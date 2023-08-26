@@ -24,6 +24,8 @@ configure_file(include/vrfbcalccfg.hpp.in include/vrfbcalccfg.hpp)
 
 add_executable(vrfbcalc-cpp
     src/main.cpp
+    src/strutils.cpp
+    src/table.cpp
 )
 
 target_include_directories(vrfbcalc-cpp PRIVATE
