@@ -1,0 +1,9 @@
+# Ignore build files
+/build
+
+# Ignore editor files
+/.vscode
+
+# Ignore app files
+*.csv
+*.json
