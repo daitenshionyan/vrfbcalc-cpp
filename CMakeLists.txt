@@ -26,6 +26,7 @@ add_executable(vrfbcalc-cpp
     src/main.cpp
     src/strutils.cpp
     src/table.cpp
+    src/celleff.cpp
 )
 
 target_include_directories(vrfbcalc-cpp PRIVATE

@@ -62,9 +62,9 @@ class Table {
     return at(c).at(r);
   }
 
-  template<typename T>
+  template<typename T = std::string>
   T get(const std::string& h, const std::size_t r) const;
-  template<typename T>
+  template<typename T = std::string>
   T get(const std::size_t, const std::size_t r) const;
 
 
