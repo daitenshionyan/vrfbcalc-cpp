@@ -70,10 +70,18 @@ struct CellCycle {
 };
 
 
+enum class StepType {
+  kChg = 0,
+  kDChg
+};
+
+
 struct CycleStep {
-  std::size_t beg;    /* Begin row */
-  std::size_t end;    /* End row */
-  std::string s_type;  /* Step type */
+  std::size_t beg;    /* Begin row index */
+  std::size_t end;    /* End row index (1 above) */
+  StepType s_type;    /* Step type */
+
+  double offset = 0;  /* Time offset in seconds */
 };
 
 
@@ -81,6 +89,7 @@ extern inline void extractCycle(
       const vrfb_utils::Table& t, const Config_CE& cfg,
       const CycleStep& c_step, const CycleStep& d_step,
       const double cur_time, CellCycle& cyc);
+
 extern inline void pushIn(const CellCycle& cyc, std::vector<std::string>& elems);
 
 
