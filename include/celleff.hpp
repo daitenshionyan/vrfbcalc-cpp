@@ -11,6 +11,7 @@
 namespace vrfb {
 
 
+/* Output cell cycle headers. */
 const std::vector<std::string> kCycleTableHdrs {
   "Cycle Number",
   "Total Time (s)",
@@ -28,10 +29,11 @@ const std::vector<std::string> kCycleTableHdrs {
   "CE (Fractional)",
   "EE (Fractional)",
   "VE (Fractional)",
-  "ASR (Ohm cm-2)"
+  "ASR (\u2126 cm-2)"
 };
 
 
+/* Structure containing cell efficiency calculation configuration. */
 struct Config_CE {
   std::string t_time_h;                           /* Total time header */
   std::string type_h;                             /* Step type header */
@@ -47,6 +49,7 @@ struct Config_CE {
 };
 
 
+/* Structure containing performance data of a cell cycle. */
 struct CellCycle {
   double cs_time;     /* Charging step time (s) */
   double ds_time;     /* Discharging step time (s) */
@@ -70,33 +73,67 @@ struct CellCycle {
 };
 
 
+/* Enum representing a step type of a cycle step. */
 enum class StepType {
   kChg = 0,
   kDChg
 };
 
 
+/* Structure containing the range of rows in a table that describe the step cycle. */
 struct CycleStep {
-  std::size_t beg;    /* Begin row index */
-  std::size_t end;    /* End row index (1 above) */
-  StepType s_type;    /* Step type */
+  std::size_t beg;    /* Row index where cycle begins (inclusive) */
+  std::size_t end;    /* Row index where cycle ends (exclusive) */
 
+  StepType s_type;    /* Step type */
   double offset = 0;  /* Time offset in seconds */
 };
 
 
+/*
+  Extracts cycle step data from a table as std::vector<CycleStep>.
+
+  @param t Table to extract data from
+  @param cfg Configuration information.
+  @return A std::vector containing the extracted cycle steps.
+*/
+std::vector<CycleStep> extractCycleStep(const vrfb_utils::Table& t, const Config_CE& cfg);
+
+
+/*
+  Extracts the performance data from the given table to the specified cell
+  cycle.
+
+  @param t Table to extract data from.
+  @param cfg Configuration information.
+  @param c_step Charging CycleStep.
+  @param d_step Discharging CycleStep.
+  @param cur_time Current accumulated time before this cycle in seconds.
+  @param cyc CellCycle to output performance data to.
+*/
 extern inline void extractCycle(
       const vrfb_utils::Table& t, const Config_CE& cfg,
       const CycleStep& c_step, const CycleStep& d_step,
       const double cur_time, CellCycle& cyc);
 
+/*
+  Pushes the specified cell cycle performance data into a vector that will be
+  used to construct a vrfb_utils::Table.
+
+  @param cyc CellCycle to push.
+  @param elems Elements vector to construct a vrfb::Table.
+*/
 extern inline void pushIn(const CellCycle& cyc, std::vector<std::string>& elems);
 
 
-std::vector<CycleStep> extractCycleStep(const vrfb_utils::Table& t, const Config_CE& cfg);
+/*
+  Calculates the cell efficiency performance of a cell.
 
-
-vrfb_utils::Table toCycleTable(const vrfb_utils::Table& t, const Config_CE& cfg);
+  @param t Table of raw cycling data.
+  @param cfg Configuration information.
+  @return A Table of calculated performance of each cycle performed.
+*/
+vrfb_utils::Table calcPerf_CE(const vrfb_utils::Table& t, const Config_CE& cfg);
 
 
 }

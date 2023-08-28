@@ -70,7 +70,7 @@ inline void calcCellEff(const std::string& path, const vrfb::Config_CE& cfg) {
   vrfb_utils::Table input;
   ifs >> input;
 
-  vrfb_utils::Table output = vrfb::toCycleTable(input, cfg);
+  vrfb_utils::Table output = vrfb::calcPerf_CE(input, cfg);
 
   std::ofstream ofs;
   ofs.open("Processed_" + path);

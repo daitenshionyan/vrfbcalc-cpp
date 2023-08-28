@@ -91,7 +91,7 @@ std::vector<CycleStep> extractCycleStep(const vrfb_utils::Table& t, const Config
 }
 
 
-vrfb_utils::Table toCycleTable(const vrfb_utils::Table& t, const Config_CE& cfg) {
+vrfb_utils::Table calcPerf_CE(const vrfb_utils::Table& t, const Config_CE& cfg) {
   auto steps = extractCycleStep(t, cfg);
   std::vector<std::string> elems {};
   CellCycle cyc {};

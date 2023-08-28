@@ -61,7 +61,7 @@ std::ostream& operator<<(std::ostream& os, const Table& table) {
 
   for (std::size_t r = 0; r < table.numRows(); ++r) {
     for (std::size_t c = 0; c < table.numCols(); ++c) {
-      os << table.at(c, r)
+      os << table.get(c, r)
           << ((c+1 < table.numCols()) ? ',' : '\n');
     }
   }

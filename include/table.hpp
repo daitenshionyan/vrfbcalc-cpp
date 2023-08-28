@@ -17,7 +17,7 @@ class Table {
  public:
   using iterator = std::vector<std::string>::const_iterator;
 
-  struct header_view {
+  struct list_view {
     iterator b;
     iterator e;
 
@@ -45,27 +45,85 @@ class Table {
 
   ~Table() = default;
 
+  /* Returns the number of rows the table has. */
   inline std::size_t numRows() const {return r_size;}
-  inline std::size_t numCols() const {return c_size;}
-  inline header_view headers() const {return {hdrs.begin(), hdrs.end()};}
 
+  /* Returns the number of columns the table has. */
+  inline std::size_t numCols() const {return c_size;}
+
+  /* Returns list like view of the headers of the table. */
+  inline list_view headers() const {return {hdrs.begin(), hdrs.end()};}
+
+
+  /*
+    Returns the value of the cell in the specified location.
+
+    @param <T> Return value type.
+    @param h Header of column of cell to return.
+    @param r Row number of cell to return.
+    @throws std::out_of_range if the specified header does not exist or if
+        the specifed row number is out of range.
+  */
+  template<typename T = std::string>
+  T get(const std::string& h, const std::size_t r) const;
+
+  /*
+    Returns the value of the cell in the specified location.
+
+    @param <T> Return value type.
+    @param c Column number of cell to return.
+    @param r Row number of cell to return.
+    @throws std::out_of_range if the specified column or row number is out of
+        range.
+  */
+  template<typename T = std::string>
+  T get(const std::size_t, const std::size_t r) const;
+
+
+ protected:
+  /*
+    Returns a list like view of the column at the specified header.
+
+    @param h Header of column to return.
+    @throws std::out_of_range - if the specified header does not exist.
+  */
   inline const std::vector<std::string>& at(const std::string& h) const {
     return colMap.at(h);
   }
+
+  /*
+    Returns a list like view of the column at the specified header.
+
+    @param c Column number of column to return.
+    @throws std::out_of_range - if specified column number is out of range.
+  */
   inline const std::vector<std::string>& at(const std::size_t c) const {
     return colMap.at(hdrs.at(c));
   }
+
+  /*
+    Returns the std::string value of the cell at the specified location.
+
+    @param h Header of column of the cell to return.
+    @param r Row number of cell to return.
+    @throws std::out_of_range if the specified header does not exist or if
+        the specifed row number is out of range.
+  */
   inline const std::string& at(const std::string& h, const std::size_t r) const {
     return at(h).at(r);
   }
+
+  /*
+    Returns the std::string value of the cell at the specified location.
+
+    @param c Column number of cell to return.
+    @param r Row number of cell to return.
+    @throws std::out_of_range if the specified column or row number is out of
+        range.
+  */
   inline const std::string& at(const std::size_t c, const std::size_t r) const  {
     return at(c).at(r);
   }
-
-  template<typename T = std::string>
-  T get(const std::string& h, const std::size_t r) const;
-  template<typename T = std::string>
-  T get(const std::size_t, const std::size_t r) const;
 
 
  private:
