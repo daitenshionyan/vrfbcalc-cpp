@@ -26,6 +26,7 @@ configure_file(include/vrfbcalccfg.hpp.in include/vrfbcalccfg.hpp)
 
 add_executable(vrfbcalc-cpp
     src/main.cpp
+    src/vrfbdriver.cpp
     src/strutils.cpp
     src/table.cpp
     src/celleff.cpp

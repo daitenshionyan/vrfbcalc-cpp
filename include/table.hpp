@@ -88,7 +88,11 @@ class Table {
     @throws std::out_of_range - if the specified header does not exist.
   */
   inline const std::vector<std::string>& at(const std::string& h) const {
-    return colMap.at(h);
+    try {
+      return colMap.at(h);
+    } catch (std::out_of_range oor) {
+      throw std::out_of_range("Header does not exist (" + h + ")");
+    }
   }
 
   /*
