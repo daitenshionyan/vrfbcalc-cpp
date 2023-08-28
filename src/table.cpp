@@ -5,7 +5,7 @@
 #include "strutils.hpp"
 
 
-namespace vrfb_utils {
+namespace vrfb {
 
 
 Table::Table(const std::vector<std::string>& h, const std::vector<std::string>& elems)

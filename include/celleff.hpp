@@ -77,7 +77,7 @@ struct CycleStep {
   @param cfg Configuration information.
   @return A std::vector containing the extracted cycle steps.
 */
-std::vector<CycleStep> extractCycleStep(const vrfb_utils::Table& t, const vrfb::Config_CE& cfg);
+std::vector<CycleStep> extractCycleStep(const vrfb::Table& t, const vrfb::Config_CE& cfg);
 
 
 /*
@@ -92,13 +92,13 @@ std::vector<CycleStep> extractCycleStep(const vrfb_utils::Table& t, const vrfb::
   @param cyc CellCycle to output performance data to.
 */
 extern inline void extractCycle(
-      const vrfb_utils::Table& t, const vrfb::Config_CE& cfg,
+      const vrfb::Table& t, const vrfb::Config_CE& cfg,
       const CycleStep& c_step, const CycleStep& d_step,
       const double cur_time, CellCycle& cyc);
 
 /*
   Pushes the specified cell cycle performance data into a vector that will be
-  used to construct a vrfb_utils::Table.
+  used to construct a vrfb::Table.
 
   @param cyc CellCycle to push.
   @param elems Elements vector to construct a vrfb::Table.

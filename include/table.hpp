@@ -7,7 +7,7 @@
 #include <vector>
 
 
-namespace vrfb_utils {
+namespace vrfb {
 
 
 using ColMap = std::unordered_map<std::string, std::vector<std::string>>;

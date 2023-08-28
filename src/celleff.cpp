@@ -15,7 +15,7 @@ namespace celleff {
 
 
 inline void extractCycle(
-      const vrfb_utils::Table& t, const vrfb::Config_CE& cfg,
+      const vrfb::Table& t, const vrfb::Config_CE& cfg,
       const CycleStep& c_step, const CycleStep& d_step,
       const double cur_time, CellCycle& cyc) {
   // time calculation
@@ -71,7 +71,7 @@ inline void pushIn(const CellCycle& cyc, std::vector<std::string>& elems) {
 }
 
 
-std::vector<CycleStep> extractCycleStep(const vrfb_utils::Table& t, const vrfb::Config_CE& cfg) {
+std::vector<CycleStep> extractCycleStep(const vrfb::Table& t, const vrfb::Config_CE& cfg) {
   std::vector<CycleStep> res {};
   if (t.numRows() == 0) {
     return res;
@@ -113,7 +113,7 @@ std::vector<CycleStep> extractCycleStep(const vrfb_utils::Table& t, const vrfb::
 namespace vrfb {
 
 
-vrfb_utils::Table calcPerf_CE(const vrfb_utils::Table& t, const Config_CE& cfg) {
+vrfb::Table calcPerf_CE(const vrfb::Table& t, const Config_CE& cfg) {
   auto steps = celleff::extractCycleStep(t, cfg);
   std::vector<std::string> elems {};
   celleff::CellCycle cyc {};

@@ -54,7 +54,7 @@ int calcCellEff_s(const std::string& path, const vrfb::Config_CE& cfg) {
     return 1;
   }
 
-  vrfb_utils::Table data_raw;
+  vrfb::Table data_raw;
   try {
     ifs >> data_raw;
   } catch (std::exception& ex) {
@@ -63,7 +63,7 @@ int calcCellEff_s(const std::string& path, const vrfb::Config_CE& cfg) {
     return 1;
   }
 
-  vrfb_utils::Table data_pro;
+  vrfb::Table data_pro;
   try {
     data_pro = vrfb::calcPerf_CE(data_raw, cfg);
   } catch (std::exception& ex) {

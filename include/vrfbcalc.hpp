@@ -33,7 +33,7 @@ struct Config_CE {
   @param cfg Configuration information.
   @return A Table of calculated performance of each cycle performed.
 */
-vrfb_utils::Table calcPerf_CE(const vrfb_utils::Table& t, const Config_CE& cfg);
+vrfb::Table calcPerf_CE(const vrfb::Table& t, const Config_CE& cfg);
 
 
 }
