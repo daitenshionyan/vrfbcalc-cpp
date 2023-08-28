@@ -74,6 +74,8 @@ int calcCellEff_s(const std::string& path, const vrfb::Config_CE& cfg) {
 
   std::ofstream ofs;
   ofs.open("Processed_" + path);
+  // UTF-8 with BOM for excel UTF-8
+  ofs << (unsigned char) 0xEF << (unsigned char) 0xBB << (unsigned char) 0xBF;
   ofs << data_pro;
   if (!ofs.good()) {
     std::cout
@@ -119,8 +121,8 @@ void calcCellEff_a(const std::string& cfgPath) {
   }
 
   std::cout << "\n\n>>> Total = " << cfgMap.size()
-      << " Success = " << cfgMap.size()-num_err
-      << " Failure = " << num_err << std::endl;
+      << " || Success = " << cfgMap.size()-num_err
+      << " || Failure = " << num_err << std::endl;
 }
 
 
