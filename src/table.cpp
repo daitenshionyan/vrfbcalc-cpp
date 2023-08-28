@@ -1,7 +1,6 @@
 #include "table.hpp"
 
 #include <exception>
-#include <format>
 
 #include "strutils.hpp"
 

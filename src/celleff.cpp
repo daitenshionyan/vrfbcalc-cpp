@@ -1,13 +1,21 @@
+#include "vrfbcalc.hpp"
 #include "celleff.hpp"
 
 #include "strutils.hpp"
 
 
-namespace vrfb {
+/*
+================================================================================
+        celleff
+================================================================================
+*/
+
+
+namespace celleff {
 
 
 inline void extractCycle(
-      const vrfb_utils::Table& t, const Config_CE& cfg,
+      const vrfb_utils::Table& t, const vrfb::Config_CE& cfg,
       const CycleStep& c_step, const CycleStep& d_step,
       const double cur_time, CellCycle& cyc) {
   // time calculation
@@ -21,10 +29,10 @@ inline void extractCycle(
   cyc.t_time = cur_time + cyc.c_time;
 
   // extract capacity and energy
-  cyc.c_cap = t.get<double>(cfg.c_capacity_h, c_step.end-1);
-  cyc.d_cap = t.get<double>(cfg.d_capacity_h, d_step.end-1);
-  cyc.c_energy = t.get<double>(cfg.c_energy_h, c_step.end-1);
-  cyc.d_energy = t.get<double>(cfg.d_energy_h, d_step.end-1);
+  cyc.c_cap = t.get<double>(cfg.c_capacity_h, c_step.end-c_step.r_off);
+  cyc.d_cap = t.get<double>(cfg.d_capacity_h, d_step.end-d_step.r_off);
+  cyc.c_energy = t.get<double>(cfg.c_energy_h, c_step.end-c_step.r_off);
+  cyc.d_energy = t.get<double>(cfg.d_energy_h, d_step.end-d_step.r_off);
 
   // calculate current
   cyc.c_cur = (cyc.c_cap / cyc.cs_time) * 3600;
@@ -63,7 +71,7 @@ inline void pushIn(const CellCycle& cyc, std::vector<std::string>& elems) {
 }
 
 
-std::vector<CycleStep> extractCycleStep(const vrfb_utils::Table& t, const Config_CE& cfg) {
+std::vector<CycleStep> extractCycleStep(const vrfb_utils::Table& t, const vrfb::Config_CE& cfg) {
   std::vector<CycleStep> res {};
   if (t.numRows() == 0) {
     return res;
@@ -73,46 +81,63 @@ std::vector<CycleStep> extractCycleStep(const vrfb_utils::Table& t, const Config
   for (std::size_t end = beg+1; end+1 < t.numRows(); ++end) {
     if (t.get(cfg.type_h, end) != t.get(cfg.type_h, end+1)) {
       if (cfg.c_type_names.find(t.get(cfg.type_h, beg)) != cfg.c_type_names.end()) {
-        res.push_back({beg, end+1, StepType::kChg});
+        res.push_back({beg, end+1, StepType::kChg, 1});
       } else if (cfg.d_type_names.find(t.get(cfg.type_h, beg)) != cfg.c_type_names.end()) {
-        res.push_back({beg, end+1, StepType::kDChg});
+        res.push_back({beg, end+1, StepType::kDChg, 1});
       }
       beg = end+1;
       ++end;
     }
   }
+  // process last step that will not be added in loop due to conditions
   if (cfg.c_type_names.find(t.get(cfg.type_h, beg)) != cfg.c_type_names.end()) {
-    res.push_back({beg, t.numRows()-1, StepType::kChg});
+    res.push_back({beg, t.numRows()-1, StepType::kChg, 0});
   } else if (cfg.d_type_names.find(t.get(cfg.type_h, beg)) != cfg.c_type_names.end()) {
-    res.push_back({beg, t.numRows()-1, StepType::kDChg});
+    res.push_back({beg, t.numRows()-1, StepType::kDChg, 0});
   }
 
   return res;
 }
 
 
+}
+
+
+/*
+================================================================================
+        vrfb
+================================================================================
+*/
+
+
+namespace vrfb {
+
+
 vrfb_utils::Table calcPerf_CE(const vrfb_utils::Table& t, const Config_CE& cfg) {
-  auto steps = extractCycleStep(t, cfg);
+  auto steps = celleff::extractCycleStep(t, cfg);
   std::vector<std::string> elems {};
-  CellCycle cyc {};
+  celleff::CellCycle cyc {};
   double cur_time = 0;
   std::size_t i = 0;
 
   while (i < steps.size()) {
-    if (steps[i++].s_type != StepType::kChg || i >= steps.size()) {
+    if (steps[i++].s_type != celleff::StepType::kChg || i >= steps.size()) {
       continue;
     }
-    while (i < steps.size() && steps[i].s_type == StepType::kChg) {
+    while (i < steps.size() && steps[i].s_type == celleff::StepType::kChg) {
+      // push charging time forward as offset if multiple charging step appear consecutively.
       steps[i].offset += strutils::parseTimestamp(t.get(cfg.t_time_h, steps[i-1].end))
           - strutils::parseTimestamp(t.get(cfg.t_time_h, steps[i-1].beg))
           + steps[i-1].offset;
       ++i;
     }
     if (i >= steps.size()) {
+      // end of list and no discharge step
       break;
     }
     std::size_t ch_i = i-1;
-    while (i+1 < steps.size() && steps[i+1].s_type == StepType::kDChg) {
+    while (i+1 < steps.size() && steps[i+1].s_type == celleff::StepType::kDChg) {
+      // push charging time forward as offset if multiple charging step appear consecutively.
       steps[i+1].offset += strutils::parseTimestamp(t.get(cfg.t_time_h, steps[i].end))
           - strutils::parseTimestamp(t.get(cfg.t_time_h, steps[i].beg))
           + steps[i].offset;
@@ -122,7 +147,8 @@ vrfb_utils::Table calcPerf_CE(const vrfb_utils::Table& t, const Config_CE& cfg) 
     pushIn(cyc, elems);
     cur_time += cyc.c_time;
   }
-  return {kCycleTableHdrs, elems};
+
+  return {celleff::kCycleTableHdrs, elems};
 }
 
 

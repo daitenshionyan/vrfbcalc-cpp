@@ -57,8 +57,8 @@ void printVersion() {
 
 
 inline void calcCellEff(const std::string& path, const vrfb::Config_CE& cfg) {
-  auto beg = std::chrono::high_resolution_clock::now();
   std::cout << path << " - ";
+  auto beg = std::chrono::high_resolution_clock::now();
 
   std::ifstream ifs;
   ifs.open(path);
@@ -81,8 +81,8 @@ inline void calcCellEff(const std::string& path, const vrfb::Config_CE& cfg) {
   ofs << output;
 
   auto end = std::chrono::high_resolution_clock::now();
-  auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - beg);
-  std::cout << "Completed in " << duration.count() << "ms" << std::endl;
+  auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - beg);
+  std::cout << "Completed in " << duration.count() / 1000. << "ms" << std::endl;
 }
 
 

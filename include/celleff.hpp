@@ -1,14 +1,9 @@
 #pragma once
 
-
-#include <string>
-#include <unordered_set>
-#include <vector>
-
-#include "table.hpp"
+#include "vrfbcalc.hpp"
 
 
-namespace vrfb {
+namespace celleff {
 
 
 /* Output cell cycle headers. */
@@ -30,22 +25,6 @@ const std::vector<std::string> kCycleTableHdrs {
   "EE (Fractional)",
   "VE (Fractional)",
   "ASR (\u2126 cm-2)"
-};
-
-
-/* Structure containing cell efficiency calculation configuration. */
-struct Config_CE {
-  std::string t_time_h;                           /* Total time header */
-  std::string type_h;                             /* Step type header */
-  std::string c_capacity_h;                       /* Charging capacity header */
-  std::string d_capacity_h;                       /* Dicharging capacity header */
-  std::string c_energy_h;                         /* Charging energy header */
-  std::string d_energy_h;                         /* Discharging energy header */
-
-  std::unordered_set<std::string> c_type_names;   /* Charging type names */
-  std::unordered_set<std::string> d_type_names;   /* Discharging type names */
-
-  double area;                                    /* Electrode area (cm2) */
 };
 
 
@@ -82,11 +61,12 @@ enum class StepType {
 
 /* Structure containing the range of rows in a table that describe the step cycle. */
 struct CycleStep {
-  std::size_t beg;    /* Row index where cycle begins (inclusive) */
-  std::size_t end;    /* Row index where cycle ends (exclusive) */
+  std::size_t beg;        /* Row index where cycle begins (inclusive) */
+  std::size_t end;        /* Row index where cycle ends offsetted by r_off amount */
 
-  StepType s_type;    /* Step type */
-  double offset = 0;  /* Time offset in seconds */
+  StepType s_type;        /* Step type */
+  std::size_t r_off;      /* End row offset from actual last row */
+  double offset = 0;      /* Time offset in seconds */
 };
 
 
@@ -97,7 +77,7 @@ struct CycleStep {
   @param cfg Configuration information.
   @return A std::vector containing the extracted cycle steps.
 */
-std::vector<CycleStep> extractCycleStep(const vrfb_utils::Table& t, const Config_CE& cfg);
+std::vector<CycleStep> extractCycleStep(const vrfb_utils::Table& t, const vrfb::Config_CE& cfg);
 
 
 /*
@@ -112,7 +92,7 @@ std::vector<CycleStep> extractCycleStep(const vrfb_utils::Table& t, const Config
   @param cyc CellCycle to output performance data to.
 */
 extern inline void extractCycle(
-      const vrfb_utils::Table& t, const Config_CE& cfg,
+      const vrfb_utils::Table& t, const vrfb::Config_CE& cfg,
       const CycleStep& c_step, const CycleStep& d_step,
       const double cur_time, CellCycle& cyc);
 
@@ -124,16 +104,6 @@ extern inline void extractCycle(
   @param elems Elements vector to construct a vrfb::Table.
 */
 extern inline void pushIn(const CellCycle& cyc, std::vector<std::string>& elems);
-
-
-/*
-  Calculates the cell efficiency performance of a cell.
-
-  @param t Table of raw cycling data.
-  @param cfg Configuration information.
-  @return A Table of calculated performance of each cycle performed.
-*/
-vrfb_utils::Table calcPerf_CE(const vrfb_utils::Table& t, const Config_CE& cfg);
 
 
 }
