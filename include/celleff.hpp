@@ -60,23 +60,12 @@ enum class StepType {
 };
 
 
-/* Structure containing the range of rows in a table that describe the step cycle. */
-struct CycleStep {
-  std::size_t beg;        /* Row index where cycle begins (inclusive) */
-  std::size_t end;        /* Row index where cycle ends offsetted by r_off amount */
-
-  StepType s_type;        /* Step type */
-  std::size_t r_off;      /* End row offset from actual last row */
-  double offset = 0;      /* Time offset in seconds */
-};
-
-
 class Step {
  public:
   Step(const StepType st,
       const vrfb::Table* t, const vrfb::Config_CE* c,
       const std::size_t b, const std::size_t e,
-      const std::size_t off)
+      const int off)
       : s_type{st}, table{t}, cfg{c},
         beg{b}, end{e}, off_row{off} {};
 
@@ -85,6 +74,10 @@ class Step {
   Step(Step&&) = default;
 
   ~Step() = default;
+
+  inline StepType stepType() const {
+    return s_type;
+  }
 
   inline double time() const {
     return strutils::parseTimestamp(table->get(cfg->t_time_h, end))
@@ -120,7 +113,7 @@ class Step {
   const vrfb::Config_CE* cfg;
   std::size_t beg;
   std::size_t end;
-  std::size_t off_row;
+  int off_row;
 
   double off_tim = 0;
 };
@@ -133,7 +126,7 @@ class Step {
   @param cfg Configuration information.
   @return A std::vector containing the extracted cycle steps.
 */
-std::vector<CycleStep> extractCycleStep(const vrfb::Table& t, const vrfb::Config_CE& cfg);
+std::vector<Step> extractSteps(const vrfb::Table& t, const vrfb::Config_CE& cfg);
 
 
 /*
@@ -147,9 +140,8 @@ std::vector<CycleStep> extractCycleStep(const vrfb::Table& t, const vrfb::Config
   @param cur_time Current accumulated time before this cycle in seconds.
   @param cyc CellCycle to output performance data to.
 */
-extern inline void extractCycle(
-      const vrfb::Table& t, const vrfb::Config_CE& cfg,
-      const CycleStep& c_step, const CycleStep& d_step,
+extern inline void extractCycle(const double area,
+      const Step& c_step, const Step& d_step,
       const double cur_time, CellCycle& cyc);
 
 /*
