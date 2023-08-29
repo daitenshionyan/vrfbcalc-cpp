@@ -72,6 +72,20 @@ NLOHMANN_JSON_NAMESPACE_END
 namespace vrfbdriver {
 
 
+void clearBOM(std::istream& is) {
+  unsigned char bom_bytes[3];
+  is.read((char*) bom_bytes, 3);
+  for (int i = 0; i < 3; ++i) {
+    if (bom_bytes[i] != kUtf8BOM[i]) {
+      for (int j = 0; j < 3; ++j) {
+        is.putback(kUtf8BOM[3-j-1]);
+      }
+      return;
+    }
+  }
+}
+
+
 int calcCellEff_s(const std::string& name, const DataSet_CE& set_d) {
   std::cout << "\n" << kSeparator << "\t" << name << "\n" << kSeparator << std::endl;
   auto beg = std::chrono::high_resolution_clock::now();
@@ -85,17 +99,21 @@ int calcCellEff_s(const std::string& name, const DataSet_CE& set_d) {
           << "Error while reading (state = " << ifs.exceptions() << ")" << std::endl;
       return 1;
     }
+    clearBOM(ifs);
 
-    vrfb::Table data_raw;
+    tables.push_back(vrfb::Table {});
     try {
-      ifs >> data_raw;
+      ifs >> tables[tables.size()-1];
     } catch (std::exception& ex) {
       std::cout
           << "Error while forming raw table - " << ex.what() << std::endl;
       return 1;
     }
-    tables.push_back(data_raw);
+
+    std::cout << entry.path << " : "
+        << tables[tables.size()-1].numRows() << " points" << std::endl;
   }
+  std::cout << std::endl;
 
   std::vector<vrfb::Data_CE> datas {};
   for (std::size_t i = 0; i < tables.size(); ++i) {
@@ -121,11 +139,9 @@ int calcCellEff_s(const std::string& name, const DataSet_CE& set_d) {
         << "Error while writing (state = " << ofs.exceptions() << ")" << std::endl;
     return 1;
   }
+  std::cout << "Output table : " << std::to_string(data_pro.numRows()) << " cycles" << std::endl;
 
   auto end = std::chrono::high_resolution_clock::now();
-
-  std::cout << "Output table: " << std::to_string(data_pro.numRows()) << " cycles\n";
-
   auto dur = std::chrono::duration_cast<std::chrono::microseconds>(end - beg);
   std::cout << "Completed in " << dur.count()/1000. << "ms" << std::endl;
 

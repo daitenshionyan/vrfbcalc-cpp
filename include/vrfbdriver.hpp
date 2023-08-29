@@ -1,11 +1,16 @@
 #pragma once
 
+#include <istream>
 #include <string>
 
 #include "vrfbcalc.hpp"
 
 
 namespace vrfbdriver {
+
+constexpr unsigned char kUtf8BOM[3] = {0xEF, 0xBB, 0xBF};
+
+void clearBOM(std::istream& is);
 
 
 constexpr std::string_view kSeparator =
