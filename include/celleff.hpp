@@ -70,7 +70,7 @@ class Step {
         beg{b}, end{e}, off_row{off} {};
 
   Step() = default;
-  Step(Step&) = default;
+  Step(const Step&) = default;
   Step(Step&&) = default;
 
   ~Step() = default;

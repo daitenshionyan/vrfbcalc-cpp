@@ -106,7 +106,7 @@ std::vector<Step> extractSteps(const vrfb::Table& t, const vrfb::Config_CE& cfg)
 namespace vrfb {
 
 
-vrfb::Table calcPerf_CE(const double area, std::vector<Data_CE>& datas) {
+vrfb::Table calcPerf_CE(const double area, const std::vector<Data_CE>& datas) {
   std::vector<celleff::Step> steps {};
   for (auto d : datas) {
     for (auto s : celleff::extractSteps(*d.table, *d.cfg)) {
