@@ -19,8 +19,7 @@ struct adl_serializer<vrfb::Config_CE> {
       {vrfbdriver::kLblCEnergyHdr_CE, cfg.c_energy_h},
       {vrfbdriver::kLblDEnergyHdr_CE, cfg.d_energy_h},
       {vrfbdriver::kLblCTypeNames_CE, cfg.c_type_names},
-      {vrfbdriver::kLblDTypeNames_CE, cfg.d_type_names},
-      {vrfbdriver::kLblArea_CE, cfg.area}
+      {vrfbdriver::kLblDTypeNames_CE, cfg.d_type_names}
     };
   }
 
@@ -33,7 +32,38 @@ struct adl_serializer<vrfb::Config_CE> {
     j.at(vrfbdriver::kLblDEnergyHdr_CE).get_to(cfg.d_energy_h);
     j.at(vrfbdriver::kLblCTypeNames_CE).get_to(cfg.c_type_names);
     j.at(vrfbdriver::kLblDTypeNames_CE).get_to(cfg.d_type_names);
-    j.at(vrfbdriver::kLblArea_CE).get_to(cfg.area);
+  }
+};
+
+
+template<>
+struct adl_serializer<vrfbdriver::DataEntry_CE> {
+  static void to_json(json& j, const vrfbdriver::DataEntry_CE& entry) {
+    j = nlohmann::json{
+      {vrfbdriver::kLblDataEntryPath_CE, entry.path},
+      {vrfbdriver::kLblDataEntryConfig_CE, entry.cfg}
+    };
+  }
+
+  static void from_json(const json& j, vrfbdriver::DataEntry_CE& entry) {
+    j.at(vrfbdriver::kLblDataEntryPath_CE).get_to(entry.path);
+    j.at(vrfbdriver::kLblDataEntryConfig_CE).get_to(entry.cfg);
+  }
+};
+
+
+template<>
+struct adl_serializer<vrfbdriver::DataSet_CE> {
+  static void to_json(json& j, const vrfbdriver::DataSet_CE& set_d) {
+    j = nlohmann::json{
+      {vrfbdriver::kLblDataSetArea, set_d.area},
+      {vrfbdriver::kLblDataSetEnties, set_d.entries}
+    };
+  }
+
+  static void from_json(const json& j, vrfbdriver::DataSet_CE& set_d) {
+    j.at(vrfbdriver::kLblDataSetArea).get_to(set_d.area);
+    j.at(vrfbdriver::kLblDataSetEnties).get_to(set_d.entries);
   }
 };
 NLOHMANN_JSON_NAMESPACE_END
@@ -42,30 +72,39 @@ NLOHMANN_JSON_NAMESPACE_END
 namespace vrfbdriver {
 
 
-int calcCellEff_s(const std::string& path, const vrfb::Config_CE& cfg) {
-  std::cout << "\n" << kSeparator << "\t" << path << "\n" << kSeparator << std::endl;
+int calcCellEff_s(const std::string& name, const DataSet_CE& set_d) {
+  std::cout << "\n" << kSeparator << "\t" << name << "\n" << kSeparator << std::endl;
   auto beg = std::chrono::high_resolution_clock::now();
 
-  std::ifstream ifs;
-  ifs.open(path);
-  if (!ifs.good()) {
-    std::cout
-        << "Error while reading (state = " << ifs.exceptions() << ")" << std::endl;
-    return 1;
+  std::vector<vrfb::Table> tables {};
+  for (auto entry : set_d.entries) {
+    std::ifstream ifs;
+    ifs.open(entry.path);
+    if (!ifs.good()) {
+      std::cout
+          << "Error while reading (state = " << ifs.exceptions() << ")" << std::endl;
+      return 1;
+    }
+
+    vrfb::Table data_raw;
+    try {
+      ifs >> data_raw;
+    } catch (std::exception& ex) {
+      std::cout
+          << "Error while forming raw table - " << ex.what() << std::endl;
+      return 1;
+    }
+    tables.push_back(data_raw);
   }
 
-  vrfb::Table data_raw;
-  try {
-    ifs >> data_raw;
-  } catch (std::exception& ex) {
-    std::cout
-        << "Error while forming raw table - " << ex.what() << std::endl;
-    return 1;
+  std::vector<vrfb::Data_CE> datas {};
+  for (std::size_t i = 0; i < tables.size(); ++i) {
+    datas.push_back({&tables[i], &set_d.entries[i].cfg});
   }
 
   vrfb::Table data_pro;
   try {
-    data_pro = vrfb::calcPerf_CE(data_raw, cfg);
+    data_pro = vrfb::calcPerf_CE(set_d.area, datas);
   } catch (std::exception& ex) {
     std::cout
         << "Error while processing data - " << ex.what() << std::endl;
@@ -73,19 +112,18 @@ int calcCellEff_s(const std::string& path, const vrfb::Config_CE& cfg) {
   }
 
   std::ofstream ofs;
-  ofs.open("Processed_" + path);
+  ofs.open(name + ".csv");
   // UTF-8 with BOM for excel UTF-8
   ofs << (unsigned char) 0xEF << (unsigned char) 0xBB << (unsigned char) 0xBF;
   ofs << data_pro;
   if (!ofs.good()) {
     std::cout
-        << "Error while writing (state = " << ifs.exceptions() << ")" << std::endl;
+        << "Error while writing (state = " << ofs.exceptions() << ")" << std::endl;
     return 1;
   }
 
   auto end = std::chrono::high_resolution_clock::now();
 
-  std::cout << "Input table : " << std::to_string(data_raw.numRows()) << " points\n";
   std::cout << "Output table: " << std::to_string(data_pro.numRows()) << " cycles\n";
 
   auto dur = std::chrono::duration_cast<std::chrono::microseconds>(end - beg);
@@ -104,7 +142,7 @@ void calcCellEff_a(const std::string& cfgPath) {
     return;
   }
 
-  std::unordered_map<std::string, vrfb::Config_CE> cfgMap;
+  std::unordered_map<std::string, DataSet_CE> cfgMap;
   try {
     nlohmann::json j;
     ifs >> j;

@@ -106,8 +106,13 @@ std::vector<Step> extractSteps(const vrfb::Table& t, const vrfb::Config_CE& cfg)
 namespace vrfb {
 
 
-vrfb::Table calcPerf_CE(const vrfb::Table& t, const Config_CE& cfg) {
-  auto steps = celleff::extractSteps(t, cfg);
+vrfb::Table calcPerf_CE(const double area, std::vector<Data_CE>& datas) {
+  std::vector<celleff::Step> steps {};
+  for (auto d : datas) {
+    for (auto s : celleff::extractSteps(*d.table, *d.cfg)) {
+      steps.push_back(s);
+    }
+  }
   std::vector<std::string> elems {};
   celleff::CellCycle cyc {};
   double cur_time = 0;
@@ -132,7 +137,7 @@ vrfb::Table calcPerf_CE(const vrfb::Table& t, const Config_CE& cfg) {
       steps[i+1].merge(steps[i]);
       ++i;
     }
-    extractCycle(cfg.area, steps[ch_i], steps[i], cur_time, cyc);
+    extractCycle(area, steps[ch_i], steps[i], cur_time, cyc);
     pushIn(cyc, elems);
     cur_time += cyc.c_time;
   }
