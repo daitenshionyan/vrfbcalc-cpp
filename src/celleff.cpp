@@ -80,7 +80,7 @@ std::vector<Step> extractSteps(const vrfb::Table& t, const vrfb::Config_CE& cfg)
     if (t.get(cfg.type_h, end) != t.get(cfg.type_h, end+1)) {
       if (cfg.c_type_names.find(t.get(cfg.type_h, beg)) != cfg.c_type_names.end()) {
         steps.push_back({StepType::kChg, &t, &cfg, beg, end+1, 1});
-      } else if (cfg.d_type_names.find(t.get(cfg.type_h, beg)) != cfg.c_type_names.end()) {
+      } else if (cfg.d_type_names.find(t.get(cfg.type_h, beg)) != cfg.d_type_names.end()) {
         steps.push_back({StepType::kDChg, &t, &cfg, beg, end+1, 1});
       }
       beg = end+1;

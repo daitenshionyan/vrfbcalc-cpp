@@ -27,7 +27,7 @@ const std::vector<std::string> kCycleTableHdrs {
   "CE (Fractional)",
   "EE (Fractional)",
   "VE (Fractional)",
-  "ASR (\u2126 cm-2)"
+  "ASR (Ohm cm-2)"
 };
 
 

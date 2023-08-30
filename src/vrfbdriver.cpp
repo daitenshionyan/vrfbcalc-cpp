@@ -131,7 +131,6 @@ int calcCellEff_s(const std::string& name, const DataSet_CE& set_d) {
   std::ofstream ofs;
   ofs.open(name + ".csv");
   // UTF-8 with BOM for excel UTF-8
-  ofs << (unsigned char) 0xEF << (unsigned char) 0xBB << (unsigned char) 0xBF;
   ofs << data_pro;
   if (!ofs.good()) {
     std::cout
