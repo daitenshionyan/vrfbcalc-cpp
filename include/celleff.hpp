@@ -16,6 +16,8 @@ const std::vector<std::string> kCycleTableHdrs {
   "Discharging Step Time (s)",
   "Charging Current (A)",
   "Discharging Current (A)",
+  "Charging Charge Density (A cm-2)",
+  "Discharging Charge Density (A cm-2)",
   "Charging Voltage (V)",
   "Discharging Voltage (V)",
   "Charging Capacity (Ah)",
@@ -45,6 +47,9 @@ struct CellCycle {
   double d_cur;       /* Discharging current (A) */
   double c_volt;      /* Charging voltage (V) */
   double d_volt;      /* Discharging voltage (V) */
+
+  double c_ch_den;    /* Charging charge density (A cm-2) */
+  double d_ch_den;    /* Discharging charge density (A cm-2) */
 
   double ce;          /* Coulumbic efficiency (fractional) */
   double ee;          /* Energy efficiency (fractional) */

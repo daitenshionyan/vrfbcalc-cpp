@@ -31,6 +31,8 @@ inline void extractCycle(const double area,
   // calculate current
   cyc.c_cur = (cyc.c_cap / cyc.cs_time) * 3600;
   cyc.d_cur = (cyc.d_cap / cyc.ds_time) * 3600;
+  cyc.c_ch_den = cyc.c_cur / area;
+  cyc.d_ch_den = cyc.d_cur / area;
 
   // calculate voltage
   cyc.c_volt = ((cyc.c_energy*3600) / cyc.cs_time) / cyc.c_cur;
@@ -52,6 +54,8 @@ inline void pushIn(const CellCycle& cyc, std::vector<std::string>& elems) {
   elems.push_back(std::to_string(cyc.ds_time));
   elems.push_back(std::to_string(cyc.c_cur));
   elems.push_back(std::to_string(cyc.d_cur));
+  elems.push_back(std::to_string(cyc.c_ch_den));
+  elems.push_back(std::to_string(cyc.d_ch_den));
   elems.push_back(std::to_string(cyc.c_volt));
   elems.push_back(std::to_string(cyc.d_volt));
   elems.push_back(std::to_string(cyc.c_cap));
