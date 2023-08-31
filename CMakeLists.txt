@@ -1,14 +1,10 @@
 # ==== CMAKE CONFIGURATION =================================================== #
 
-cmake_minimum_required(VERSION 3.15.0)
+cmake_minimum_required(VERSION 3.21.0)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED true)
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS on)
-
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/output/lib)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/output/lib)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/output/bin)
 
 # ==== PROJECT CONFIGURATION ================================================= #
 
@@ -16,26 +12,61 @@ project(vrfbcalc-cpp
     LANGUAGES CXX
 )
 
+set(dir ${CMAKE_BINARY_DIR}/output)
+set(EXECUTABLE_OUTPUT_PATH ${dir} CACHE PATH "Build directory" FORCE)
+set(LIBRARY_OUTPUT_PATH ${dir} CACHE PATH "Build directory" FORCE)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${dir})
+set(CMAKE_BUILD_FILES_DIRECTORY ${dir})
+set(CMAKE_BUILD_DIRECTORY ${dir})
+set(CMAKE_BINARY_DIR  ${dir})
+SET(EXECUTABLE_OUTPUT_PATH ${dir})
+SET(LIBRARY_OUTPUT_PATH ${dir}lib)
+SET(CMAKE_CACHEFILE_DIR ${dir})
+
+include_directories(src include ${CMAKE_CURRENT_BINARY_DIR}/include)
+
+# ==== LIBRARY =============================================================== #
+
 set(VRFBCALC-CPP_VERSION "0.1.0")
 
+set(INSTALL_LIBRARY_BIN_DIR ${CMAKE_BINARY_DIR}/install/library/bin)
+set(INSTALL_LIBRARY_LIB_DIR ${CMAKE_BINARY_DIR}/install/library/lib)
+set(INSTALL_LIBRARY_INC_DIR ${CMAKE_BINARY_DIR}/install/library/include)
+
 configure_file(include/vrfbcalccfg.hpp.in include/vrfbcalccfg.hpp)
+
+set(VRFBCALC_PUBLIC_HEADERS
+    include/table.hpp
+    ${CMAKE_CURRENT_BINARY_DIR}/include/vrfbcalccfg.hpp
+    include/vrfbcalc.hpp)
+set(VRFBCALC_PRIVATE_HEADERS
+    include/celleff.hpp
+    include/strutils.hpp)
+set(VRFBCALC_SOURCES
+    src/strutils.cpp
+    src/table.cpp
+    src/celleff.cpp)
+
+add_library(vrfbcalc SHARED
+    ${VRFBCALC_PUBLIC_HEADERS}
+    ${VRFBCALC_PRIVATE_HEADERS}
+    ${VRFBCALC_SOURCES})
+
+install(TARGETS vrfbcalc
+    RUNTIME DESTINATION ${INSTALL_LIBRARY_BIN_DIR}
+    ARCHIVE DESTINATION ${INSTALL_LIBRARY_LIB_DIR}
+    LIBRARY DESTINATION ${INSTALL_LIBRARY_LIB_DIR})
+install(FILES ${VRFBCALC_PUBLIC_HEADERS} DESTINATION ${INSTALL_LIBRARY_INC_DIR})
 
 # ==== EXECUTABLE ============================================================ #
 
 add_executable(vrfbcalc-cpp
     src/main.cpp
+    include/vrfbdriver.hpp
     src/vrfbdriver.cpp
-    src/strutils.cpp
-    src/table.cpp
-    src/celleff.cpp
 )
 
-target_include_directories(vrfbcalc-cpp PRIVATE
-    ${PROJECT_BINARY_DIR}/include
-)
-target_include_directories(vrfbcalc-cpp PRIVATE
-    ${PROJECT_SOURCE_DIR}/include
-)
+target_link_libraries(vrfbcalc-cpp PRIVATE vrfbcalc)
 
 find_package(nlohmann_json CONFIG REQUIRED)
 target_link_libraries(vrfbcalc-cpp PRIVATE nlohmann_json::nlohmann_json)
