@@ -21,19 +21,21 @@ struct Config_CE {
 
   std::unordered_set<std::string> c_type_names;   /* Charging type names */
   std::unordered_set<std::string> d_type_names;   /* Discharging type names */
+};
 
-  double area;                                    /* Electrode area (cm2) */
+
+struct Data_CE {
+  const Table* table;
+  const Config_CE* cfg;
 };
 
 
 /*
   Calculates the cell efficiency performance of a cell.
 
-  @param t Table of raw cycling data.
-  @param cfg Configuration information.
-  @return A Table of calculated performance of each cycle performed.
+  @param datas List of data to process.
 */
-vrfb::Table calcPerf_CE(const vrfb::Table& t, const Config_CE& cfg);
+vrfb::Table calcPerf_CE(const double area, const std::vector<Data_CE>& datas);
 
 
 }

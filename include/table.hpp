@@ -37,7 +37,7 @@ class Table {
   Table(const std::vector<std::string>& h, const std::vector<std::string>& elems);
 
   Table() = default;
-  Table(Table&) = default;
+  Table(const Table&) = default;
   Table(Table&&) = default;
 
   Table& operator=(Table&) = default;

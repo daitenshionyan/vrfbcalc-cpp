@@ -1,11 +1,16 @@
 #pragma once
 
+#include <istream>
 #include <string>
 
 #include "vrfbcalc.hpp"
 
 
 namespace vrfbdriver {
+
+constexpr unsigned char kUtf8BOM[3] = {0xEF, 0xBB, 0xBF};
+
+void clearBOM(std::istream& is);
 
 
 constexpr std::string_view kSeparator =
@@ -20,10 +25,27 @@ constexpr std::string_view kLblCEnergyHdr_CE  =   "c_energy_h";
 constexpr std::string_view kLblDEnergyHdr_CE  =   "d_energy_h";
 constexpr std::string_view kLblCTypeNames_CE  =   "c_type_names";
 constexpr std::string_view kLblDTypeNames_CE  =   "d_type_names";
-constexpr std::string_view kLblArea_CE        =   "area";
+
+constexpr std::string_view kLblDataSetArea    =   "area";
+constexpr std::string_view kLblDataSetEnties  =   "entries";
+
+constexpr std::string_view kLblDataEntryPath_CE   =   "path";
+constexpr std::string_view kLblDataEntryConfig_CE =   "config";
 
 
-int calcCellEff_s(const std::string& path, const vrfb::Config_CE& cfg);
+struct DataEntry_CE {
+  std::string path;
+  vrfb::Config_CE cfg;
+};
+
+
+struct DataSet_CE {
+  double area;
+  std::vector<DataEntry_CE> entries;
+};
+
+
+int calcCellEff_s(const std::string& name, const DataSet_CE& set_d);
 void calcCellEff_a(const std::string& cfgPath);
 
 

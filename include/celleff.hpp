@@ -1,5 +1,6 @@
 #pragma once
 
+#include "strutils.hpp"
 #include "vrfbcalc.hpp"
 
 
@@ -15,6 +16,8 @@ const std::vector<std::string> kCycleTableHdrs {
   "Discharging Step Time (s)",
   "Charging Current (A)",
   "Discharging Current (A)",
+  "Charging Charge Density (A cm-2)",
+  "Discharging Charge Density (A cm-2)",
   "Charging Voltage (V)",
   "Discharging Voltage (V)",
   "Charging Capacity (Ah)",
@@ -24,7 +27,7 @@ const std::vector<std::string> kCycleTableHdrs {
   "CE (Fractional)",
   "EE (Fractional)",
   "VE (Fractional)",
-  "ASR (\u2126 cm-2)"
+  "ASR (Ohm cm-2)"
 };
 
 
@@ -45,6 +48,9 @@ struct CellCycle {
   double c_volt;      /* Charging voltage (V) */
   double d_volt;      /* Discharging voltage (V) */
 
+  double c_ch_den;    /* Charging charge density (A cm-2) */
+  double d_ch_den;    /* Discharging charge density (A cm-2) */
+
   double ce;          /* Coulumbic efficiency (fractional) */
   double ee;          /* Energy efficiency (fractional) */
   double ve;          /* Voltage efficiency (fractional) */
@@ -59,14 +65,62 @@ enum class StepType {
 };
 
 
-/* Structure containing the range of rows in a table that describe the step cycle. */
-struct CycleStep {
-  std::size_t beg;        /* Row index where cycle begins (inclusive) */
-  std::size_t end;        /* Row index where cycle ends offsetted by r_off amount */
+class Step {
+ public:
+  Step(const StepType st,
+      const vrfb::Table* t, const vrfb::Config_CE* c,
+      const std::size_t b, const std::size_t e,
+      const int off)
+      : s_type{st}, table{t}, cfg{c},
+        beg{b}, end{e}, off_row{off} {};
 
-  StepType s_type;        /* Step type */
-  std::size_t r_off;      /* End row offset from actual last row */
-  double offset = 0;      /* Time offset in seconds */
+  Step() = default;
+  Step(const Step&) = default;
+  Step(Step&&) = default;
+
+  ~Step() = default;
+
+  inline StepType stepType() const {
+    return s_type;
+  }
+
+  inline double time() const {
+    return strutils::parseTimestamp(table->get(cfg->t_time_h, end))
+        - strutils::parseTimestamp(table->get(cfg->t_time_h, beg))
+        + off_tim;
+  }
+
+  inline double c_capacity() const {
+    return table->get<double>(cfg->c_capacity_h, end-off_row);
+  }
+
+  inline double d_capacity() const {
+    return table->get<double>(cfg->d_capacity_h, end-off_row);
+  }
+
+  inline double c_energy() const {
+    return table->get<double>(cfg->c_energy_h, end-off_row);
+  }
+
+  inline double d_energy() const {
+    return table->get<double>(cfg->d_energy_h, end-off_row);
+  }
+
+  inline void merge(const Step& o) {
+    off_tim += o.time();
+  }
+
+
+ private:
+  StepType s_type;
+
+  const vrfb::Table* table;
+  const vrfb::Config_CE* cfg;
+  std::size_t beg;
+  std::size_t end;
+  int off_row;
+
+  double off_tim = 0;
 };
 
 
@@ -77,7 +131,7 @@ struct CycleStep {
   @param cfg Configuration information.
   @return A std::vector containing the extracted cycle steps.
 */
-std::vector<CycleStep> extractCycleStep(const vrfb::Table& t, const vrfb::Config_CE& cfg);
+std::vector<Step> extractSteps(const vrfb::Table& t, const vrfb::Config_CE& cfg);
 
 
 /*
@@ -91,9 +145,8 @@ std::vector<CycleStep> extractCycleStep(const vrfb::Table& t, const vrfb::Config
   @param cur_time Current accumulated time before this cycle in seconds.
   @param cyc CellCycle to output performance data to.
 */
-extern inline void extractCycle(
-      const vrfb::Table& t, const vrfb::Config_CE& cfg,
-      const CycleStep& c_step, const CycleStep& d_step,
+extern inline void extractCycle(const double area,
+      const Step& c_step, const Step& d_step,
       const double cur_time, CellCycle& cyc);
 
 /*
