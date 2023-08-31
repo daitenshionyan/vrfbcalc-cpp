@@ -1,6 +1,7 @@
 #pragma once
 
 
+#include <exception>
 #include <iostream>
 #include <string>
 #include <unordered_map>
@@ -138,8 +139,24 @@ class Table {
 };
 
 
-std::istream& operator>>(std::istream&, Table&);
-std::ostream& operator<<(std::ostream&, const Table&);
+class invalid_csv_format : public std::exception {
+ public:
+  invalid_csv_format(const std::string& d) : desc{d} {}
+
+  const char* what() const override {
+    return desc.c_str();
+  }
+
+ private:
+  std::string desc;
+};
+
+
+void readLine_CSV(std::istream&, std::vector<std::string>&);
+Table readTable_CSV(std::istream&);
+
+void writeCell_CSV(std::ostream&, const std::string&);
+void writeTable_CSV(std::ostream&, const Table&);
 
 
 

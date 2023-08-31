@@ -1,6 +1,7 @@
 #include "vrfbdriver.hpp"
 
 #include <chrono>
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 
@@ -92,20 +93,20 @@ int calcCellEff_s(const std::string& name, const DataSet_CE& set_d) {
   std::vector<vrfb::Table> tables {};
   for (auto entry : set_d.entries) {
     std::ifstream ifs;
-    ifs.open(entry.path);
+    ifs.open(std::filesystem::u8path<std::string>(entry.path));
     if (!ifs.good()) {
       std::cout
-          << "Error while reading (state = " << ifs.exceptions() << ")" << std::endl;
+          << "Error while reading " << entry.path <<" (state = " << ifs.exceptions() << ")" << std::endl;
       return 1;
     }
     clearBOM(ifs);
 
-    tables.push_back(vrfb::Table {});
     try {
-      ifs >> tables[tables.size()-1];
+      tables.push_back(vrfb::readTable_CSV(ifs));
     } catch (std::exception& ex) {
       std::cout
-          << "Error while forming raw table - " << ex.what() << std::endl;
+          << "Error while forming raw table from "
+          << entry.path << " - " << ex.what() << std::endl;
       return 1;
     }
 
@@ -130,8 +131,7 @@ int calcCellEff_s(const std::string& name, const DataSet_CE& set_d) {
 
   std::ofstream ofs;
   ofs.open(name + ".csv");
-  // UTF-8 with BOM for excel UTF-8
-  ofs << data_pro;
+  vrfb::writeTable_CSV(ofs, data_pro);
   if (!ofs.good()) {
     std::cout
         << "Error while writing (state = " << ofs.exceptions() << ")" << std::endl;

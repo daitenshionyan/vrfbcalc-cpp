@@ -29,28 +29,6 @@ Table::Table(const std::vector<std::string>& h, const std::vector<std::string>& 
 }
 
 
-std::istream& operator>>(std::istream& is, Table& table) {
-  if (!is.good()) {
-    throw is.exceptions();
-  }
-
-  std::vector<std::string> hdrs;
-  std::string hdrLn;
-  std::getline(is, hdrLn);
-  strutils::split(hdrLn, hdrs);
-
-  std::vector<std::string> elems;
-  while(is.good()) {
-    std::string ln;
-    std::getline(is, ln);
-    strutils::split(ln, elems);
-  }
-
-  table = {hdrs, elems};
-  return is;
-}
-
-
 std::ostream& operator<<(std::ostream& os, const Table& table) {
   auto hdrs = table.headers();
   for (std::size_t i = 0; i < table.numCols(); ++i) {
@@ -66,6 +44,112 @@ std::ostream& operator<<(std::ostream& os, const Table& table) {
   }
 
   return os;
+}
+
+
+void readLine_CSV(std::istream& is, std::vector<std::string>& cells) {
+  bool is_quoted = false;
+
+  while (is.good()) {
+    std::string line {};
+    std::getline(is, line);
+
+    if (is_quoted) {
+      cells[cells.size()-1] += '\n';
+    }
+
+    if (line.empty()) {
+      continue;
+    } else if (!is_quoted) {
+      cells.push_back({});
+    }
+
+    for (std::size_t i = 0; i < line.size(); ++i) {
+      switch (line[i]) {
+        case ',':
+          if (!is_quoted) {
+            cells.push_back({});
+            continue;
+          }
+          break;
+        case '"':
+          if (cells[cells.size()-1].empty()) {
+            is_quoted = true;
+            continue;
+          } else if (!is_quoted) {
+            throw invalid_csv_format("Quotation character not within quoted field");
+          } else if (i+1 >= line.size() || line[i+1] == ',') {
+            is_quoted = false;
+            continue;
+          } else if (line[i+1] == '"') {
+            ++i;
+          } else {
+            throw invalid_csv_format("Missing escape quotation character");
+          }
+          break;
+      }
+      cells[cells.size()-1] += line[i];
+    }
+
+    if (!is_quoted) {
+      // end of line and not quoted
+      break;
+    }
+  }
+
+  if (is_quoted) {
+    throw invalid_csv_format("Missing closing quote");
+  }
+}
+
+
+Table readTable_CSV(std::istream& is) {
+  std::vector<std::string> hdrs {};
+  std::vector<std::string> elems {};
+
+  readLine_CSV(is, hdrs);
+  while(is.good()) {
+    readLine_CSV(is, elems);
+  }
+
+  return {hdrs, elems};
+}
+
+
+void writeCell_CSV(std::ostream& os, const std::string& cell) {
+  bool is_quoted = false;
+  std::string cell_formatted {};
+  for (auto c : cell) {
+    switch (c) {
+      case '"':
+        cell_formatted += '"';
+        // fall through
+      case ',':
+        is_quoted = true;
+        break;
+    }
+    cell_formatted += c;
+  }
+  if (is_quoted) {
+    os << '"' << cell_formatted << '"';
+  } else {
+    os << cell_formatted;
+  }
+}
+
+
+void writeTable_CSV(std::ostream& os, const Table& table) {
+  auto hdrs = table.headers();
+  for (std::size_t i = 0; i < table.numCols(); ++i) {
+    writeCell_CSV(os, hdrs[i]);
+    os << ((i+1 < table.numCols()) ? ',' : '\n');
+  }
+  for (std::size_t r = 0; r < table.numRows(); ++r) {
+    for (std::size_t c = 0; c < table.numCols(); ++c) {
+      writeCell_CSV(os, table.get(c, r));
+      os << ((c+1 < table.numCols()) ? ',' : '\n');
+    }
+  }
 }
 
 
