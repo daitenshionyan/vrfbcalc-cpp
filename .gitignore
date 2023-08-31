@@ -6,4 +6,4 @@
 
 # Ignore app files
 *.csv
-*.json
+CellEffConfig.json
