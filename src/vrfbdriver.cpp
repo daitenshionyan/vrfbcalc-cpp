@@ -131,8 +131,7 @@ int calcCellEff_s(const std::string& name, const DataSet_CE& set_d) {
 
   std::ofstream ofs;
   ofs.open(name + ".csv");
-  // UTF-8 with BOM for excel UTF-8
-  ofs << data_pro;
+  vrfb::writeTable_CSV(ofs, data_pro);
   if (!ofs.good()) {
     std::cout
         << "Error while writing (state = " << ofs.exceptions() << ")" << std::endl;

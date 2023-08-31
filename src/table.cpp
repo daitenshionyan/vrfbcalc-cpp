@@ -116,4 +116,41 @@ Table readTable_CSV(std::istream& is) {
 }
 
 
+void writeCell_CSV(std::ostream& os, const std::string& cell) {
+  bool is_quoted = false;
+  std::string cell_formatted {};
+  for (auto c : cell) {
+    switch (c) {
+      case '"':
+        cell_formatted += '"';
+        // fall through
+      case ',':
+        is_quoted = true;
+        break;
+    }
+    cell_formatted += c;
+  }
+  if (is_quoted) {
+    os << '"' << cell_formatted << '"';
+  } else {
+    os << cell_formatted;
+  }
+}
+
+
+void writeTable_CSV(std::ostream& os, const Table& table) {
+  auto hdrs = table.headers();
+  for (std::size_t i = 0; i < table.numCols(); ++i) {
+    writeCell_CSV(os, hdrs[i]);
+    os << ((i+1 < table.numCols()) ? ',' : '\n');
+  }
+  for (std::size_t r = 0; r < table.numRows(); ++r) {
+    for (std::size_t c = 0; c < table.numCols(); ++c) {
+      writeCell_CSV(os, table.get(c, r));
+      os << ((c+1 < table.numCols()) ? ',' : '\n');
+    }
+  }
+}
+
+
 }

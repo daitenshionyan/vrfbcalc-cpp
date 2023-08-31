@@ -139,9 +139,6 @@ class Table {
 };
 
 
-std::ostream& operator<<(std::ostream&, const Table&);
-
-
 class invalid_csv_format : public std::exception {
  public:
   invalid_csv_format(const std::string& d) : desc{d} {}
@@ -157,6 +154,9 @@ class invalid_csv_format : public std::exception {
 
 void readLine_CSV(std::istream&, std::vector<std::string>&);
 Table readTable_CSV(std::istream&);
+
+void writeCell_CSV(std::ostream&, const std::string&);
+void writeTable_CSV(std::ostream&, const Table&);
 
 
 
