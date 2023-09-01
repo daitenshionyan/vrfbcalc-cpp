@@ -2,6 +2,12 @@
 
 cmake_minimum_required(VERSION 3.21.0)
 
+set(CMAKE_PREFIX_PATH "C:/Qt/6.5.2/msvc2019_64")
+
+set(CMAKE_AUTOUIC on)
+set(CMAKE_AUTOMOC on)
+set(CMAKE_AUTORCC on)
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED true)
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS on)
@@ -60,13 +66,41 @@ install(FILES ${VRFBCALC_PUBLIC_HEADERS} DESTINATION ${INSTALL_LIBRARY_INC_DIR})
 
 # ==== EXECUTABLE ============================================================ #
 
-add_executable(vrfbcalc-cpp
+find_package(nlohmann_json CONFIG REQUIRED)
+find_package(Qt6 REQUIRED COMPONENTS Widgets)
+
+add_executable(vrfbcalc-cpp WIN32
     src/main.cpp
     include/vrfbdriver.hpp
     src/vrfbdriver.cpp
+    include/mainwindow.h
+    src/mainwindow.ui
+    src/mainwindow.cpp
 )
 
 target_link_libraries(vrfbcalc-cpp PRIVATE vrfbcalc)
-
-find_package(nlohmann_json CONFIG REQUIRED)
 target_link_libraries(vrfbcalc-cpp PRIVATE nlohmann_json::nlohmann_json)
+target_link_libraries(vrfbcalc-cpp PRIVATE Qt6::Widgets)
+
+# ---- < Copty Qt dll >------------------------------------------------------- #
+
+get_target_property(_qmake_executable Qt6::qmake IMPORTED_LOCATION)
+get_filename_component(_qt_bin_dir ${_qmake_executable} DIRECTORY)
+
+add_custom_command(TARGET vrfbcalc-cpp POST_BUILD
+    COMMAND ${_qt_bin_dir}/windeployqt.exe
+        --verbose 1
+        --release
+        --no-compiler-runtime
+        --no-network
+        --no-pdf
+        --skip-plugin-types
+            imageformats
+        --no-opengl
+        --no-opengl-sw
+        --no-svg
+        --no-system-d3d-compiler
+        --no-translations
+        \"$<TARGET_FILE:vrfbcalc-cpp>\"
+    COMMENT "Deploying Qt libraries using windeployqt ..."
+)

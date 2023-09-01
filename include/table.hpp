@@ -88,13 +88,7 @@ class Table {
     @param h Header of column to return.
     @throws std::out_of_range - if the specified header does not exist.
   */
-  inline const std::vector<std::string>& at(const std::string& h) const {
-    try {
-      return colMap.at(h);
-    } catch (std::out_of_range oor) {
-      throw std::out_of_range("Header does not exist (" + h + ")");
-    }
-  }
+  const std::vector<std::string>& at(const std::string& h) const;
 
   /*
     Returns a list like view of the column at the specified header.

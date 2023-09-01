@@ -3,6 +3,7 @@
 #include <istream>
 #include <string>
 
+#include "strutils.hpp"
 #include "vrfbcalc.hpp"
 
 
@@ -13,8 +14,8 @@ constexpr unsigned char kUtf8BOM[3] = {0xEF, 0xBB, 0xBF};
 void clearBOM(std::istream& is);
 
 
-constexpr std::string_view kSeparator =
-    "================================================================================\n";
+constexpr const char* kSeparator =
+    (char*) "================================================================================\n";
 
 
 constexpr std::string_view kLblTTimeHdr_CE    =   "t_time_h";
@@ -45,8 +46,15 @@ struct DataSet_CE {
 };
 
 
-int calcCellEff_s(const std::string& name, const DataSet_CE& set_d);
-void calcCellEff_a(const std::string& cfgPath);
+class Writer {
+ public:
+  virtual void write(const std::string& text) = 0;
+  virtual void writeln(const std::string& text) = 0;
+};
+
+
+int calcCellEff_s(const std::string& name, const DataSet_CE& set_d, Writer& w);
+void calcCellEff_a(const std::string& cfgPath, Writer& w);
 
 
 }

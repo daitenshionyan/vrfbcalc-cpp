@@ -1,15 +1,11 @@
-#include <iostream>
-#include "vrfbdriver.hpp"
-#include "vrfbcalccfg.hpp"
+#include <QApplication>
+
+#include "mainwindow.h"
 
 
-void printVersion() {
-  std::cout << "vrfb-cpp - v" << vrfbcfg::version << std::endl;
-}
-
-
-int main(int argc, const char** argv) {
-  printVersion();
-  vrfbdriver::calcCellEff_a("CellEffConfig.json");
-  system("pause");
+int main(int argc, char** argv) {
+  QApplication a(argc, argv);
+  MainWindow w;
+  w.show();
+  return a.exec();
 }

@@ -7,6 +7,8 @@
 
 #include "nlohmann/json.hpp"
 
+#include "strutils.hpp"
+
 
 NLOHMANN_JSON_NAMESPACE_BEGIN
 template<>
@@ -86,8 +88,9 @@ void clearBOM(std::istream& is) {
 }
 
 
-int calcCellEff_s(const std::string& name, const DataSet_CE& set_d) {
-  std::cout << "\n" << kSeparator << "\t" << name << "\n" << kSeparator << std::endl;
+int calcCellEff_s(const std::string& name, const DataSet_CE& set_d, Writer& w) {
+  w.writeln(strutils::format_string("%s\t%s\n%s",
+      kSeparator, name.c_str(), kSeparator));
   auto beg = std::chrono::high_resolution_clock::now();
 
   std::vector<vrfb::Table> tables {};
@@ -95,8 +98,8 @@ int calcCellEff_s(const std::string& name, const DataSet_CE& set_d) {
     std::ifstream ifs;
     ifs.open(std::filesystem::u8path<std::string>(entry.path));
     if (!ifs.good()) {
-      std::cout
-          << "Error while reading " << entry.path <<" (state = " << ifs.exceptions() << ")" << std::endl;
+      w.writeln(strutils::format_string("Error while reading '%s' (state = %d)\n",
+          entry.path.c_str(), ifs.exceptions()));
       return 1;
     }
     clearBOM(ifs);
@@ -104,14 +107,13 @@ int calcCellEff_s(const std::string& name, const DataSet_CE& set_d) {
     try {
       tables.push_back(vrfb::readTable_CSV(ifs));
     } catch (std::exception& ex) {
-      std::cout
-          << "Error while forming raw table from "
-          << entry.path << " - " << ex.what() << std::endl;
+      w.writeln(strutils::format_string("Error while forming raw table from '%s' - %s\n",
+          entry.path.c_str(), ex.what()));
       return 1;
     }
 
-    std::cout << entry.path << " : "
-        << tables[tables.size()-1].numRows() << " points" << std::endl;
+    w.writeln(strutils::format_string("%s : %d points",
+        entry.path.c_str(), tables[tables.size()-1].numRows()));
   }
   std::cout << std::endl;
 
@@ -124,8 +126,8 @@ int calcCellEff_s(const std::string& name, const DataSet_CE& set_d) {
   try {
     data_pro = vrfb::calcPerf_CE(set_d.area, datas);
   } catch (std::exception& ex) {
-    std::cout
-        << "Error while processing data - " << ex.what() << std::endl;
+    w.writeln(strutils::format_string("Error while processing data - %s\n",
+        ex.what()));
     return 1;
   }
 
@@ -133,26 +135,28 @@ int calcCellEff_s(const std::string& name, const DataSet_CE& set_d) {
   ofs.open(name + ".csv");
   vrfb::writeTable_CSV(ofs, data_pro);
   if (!ofs.good()) {
-    std::cout
-        << "Error while writing (state = " << ofs.exceptions() << ")" << std::endl;
+    w.writeln(strutils::format_string("Error while writing to '%s' (state = %d)\n",
+        (name+".csv").c_str(), ofs.exceptions()));
     return 1;
   }
-  std::cout << "Output table : " << std::to_string(data_pro.numRows()) << " cycles" << std::endl;
+  w.writeln(strutils::format_string("Output table : %d cycles",
+      data_pro.numRows()));
 
   auto end = std::chrono::high_resolution_clock::now();
   auto dur = std::chrono::duration_cast<std::chrono::microseconds>(end - beg);
-  std::cout << "Completed in " << dur.count()/1000. << "ms" << std::endl;
+  w.writeln(strutils::format_string("Completed in %.3f ms\n",
+      dur.count()/1000.));
 
   return 0;
 }
 
 
-void calcCellEff_a(const std::string& cfgPath) {
+void calcCellEff_a(const std::string& cfgPath, Writer& w) {
   std::ifstream ifs;
   ifs.open(cfgPath);
   if (!ifs.good()) {
-    std::cout
-        << "Error while reading (state = " << ifs.exceptions() << ")" << std::endl;
+    w.writeln(strutils::format_string("Error while reading config file '%s' (state = %d)",
+        cfgPath.c_str(), ifs.exceptions()));
     return;
   }
 
@@ -162,19 +166,18 @@ void calcCellEff_a(const std::string& cfgPath) {
     ifs >> j;
     j.get_to(cfgMap);
   } catch (std::exception& ex) {
-    std::cout
-        << "Error while reading json - " << ex.what() << std::endl;
+    w.writeln(strutils::format_string("Error while processing config file '%s' - %s",
+        cfgPath, ex.what()));
     return;
   }
 
   int num_err = 0;
   for (const auto entry : cfgMap) {
-    num_err += calcCellEff_s(entry.first, entry.second);
+    num_err += calcCellEff_s(entry.first, entry.second, w);
   }
 
-  std::cout << "\n\n>>> Total = " << cfgMap.size()
-      << " || Success = " << cfgMap.size()-num_err
-      << " || Failure = " << num_err << std::endl;
+  w.writeln(strutils::format_string("\n>>> Total = %d || Success = %d || Failure = %d",
+      cfgMap.size(), cfgMap.size()-num_err, num_err));
 }
 
 

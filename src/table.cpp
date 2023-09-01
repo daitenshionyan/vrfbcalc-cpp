@@ -1,5 +1,6 @@
 #include "table.hpp"
 
+#include <stdexcept>
 #include <exception>
 
 #include "strutils.hpp"
@@ -13,9 +14,8 @@ Table::Table(const std::vector<std::string>& h, const std::vector<std::string>& 
       r_size{elems.size()/h.size()},
       hdrs{h.begin(), h.end()} {
   if (elems.size() % h.size() != 0) {
-    throw std::invalid_argument("Incomplete table "
-        + std::to_string(h.size()) + " cols for "
-        + std::to_string(elems.size()) + " elems");
+    throw std::runtime_error(strutils::format_string("Incomplete table %d cols for %d elems",
+        h.size(), elems.size()));
   }
   for (std::size_t colNum = 0; colNum < c_size; ++colNum) {
     if (colMap.find(h[colNum]) != colMap.end()) {
@@ -29,22 +29,14 @@ Table::Table(const std::vector<std::string>& h, const std::vector<std::string>& 
 }
 
 
-std::ostream& operator<<(std::ostream& os, const Table& table) {
-  auto hdrs = table.headers();
-  for (std::size_t i = 0; i < table.numCols(); ++i) {
-    os << hdrs[i]
-        << ((i+1 < table.numCols()) ? ',' : '\n');
-  }
-
-  for (std::size_t r = 0; r < table.numRows(); ++r) {
-    for (std::size_t c = 0; c < table.numCols(); ++c) {
-      os << table.get(c, r)
-          << ((c+1 < table.numCols()) ? ',' : '\n');
+const std::vector<std::string>& Table::at(const std::string& h) const {
+    try {
+      return colMap.at(h);
+    } catch (std::out_of_range oor) {
+      throw std::out_of_range(strutils::format_string("Header does not exist '%s'",
+          h.c_str()));
     }
   }
-
-  return os;
-}
 
 
 void readLine_CSV(std::istream& is, std::vector<std::string>& cells) {
