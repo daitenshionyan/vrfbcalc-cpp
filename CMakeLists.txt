@@ -73,9 +73,22 @@ add_executable(vrfbcalc-cpp WIN32
     src/main.cpp
     include/vrfbdriver.hpp
     src/vrfbdriver.cpp
-    include/mainwindow.h
-    src/mainwindow.ui
-    src/mainwindow.cpp
+
+    include/view/mainwindow.h
+    src/view/mainwindow.ui
+    src/view/mainwindow.cpp
+
+    include/view/celleffconfigpopup.h
+    src/view/celleffconfigpopup.ui
+    src/view/celleffconfigpopup.cpp
+
+    include/view/celleffdatasetform.h
+    src/view/celleffdatasetform.ui
+    src/view/celleffdatasetform.cpp
+
+    include/view/celleffdataentryform.h
+    src/view/celleffdataentryform.ui
+    src/view/celleffdataentryform.cpp
 )
 
 target_link_libraries(vrfbcalc-cpp PRIVATE vrfbcalc)

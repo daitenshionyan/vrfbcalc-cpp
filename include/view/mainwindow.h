@@ -1,6 +1,8 @@
 #pragma once
 
 #include <QMainWindow>
+
+#include "view/celleffconfigpopup.h"
 #include "vrfbdriver.hpp"
 
 
@@ -24,8 +26,10 @@ class MainWindow : public QMainWindow, public vrfbdriver::Writer {
 
  private slots:
   void on_startBtn_clicked();
+  void on_cfgBtn_clicked();
 
 
  private:
   Ui::MainWindow* ui;
+  CellEffConfigPopup* popup_ce;
 };
