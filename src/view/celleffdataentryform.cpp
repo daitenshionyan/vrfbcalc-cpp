@@ -5,7 +5,7 @@
 
 
 CEDataEntryForm::CEDataEntryForm(QWidget* parent)
-    : QFrame(parent), ui(new Ui::CEDataEntryForm) {
+      : QFrame(parent), ui(new Ui::CEDataEntryForm) {
   ui->setupUi(this);
 }
 

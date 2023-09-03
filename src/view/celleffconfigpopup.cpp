@@ -7,7 +7,7 @@
 
 
 CEConfigPopup::CEConfigPopup(QWidget* parent)
-    : QDialog(parent), ui(new Ui::CEConfigPopup) {
+      : QDialog(parent), ui(new Ui::CEConfigPopup) {
   ui->setupUi(this);
 }
 

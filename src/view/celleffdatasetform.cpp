@@ -5,7 +5,7 @@
 
 
 CEDataSetForm::CEDataSetForm(QWidget* parent)
-    : QWidget(parent), ui(new Ui::CEDataSetForm) {
+      : QWidget(parent), ui(new Ui::CEDataSetForm) {
   ui->setupUi(this);
 }
 

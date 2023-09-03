@@ -5,9 +5,9 @@
 
 
 MainWindow::MainWindow(QWidget* parent)
-    : QMainWindow(parent),
-      ui(new Ui::MainWindow),
-      popup_ce(new CEConfigPopup(this)) {
+      : QMainWindow(parent),
+        ui(new Ui::MainWindow),
+        popup_ce(new CEConfigPopup(this)) {
   ui->setupUi(this);
 }
 

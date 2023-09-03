@@ -16,20 +16,20 @@ QT_END_NAMESPACE
 class MainWindow : public QMainWindow, public vrfbdriver::Writer {
   Q_OBJECT
 
- public:
-  MainWindow(QWidget* parent = nullptr);
-  ~MainWindow();
+  public:
+    MainWindow(QWidget* parent = nullptr);
+    ~MainWindow();
 
-  void write(const std::string&) override;
-  void writeln(const std::string&) override;
-
-
- private slots:
-  void on_startBtn_clicked();
-  void on_cfgBtn_clicked();
+    void write(const std::string&) override;
+    void writeln(const std::string&) override;
 
 
- private:
-  Ui::MainWindow* ui;
-  CEConfigPopup* popup_ce;
+  private slots:
+    void on_startBtn_clicked();
+    void on_cfgBtn_clicked();
+
+
+  private:
+    Ui::MainWindow* ui;
+    CEConfigPopup* popup_ce;
 };

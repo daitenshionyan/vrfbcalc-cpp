@@ -20,19 +20,19 @@ QT_END_NAMESPACE
 class CEConfigPopup : public QDialog {
   Q_OBJECT
 
- public:
-  CEConfigPopup(QWidget* parent);
-  ~CEConfigPopup();
+  public:
+    CEConfigPopup(QWidget* parent);
+    ~CEConfigPopup();
 
-  std::unordered_map<std::string, vrfbdriver::DataSet_CE> getDataSets() const;
-
-
- private slots:
-  void on_addBtn_clicked();
-  void on_entry_del(CEDataSetForm*);
+    std::unordered_map<std::string, vrfbdriver::DataSet_CE> getDataSets() const;
 
 
- private:
-  Ui::CEConfigPopup* ui;
-  std::vector<CEDataSetForm*> forms;
+  private slots:
+    void on_addBtn_clicked();
+    void on_entry_del(CEDataSetForm*);
+
+
+  private:
+    Ui::CEConfigPopup* ui;
+    std::vector<CEDataSetForm*> forms;
 };
