@@ -37,38 +37,6 @@ struct adl_serializer<vrfb::Config_CE> {
     j.at(vrfbdriver::kLblDTypeNames_CE).get_to(cfg.d_type_names);
   }
 };
-
-
-template<>
-struct adl_serializer<vrfbdriver::DataEntry_CE> {
-  static void to_json(json& j, const vrfbdriver::DataEntry_CE& entry) {
-    j = nlohmann::json{
-      {vrfbdriver::kLblDataEntryPath_CE, entry.path},
-      {vrfbdriver::kLblDataEntryConfig_CE, entry.cfg}
-    };
-  }
-
-  static void from_json(const json& j, vrfbdriver::DataEntry_CE& entry) {
-    j.at(vrfbdriver::kLblDataEntryPath_CE).get_to(entry.path);
-    j.at(vrfbdriver::kLblDataEntryConfig_CE).get_to(entry.cfg);
-  }
-};
-
-
-template<>
-struct adl_serializer<vrfbdriver::DataSet_CE> {
-  static void to_json(json& j, const vrfbdriver::DataSet_CE& set_d) {
-    j = nlohmann::json{
-      {vrfbdriver::kLblDataSetArea, set_d.area},
-      {vrfbdriver::kLblDataSetEnties, set_d.entries}
-    };
-  }
-
-  static void from_json(const json& j, vrfbdriver::DataSet_CE& set_d) {
-    j.at(vrfbdriver::kLblDataSetArea).get_to(set_d.area);
-    j.at(vrfbdriver::kLblDataSetEnties).get_to(set_d.entries);
-  }
-};
 NLOHMANN_JSON_NAMESPACE_END
 
 
@@ -89,8 +57,8 @@ void clearBOM(std::istream& is) {
 
 
 int calcCellEff_s(const std::string& name, const DataSet_CE& set_d, Writer& w) {
-  w.writeln(strutils::format_string("%s\t%s\n%s",
-      kSeparator, name.c_str(), kSeparator));
+  w.writeln(strutils::format_string("[%s] Processing data set '%s'",
+      name.c_str(), name.c_str()));
   auto beg = std::chrono::high_resolution_clock::now();
 
   std::vector<vrfb::Table> tables {};
@@ -98,8 +66,9 @@ int calcCellEff_s(const std::string& name, const DataSet_CE& set_d, Writer& w) {
     std::ifstream ifs;
     ifs.open(std::filesystem::u8path<std::string>(entry.path));
     if (!ifs.good()) {
-      w.writeln(strutils::format_string("Error while reading '%s' (state = %d)\n",
-          entry.path.c_str(), ifs.exceptions()));
+      w.writeln_fail(strutils::format_string(
+          "[%s] Error while reading '%s' (state = %d)",
+          name.c_str(), entry.path.c_str(), ifs.exceptions()));
       return 1;
     }
     clearBOM(ifs);
@@ -107,15 +76,16 @@ int calcCellEff_s(const std::string& name, const DataSet_CE& set_d, Writer& w) {
     try {
       tables.push_back(vrfb::readTable_CSV(ifs));
     } catch (std::exception& ex) {
-      w.writeln(strutils::format_string("Error while forming raw table from '%s' - %s\n",
-          entry.path.c_str(), ex.what()));
+      w.writeln_fail(strutils::format_string(
+          "[%s] Error while forming raw table from '%s' - %s",
+          name.c_str(), entry.path.c_str(), ex.what()));
       return 1;
     }
 
-    w.writeln(strutils::format_string("%s : %d points",
-        entry.path.c_str(), tables[tables.size()-1].numRows()));
+    w.writeln(strutils::format_string(
+        "[%s] %s : %d points",
+        name.c_str(), entry.path.c_str(), tables[tables.size()-1].numRows()));
   }
-  std::cout << std::endl;
 
   std::vector<vrfb::Data_CE> datas {};
   for (std::size_t i = 0; i < tables.size(); ++i) {
@@ -126,8 +96,9 @@ int calcCellEff_s(const std::string& name, const DataSet_CE& set_d, Writer& w) {
   try {
     data_pro = vrfb::calcPerf_CE(set_d.area, datas);
   } catch (std::exception& ex) {
-    w.writeln(strutils::format_string("Error while processing data - %s\n",
-        ex.what()));
+    w.writeln_fail(strutils::format_string(
+        "[%s] Error while processing data - %s",
+        name.c_str(), ex.what()));
     return 1;
   }
 
@@ -135,49 +106,22 @@ int calcCellEff_s(const std::string& name, const DataSet_CE& set_d, Writer& w) {
   ofs.open(name + ".csv");
   vrfb::writeTable_CSV(ofs, data_pro);
   if (!ofs.good()) {
-    w.writeln(strutils::format_string("Error while writing to '%s' (state = %d)\n",
-        (name+".csv").c_str(), ofs.exceptions()));
+    w.writeln_fail(strutils::format_string(
+        "[%s] Error while writing to '%s' (state = %d)",
+        name.c_str(), (name+".csv").c_str(), ofs.exceptions()));
     return 1;
   }
-  w.writeln(strutils::format_string("Output table : %d cycles",
-      data_pro.numRows()));
+  w.writeln(strutils::format_string(
+      "[%s] Output table : %d cycles",
+      name.c_str(), data_pro.numRows()));
 
   auto end = std::chrono::high_resolution_clock::now();
   auto dur = std::chrono::duration_cast<std::chrono::microseconds>(end - beg);
-  w.writeln(strutils::format_string("Completed in %.3f ms\n",
-      dur.count()/1000.));
+  w.writeln_succ(strutils::format_string(
+      "[%s] Completed in %.3f ms",
+      name.c_str(), dur.count()/1000.));
 
   return 0;
-}
-
-
-void calcCellEff_a(const std::string& cfgPath, Writer& w) {
-  std::ifstream ifs;
-  ifs.open(cfgPath);
-  if (!ifs.good()) {
-    w.writeln(strutils::format_string("Error while reading config file '%s' (state = %d)",
-        cfgPath.c_str(), ifs.exceptions()));
-    return;
-  }
-
-  std::unordered_map<std::string, DataSet_CE> cfgMap;
-  try {
-    nlohmann::json j;
-    ifs >> j;
-    j.get_to(cfgMap);
-  } catch (std::exception& ex) {
-    w.writeln(strutils::format_string("Error while processing config file '%s' - %s",
-        cfgPath, ex.what()));
-    return;
-  }
-
-  int num_err = 0;
-  for (const auto entry : cfgMap) {
-    num_err += calcCellEff_s(entry.first, entry.second, w);
-  }
-
-  w.writeln(strutils::format_string("\n>>> Total = %d || Success = %d || Failure = %d",
-      cfgMap.size(), cfgMap.size()-num_err, num_err));
 }
 
 

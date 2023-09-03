@@ -48,13 +48,23 @@ struct DataSet_CE {
 
 class Writer {
   public:
-    virtual void write(const std::string& text) = 0;
-    virtual void writeln(const std::string& text) = 0;
+    virtual void writeln(const std::string& text = "") = 0;
+
+    virtual void writeln_succ(const std::string& text) {
+      writeln(text);
+    }
+
+    virtual void writeln_warn(const std::string& text) {
+      writeln(text);
+    }
+
+    virtual void writeln_fail(const std::string& text) {
+      writeln(text);
+    }
 };
 
 
 int calcCellEff_s(const std::string& name, const DataSet_CE& set_d, Writer& w);
-void calcCellEff_a(const std::string& cfgPath, Writer& w);
 
 
 }

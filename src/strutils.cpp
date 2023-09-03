@@ -1,6 +1,10 @@
 #include "strutils.hpp"
 
+#include <chrono>
 #include <cmath>
+#include <ctime>
+
+#include <iostream>
 
 
 namespace strutils {
@@ -39,6 +43,16 @@ double parseTimestamp(const std::string& text, const char delim) {
     res += std::stod(times[i]) * std::pow(60, times.size()-1-i);
   }
   return res;
+}
+
+std::string getftime() {
+  std::cout << "staring" << std::endl;
+  auto now_time_t = std::chrono::system_clock::to_time_t(
+      std::chrono::system_clock::now());
+  auto now_tm = std::localtime(&now_time_t);
+  std::unique_ptr<char[]> buf(new char[20]);      // yyyy-mm-ddThh:mm:ss
+  std::strftime(buf.get(), 20, "%FT%T", now_tm);
+  return std::string(buf.get(), 19);
 }
 
 

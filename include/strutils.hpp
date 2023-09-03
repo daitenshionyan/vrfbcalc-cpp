@@ -40,6 +40,10 @@ void split(const std::string& line, std::vector<std::string>& vec, const char de
 */
 double parseTimestamp(const std::string& text, const char delim = ':');
 
+
+std::string getftime();
+
+
 template<typename ... Args>
 std::string format_string(const std::string& format, const Args& ... args) {
   std::size_t count = std::snprintf(nullptr, 0, format.c_str(), args ...);

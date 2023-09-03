@@ -20,8 +20,11 @@ class MainWindow : public QMainWindow, public vrfbdriver::Writer {
     MainWindow(QWidget* parent = nullptr);
     ~MainWindow();
 
-    void write(const std::string&) override;
-    void writeln(const std::string&) override;
+    void writeln(const std::string& text = "") override;
+
+    void writeln_succ(const std::string&) override;
+    void writeln_warn(const std::string&) override;
+    void writeln_fail(const std::string&) override;
 
 
   private slots:
