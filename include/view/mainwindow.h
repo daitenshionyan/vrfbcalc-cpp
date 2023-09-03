@@ -31,5 +31,5 @@ class MainWindow : public QMainWindow, public vrfbdriver::Writer {
 
  private:
   Ui::MainWindow* ui;
-  CellEffConfigPopup* popup_ce;
+  CEConfigPopup* popup_ce;
 };

@@ -6,37 +6,40 @@
 #include <QFileDialog>
 
 
-CellEffConfigPopup::CellEffConfigPopup(QWidget* parent)
-    : QDialog(parent), ui(new Ui::CellEffConfigPopup) {
+CEConfigPopup::CEConfigPopup(QWidget* parent)
+    : QDialog(parent), ui(new Ui::CEConfigPopup) {
   ui->setupUi(this);
 }
 
 
-CellEffConfigPopup::~CellEffConfigPopup() {
+CEConfigPopup::~CEConfigPopup() {
+  for (CEDataSetForm* e : forms) {
+    delete e;
+  }
   delete ui;
 }
 
 
-std::unordered_map<std::string, vrfbdriver::DataSet_CE> CellEffConfigPopup::getDataSets() const {
+std::unordered_map<std::string, vrfbdriver::DataSet_CE> CEConfigPopup::getDataSets() const {
   std::unordered_map<std::string, vrfbdriver::DataSet_CE> res {};
-  for (const CEDataSetForm* e : entries) {
-    res.insert(e->getDataSet());
+  for (const CEDataSetForm* f : forms) {
+    res.insert(f->getDataSet());
   }
   return res;
 }
 
 
-void CellEffConfigPopup::on_addBtn_clicked() {
-  entries.push_back(new CEDataSetForm(this));
-  ui->entriesArea->layout()->addWidget(entries[entries.size()-1]);
-  connect(entries[entries.size()-1], &CEDataSetForm::handleDelete,
-      this, &CellEffConfigPopup::on_entry_del);
-  entries[entries.size()-1]->show();
+void CEConfigPopup::on_addBtn_clicked() {
+  forms.push_back(new CEDataSetForm(this));
+  ui->entriesArea->layout()->addWidget(forms[forms.size()-1]);
+  connect(forms[forms.size()-1], &CEDataSetForm::handleDelete,
+      this, &CEConfigPopup::on_entry_del);
+  forms[forms.size()-1]->show();
 }
 
 
-void CellEffConfigPopup::on_entry_del(CEDataSetForm* entry) {
-  ui->entriesArea->layout()->removeWidget(entry);
-  entries.erase(std::remove(entries.begin(), entries.end(), entry), entries.end());
-  delete entry;
+void CEConfigPopup::on_entry_del(CEDataSetForm* f) {
+  ui->entriesArea->layout()->removeWidget(f);
+  forms.erase(std::remove(forms.begin(), forms.end(), f), forms.end());
+  delete f;
 }

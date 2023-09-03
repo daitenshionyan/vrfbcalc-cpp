@@ -12,17 +12,17 @@
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
-  class CellEffConfigPopup;
+  class CEConfigPopup;
 }
 QT_END_NAMESPACE
 
 
-class CellEffConfigPopup : public QDialog {
+class CEConfigPopup : public QDialog {
   Q_OBJECT
 
  public:
-  CellEffConfigPopup(QWidget* parent);
-  ~CellEffConfigPopup();
+  CEConfigPopup(QWidget* parent);
+  ~CEConfigPopup();
 
   std::unordered_map<std::string, vrfbdriver::DataSet_CE> getDataSets() const;
 
@@ -33,6 +33,6 @@ class CellEffConfigPopup : public QDialog {
 
 
  private:
-  Ui::CellEffConfigPopup* ui;
-  std::vector<CEDataSetForm*> entries;
+  Ui::CEConfigPopup* ui;
+  std::vector<CEDataSetForm*> forms;
 };

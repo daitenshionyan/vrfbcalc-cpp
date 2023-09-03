@@ -7,7 +7,7 @@
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent),
       ui(new Ui::MainWindow),
-      popup_ce(new CellEffConfigPopup(this)) {
+      popup_ce(new CEConfigPopup(this)) {
   ui->setupUi(this);
 }
 

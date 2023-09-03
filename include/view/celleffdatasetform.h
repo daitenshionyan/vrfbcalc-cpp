@@ -38,5 +38,5 @@ class CEDataSetForm : public QWidget {
 
  private:
   Ui::CEDataSetForm* ui;
-  std::vector<CEDataEntryForm*> entries;
+  std::vector<CEDataEntryForm*> forms;
 };
