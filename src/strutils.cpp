@@ -46,7 +46,6 @@ double parseTimestamp(const std::string& text, const char delim) {
 }
 
 std::string getftime() {
-  std::cout << "staring" << std::endl;
   auto now_time_t = std::chrono::system_clock::to_time_t(
       std::chrono::system_clock::now());
   auto now_tm = std::localtime(&now_time_t);

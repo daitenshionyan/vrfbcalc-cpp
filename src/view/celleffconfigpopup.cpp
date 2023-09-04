@@ -13,23 +13,19 @@ CEConfigPopup::CEConfigPopup(QWidget* parent)
 
 
 CEConfigPopup::~CEConfigPopup() {
-  for (CEDataSetForm* e : forms) {
-    delete e;
+  for (CEDataSetForm* f : forms) {
+    delete f;
   }
   delete ui;
 }
 
 
-std::unordered_map<std::string, vrfbdriver::DataSet_CE> CEConfigPopup::getDataSets() const {
-  std::unordered_map<std::string, vrfbdriver::DataSet_CE> res {};
+vrfbdriver::SetSupplierVec_CE CEConfigPopup::getSetSupplierMap() const {
+  vrfbdriver::SetSupplierVec_CE vec {};
   for (const CEDataSetForm* f : forms) {
-    try {
-      res.insert(f->getDataSet());
-    } catch (std::exception& ex) {
-      // do nothing for now
-    }
+    vec.push_back(f->getSetSupplier());
   }
-  return res;
+  return vec;
 }
 
 

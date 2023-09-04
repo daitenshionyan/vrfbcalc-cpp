@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -24,15 +25,16 @@ class CEConfigPopup : public QDialog {
     CEConfigPopup(QWidget* parent);
     ~CEConfigPopup();
 
-    std::unordered_map<std::string, vrfbdriver::DataSet_CE> getDataSets() const;
+    vrfbdriver::SetSupplierVec_CE getSetSupplierMap() const;
 
 
   private slots:
     void on_addBtn_clicked();
-    void on_entry_del(CEDataSetForm*);
 
 
   private:
+    void on_entry_del(CEDataSetForm*);
+
     Ui::CEConfigPopup* ui;
     std::vector<CEDataSetForm*> forms;
 };

@@ -18,16 +18,18 @@ CEDataSetForm::~CEDataSetForm() {
 }
 
 
-std::pair<std::string, vrfbdriver::DataSet_CE> CEDataSetForm::getDataSet() const {
-  std::vector<vrfbdriver::DataEntry_CE> dataEntries {};
-  for (const CEDataEntryForm* e : forms) {
-    dataEntries.push_back(e->getEntry());
-  }
+std::pair<std::string, std::function<vrfbdriver::DataSet_CE()>> CEDataSetForm::getSetSupplier() const {
   return {
     ui->nameField->text().toStdString(),
-    {
-      ui->areaField->text().toDouble(),
-      dataEntries
+    [this](){
+      std::vector<vrfbdriver::DataEntry_CE> dataEntries {};
+      for (const CEDataEntryForm* f : forms) {
+        dataEntries.push_back(f->getEntry());
+      }
+      return vrfbdriver::DataSet_CE{
+        ui->areaField->text().toDouble(),
+        dataEntries
+      };
     }
   };
 }

@@ -5,6 +5,7 @@
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
+#include <vector>
 
 #include "nlohmann/json.hpp"
 
@@ -139,6 +140,60 @@ int calcCellEff_s(const std::string& name, const DataSet_CE& set_d, Writer& w) {
       name.c_str(), dur.count()/1000.));
 
   return 0;
+}
+
+
+std::pair<SetMap_CE, std::size_t> toSetMap(const SetSupplierVec_CE& ssv, Writer& w) {
+  std::size_t num_err = 0;
+  SetMap_CE map {};
+  std::vector<std::string> dupeNames;
+  for (auto entry : ssv) {
+    if (map.find(entry.first) != map.end()) {
+      w.writeln_fail(strutils::format_string(
+          "Duplicate set names all will not be processed '%s'",
+          entry.first.c_str()
+      ));
+      ++num_err;
+      dupeNames.push_back(entry.first);
+      continue;
+    }
+    try {
+      map.insert({entry.first, entry.second()});
+      w.writeln(strutils::format_string(
+          "Configuration for '%s' generated",
+          entry.first.c_str()
+      ));
+    } catch (std::exception& ex) {
+      w.writeln_fail(strutils::format_string(
+          "Failed to generate configuration for '%s' - %s",
+          entry.first.c_str(), ex.what()
+      ));
+    }
+  }
+  for (const std::string& name : dupeNames) {
+    map.erase(name);
+    ++num_err;
+  }
+  return {map, num_err};
+}
+
+
+void calcCellEff(const SetSupplierVec_CE& ssv, Writer& w) {
+  auto cfgGenRpt = toSetMap(ssv, w);
+  std::size_t num_err = cfgGenRpt.second;
+  for (const auto entry : cfgGenRpt.first) {
+    num_err += calcCellEff_s(entry.first, entry.second, w);
+  }
+  std::string resText = strutils::format_string(
+      "Total = %d || Success = %d || Failure = %d",
+      ssv.size(), ssv.size()-num_err, num_err);
+  if (num_err == 0) {
+    w.writeln_succ(resText);
+  } else if (num_err < ssv.size()) {
+    w.writeln_warn(resText);
+  } else {
+    w.writeln_fail(resText);
+  }
 }
 
 

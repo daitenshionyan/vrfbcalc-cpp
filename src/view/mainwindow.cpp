@@ -19,23 +19,7 @@ MainWindow::~MainWindow() {
 
 
 void MainWindow::on_startBtn_clicked() {
-  auto cfgMap = popup_ce->getDataSets();
-
-  int num_err = 0;
-  for (const auto entry : cfgMap) {
-    num_err += calcCellEff_s(entry.first, entry.second, *this);
-  }
-
-  std::string resText = strutils::format_string(
-      "[System] Total = %d || Success = %d || Failure = %d",
-      cfgMap.size(), cfgMap.size()-num_err, num_err);
-  if (num_err == 0) {
-    writeln_succ(resText);
-  } else if (num_err < cfgMap.size()) {
-    writeln_warn(resText);
-  } else {
-    writeln_fail(resText);
-  }
+  vrfbdriver::calcCellEff(popup_ce->getSetSupplierMap(), *this);
 }
 
 
