@@ -66,61 +66,61 @@ enum class StepType {
 
 
 class Step {
- public:
-  Step(const StepType st,
-      const vrfb::Table* t, const vrfb::Config_CE* c,
-      const std::size_t b, const std::size_t e,
-      const int off)
-      : s_type{st}, table{t}, cfg{c},
-        beg{b}, end{e}, off_row{off} {};
+  public:
+    Step(const StepType st,
+        const vrfb::Table* t, const vrfb::Config_CE* c,
+        const std::size_t b, const std::size_t e,
+        const int off)
+        : s_type{st}, table{t}, cfg{c},
+          beg{b}, end{e}, off_row{off} {};
 
-  Step() = default;
-  Step(const Step&) = default;
-  Step(Step&&) = default;
+    Step() = default;
+    Step(const Step&) = default;
+    Step(Step&&) = default;
 
-  ~Step() = default;
+    ~Step() = default;
 
-  inline StepType stepType() const {
-    return s_type;
-  }
+    inline StepType stepType() const {
+      return s_type;
+    }
 
-  inline double time() const {
-    return strutils::parseTimestamp(table->get(cfg->t_time_h, end))
-        - strutils::parseTimestamp(table->get(cfg->t_time_h, beg))
-        + off_tim;
-  }
+    inline double time() const {
+      return strutils::parseTimestamp(table->get(cfg->t_time_h, end))
+          - strutils::parseTimestamp(table->get(cfg->t_time_h, beg))
+          + off_tim;
+    }
 
-  inline double c_capacity() const {
-    return table->get<double>(cfg->c_capacity_h, end-off_row);
-  }
+    inline double c_capacity() const {
+      return table->get<double>(cfg->c_capacity_h, end-off_row);
+    }
 
-  inline double d_capacity() const {
-    return table->get<double>(cfg->d_capacity_h, end-off_row);
-  }
+    inline double d_capacity() const {
+      return table->get<double>(cfg->d_capacity_h, end-off_row);
+    }
 
-  inline double c_energy() const {
-    return table->get<double>(cfg->c_energy_h, end-off_row);
-  }
+    inline double c_energy() const {
+      return table->get<double>(cfg->c_energy_h, end-off_row);
+    }
 
-  inline double d_energy() const {
-    return table->get<double>(cfg->d_energy_h, end-off_row);
-  }
+    inline double d_energy() const {
+      return table->get<double>(cfg->d_energy_h, end-off_row);
+    }
 
-  inline void merge(const Step& o) {
-    off_tim += o.time();
-  }
+    inline void merge(const Step& o) {
+      off_tim += o.time();
+    }
 
 
- private:
-  StepType s_type;
+  private:
+    StepType s_type;
 
-  const vrfb::Table* table;
-  const vrfb::Config_CE* cfg;
-  std::size_t beg;
-  std::size_t end;
-  int off_row;
+    const vrfb::Table* table;
+    const vrfb::Config_CE* cfg;
+    std::size_t beg;
+    std::size_t end;
+    int off_row;
 
-  double off_tim = 0;
+    double off_tim = 0;
 };
 
 

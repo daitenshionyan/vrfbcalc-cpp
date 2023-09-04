@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -37,6 +39,21 @@ void split(const std::string& line, std::vector<std::string>& vec, const char de
   @return The equivalent time in seconds of the text.
 */
 double parseTimestamp(const std::string& text, const char delim = ':');
+
+
+std::string getftime();
+
+
+template<typename ... Args>
+std::string format_string(const std::string& format, const Args& ... args) {
+  std::size_t count = std::snprintf(nullptr, 0, format.c_str(), args ...);
+  if (count < 0) {
+    throw std::runtime_error("Error while formatting");
+  }
+  std::unique_ptr<char[]> buf(new char[count+1]);
+  std::snprintf(buf.get(), count+1, format.c_str(), args ...);
+  return std::string(buf.get(), count);
+}
 
 
 }
