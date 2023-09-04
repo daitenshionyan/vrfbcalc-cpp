@@ -22,3 +22,8 @@ Calculates cell cycle performance from raw cycling data.
 * Logged data should be arranged in a table with the headers in the first row.
 * Both config file and logged data files must be in the same directory as executable and not inside a folder.
 * Time field column should have the following format `H:M:S`, where `H` and `M` are optional.
+
+## Acknowledgements
+
+GUI framework: [Qt Framework](https://www.qt.io/)
+JSON parsing: [nlohmann/json](https://github.com/nlohmann/json)
