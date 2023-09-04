@@ -33,7 +33,7 @@ include_directories(src include ${CMAKE_CURRENT_BINARY_DIR}/include)
 
 # ==== LIBRARY =============================================================== #
 
-set(VRFBCALC-CPP_VERSION "0.1.0")
+set(VRFBCALC-CPP_VERSION "0.1.0-EA1")
 
 set(INSTALL_LIBRARY_BIN_DIR ${CMAKE_BINARY_DIR}/install/library/bin)
 set(INSTALL_LIBRARY_LIB_DIR ${CMAKE_BINARY_DIR}/install/library/lib)
@@ -92,6 +92,7 @@ add_executable(vrfbcalc-cpp WIN32
     src/view/celleffdataentryform.ui
     src/view/celleffdataentryform.cpp
 )
+set_target_properties(vrfbcalc-cpp PROPERTIES OUTPUT_NAME "vrfbcalc_v${VRFBCALC-CPP_VERSION}")
 
 target_link_libraries(vrfbcalc-cpp PRIVATE vrfbcalc)
 target_link_libraries(vrfbcalc-cpp PRIVATE nlohmann_json::nlohmann_json)
