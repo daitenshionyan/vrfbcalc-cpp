@@ -4,6 +4,7 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <stdexcept>
 
 #include "nlohmann/json.hpp"
 
@@ -53,6 +54,22 @@ void clearBOM(std::istream& is) {
       return;
     }
   }
+}
+
+
+vrfb::Config_CE loadConfig_CE(const std::string& path) {
+  std::ifstream ifs;
+  ifs.open(std::filesystem::u8path<std::string>(path));
+  if (!ifs.good()) {
+    throw std::runtime_error(strutils::format_string(
+        "Unable to open file '%s' (state = %d)",
+        path.c_str(), ifs.exceptions()).c_str());
+  }
+  nlohmann::json j;
+  ifs >> j;
+  vrfb::Config_CE cfg;
+  j.get_to(cfg);
+  return cfg;
 }
 
 

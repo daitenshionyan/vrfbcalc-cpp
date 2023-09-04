@@ -30,6 +30,7 @@ class CEDataEntryForm : public QFrame {
 
   private slots:
     void on_browseBtn_clicked();
+    void on_presetBrowseBtn_clicked();
     void on_delBtn_clicked();
 
 

@@ -23,7 +23,11 @@ CEConfigPopup::~CEConfigPopup() {
 std::unordered_map<std::string, vrfbdriver::DataSet_CE> CEConfigPopup::getDataSets() const {
   std::unordered_map<std::string, vrfbdriver::DataSet_CE> res {};
   for (const CEDataSetForm* f : forms) {
-    res.insert(f->getDataSet());
+    try {
+      res.insert(f->getDataSet());
+    } catch (std::exception& ex) {
+      // do nothing for now
+    }
   }
   return res;
 }

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>545</width>
+    <width>723</width>
     <height>289</height>
    </rect>
   </property>
@@ -259,11 +259,11 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>341</x>
+     <x>519</x>
      <y>56</y>
     </hint>
     <hint type="destinationlabel">
-     <x>310</x>
+     <x>488</x>
      <y>60</y>
     </hint>
    </hints>
@@ -275,7 +275,7 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>341</x>
+     <x>519</x>
      <y>55</y>
     </hint>
     <hint type="destinationlabel">
@@ -291,7 +291,7 @@
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>341</x>
+     <x>519</x>
      <y>51</y>
     </hint>
     <hint type="destinationlabel">
@@ -307,7 +307,7 @@
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>341</x>
+     <x>519</x>
      <y>54</y>
     </hint>
     <hint type="destinationlabel">
@@ -323,7 +323,7 @@
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>341</x>
+     <x>519</x>
      <y>54</y>
     </hint>
     <hint type="destinationlabel">
@@ -339,7 +339,7 @@
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>341</x>
+     <x>519</x>
      <y>50</y>
     </hint>
     <hint type="destinationlabel">
@@ -355,7 +355,7 @@
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>341</x>
+     <x>519</x>
      <y>59</y>
     </hint>
     <hint type="destinationlabel">
@@ -371,7 +371,7 @@
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>341</x>
+     <x>519</x>
      <y>53</y>
     </hint>
     <hint type="destinationlabel">
@@ -387,7 +387,7 @@
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>341</x>
+     <x>519</x>
      <y>52</y>
     </hint>
     <hint type="destinationlabel">
@@ -403,12 +403,156 @@
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>341</x>
+     <x>519</x>
      <y>55</y>
     </hint>
     <hint type="destinationlabel">
      <x>319</x>
      <y>275</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>lfpRadioBtn</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>presetPathField</receiver>
+   <slot>clear()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>620</x>
+     <y>50</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>373</x>
+     <y>54</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>lfpRadioBtn</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>timeHdrField</receiver>
+   <slot>clear()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>616</x>
+     <y>52</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>617</x>
+     <y>77</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>lfpRadioBtn</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>typeHdrField</receiver>
+   <slot>clear()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>605</x>
+     <y>56</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>611</x>
+     <y>106</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>lfpRadioBtn</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>c_capHdrField</receiver>
+   <slot>clear()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>628</x>
+     <y>56</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>577</x>
+     <y>136</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>lfpRadioBtn</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>d_capHdrField</receiver>
+   <slot>clear()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>617</x>
+     <y>48</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>618</x>
+     <y>156</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>lfpRadioBtn</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>c_energyHdrField</receiver>
+   <slot>clear()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>526</x>
+     <y>60</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>526</x>
+     <y>182</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>lfpRadioBtn</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>d_energyHdrField</receiver>
+   <slot>clear()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>519</x>
+     <y>60</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>519</x>
+     <y>211</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>lfpRadioBtn</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>c_typeNameField</receiver>
+   <slot>clear()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>627</x>
+     <y>60</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>432</x>
+     <y>243</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>lfpRadioBtn</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>d_typeNameField</receiver>
+   <slot>clear()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>631</x>
+     <y>59</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>490</x>
+     <y>276</y>
     </hint>
    </hints>
   </connection>

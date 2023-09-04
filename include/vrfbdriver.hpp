@@ -14,10 +14,6 @@ constexpr unsigned char kUtf8BOM[3] = {0xEF, 0xBB, 0xBF};
 void clearBOM(std::istream& is);
 
 
-constexpr const char* kSeparator =
-    (char*) "================================================================================\n";
-
-
 constexpr std::string_view kLblTTimeHdr_CE        =   "t_time_h";
 constexpr std::string_view kLblTypeHdr_CE         =   "type_h";
 constexpr std::string_view kLblCCapHdr_CE         =   "c_cap_h";
@@ -26,12 +22,6 @@ constexpr std::string_view kLblCEnergyHdr_CE      =   "c_energy_h";
 constexpr std::string_view kLblDEnergyHdr_CE      =   "d_energy_h";
 constexpr std::string_view kLblCTypeNames_CE      =   "c_type_names";
 constexpr std::string_view kLblDTypeNames_CE      =   "d_type_names";
-
-constexpr std::string_view kLblDataSetArea        =   "area";
-constexpr std::string_view kLblDataSetEnties      =   "entries";
-
-constexpr std::string_view kLblDataEntryPath_CE   =   "path";
-constexpr std::string_view kLblDataEntryConfig_CE =   "config";
 
 
 struct DataEntry_CE {
@@ -62,6 +52,9 @@ class Writer {
       writeln(text);
     }
 };
+
+
+vrfb::Config_CE loadConfig_CE(const std::string& path);
 
 
 int calcCellEff_s(const std::string& name, const DataSet_CE& set_d, Writer& w);
