@@ -1,6 +1,6 @@
 #pragma once
 
-#include <functional>
+#include <unordered_set>
 #include <vector>
 
 #include <QFrame>
@@ -36,5 +36,7 @@ class CEDataEntryForm : public QFrame {
 
 
   private:
+    vrfb::Config_CE getConfig() const;
+
     Ui::CEDataEntryForm* ui;
 };
