@@ -1,6 +1,8 @@
 #include "view/mainwindow.h"
 #include "./ui_mainwindow.h"
 
+#include <QDesktopServices>
+
 #include "strutils.hpp"
 
 
@@ -15,6 +17,11 @@ MainWindow::MainWindow(QWidget* parent)
 MainWindow::~MainWindow() {
   delete popup_ce;
   delete ui;
+}
+
+
+void MainWindow::on_action_openOutput_triggered(bool) {
+  QDesktopServices::openUrl(QUrl::fromLocalFile("output"));
 }
 
 
