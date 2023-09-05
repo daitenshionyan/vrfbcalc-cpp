@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include <string>
 #include <utility>
 #include <vector>
@@ -7,6 +8,7 @@
 #include <QWidget>
 
 #include "view/celleffdataentryform.h"
+#include "vrfbdriver.hpp"
 
 
 QT_BEGIN_NAMESPACE
@@ -23,7 +25,7 @@ class CEDataSetForm : public QWidget {
     CEDataSetForm(QWidget* parent);
     ~CEDataSetForm();
 
-    std::pair<std::string, vrfbdriver::DataSet_CE> getDataSet() const;
+    std::pair<std::string, std::function<vrfbdriver::DataSet_CE()>> getSetSupplier() const;
 
 
   signals:
@@ -33,10 +35,11 @@ class CEDataSetForm : public QWidget {
   private slots:
     void on_delBtn_clicked();
     void on_addEntryBtn_clicked();
-    void on_entry_del(CEDataEntryForm*);
 
 
   private:
+    void on_entry_del(CEDataEntryForm*);
+
     Ui::CEDataSetForm* ui;
     std::vector<CEDataEntryForm*> forms;
 };

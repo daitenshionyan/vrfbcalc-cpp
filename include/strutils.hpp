@@ -56,4 +56,7 @@ std::string format_string(const std::string& format, const Args& ... args) {
 }
 
 
+bool isValidFileName(const std::string&);
+
+
 }
