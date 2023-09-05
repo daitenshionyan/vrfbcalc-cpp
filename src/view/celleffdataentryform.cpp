@@ -9,6 +9,14 @@
 CEDataEntryForm::CEDataEntryForm(QWidget* parent)
       : QFrame(parent), ui(new Ui::CEDataEntryForm) {
   ui->setupUi(this);
+  connect(
+      ui->c_capHdrField, &QLineEdit::textChanged,
+      this, &CEDataEntryForm::on_c_capField_changed);
+  connect(
+      ui->c_energyHdrField, &QLineEdit::textChanged,
+      this, &CEDataEntryForm::on_c_energyField_changed);
+  ui->d_capRBtn->setChecked(true);
+  ui->d_energyRBtn->setChecked(true);
 }
 
 
@@ -64,6 +72,36 @@ void CEDataEntryForm::on_presetBrowseBtn_clicked() {
 }
 
 
+void CEDataEntryForm::on_d_capRBtn_toggled(bool t) {
+  if (t) {
+    ui->d_capHdrField->setText(ui->c_capHdrField->text());
+  }
+  ui->d_capHdrField->setDisabled(t);
+}
+
+
+void CEDataEntryForm::on_d_energyRBtn_toggled(bool t) {
+  if (t) {
+    ui->d_energyHdrField->setText(ui->c_energyHdrField->text());
+  }
+  ui->d_energyHdrField->setDisabled(t);
+}
+
+
 void CEDataEntryForm::on_delBtn_clicked() {
   emit handleDelete(this);
+}
+
+
+void CEDataEntryForm::on_c_capField_changed() {
+  if (ui->d_capRBtn->isChecked()) {
+    ui->d_capHdrField->setText(ui->c_capHdrField->text());
+  }
+}
+
+
+void CEDataEntryForm::on_c_energyField_changed() {
+  if (ui->d_energyRBtn->isChecked()) {
+    ui->d_energyHdrField->setText(ui->c_energyHdrField->text());
+  }
 }

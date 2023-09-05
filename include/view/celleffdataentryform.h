@@ -32,10 +32,15 @@ class CEDataEntryForm : public QFrame {
   private slots:
     void on_browseBtn_clicked();
     void on_presetBrowseBtn_clicked();
+    void on_d_capRBtn_toggled(bool);
+    void on_d_energyRBtn_toggled(bool);
     void on_delBtn_clicked();
 
 
   private:
+    void on_c_capField_changed();
+    void on_c_energyField_changed();
+
     vrfb::Config_CE getConfig() const;
 
     Ui::CEDataEntryForm* ui;
