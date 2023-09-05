@@ -1,6 +1,7 @@
 #include "view/celleffdataentryform.h"
 #include "./ui_celleffdataentryform.h"
 
+#include <filesystem>
 #include <sstream>
 
 #include <QFileDialog>
@@ -66,8 +67,12 @@ void CEDataEntryForm::on_browseBtn_clicked() {
 
 
 void CEDataEntryForm::on_presetBrowseBtn_clicked() {
+  std::string preset_path = "";
+  if (std::filesystem::exists(std::filesystem::path("presets"))) {
+    preset_path = "presets";
+  }
   QString path = QFileDialog::getOpenFileName(this, "Open file",
-      QString(), "JSON files (*.json)");
+      QString::fromStdString(preset_path), "JSON files (*.json)");
   ui->presetPathField->setText(path);
 }
 
