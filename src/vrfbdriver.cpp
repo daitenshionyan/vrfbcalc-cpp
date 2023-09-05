@@ -75,10 +75,16 @@ vrfb::Config_CE loadConfig_CE(const std::string& path) {
 
 
 int calcCellEff_s(const std::string& name, const DataSet_CE& set_d, Writer& w) {
-  w.writeln(strutils::format_string("[%s] Processing data set '%s'",
-      name.c_str(), name.c_str()));
+  w.writeln(strutils::format_string("[%s] Processing data set",
+      name.c_str()));
   auto beg = std::chrono::high_resolution_clock::now();
 
+  if (!strutils::isValidFileName(name)) {
+    // warn if illegal path characters present
+    w.writeln_warn(strutils::format_string(
+        "[%s] Output file name may contain illegal path characters to system and may not be saved",
+        name.c_str()));
+  }
   if (set_d.area <= 0) {
     // warn if area is negative or zero
     w.writeln_warn(strutils::format_string(
@@ -146,7 +152,7 @@ int calcCellEff_s(const std::string& name, const DataSet_CE& set_d, Writer& w) {
 
   auto end = std::chrono::high_resolution_clock::now();
   auto dur = std::chrono::duration_cast<std::chrono::microseconds>(end - beg);
-  w.writeln_succ(strutils::format_string(
+  w.writeln(strutils::format_string(
       "[%s] Completed in %.3f ms",
       name.c_str(), dur.count()/1000.));
   return 0;

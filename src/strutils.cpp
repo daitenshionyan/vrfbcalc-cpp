@@ -45,6 +45,7 @@ double parseTimestamp(const std::string& text, const char delim) {
   return res;
 }
 
+
 std::string getftime() {
   auto now_time_t = std::chrono::system_clock::to_time_t(
       std::chrono::system_clock::now());
@@ -52,6 +53,11 @@ std::string getftime() {
   std::unique_ptr<char[]> buf(new char[20]);      // yyyy-mm-ddThh:mm:ss
   std::strftime(buf.get(), 20, "%FT%T", now_tm);
   return std::string(buf.get(), 19);
+}
+
+
+bool isValidFileName(const std::string& name) {
+  return name.find_first_of("\\/:*?\"<>|") == std::string::npos;
 }
 
 
