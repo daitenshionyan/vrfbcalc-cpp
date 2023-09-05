@@ -79,6 +79,14 @@ int calcCellEff_s(const std::string& name, const DataSet_CE& set_d, Writer& w) {
       name.c_str(), name.c_str()));
   auto beg = std::chrono::high_resolution_clock::now();
 
+  if (set_d.area <= 0) {
+    // warn if area is negative or zero
+    w.writeln_warn(strutils::format_string(
+        "[%s] Negative or zero area set '%.2f'",
+        name.c_str(), set_d.area));
+  }
+
+  // read raw data and convert to tables
   std::vector<vrfb::Table> tables {};
   for (auto entry : set_d.entries) {
     std::ifstream ifs;
@@ -105,11 +113,13 @@ int calcCellEff_s(const std::string& name, const DataSet_CE& set_d, Writer& w) {
         name.c_str(), entry.path.c_str(), tables[tables.size()-1].numRows()));
   }
 
+  // combine generated tables and corresponding DataEntry_CE
   std::vector<vrfb::Data_CE> datas {};
   for (std::size_t i = 0; i < tables.size(); ++i) {
     datas.push_back({&tables[i], &set_d.entries[i].cfg});
   }
 
+  // process data and generate output table
   vrfb::Table data_pro;
   try {
     data_pro = vrfb::calcPerf_CE(set_d.area, datas);
@@ -120,6 +130,7 @@ int calcCellEff_s(const std::string& name, const DataSet_CE& set_d, Writer& w) {
     return 1;
   }
 
+  // write output table to hard disk
   std::ofstream ofs;
   ofs.open(name + ".csv");
   vrfb::writeTable_CSV(ofs, data_pro);
@@ -138,7 +149,6 @@ int calcCellEff_s(const std::string& name, const DataSet_CE& set_d, Writer& w) {
   w.writeln_succ(strutils::format_string(
       "[%s] Completed in %.3f ms",
       name.c_str(), dur.count()/1000.));
-
   return 0;
 }
 
@@ -148,11 +158,15 @@ std::pair<SetMap_CE, std::size_t> toSetMap(const SetSupplierVec_CE& ssv, Writer&
   SetMap_CE map {};
   std::vector<std::string> dupeNames;
   for (auto entry : ssv) {
-    if (map.find(entry.first) != map.end()) {
+    if (entry.first.empty()) {
+      w.writeln_fail(strutils::format_string(
+          "Blank set name will not be processed"));
+      ++num_err;
+      continue;
+    } else if (map.find(entry.first) != map.end()) {
       w.writeln_fail(strutils::format_string(
           "Duplicate set names all will not be processed '%s'",
-          entry.first.c_str()
-      ));
+          entry.first.c_str()));
       ++num_err;
       dupeNames.push_back(entry.first);
       continue;
@@ -161,13 +175,11 @@ std::pair<SetMap_CE, std::size_t> toSetMap(const SetSupplierVec_CE& ssv, Writer&
       map.insert({entry.first, entry.second()});
       w.writeln(strutils::format_string(
           "Configuration for '%s' generated",
-          entry.first.c_str()
-      ));
+          entry.first.c_str()));
     } catch (std::exception& ex) {
       w.writeln_fail(strutils::format_string(
           "Failed to generate configuration for '%s' - %s",
-          entry.first.c_str(), ex.what()
-      ));
+          entry.first.c_str(), ex.what()));
     }
   }
   for (const std::string& name : dupeNames) {

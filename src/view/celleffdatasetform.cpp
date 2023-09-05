@@ -27,7 +27,7 @@ std::pair<std::string, std::function<vrfbdriver::DataSet_CE()>> CEDataSetForm::g
         dataEntries.push_back(f->getEntry());
       }
       return vrfbdriver::DataSet_CE{
-        ui->areaField->text().toDouble(),
+        ui->areaField->value(),
         dataEntries
       };
     }
