@@ -1,6 +1,8 @@
 #include "view/mainwindow.h"
 #include "./ui_mainwindow.h"
 
+#include <filesystem>
+
 #include <QDesktopServices>
 
 #include "strutils.hpp"
@@ -21,6 +23,14 @@ MainWindow::~MainWindow() {
 
 
 void MainWindow::on_action_openOutput_triggered(bool) {
+  std::filesystem::path output_path {"output"};
+  if (!std::filesystem::exists(output_path)) {
+    writeln_fail("Output folder does not exist yet");
+    return;
+  } else if (!std::filesystem::is_directory(output_path)) {
+    writeln_fail("The file 'output' exists but it is not a directory");
+    return;
+  }
   QDesktopServices::openUrl(QUrl::fromLocalFile("output"));
 }
 

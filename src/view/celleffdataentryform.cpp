@@ -67,12 +67,13 @@ void CEDataEntryForm::on_browseBtn_clicked() {
 
 
 void CEDataEntryForm::on_presetBrowseBtn_clicked() {
-  std::string preset_path = "";
-  if (std::filesystem::exists(std::filesystem::path("presets"))) {
+  QString preset_path{};
+  std::filesystem::path output_path {"presets"};
+  if (std::filesystem::exists(output_path) && std::filesystem::is_directory(output_path)) {
     preset_path = "presets";
   }
   QString path = QFileDialog::getOpenFileName(this, "Open file",
-      QString::fromStdString(preset_path), "JSON files (*.json)");
+      preset_path, "JSON files (*.json)");
   ui->presetPathField->setText(path);
 }
 
