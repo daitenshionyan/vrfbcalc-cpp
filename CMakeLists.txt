@@ -33,7 +33,7 @@ include_directories(src include ${CMAKE_CURRENT_BINARY_DIR}/include)
 
 # ==== LIBRARY =============================================================== #
 
-set(VRFBCALC-CPP_VERSION "0.1.0-EA1")
+set(VRFBCALC-CPP_VERSION "0.1.0-EA2")
 
 set(INSTALL_LIBRARY_BIN_DIR ${CMAKE_BINARY_DIR}/install/library/bin)
 set(INSTALL_LIBRARY_LIB_DIR ${CMAKE_BINARY_DIR}/install/library/lib)

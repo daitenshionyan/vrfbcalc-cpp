@@ -137,13 +137,20 @@ int calcCellEff_s(const std::string& name, const DataSet_CE& set_d, Writer& w) {
   }
 
   // write output table to hard disk
-  std::ofstream ofs;
-  ofs.open(name + ".csv");
-  vrfb::writeTable_CSV(ofs, data_pro);
-  if (!ofs.good()) {
+  try {
+    auto path_o = std::filesystem::u8path<std::string>("output/" + name + ".csv");
+    std::filesystem::create_directories(path_o.parent_path());
+    std::ofstream ofs{path_o};
+    vrfb::writeTable_CSV(ofs, data_pro);
+    if (!ofs.good()) {
+      throw std::runtime_error(strutils::format_string(
+          "Error while writing to '%s' (state = %d)",
+          (name+".csv").c_str(), ofs.exceptions()));
+    }
+  } catch (std::exception& ex) {
     w.writeln_fail(strutils::format_string(
-        "[%s] Error while writing to '%s' (state = %d)",
-        name.c_str(), (name+".csv").c_str(), ofs.exceptions()));
+        "[%s] Failed to save processed data - %s",
+        name.c_str(), ex.what()));
     return 1;
   }
   w.writeln(strutils::format_string(
