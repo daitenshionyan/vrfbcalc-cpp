@@ -25,5 +25,6 @@ Calculates cell cycle performance from raw cycling data.
 
 ## Acknowledgements
 
-GUI framework: [Qt Framework](https://www.qt.io/)
-JSON parsing: [nlohmann/json](https://github.com/nlohmann/json)
+* GUI framework: [Qt Framework](https://www.qt.io/)
+* JSON library: [nlohmann/json](https://github.com/nlohmann/json)
+* XLSX library: [xlnt](https://github.com/tfussell/xlnt)
