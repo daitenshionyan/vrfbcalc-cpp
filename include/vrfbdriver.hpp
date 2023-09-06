@@ -1,5 +1,6 @@
 #pragma once
 
+#include <filesystem>
 #include <functional>
 #include <istream>
 #include <string>
@@ -54,6 +55,12 @@ class Writer {
       writeln(text);
     }
 };
+
+
+vrfb::Table readTable_CSV(const std::filesystem::path& path);
+vrfb::Table readTable_XLXS(const std::filesystem::path& path);
+
+vrfb::Table readTable(const std::string& path);
 
 
 vrfb::Config_CE loadConfig_CE(const std::string& path);

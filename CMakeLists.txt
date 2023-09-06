@@ -58,6 +58,9 @@ add_library(vrfbcalc SHARED
     ${VRFBCALC_PRIVATE_HEADERS}
     ${VRFBCALC_SOURCES})
 
+find_package(Xlnt CONFIG REQUIRED)
+target_link_libraries(vrfbcalc PRIVATE xlnt::xlnt)
+
 install(TARGETS vrfbcalc
     RUNTIME DESTINATION ${INSTALL_LIBRARY_BIN_DIR}
     ARCHIVE DESTINATION ${INSTALL_LIBRARY_LIB_DIR}

@@ -3,6 +3,8 @@
 #include <stdexcept>
 #include <exception>
 
+#include <xlnt/xlnt.hpp>
+
 #include "strutils.hpp"
 
 
@@ -102,6 +104,29 @@ Table readTable_CSV(std::istream& is) {
   readLine_CSV(is, hdrs);
   while(is.good()) {
     readLine_CSV(is, elems);
+  }
+
+  return {hdrs, elems};
+}
+
+
+Table readTable_XLXS(std::istream& is) {
+  std::vector<std::string> hdrs {};
+  std::vector<std::string> elems {};
+
+  xlnt::workbook wb;
+  wb.load(is);
+  auto ws = wb.active_sheet();
+  std::size_t r_num = 0;
+  for (auto row : ws.rows()) {
+    std::vector<std::string>* v = &elems;
+    if (r_num < 1) {
+      v = &hdrs;
+    }
+    for (auto cell : row) {
+      v->push_back(cell.to_string());
+    }
+    ++r_num;
   }
 
   return {hdrs, elems};

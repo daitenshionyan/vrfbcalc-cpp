@@ -64,13 +64,55 @@ vrfb::Config_CE loadConfig_CE(const std::string& path) {
   if (!ifs.good()) {
     throw std::runtime_error(strutils::format_string(
         "Unable to open file '%s' (state = %d)",
-        path.c_str(), ifs.exceptions()).c_str());
+        path.c_str(), ifs.exceptions()));
   }
   nlohmann::json j;
   ifs >> j;
   vrfb::Config_CE cfg;
   j.get_to(cfg);
   return cfg;
+}
+
+
+vrfb::Table readTable_CSV(const std::filesystem::path& path) {
+  std::ifstream ifs {path, std::ios_base::in};
+  if (!ifs.good()) {
+    throw std::runtime_error(strutils::format_string(
+        "Error while reading '%s' (state = %d)",
+        path.string().c_str(), ifs.exceptions()));
+  }
+  clearBOM(ifs);
+  return vrfb::readTable_CSV(ifs);
+}
+
+
+vrfb::Table readTable_XLXS(const std::filesystem::path& path) {
+  std::ifstream ifs {path, std::ios_base::binary};
+  if (!ifs.good()) {
+    throw std::runtime_error(strutils::format_string(
+        "Error while reading '%s' (state = %d)",
+        path.string().c_str(), ifs.exceptions()));
+  }
+  return vrfb::readTable_XLXS(ifs);
+}
+
+
+vrfb::Table readTable(const std::string& path_s) {
+  auto path = std::filesystem::u8path<std::string>(path_s);
+  if (!std::filesystem::exists(path)) {
+    throw std::runtime_error(strutils::format_string(
+        "Cannot find the file '%s'",
+        path.string().c_str()));
+  }
+  if (path.extension() == ".csv") {
+    return readTable_CSV(path);
+  } else if (path.extension() == ".xlsx") {
+    return readTable_XLXS(path);
+  } else {
+    throw std::runtime_error(strutils::format_string(
+        "Unsupported file format '%s' for '%s'",
+        path.extension().string().c_str(), path.string().c_str()));
+  }
 }
 
 
@@ -95,22 +137,12 @@ int calcCellEff_s(const std::string& name, const DataSet_CE& set_d, Writer& w) {
   // read raw data and convert to tables
   std::vector<vrfb::Table> tables {};
   for (auto entry : set_d.entries) {
-    std::ifstream ifs;
-    ifs.open(std::filesystem::u8path<std::string>(entry.path));
-    if (!ifs.good()) {
-      w.writeln_fail(strutils::format_string(
-          "[%s] Error while reading '%s' (state = %d)",
-          name.c_str(), entry.path.c_str(), ifs.exceptions()));
-      return 1;
-    }
-    clearBOM(ifs);
-
     try {
-      tables.push_back(vrfb::readTable_CSV(ifs));
+      tables.push_back(readTable(entry.path));
     } catch (std::exception& ex) {
       w.writeln_fail(strutils::format_string(
-          "[%s] Error while forming raw table from '%s' - %s",
-          name.c_str(), entry.path.c_str(), ex.what()));
+          "[%s] Failed to form table - %s",
+          name.c_str(), ex.what()));
       return 1;
     }
 
