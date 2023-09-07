@@ -86,19 +86,19 @@ vrfb::Table readTable_CSV(const std::filesystem::path& path) {
 }
 
 
-vrfb::Table readTable_XLXS(const std::filesystem::path& path) {
+vrfb::Table readTable_XLXS(const std::filesystem::path& path, const std::string& sheet_title) {
   std::ifstream ifs {path, std::ios_base::binary};
   if (!ifs.good()) {
     throw std::runtime_error(strutils::format_string(
         "Error while reading '%s' (state = %d)",
         path.string().c_str(), ifs.exceptions()));
   }
-  return vrfb::readTable_XLXS(ifs);
+  return vrfb::readTable_XLXS(ifs, sheet_title);
 }
 
 
-vrfb::Table readTable(const std::string& path_s) {
-  auto path = std::filesystem::u8path<std::string>(path_s);
+vrfb::Table readTable(const DataEntry_CE& entry) {
+  auto path = std::filesystem::u8path<std::string>(entry.path);
   if (!std::filesystem::exists(path)) {
     throw std::runtime_error(strutils::format_string(
         "Cannot find the file '%s'",
@@ -107,7 +107,7 @@ vrfb::Table readTable(const std::string& path_s) {
   if (path.extension() == ".csv") {
     return readTable_CSV(path);
   } else if (path.extension() == ".xlsx") {
-    return readTable_XLXS(path);
+    return readTable_XLXS(path, entry.sheet_title);
   } else {
     throw std::runtime_error(strutils::format_string(
         "Unsupported file format '%s' for '%s'",
@@ -138,7 +138,7 @@ int calcCellEff_s(const std::string& name, const DataSet_CE& set_d, Writer& w) {
   std::vector<vrfb::Table> tables {};
   for (auto entry : set_d.entries) {
     try {
-      tables.push_back(readTable(entry.path));
+      tables.push_back(readTable(entry));
     } catch (std::exception& ex) {
       w.writeln_fail(strutils::format_string(
           "[%s] Failed to form table - %s",

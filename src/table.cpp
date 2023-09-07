@@ -110,14 +110,28 @@ Table readTable_CSV(std::istream& is) {
 }
 
 
-Table readTable_XLXS(std::istream& is) {
-  std::vector<std::string> hdrs {};
-  std::vector<std::string> elems {};
-
+Table readTable_XLXS(std::istream& is, const std::string& sheet_title) {
   xlnt::workbook wb;
   wb.load(is);
-  auto ws = wb.active_sheet();
+
+  // get sheet
+  xlnt::worksheet ws;
+  if (sheet_title.empty()) {
+    ws = wb.active_sheet();
+  } else {
+    if (wb.contains(sheet_title)) {
+      ws = wb.sheet_by_title(sheet_title);
+    } else {
+      throw std::runtime_error(strutils::format_string(
+          "Cannot find XLSX sheet '%s'",
+          sheet_title.c_str()));
+    }
+  }
+
+  // form headers and elems
   std::size_t r_num = 0;
+  std::vector<std::string> hdrs {};
+  std::vector<std::string> elems {};
   for (auto row : ws.rows()) {
     std::vector<std::string>* v = &elems;
     if (r_num < 1) {

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>723</width>
-    <height>289</height>
+    <width>772</width>
+    <height>316</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -97,88 +97,24 @@
         </layout>
        </widget>
       </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="timeHdrLabel">
-        <property name="text">
-         <string>Time Hdr</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QLineEdit" name="timeHdrField"/>
-      </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="typeHdrLabel">
-        <property name="text">
-         <string>Type Hdr</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="1">
-       <widget class="QLineEdit" name="typeHdrField"/>
-      </item>
-      <item row="4" column="0">
-       <widget class="QLabel" name="c_capHdrLabel">
-        <property name="text">
-         <string>Chg Cap Hdr</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="1">
-       <widget class="QLineEdit" name="c_capHdrField"/>
-      </item>
-      <item row="5" column="0">
-       <widget class="QLabel" name="d_capHdrLabel">
-        <property name="text">
-         <string>DChg Cap Hdr</string>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="0">
-       <widget class="QLabel" name="c_energyHdrLabel">
-        <property name="text">
-         <string>Chg Energy Hdr</string>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="1">
-       <widget class="QLineEdit" name="c_energyHdrField"/>
-      </item>
-      <item row="7" column="0">
-       <widget class="QLabel" name="d_energyHdrLabel">
-        <property name="text">
-         <string>DChg Energy Hdr</string>
-        </property>
-       </widget>
-      </item>
-      <item row="8" column="0">
-       <widget class="QLabel" name="c_typeNameLabel">
-        <property name="text">
-         <string>Chg Type Name</string>
-        </property>
-       </widget>
-      </item>
-      <item row="8" column="1">
-       <widget class="QLineEdit" name="c_typeNameField"/>
-      </item>
-      <item row="9" column="0">
-       <widget class="QLabel" name="d_typeNameLabel">
-        <property name="text">
-         <string>DChg Type Name</string>
-        </property>
-       </widget>
-      </item>
-      <item row="9" column="1">
-       <widget class="QLineEdit" name="d_typeNameField"/>
-      </item>
       <item row="1" column="0">
+       <widget class="QLabel" name="sheetTitleLabel">
+        <property name="text">
+         <string>Sheet title</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QLineEdit" name="sheetTitleField"/>
+      </item>
+      <item row="2" column="0">
        <widget class="QLabel" name="presetPathLabel">
         <property name="text">
          <string>Preset path</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="1">
+      <item row="2" column="1">
        <widget class="QWidget" name="presetFieldWidget" native="true">
         <layout class="QHBoxLayout" name="horizontalLayout_3">
          <property name="leftMargin">
@@ -226,38 +162,44 @@
         </layout>
        </widget>
       </item>
-      <item row="7" column="1">
-       <widget class="QWidget" name="d_energyHdrFieldWidget" native="true">
-        <layout class="QHBoxLayout" name="horizontalLayout_4">
-         <property name="leftMargin">
-          <number>0</number>
-         </property>
-         <property name="topMargin">
-          <number>0</number>
-         </property>
-         <property name="rightMargin">
-          <number>0</number>
-         </property>
-         <property name="bottomMargin">
-          <number>0</number>
-         </property>
-         <item>
-          <widget class="QLineEdit" name="d_energyHdrField"/>
-         </item>
-         <item>
-          <widget class="QRadioButton" name="d_energyRBtn">
-           <property name="text">
-            <string>Same as Chg</string>
-           </property>
-           <property name="checked">
-            <bool>false</bool>
-           </property>
-          </widget>
-         </item>
-        </layout>
+      <item row="3" column="0">
+       <widget class="QLabel" name="timeHdrLabel">
+        <property name="text">
+         <string>Time Hdr</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QLineEdit" name="timeHdrField"/>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="typeHdrLabel">
+        <property name="text">
+         <string>Type Hdr</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <widget class="QLineEdit" name="typeHdrField"/>
+      </item>
+      <item row="5" column="0">
+       <widget class="QLabel" name="c_capHdrLabel">
+        <property name="text">
+         <string>Chg Cap Hdr</string>
+        </property>
        </widget>
       </item>
       <item row="5" column="1">
+       <widget class="QLineEdit" name="c_capHdrField"/>
+      </item>
+      <item row="6" column="0">
+       <widget class="QLabel" name="d_capHdrLabel">
+        <property name="text">
+         <string>DChg Cap Hdr</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="1">
        <widget class="QWidget" name="d_capHdrFieldWidget" native="true">
         <layout class="QHBoxLayout" name="horizontalLayout_5">
          <property name="leftMargin">
@@ -288,6 +230,74 @@
         </layout>
        </widget>
       </item>
+      <item row="7" column="0">
+       <widget class="QLabel" name="c_energyHdrLabel">
+        <property name="text">
+         <string>Chg Energy Hdr</string>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="1">
+       <widget class="QLineEdit" name="c_energyHdrField"/>
+      </item>
+      <item row="8" column="0">
+       <widget class="QLabel" name="d_energyHdrLabel">
+        <property name="text">
+         <string>DChg Energy Hdr</string>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="1">
+       <widget class="QWidget" name="d_energyHdrFieldWidget" native="true">
+        <layout class="QHBoxLayout" name="horizontalLayout_4">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QLineEdit" name="d_energyHdrField"/>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="d_energyRBtn">
+           <property name="text">
+            <string>Same as Chg</string>
+           </property>
+           <property name="checked">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item row="9" column="0">
+       <widget class="QLabel" name="c_typeNameLabel">
+        <property name="text">
+         <string>Chg Type Name</string>
+        </property>
+       </widget>
+      </item>
+      <item row="9" column="1">
+       <widget class="QLineEdit" name="c_typeNameField"/>
+      </item>
+      <item row="10" column="0">
+       <widget class="QLabel" name="d_typeNameLabel">
+        <property name="text">
+         <string>DChg Type Name</string>
+        </property>
+       </widget>
+      </item>
+      <item row="10" column="1">
+       <widget class="QLineEdit" name="d_typeNameField"/>
+      </item>
      </layout>
     </widget>
    </item>
@@ -315,11 +325,11 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>519</x>
+     <x>608</x>
      <y>56</y>
     </hint>
     <hint type="destinationlabel">
-     <x>488</x>
+     <x>537</x>
      <y>60</y>
     </hint>
    </hints>
@@ -331,7 +341,7 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>519</x>
+     <x>608</x>
      <y>55</y>
     </hint>
     <hint type="destinationlabel">
@@ -347,7 +357,7 @@
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>519</x>
+     <x>608</x>
      <y>51</y>
     </hint>
     <hint type="destinationlabel">
@@ -363,7 +373,7 @@
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>519</x>
+     <x>608</x>
      <y>54</y>
     </hint>
     <hint type="destinationlabel">
@@ -379,7 +389,7 @@
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>519</x>
+     <x>608</x>
      <y>54</y>
     </hint>
     <hint type="destinationlabel">
@@ -395,7 +405,7 @@
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>519</x>
+     <x>608</x>
      <y>59</y>
     </hint>
     <hint type="destinationlabel">
@@ -411,7 +421,7 @@
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>519</x>
+     <x>608</x>
      <y>52</y>
     </hint>
     <hint type="destinationlabel">
@@ -427,7 +437,7 @@
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>519</x>
+     <x>608</x>
      <y>55</y>
     </hint>
     <hint type="destinationlabel">
@@ -443,11 +453,11 @@
    <slot>clear()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>620</x>
+     <x>608</x>
      <y>50</y>
     </hint>
     <hint type="destinationlabel">
-     <x>373</x>
+     <x>357</x>
      <y>54</y>
     </hint>
    </hints>
@@ -459,11 +469,11 @@
    <slot>clear()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>616</x>
+     <x>608</x>
      <y>52</y>
     </hint>
     <hint type="destinationlabel">
-     <x>617</x>
+     <x>507</x>
      <y>77</y>
     </hint>
    </hints>
@@ -475,11 +485,11 @@
    <slot>clear()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>605</x>
+     <x>608</x>
      <y>56</y>
     </hint>
     <hint type="destinationlabel">
-     <x>611</x>
+     <x>507</x>
      <y>106</y>
     </hint>
    </hints>
@@ -491,11 +501,11 @@
    <slot>clear()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>628</x>
+     <x>608</x>
      <y>56</y>
     </hint>
     <hint type="destinationlabel">
-     <x>577</x>
+     <x>507</x>
      <y>136</y>
     </hint>
    </hints>
@@ -507,11 +517,11 @@
    <slot>clear()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>526</x>
+     <x>608</x>
      <y>60</y>
     </hint>
     <hint type="destinationlabel">
-     <x>526</x>
+     <x>507</x>
      <y>182</y>
     </hint>
    </hints>
@@ -523,7 +533,7 @@
    <slot>clear()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>627</x>
+     <x>608</x>
      <y>60</y>
     </hint>
     <hint type="destinationlabel">
@@ -539,7 +549,7 @@
    <slot>clear()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>631</x>
+     <x>608</x>
      <y>59</y>
     </hint>
     <hint type="destinationlabel">
@@ -555,11 +565,11 @@
    <slot>clear()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>626</x>
+     <x>608</x>
      <y>51</y>
     </hint>
     <hint type="destinationlabel">
-     <x>469</x>
+     <x>410</x>
      <y>163</y>
     </hint>
    </hints>
@@ -571,7 +581,7 @@
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>627</x>
+     <x>608</x>
      <y>57</y>
     </hint>
     <hint type="destinationlabel">
@@ -587,7 +597,7 @@
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>629</x>
+     <x>608</x>
      <y>52</y>
     </hint>
     <hint type="destinationlabel">
@@ -603,7 +613,7 @@
    <slot>clear()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>626</x>
+     <x>608</x>
      <y>58</y>
     </hint>
     <hint type="destinationlabel">
@@ -619,7 +629,7 @@
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>630</x>
+     <x>608</x>
      <y>59</y>
     </hint>
     <hint type="destinationlabel">
@@ -635,11 +645,11 @@
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>628</x>
+     <x>608</x>
      <y>46</y>
     </hint>
     <hint type="destinationlabel">
-     <x>579</x>
+     <x>608</x>
      <y>218</y>
     </hint>
    </hints>

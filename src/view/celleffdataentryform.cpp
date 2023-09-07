@@ -32,6 +32,7 @@ vrfbdriver::DataEntry_CE CEDataEntryForm::getEntry() const {
       : getConfig();
   return {
     ui->pathField->text().toStdString(),
+    ui->sheetTitleField->text().toStdString(),
     cfg
   };
 }

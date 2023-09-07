@@ -29,6 +29,7 @@ constexpr std::string_view kLblDTypeNames_CE      =   "d_type_names";
 
 struct DataEntry_CE {
   std::string path;
+  std::string sheet_title;
   vrfb::Config_CE cfg;
 };
 
@@ -58,9 +59,9 @@ class Writer {
 
 
 vrfb::Table readTable_CSV(const std::filesystem::path& path);
-vrfb::Table readTable_XLXS(const std::filesystem::path& path);
+vrfb::Table readTable_XLXS(const std::filesystem::path& path, const std::string& sheet_title);
 
-vrfb::Table readTable(const std::string& path);
+vrfb::Table readTable(const DataEntry_CE&);
 
 
 vrfb::Config_CE loadConfig_CE(const std::string& path);
