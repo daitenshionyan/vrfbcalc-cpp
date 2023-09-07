@@ -106,6 +106,9 @@ target_link_libraries(vrfbcalc-cpp PRIVATE Qt6::Widgets)
 get_target_property(_qmake_executable Qt6::qmake IMPORTED_LOCATION)
 get_filename_component(_qt_bin_dir ${_qmake_executable} DIRECTORY)
 
+set(PACKAGE_OUTPUT_DIR ${CMAKE_BINARY_DIR}/package)
+file(MAKE_DIRECTORY ${PACKAGE_OUTPUT_DIR})
+
 add_custom_command(TARGET vrfbcalc-cpp POST_BUILD
     COMMAND ${_qt_bin_dir}/windeployqt.exe
         --verbose 1
@@ -121,5 +124,17 @@ add_custom_command(TARGET vrfbcalc-cpp POST_BUILD
         --no-system-d3d-compiler
         --no-translations
         \"$<TARGET_FILE:vrfbcalc-cpp>\"
-    COMMENT "Deploying Qt libraries using windeployqt ..."
+    COMMAND tar -cvzf "${PACKAGE_OUTPUT_DIR}/vrfbcalc_v${VRFBCALC-CPP_VERSION}.tar.gz"
+        -C "${CMAKE_BINARY_DIR}/Release"
+            *
+        -C "${PROJECT_SOURCE_DIR}"
+            COPYING
+            COPYING.LESSER
+            README.md
+    COMMAND "C:/Program Files/7-Zip/7z.exe"
+        a -tzip "${PACKAGE_OUTPUT_DIR}/vrfbcalc_v${VRFBCALC-CPP_VERSION}.zip"
+            "${CMAKE_BINARY_DIR}/Release/*"
+            "${PROJECT_SOURCE_DIR}/COPYING"
+            "${PROJECT_SOURCE_DIR}/COPYING.LESSER"
+            "${PROJECT_SOURCE_DIR}/README.md"
 )
