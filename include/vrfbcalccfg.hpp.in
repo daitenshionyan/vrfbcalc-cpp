@@ -7,4 +7,11 @@ namespace vrfbcfg {
 const char* version = "${VRFBCALC-CPP_VERSION}";
 
 
+const char* licence_notice =
+    "vrfbcalc - v${VRFBCALC-CPP_VERSION}  Copyright (C) 2023 daitenshionyan\n"
+    "This program comes with ABSOLUTELY NO WARRANTY.\n"
+    "This is free software, and you are welcome to redistribute it\n"
+    "under certain conditions; see COPYING and COPYING.LESSER file for details.";
+
+
 }

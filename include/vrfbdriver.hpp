@@ -1,5 +1,6 @@
 #pragma once
 
+#include <filesystem>
 #include <functional>
 #include <istream>
 #include <string>
@@ -28,6 +29,7 @@ constexpr std::string_view kLblDTypeNames_CE      =   "d_type_names";
 
 struct DataEntry_CE {
   std::string path;
+  std::string sheet_title;
   vrfb::Config_CE cfg;
 };
 
@@ -54,6 +56,14 @@ class Writer {
       writeln(text);
     }
 };
+
+
+vrfb::Table readTable_CSV(const std::filesystem::path& path);
+vrfb::Table readTable_XLSX(const std::filesystem::path& path, const std::string& sheet_title);
+
+void saveData_XLSX(std::filesystem::path& path, const vrfb::Table& table, DataSet_CE data);
+
+vrfb::Table readTable(const DataEntry_CE&);
 
 
 vrfb::Config_CE loadConfig_CE(const std::string& path);

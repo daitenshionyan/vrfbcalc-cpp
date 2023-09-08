@@ -32,6 +32,7 @@ vrfbdriver::DataEntry_CE CEDataEntryForm::getEntry() const {
       : getConfig();
   return {
     ui->pathField->text().toStdString(),
+    ui->sheetTitleField->text().toStdString(),
     cfg
   };
 }
@@ -61,7 +62,7 @@ vrfb::Config_CE CEDataEntryForm::getConfig() const {
 
 void CEDataEntryForm::on_browseBtn_clicked() {
   QString path = QFileDialog::getOpenFileName(this, "Open file",
-      QString(), "CSV files (*.csv)");
+      QString(), "Data files (*.csv *.xlsx)");
   ui->pathField->setText(path);
 }
 

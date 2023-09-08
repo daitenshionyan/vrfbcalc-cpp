@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "nlohmann/json.hpp"
+#include <xlnt/xlnt.hpp>
 
 #include "strutils.hpp"
 
@@ -64,13 +65,87 @@ vrfb::Config_CE loadConfig_CE(const std::string& path) {
   if (!ifs.good()) {
     throw std::runtime_error(strutils::format_string(
         "Unable to open file '%s' (state = %d)",
-        path.c_str(), ifs.exceptions()).c_str());
+        path.c_str(), ifs.exceptions()));
   }
   nlohmann::json j;
   ifs >> j;
   vrfb::Config_CE cfg;
   j.get_to(cfg);
   return cfg;
+}
+
+
+vrfb::Table readTable_CSV(const std::filesystem::path& path) {
+  std::ifstream ifs {path, std::ios_base::in};
+  if (!ifs.good()) {
+    throw std::runtime_error(strutils::format_string(
+        "Error while reading '%s' (state = %d)",
+        path.string().c_str(), ifs.exceptions()));
+  }
+  clearBOM(ifs);
+  return vrfb::readTable_CSV(ifs);
+}
+
+
+vrfb::Table readTable_XLSX(const std::filesystem::path& path, const std::string& sheet_title) {
+  std::ifstream ifs {path, std::ios_base::binary};
+  if (!ifs.good()) {
+    throw std::runtime_error(strutils::format_string(
+        "Error while reading '%s' (state = %d)",
+        path.string().c_str(), ifs.exceptions()));
+  }
+  return vrfb::readTable_XLSX(ifs, sheet_title);
+}
+
+
+vrfb::Table readTable(const DataEntry_CE& entry) {
+  auto path = std::filesystem::u8path<std::string>(entry.path);
+  if (!std::filesystem::exists(path)) {
+    throw std::runtime_error(strutils::format_string(
+        "Cannot find the file '%s'",
+        path.string().c_str()));
+  }
+  if (path.extension() == ".csv") {
+    return readTable_CSV(path);
+  } else if (path.extension() == ".xlsx") {
+    return readTable_XLSX(path, entry.sheet_title);
+  } else {
+    throw std::runtime_error(strutils::format_string(
+        "Unsupported file format '%s' for '%s'",
+        path.extension().string().c_str(), path.string().c_str()));
+  }
+}
+
+
+void saveData_XLSX(std::filesystem::path& path, const vrfb::Table& table, DataSet_CE data) {
+  xlnt::workbook wb;
+  auto ws = wb.active_sheet();
+  ws.title("Data");
+  auto hdrs = table.headers();
+  for (std::size_t i = 0; i < table.numCols(); ++i) {
+    ws.cell(i+1, 1).value(hdrs[i]);
+    ws.column_properties(i+1).width = (i > 0) ? 25 : 10;
+  }
+  for (std::size_t r = 0; r < table.numRows(); ++r) {
+    for (std::size_t c = 0; c < table.numCols(); ++c) {
+      // +1 row to account for header row
+      ws.cell(c+1, r+2).value(table.get<double>(c, r));
+    }
+  }
+  ws.freeze_panes("B2");
+
+  ws = wb.create_sheet();
+  ws.title("Config");
+  ws.cell(1, 1).value("Area (cm2)");
+  ws.cell(2, 1).value(data.area);
+
+  std::ofstream ofs{path, std::ios_base::binary};
+  wb.save(ofs);
+    if (!ofs.good()) {
+      throw std::runtime_error(strutils::format_string(
+          "Error while writing to '%s' (state = %d)",
+          path.filename().c_str(), ofs.exceptions()));
+    }
 }
 
 
@@ -95,22 +170,12 @@ int calcCellEff_s(const std::string& name, const DataSet_CE& set_d, Writer& w) {
   // read raw data and convert to tables
   std::vector<vrfb::Table> tables {};
   for (auto entry : set_d.entries) {
-    std::ifstream ifs;
-    ifs.open(std::filesystem::u8path<std::string>(entry.path));
-    if (!ifs.good()) {
-      w.writeln_fail(strutils::format_string(
-          "[%s] Error while reading '%s' (state = %d)",
-          name.c_str(), entry.path.c_str(), ifs.exceptions()));
-      return 1;
-    }
-    clearBOM(ifs);
-
     try {
-      tables.push_back(vrfb::readTable_CSV(ifs));
+      tables.push_back(readTable(entry));
     } catch (std::exception& ex) {
       w.writeln_fail(strutils::format_string(
-          "[%s] Error while forming raw table from '%s' - %s",
-          name.c_str(), entry.path.c_str(), ex.what()));
+          "[%s] Failed to form table - %s",
+          name.c_str(), ex.what()));
       return 1;
     }
 
@@ -138,15 +203,9 @@ int calcCellEff_s(const std::string& name, const DataSet_CE& set_d, Writer& w) {
 
   // write output table to hard disk
   try {
-    auto path_o = std::filesystem::u8path<std::string>("output/" + name + ".csv");
+    auto path_o = std::filesystem::u8path<std::string>("output/" + name + ".xlsx");
     std::filesystem::create_directories(path_o.parent_path());
-    std::ofstream ofs{path_o};
-    vrfb::writeTable_CSV(ofs, data_pro);
-    if (!ofs.good()) {
-      throw std::runtime_error(strutils::format_string(
-          "Error while writing to '%s' (state = %d)",
-          (name+".csv").c_str(), ofs.exceptions()));
-    }
+    saveData_XLSX(path_o, data_pro, set_d);
   } catch (std::exception& ex) {
     w.writeln_fail(strutils::format_string(
         "[%s] Failed to save processed data - %s",

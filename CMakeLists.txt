@@ -33,13 +33,9 @@ include_directories(src include ${CMAKE_CURRENT_BINARY_DIR}/include)
 
 # ==== LIBRARY =============================================================== #
 
-set(VRFBCALC-CPP_VERSION "0.1.0-EA2")
-
 set(INSTALL_LIBRARY_BIN_DIR ${CMAKE_BINARY_DIR}/install/library/bin)
 set(INSTALL_LIBRARY_LIB_DIR ${CMAKE_BINARY_DIR}/install/library/lib)
 set(INSTALL_LIBRARY_INC_DIR ${CMAKE_BINARY_DIR}/install/library/include)
-
-configure_file(include/vrfbcalccfg.hpp.in include/vrfbcalccfg.hpp)
 
 set(VRFBCALC_PUBLIC_HEADERS
     include/table.hpp
@@ -58,6 +54,9 @@ add_library(vrfbcalc SHARED
     ${VRFBCALC_PRIVATE_HEADERS}
     ${VRFBCALC_SOURCES})
 
+find_package(Xlnt CONFIG REQUIRED)
+target_link_libraries(vrfbcalc PRIVATE xlnt::xlnt)
+
 install(TARGETS vrfbcalc
     RUNTIME DESTINATION ${INSTALL_LIBRARY_BIN_DIR}
     ARCHIVE DESTINATION ${INSTALL_LIBRARY_LIB_DIR}
@@ -65,6 +64,10 @@ install(TARGETS vrfbcalc
 install(FILES ${VRFBCALC_PUBLIC_HEADERS} DESTINATION ${INSTALL_LIBRARY_INC_DIR})
 
 # ==== EXECUTABLE ============================================================ #
+
+set(VRFBCALC-CPP_VERSION "0.1.0-EA4")
+
+configure_file(include/vrfbcalccfg.hpp.in include/vrfbcalccfg.hpp)
 
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(Qt6 REQUIRED COMPONENTS Widgets)
@@ -95,6 +98,7 @@ add_executable(vrfbcalc-cpp WIN32
 set_target_properties(vrfbcalc-cpp PROPERTIES OUTPUT_NAME "vrfbcalc_v${VRFBCALC-CPP_VERSION}")
 
 target_link_libraries(vrfbcalc-cpp PRIVATE vrfbcalc)
+target_link_libraries(vrfbcalc-cpp PRIVATE xlnt::xlnt)
 target_link_libraries(vrfbcalc-cpp PRIVATE nlohmann_json::nlohmann_json)
 target_link_libraries(vrfbcalc-cpp PRIVATE Qt6::Widgets)
 
@@ -102,6 +106,9 @@ target_link_libraries(vrfbcalc-cpp PRIVATE Qt6::Widgets)
 
 get_target_property(_qmake_executable Qt6::qmake IMPORTED_LOCATION)
 get_filename_component(_qt_bin_dir ${_qmake_executable} DIRECTORY)
+
+set(PACKAGE_OUTPUT_DIR ${CMAKE_BINARY_DIR}/package)
+file(MAKE_DIRECTORY ${PACKAGE_OUTPUT_DIR})
 
 add_custom_command(TARGET vrfbcalc-cpp POST_BUILD
     COMMAND ${_qt_bin_dir}/windeployqt.exe
@@ -118,5 +125,17 @@ add_custom_command(TARGET vrfbcalc-cpp POST_BUILD
         --no-system-d3d-compiler
         --no-translations
         \"$<TARGET_FILE:vrfbcalc-cpp>\"
-    COMMENT "Deploying Qt libraries using windeployqt ..."
+    COMMAND tar -cvzf "${PACKAGE_OUTPUT_DIR}/vrfbcalc_v${VRFBCALC-CPP_VERSION}.tar.gz"
+        -C "${CMAKE_BINARY_DIR}/Release"
+            *
+        -C "${PROJECT_SOURCE_DIR}"
+            COPYING
+            COPYING.LESSER
+            README.md
+    COMMAND "C:/Program Files/7-Zip/7z.exe"
+        a -tzip "${PACKAGE_OUTPUT_DIR}/vrfbcalc_v${VRFBCALC-CPP_VERSION}.zip"
+            "${CMAKE_BINARY_DIR}/Release/*"
+            "${PROJECT_SOURCE_DIR}/COPYING"
+            "${PROJECT_SOURCE_DIR}/COPYING.LESSER"
+            "${PROJECT_SOURCE_DIR}/README.md"
 )

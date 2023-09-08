@@ -149,6 +149,8 @@ class invalid_csv_format : public std::exception {
 void readLine_CSV(std::istream&, std::vector<std::string>&);
 Table readTable_CSV(std::istream&);
 
+Table readTable_XLSX(std::istream&, const std::string&);
+
 void writeCell_CSV(std::ostream&, const std::string&);
 void writeTable_CSV(std::ostream&, const Table&);
 
