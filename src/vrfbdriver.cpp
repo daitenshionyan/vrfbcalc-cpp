@@ -120,10 +120,11 @@ vrfb::Table readTable(const DataEntry_CE& entry) {
 void saveData_XLSX(std::filesystem::path& path, const vrfb::Table& table, DataSet_CE data) {
   xlnt::workbook wb;
   auto ws = wb.active_sheet();
+  ws.title("Data");
   auto hdrs = table.headers();
   for (std::size_t i = 0; i < table.numCols(); ++i) {
     ws.cell(i+1, 1).value(hdrs[i]);
-    ws.column_properties(i+1).width = 20;
+    ws.column_properties(i+1).width = (i > 0) ? 25 : 10;
   }
   for (std::size_t r = 0; r < table.numRows(); ++r) {
     for (std::size_t c = 0; c < table.numCols(); ++c) {
@@ -132,6 +133,12 @@ void saveData_XLSX(std::filesystem::path& path, const vrfb::Table& table, DataSe
     }
   }
   ws.freeze_panes("B2");
+
+  ws = wb.create_sheet();
+  ws.title("Config");
+  ws.cell(1, 1).value("Area (cm2)");
+  ws.cell(2, 1).value(data.area);
+
   std::ofstream ofs{path, std::ios_base::binary};
   wb.save(ofs);
     if (!ofs.good()) {
