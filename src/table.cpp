@@ -110,7 +110,7 @@ Table readTable_CSV(std::istream& is) {
 }
 
 
-Table readTable_XLXS(std::istream& is, const std::string& sheet_title) {
+Table readTable_XLSX(std::istream& is, const std::string& sheet_title) {
   xlnt::workbook wb;
   wb.load(is);
 

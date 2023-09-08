@@ -59,7 +59,7 @@ class Writer {
 
 
 vrfb::Table readTable_CSV(const std::filesystem::path& path);
-vrfb::Table readTable_XLXS(const std::filesystem::path& path, const std::string& sheet_title);
+vrfb::Table readTable_XLSX(const std::filesystem::path& path, const std::string& sheet_title);
 
 vrfb::Table readTable(const DataEntry_CE&);
 
