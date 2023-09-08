@@ -6,6 +6,7 @@
 #include <QDesktopServices>
 
 #include "strutils.hpp"
+#include "vrfbcalccfg.hpp"
 
 
 MainWindow::MainWindow(QWidget* parent)
@@ -13,6 +14,15 @@ MainWindow::MainWindow(QWidget* parent)
         ui(new Ui::MainWindow),
         popup_ce(new CEConfigPopup(this)) {
   ui->setupUi(this);
+  ui->outputArea->appendHtml(
+      QString("<p style=\"color:grey;white-space:pre\">")
+      + QString::fromStdString(
+            strutils::format_string(
+                "%s\n%s\n%s",
+                "================================================================================",
+                vrfbcfg::licence_notice,
+                "================================================================================"))
+      + QString("</p>"));
 }
 
 

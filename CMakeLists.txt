@@ -33,13 +33,9 @@ include_directories(src include ${CMAKE_CURRENT_BINARY_DIR}/include)
 
 # ==== LIBRARY =============================================================== #
 
-set(VRFBCALC-CPP_VERSION "0.1.0-EA3")
-
 set(INSTALL_LIBRARY_BIN_DIR ${CMAKE_BINARY_DIR}/install/library/bin)
 set(INSTALL_LIBRARY_LIB_DIR ${CMAKE_BINARY_DIR}/install/library/lib)
 set(INSTALL_LIBRARY_INC_DIR ${CMAKE_BINARY_DIR}/install/library/include)
-
-configure_file(include/vrfbcalccfg.hpp.in include/vrfbcalccfg.hpp)
 
 set(VRFBCALC_PUBLIC_HEADERS
     include/table.hpp
@@ -68,6 +64,10 @@ install(TARGETS vrfbcalc
 install(FILES ${VRFBCALC_PUBLIC_HEADERS} DESTINATION ${INSTALL_LIBRARY_INC_DIR})
 
 # ==== EXECUTABLE ============================================================ #
+
+set(VRFBCALC-CPP_VERSION "0.1.0-EA4")
+
+configure_file(include/vrfbcalccfg.hpp.in include/vrfbcalccfg.hpp)
 
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(Qt6 REQUIRED COMPONENTS Widgets)
