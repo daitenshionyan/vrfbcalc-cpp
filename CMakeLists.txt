@@ -98,6 +98,7 @@ add_executable(vrfbcalc-cpp WIN32
 set_target_properties(vrfbcalc-cpp PROPERTIES OUTPUT_NAME "vrfbcalc_v${VRFBCALC-CPP_VERSION}")
 
 target_link_libraries(vrfbcalc-cpp PRIVATE vrfbcalc)
+target_link_libraries(vrfbcalc-cpp PRIVATE xlnt::xlnt)
 target_link_libraries(vrfbcalc-cpp PRIVATE nlohmann_json::nlohmann_json)
 target_link_libraries(vrfbcalc-cpp PRIVATE Qt6::Widgets)
 
