@@ -111,11 +111,38 @@ void readLine_CSV(std::istream& is, std::vector<std::string>& cells) {
 
 Table readTable_CSV(std::istream& is) {
   std::vector<std::string> hdrs {};
-  std::vector<std::string> elems {};
-
   readLine_CSV(is, hdrs);
+
+  // add rows as vector and find highest col num
+  std::size_t max_col = hdrs.size();
+  std::vector<std::vector<std::string>> rows {};
   while(is.good()) {
-    readLine_CSV(is, elems);
+    rows.push_back({});
+    readLine_CSV(is, rows[rows.size()-1]);
+    if (max_col < rows[rows.size()-1].size()) {
+      max_col = rows[rows.size()-1].size();
+    }
+  }
+  if (rows[rows.size()-1].empty()) {
+    rows.erase(rows.end()-1);
+  }
+
+  // top up headers if required
+  for (; hdrs.size() < max_col;) {
+    hdrs.push_back("");
+  }
+
+  // flatten and top up rows
+  std::vector<std::string> elems {};
+  for (auto row : rows) {
+    std::size_t num_col = 0;
+    for (auto cell : row) {
+      elems.push_back(cell);
+      ++num_col;
+    }
+    for (; num_col < max_col; ++num_col) {
+      elems.push_back("");
+    }
   }
 
   return {hdrs, elems};
