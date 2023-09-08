@@ -12,19 +12,31 @@ namespace vrfb {
 
 
 Table::Table(const std::vector<std::string>& h, const std::vector<std::string>& elems)
-    : c_size{h.size()},
-      r_size{elems.size()/h.size()},
-      hdrs{h.begin(), h.end()} {
+    : r_size{elems.size()/h.size()},
+      hdrs{} {
   if (elems.size() % h.size() != 0) {
     throw std::runtime_error(strutils::format_string("Incomplete table %d cols for %d elems",
         h.size(), elems.size()));
   }
-  for (std::size_t colNum = 0; colNum < c_size; ++colNum) {
+
+  std::vector<bool> isKeeps = std::vector<bool>(h.size());
+  for (std::size_t i = 0; i < h.size(); ++i) {
+    isKeeps[i] = !h[i].empty();
+    if (isKeeps[i]) {
+      hdrs.push_back(h[i]);
+    }
+  }
+
+  c_size = hdrs.size();
+  for (std::size_t colNum = 0; colNum < h.size(); ++colNum) {
+    if (!isKeeps[colNum]) {
+      continue;
+    }
     if (colMap.find(h[colNum]) != colMap.end()) {
       throw std::invalid_argument("Duplicate headers");
     }
     colMap.emplace(h[colNum], std::vector<std::string>());
-    for (std::size_t i = colNum; i < elems.size(); i += c_size) {
+    for (std::size_t i = colNum; i < elems.size(); i += h.size()) {
       colMap[h[colNum]].push_back(elems[i]);
     }
   }
@@ -132,13 +144,18 @@ Table readTable_XLXS(std::istream& is, const std::string& sheet_title) {
   std::size_t r_num = 0;
   std::vector<std::string> hdrs {};
   std::vector<std::string> elems {};
-  for (auto row : ws.rows()) {
+  for (auto row : ws.rows(false)) {
+    if (row.empty()) {
+      continue;
+    }
     std::vector<std::string>* v = &elems;
     if (r_num < 1) {
       v = &hdrs;
     }
+    std::size_t c_num = 0;
     for (auto cell : row) {
       v->push_back(cell.to_string());
+      ++c_num;
     }
     ++r_num;
   }
