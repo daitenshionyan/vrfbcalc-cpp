@@ -65,7 +65,7 @@ install(FILES ${VRFBCALC_PUBLIC_HEADERS} DESTINATION ${INSTALL_LIBRARY_INC_DIR})
 
 # ==== EXECUTABLE ============================================================ #
 
-set(VRFBCALC-CPP_VERSION "0.1.0-EA4")
+set(VRFBCALC-CPP_VERSION "0.1.0-EA5")
 
 configure_file(include/vrfbcalccfg.hpp.in include/vrfbcalccfg.hpp)
 
@@ -128,17 +128,9 @@ add_custom_command(TARGET vrfbcalc-cpp POST_BUILD
         --no-system-d3d-compiler
         --no-translations
         \"$<TARGET_FILE:vrfbcalc-cpp>\"
-    COMMAND tar -cvzf "${PACKAGE_OUTPUT_DIR}/vrfbcalc_v${VRFBCALC-CPP_VERSION}.tar.gz"
-        -C "${CMAKE_BINARY_DIR}/Release"
-            *
-        -C "${PROJECT_SOURCE_DIR}"
-            COPYING
-            COPYING.LESSER
-            README.md
-    COMMAND "C:/Program Files/7-Zip/7z.exe"
-        a -tzip "${PACKAGE_OUTPUT_DIR}/vrfbcalc_v${VRFBCALC-CPP_VERSION}.zip"
-            "${CMAKE_BINARY_DIR}/Release/*"
-            "${PROJECT_SOURCE_DIR}/COPYING"
-            "${PROJECT_SOURCE_DIR}/COPYING.LESSER"
-            "${PROJECT_SOURCE_DIR}/README.md"
+    COMMAND "${PROJECT_SOURCE_DIR}/package.bat"
+        "vrfbcalc_v${VRFBCALC-CPP_VERSION}"
+        "${CMAKE_BINARY_DIR}/Release"
+        "${PROJECT_SOURCE_DIR}"
+        "${PACKAGE_OUTPUT_DIR}"
 )
