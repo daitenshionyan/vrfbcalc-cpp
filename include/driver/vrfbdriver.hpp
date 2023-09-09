@@ -53,8 +53,6 @@ class Writer {
     }
 };
 
-void saveData_XLSX(std::filesystem::path& path, const vrfb::Table& table, DataSet_CE data);
-
 vrfb::Table readTable(const DataEntry_CE&);
 
 

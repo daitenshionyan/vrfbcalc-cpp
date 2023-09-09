@@ -82,38 +82,6 @@ vrfb::Table readTable(const DataEntry_CE& entry) {
 }
 
 
-void saveData_XLSX(std::filesystem::path& path, const vrfb::Table& table, DataSet_CE data) {
-  xlnt::workbook wb;
-  auto ws = wb.active_sheet();
-  ws.title("Data");
-  auto hdrs = table.headers();
-  for (std::size_t i = 0; i < table.numCols(); ++i) {
-    ws.cell(i+1, 1).value(hdrs[i]);
-    ws.column_properties(i+1).width = (i > 0) ? 25 : 10;
-  }
-  for (std::size_t r = 0; r < table.numRows(); ++r) {
-    for (std::size_t c = 0; c < table.numCols(); ++c) {
-      // +1 row to account for header row
-      ws.cell(c+1, r+2).value(table.get<double>(c, r));
-    }
-  }
-  ws.freeze_panes("B2");
-
-  ws = wb.create_sheet();
-  ws.title("Config");
-  ws.cell(1, 1).value("Area (cm2)");
-  ws.cell(2, 1).value(data.area);
-
-  std::ofstream ofs{path, std::ios_base::binary};
-  wb.save(ofs);
-    if (!ofs.good()) {
-      throw std::runtime_error(strutils::format_string(
-          "Error while writing to '%s' (state = %d)",
-          path.filename().c_str(), ofs.exceptions()));
-    }
-}
-
-
 int calcCellEff_s(const std::string& name, const DataSet_CE& set_d, Writer& w) {
   w.writeln(strutils::format_string("[%s] Processing data set",
       name.c_str()));
@@ -170,7 +138,7 @@ int calcCellEff_s(const std::string& name, const DataSet_CE& set_d, Writer& w) {
   try {
     auto path_o = std::filesystem::u8path<std::string>("output/" + name + ".xlsx");
     std::filesystem::create_directories(path_o.parent_path());
-    saveData_XLSX(path_o, data_pro, set_d);
+    io::saveData_XLSX(path_o, data_pro, set_d);
   } catch (std::exception& ex) {
     w.writeln_fail(strutils::format_string(
         "[%s] Failed to save processed data - %s",

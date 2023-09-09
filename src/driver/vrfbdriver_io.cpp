@@ -1,6 +1,7 @@
 #include "driver/vrfbdriver_io.hpp"
 
 #include <algorithm>
+#include <cmath>
 #include <fstream>
 #include <istream>
 #include <stdexcept>
@@ -22,9 +23,12 @@ namespace {
 
 constexpr unsigned char kUtf8BOM[3] = {0xEF, 0xBB, 0xBF};
 
+constexpr double kCycNumColWidth = 10;
+constexpr double kNormColWidth = 25;
+
 
 template<std::ios_base::openmode Mode = std::ios_base::in>
-std::ifstream openFile(const std::filesystem::path& path) {
+std::ifstream openFile_r(const std::filesystem::path& path) {
   if (!std::filesystem::exists(path)) {
     throw std::runtime_error(strutils::format_string(
         "Cannot find file `%s`",
@@ -33,10 +37,25 @@ std::ifstream openFile(const std::filesystem::path& path) {
   std::ifstream ifs{path, Mode};
   if (!ifs.good()) {
     throw std::runtime_error(strutils::format_string(
-        "Error while reading file (state = %d)",
-        ifs.exceptions()));
+        "Error while reading file '%s' (state = %d)",
+        path.filename().c_str(), ifs.exceptions()));
   }
   return ifs;
+}
+
+
+template<std::ios_base::openmode Mode = std::ios_base::out>
+std::ofstream openFile_w(const std::filesystem::path& path) {
+  if (path.has_parent_path()) {
+    std::filesystem::create_directories(path.parent_path());
+  }
+  std::ofstream ofs{path, Mode};
+  if (!ofs.good()) {
+    throw std::runtime_error(strutils::format_string(
+        "Error while writing file '%s' (state = %d)",
+        path.filename().c_str(), ofs.exceptions()));
+  }
+  return ofs;
 }
 
 
@@ -135,7 +154,7 @@ std::size_t readLine_CSV(std::istream& is, std::vector<std::string>& elems) {
 
 
 vrfb::Table readTable_CSV(const std::filesystem::path& path) {
-  std::ifstream ifs = openFile(path);
+  std::ifstream ifs = openFile_r(path);
   clearBOM(ifs);
 
   std::vector<std::string> hdrs {};
@@ -167,7 +186,7 @@ vrfb::Table readTable_CSV(const std::filesystem::path& path) {
 
 
 vrfb::Table readTable_XLSX(const std::filesystem::path& path, const std::string& title) {
-  std::ifstream ifs = openFile<std::ios_base::binary>(path);
+  std::ifstream ifs = openFile_r<std::ios_base::binary>(path);
   xlnt::workbook wb;
   wb.load(ifs);
 
@@ -209,6 +228,45 @@ vrfb::Table readTable_XLSX(const std::filesystem::path& path, const std::string&
   }
 
   return {std::move(hdrs), std::move(colMap)};
+}
+
+
+void saveData_XLSX(const std::filesystem::path& path, const vrfb::Table& t, const DataSet_CE& data) {
+  xlnt::workbook wb;
+
+  auto ws = wb.active_sheet();
+  ws.title("Data");
+  auto hdrs = t.headers();
+  for (std::size_t i = 0; i < t.numCols(); ++i) {
+    ws.cell(i+1, 1).value(hdrs[i]);
+    ws.column_properties(i+1).width = (i > 0) ? kNormColWidth : kCycNumColWidth;
+  }
+  for (std::size_t r = 0; r < t.numRows(); ++r) {
+    for (std::size_t c = 0; c < t.numCols(); ++c) {
+      double value = t.get<double>(c, r);
+      // +1 row to account for header row
+      if (std::isfinite(value)) {
+        ws.cell(c+1, r+2).value(value);
+      } else {
+        ws.cell(c+1, r+2).value("NaN");
+      }
+    }
+  }
+  ws.freeze_panes("B2");
+
+  ws = wb.create_sheet();
+  ws.title("Config");
+  ws.title("Config");
+  ws.cell(1, 1).value("Area (cm2)");
+  ws.cell(2, 1).value(data.area);
+
+  std::ofstream ofs = openFile_w<std::ios_base::binary>(path);
+  wb.save(ofs);
+  if (!ofs.good()) {
+    throw std::runtime_error(strutils::format_string(
+        "Error occured while writing to '%s' (state = %d)",
+        path.filename().c_str(), ofs.exceptions()));
+  }
 }
 
 
