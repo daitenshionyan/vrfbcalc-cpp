@@ -11,11 +11,9 @@
 namespace vrfb {
 
 
-using ColMap = std::unordered_map<std::string, std::vector<std::string>>;
-
-
 class Table {
   public:
+    using ColMap = std::unordered_map<std::string, std::vector<std::string>>;
     using iterator = std::vector<std::string>::const_iterator;
 
     struct list_view {
@@ -144,12 +142,6 @@ class invalid_csv_format : public std::exception {
   private:
     std::string desc;
 };
-
-
-Table readTable_XLSX(std::istream&, const std::string&);
-
-void writeCell_CSV(std::ostream&, const std::string&);
-void writeTable_CSV(std::ostream&, const Table&);
 
 
 

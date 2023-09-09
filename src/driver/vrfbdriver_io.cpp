@@ -8,9 +8,9 @@
 #include <utility>
 #include <vector>
 
-#include "strutils.hpp"
+#include <xlnt/xlnt.hpp>
 
-#include <iostream>
+#include "strutils.hpp"
 
 
 namespace vrfbdriver {
@@ -50,6 +50,21 @@ void clearBOM(std::istream& is) {
       return;
     }
   }
+}
+
+
+inline void initColMap(std::vector<std::string>& hdrs, std::vector<bool>& isKeeps, vrfb::Table::ColMap& colMap) {
+  hdrs.erase(
+      std::remove_if(
+          hdrs.begin(), hdrs.end(),
+          [&](const std::string& hdr) {
+            isKeeps.push_back(!hdr.empty());
+            if (isKeeps.back()) {
+              colMap.emplace(hdr, std::vector<std::string>());
+            }
+            return !isKeeps.back();
+          }),
+      hdrs.end());
 }
 
 
@@ -123,20 +138,7 @@ vrfb::Table readTable_CSV(const std::filesystem::path& path) {
 
   std::vector<bool> isKeeps = std::vector<bool>();
   std::unordered_map<std::string, std::vector<std::string>> colMap{};
-  hdrs.erase(
-      std::remove_if(
-          hdrs.begin(),
-          hdrs.end(),
-          [&](const std::string& hdr) {
-            isKeeps.push_back(!hdr.empty());
-            if (isKeeps.back()) {
-              colMap.emplace(hdr, std::vector<std::string>());
-            }
-            return !isKeeps.back();
-          }
-      ),
-      hdrs.end()
-  );
+  initColMap(hdrs, isKeeps, colMap);
 
   while (ifs.good()) {
     std::vector<std::string> row{};
@@ -153,6 +155,52 @@ vrfb::Table readTable_CSV(const std::filesystem::path& path) {
       }
       ++i_cm;
     }
+  }
+
+  return {std::move(hdrs), std::move(colMap)};
+}
+
+
+vrfb::Table readTable_XLSX(const std::filesystem::path& path, const std::string& title) {
+  std::ifstream ifs = openFile<std::ios_base::binary>(path);
+  xlnt::workbook wb;
+  wb.load(ifs);
+
+  // get sheet
+  xlnt::worksheet ws;
+  if (title.empty()) {
+    ws = wb.active_sheet();
+  } else {
+    if (wb.contains(title)) {
+      ws = wb.sheet_by_title(title);
+    } else {
+      throw std::runtime_error(strutils::format_string(
+          "Cannot find XLSX sheet '%s'",
+          title.c_str()));
+    }
+  }
+
+  std::vector<std::string> hdrs{};
+  std::vector<bool> isKeeps = std::vector<bool>();
+  std::unordered_map<std::string, std::vector<std::string>> colMap{};
+  std::size_t r_num = 0;
+  for (auto row : ws.rows(false)) {
+    if (r_num == 0) {
+      for (auto cell : row) {
+        hdrs.push_back(cell.to_string());
+      }
+      initColMap(hdrs, isKeeps, colMap);
+    } else {
+      std::size_t i_cm = 0;
+      for (std::size_t i_r = 0; i_cm < hdrs.size(); ++i_r) {
+        if (!isKeeps[i_r]) {
+          continue;
+        }
+        colMap[hdrs[i_cm]].push_back(row[i_r].to_string());
+        ++i_cm;
+      }
+    }
+    ++r_num;
   }
 
   return {std::move(hdrs), std::move(colMap)};

@@ -63,17 +63,6 @@ vrfb::Config_CE loadConfig_CE(const std::string& path) {
 }
 
 
-vrfb::Table readTable_XLSX(const std::filesystem::path& path, const std::string& sheet_title) {
-  std::ifstream ifs {path, std::ios_base::binary};
-  if (!ifs.good()) {
-    throw std::runtime_error(strutils::format_string(
-        "Error while reading '%s' (state = %d)",
-        path.string().c_str(), ifs.exceptions()));
-  }
-  return vrfb::readTable_XLSX(ifs, sheet_title);
-}
-
-
 vrfb::Table readTable(const DataEntry_CE& entry) {
   auto path = std::filesystem::u8path<std::string>(entry.path);
   if (!std::filesystem::exists(path)) {
@@ -84,7 +73,7 @@ vrfb::Table readTable(const DataEntry_CE& entry) {
   if (path.extension() == ".csv") {
     return io::readTable_CSV(path);
   } else if (path.extension() == ".xlsx") {
-    return readTable_XLSX(path, entry.sheet_title);
+    return io::readTable_XLSX(path, entry.sheet_title);
   } else {
     throw std::runtime_error(strutils::format_string(
         "Unsupported file format '%s' for '%s'",
