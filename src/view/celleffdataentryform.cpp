@@ -6,6 +6,8 @@
 
 #include <QFileDialog>
 
+#include "driver/vrfbdriver_io.hpp"
+
 
 CEDataEntryForm::CEDataEntryForm(QWidget* parent)
       : QFrame(parent), ui(new Ui::CEDataEntryForm) {
@@ -49,12 +51,12 @@ vrfb::Config_CE CEDataEntryForm::getConfig() const {
   // read charging type names
   std::vector<std::string> c_names {};
   std::stringstream cn_ss{ui->c_typeNameField->text().toStdString()};
-  vrfb::readLine_CSV(cn_ss, c_names);
+  vrfbdriver::io::readLine_CSV(cn_ss, c_names);
   cfg.c_type_names.insert(c_names.begin(), c_names.end());
   // read discharging type names
   std::vector<std::string> d_names {};
   std::stringstream dn_ss{ui->d_typeNameField->text().toStdString()};
-  vrfb::readLine_CSV(dn_ss, d_names);
+  vrfbdriver::io::readLine_CSV(dn_ss, d_names);
   cfg.d_type_names.insert(d_names.begin(), d_names.end());
   return cfg;
 }

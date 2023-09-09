@@ -3,7 +3,7 @@
 #include <QMainWindow>
 
 #include "view/celleffconfigpopup.h"
-#include "vrfbdriver.hpp"
+#include "driver/vrfbdriver.hpp"
 
 
 QT_BEGIN_NAMESPACE

@@ -1,4 +1,4 @@
-#include "vrfbdriver.hpp"
+#include "driver/vrfbdriver.hpp"
 
 #include <chrono>
 #include <filesystem>
@@ -11,6 +11,7 @@
 #include <xlnt/xlnt.hpp>
 
 #include "strutils.hpp"
+#include "driver/vrfbdriver_io.hpp"
 
 
 NLOHMANN_JSON_NAMESPACE_BEGIN
@@ -46,19 +47,6 @@ NLOHMANN_JSON_NAMESPACE_END
 namespace vrfbdriver {
 
 
-void clearBOM(std::istream& is) {
-  unsigned char bom_bytes[3];
-  auto ini_pos = is.tellg();
-  is.read((char*) bom_bytes, 3);
-  for (int i = 0; i < 3; ++i) {
-    if (bom_bytes[i] != kUtf8BOM[i]) {
-      is.seekg(ini_pos);
-      return;
-    }
-  }
-}
-
-
 vrfb::Config_CE loadConfig_CE(const std::string& path) {
   std::ifstream ifs;
   ifs.open(std::filesystem::u8path<std::string>(path));
@@ -72,18 +60,6 @@ vrfb::Config_CE loadConfig_CE(const std::string& path) {
   vrfb::Config_CE cfg;
   j.get_to(cfg);
   return cfg;
-}
-
-
-vrfb::Table readTable_CSV(const std::filesystem::path& path) {
-  std::ifstream ifs {path, std::ios_base::in};
-  if (!ifs.good()) {
-    throw std::runtime_error(strutils::format_string(
-        "Error while reading '%s' (state = %d)",
-        path.string().c_str(), ifs.exceptions()));
-  }
-  clearBOM(ifs);
-  return vrfb::readTable_CSV(ifs);
 }
 
 
@@ -106,7 +82,7 @@ vrfb::Table readTable(const DataEntry_CE& entry) {
         path.string().c_str()));
   }
   if (path.extension() == ".csv") {
-    return readTable_CSV(path);
+    return io::readTable_CSV(path);
   } else if (path.extension() == ".xlsx") {
     return readTable_XLSX(path, entry.sheet_title);
   } else {

@@ -12,10 +12,6 @@
 
 namespace vrfbdriver {
 
-constexpr unsigned char kUtf8BOM[3] = {0xEF, 0xBB, 0xBF};
-
-void clearBOM(std::istream& is);
-
 
 constexpr std::string_view kLblTTimeHdr_CE        =   "t_time_h";
 constexpr std::string_view kLblTypeHdr_CE         =   "type_h";
@@ -58,7 +54,6 @@ class Writer {
 };
 
 
-vrfb::Table readTable_CSV(const std::filesystem::path& path);
 vrfb::Table readTable_XLSX(const std::filesystem::path& path, const std::string& sheet_title);
 
 void saveData_XLSX(std::filesystem::path& path, const vrfb::Table& table, DataSet_CE data);

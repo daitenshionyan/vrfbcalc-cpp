@@ -74,8 +74,11 @@ find_package(Qt6 REQUIRED COMPONENTS Widgets)
 
 add_executable(vrfbcalc-cpp WIN32
     src/main.cpp
-    include/vrfbdriver.hpp
-    src/vrfbdriver.cpp
+
+    include/driver/vrfbdriver.hpp
+    src/driver/vrfbdriver.cpp
+    include/driver/vrfbdriver_io.hpp
+    src/driver/vrfbdriver_io.cpp
 
     src/view/resource.qrc
 

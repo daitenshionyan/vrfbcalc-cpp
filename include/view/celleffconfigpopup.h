@@ -8,7 +8,7 @@
 #include <QDialog>
 
 #include "view/celleffdatasetform.h"
-#include "vrfbdriver.hpp"
+#include "driver/vrfbdriver.hpp"
 
 
 QT_BEGIN_NAMESPACE
