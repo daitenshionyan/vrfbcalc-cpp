@@ -60,6 +60,11 @@ inline void initColMap(std::vector<std::string>& hdrs, std::vector<bool>& isKeep
           [&](const std::string& hdr) {
             isKeeps.push_back(!hdr.empty());
             if (isKeeps.back()) {
+              if (colMap.find(hdr) != colMap.end()) {
+                throw std::runtime_error(strutils::format_string(
+                    "Duplicate headers '%s'",
+                    hdr.c_str()));
+              }
               colMap.emplace(hdr, std::vector<std::string>());
             }
             return !isKeeps.back();
