@@ -14,53 +14,7 @@
 #include "driver/vrfbdriver_io.hpp"
 
 
-NLOHMANN_JSON_NAMESPACE_BEGIN
-template<>
-struct adl_serializer<vrfb::Config_CE> {
-  static void to_json(json& j, const vrfb::Config_CE& cfg) {
-    j = nlohmann::json{
-      {vrfbdriver::kLblTTimeHdr_CE, cfg.t_time_h},
-      {vrfbdriver::kLblTypeHdr_CE, cfg.type_h},
-      {vrfbdriver::kLblCCapHdr_CE, cfg.c_capacity_h},
-      {vrfbdriver::kLblDCapHdr_CE, cfg.d_capacity_h},
-      {vrfbdriver::kLblCEnergyHdr_CE, cfg.c_energy_h},
-      {vrfbdriver::kLblDEnergyHdr_CE, cfg.d_energy_h},
-      {vrfbdriver::kLblCTypeNames_CE, cfg.c_type_names},
-      {vrfbdriver::kLblDTypeNames_CE, cfg.d_type_names}
-    };
-  }
-
-  static void from_json(const json& j, vrfb::Config_CE& cfg) {
-    j.at(vrfbdriver::kLblTTimeHdr_CE).get_to(cfg.t_time_h);
-    j.at(vrfbdriver::kLblTypeHdr_CE).get_to(cfg.type_h);
-    j.at(vrfbdriver::kLblCCapHdr_CE).get_to(cfg.c_capacity_h);
-    j.at(vrfbdriver::kLblDCapHdr_CE).get_to(cfg.d_capacity_h);
-    j.at(vrfbdriver::kLblCEnergyHdr_CE).get_to(cfg.c_energy_h);
-    j.at(vrfbdriver::kLblDEnergyHdr_CE).get_to(cfg.d_energy_h);
-    j.at(vrfbdriver::kLblCTypeNames_CE).get_to(cfg.c_type_names);
-    j.at(vrfbdriver::kLblDTypeNames_CE).get_to(cfg.d_type_names);
-  }
-};
-NLOHMANN_JSON_NAMESPACE_END
-
-
 namespace vrfbdriver {
-
-
-vrfb::Config_CE loadConfig_CE(const std::string& path) {
-  std::ifstream ifs;
-  ifs.open(std::filesystem::u8path<std::string>(path));
-  if (!ifs.good()) {
-    throw std::runtime_error(strutils::format_string(
-        "Unable to open file '%s' (state = %d)",
-        path.c_str(), ifs.exceptions()));
-  }
-  nlohmann::json j;
-  ifs >> j;
-  vrfb::Config_CE cfg;
-  j.get_to(cfg);
-  return cfg;
-}
 
 
 vrfb::Table readTable(const DataEntry_CE& entry) {

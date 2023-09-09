@@ -10,15 +10,63 @@
 #include <vector>
 
 #include <xlnt/xlnt.hpp>
+#include "nlohmann/json.hpp"
 
 #include "strutils.hpp"
 
 
-namespace vrfbdriver {
-namespace io {
+namespace { // BEGINING OF NAMESPACE <GLOBAL::UNNAMED> =========================
 
 
-namespace {
+constexpr std::string_view kLblTTimeHdr_CE      =    "t_time_h";
+constexpr std::string_view kLblTypeHdr_CE       =    "type_h";
+constexpr std::string_view kLblCCapHdr_CE       =    "c_cap_h";
+constexpr std::string_view kLblDCapHdr_CE       =    "d_cap_h";
+constexpr std::string_view kLblCEnergyHdr_CE    =    "c_energy_h";
+constexpr std::string_view kLblDEnergyHdr_CE    =    "d_energy_h";
+constexpr std::string_view kLblCTypeNames_CE    =    "c_type_names";
+constexpr std::string_view kLblDTypeNames_CE    =    "d_type_names";
+
+
+} // END OF NAMESPACE <GLOBAL::UNNAMED> ----------------------------------------
+// namespace <GLOBAL>
+
+
+NLOHMANN_JSON_NAMESPACE_BEGIN
+template<>
+struct adl_serializer<vrfb::Config_CE> {
+  static void to_json(json& j, const vrfb::Config_CE& cfg) {
+    j = nlohmann::json{
+      {kLblTTimeHdr_CE, cfg.t_time_h},
+      {kLblTypeHdr_CE, cfg.type_h},
+      {kLblCCapHdr_CE, cfg.c_capacity_h},
+      {kLblDCapHdr_CE, cfg.d_capacity_h},
+      {kLblCEnergyHdr_CE, cfg.c_energy_h},
+      {kLblDEnergyHdr_CE, cfg.d_energy_h},
+      {kLblCTypeNames_CE, cfg.c_type_names},
+      {kLblDTypeNames_CE, cfg.d_type_names}
+    };
+  }
+
+  static void from_json(const json& j, vrfb::Config_CE& cfg) {
+    j.at(kLblTTimeHdr_CE).get_to(cfg.t_time_h);
+    j.at(kLblTypeHdr_CE).get_to(cfg.type_h);
+    j.at(kLblCCapHdr_CE).get_to(cfg.c_capacity_h);
+    j.at(kLblDCapHdr_CE).get_to(cfg.d_capacity_h);
+    j.at(kLblCEnergyHdr_CE).get_to(cfg.c_energy_h);
+    j.at(kLblDEnergyHdr_CE).get_to(cfg.d_energy_h);
+    j.at(kLblCTypeNames_CE).get_to(cfg.c_type_names);
+    j.at(kLblDTypeNames_CE).get_to(cfg.d_type_names);
+  }
+};
+NLOHMANN_JSON_NAMESPACE_END
+
+
+namespace vrfbdriver { // BEGINING OF NAMESPACE <vrfbdriver> ===================
+namespace io { // BEGINING OF NAMESPACE <vrfbdriver::io> =======================
+
+
+namespace { // BEGINING OF NAMESPACE <vrfbdriver::io::UNNAMED> =================
 
 
 constexpr unsigned char kUtf8BOM[3] = {0xEF, 0xBB, 0xBF};
@@ -72,7 +120,10 @@ void clearBOM(std::istream& is) {
 }
 
 
-inline void initColMap(std::vector<std::string>& hdrs, std::vector<bool>& isKeeps, vrfb::Table::ColMap& colMap) {
+inline void initColMap(
+      std::vector<std::string>& hdrs,
+      std::vector<bool>& isKeeps,
+      vrfb::Table::ColMap& colMap) {
   hdrs.erase(
       std::remove_if(
           hdrs.begin(), hdrs.end(),
@@ -92,6 +143,14 @@ inline void initColMap(std::vector<std::string>& hdrs, std::vector<bool>& isKeep
 }
 
 
+} // END OF NAMESPACE <vrfbdriver::io::UNNAMED> --------------------------------
+// namespace <vrfbdriver::io>
+
+
+inline vrfb::Config_CE loadConfig_CE(const std::filesystem::path& path) {
+  nlohmann::json j;
+  openFile_r(path) >> j;
+  return j.get<vrfb::Config_CE>();
 }
 
 
@@ -126,14 +185,16 @@ std::size_t readLine_CSV(std::istream& is, std::vector<std::string>& elems) {
             isQuoted = true;
             continue;
           }else if (!isQuoted) {
-            throw std::runtime_error("Opening quote not in beginning of field");
+            throw std::runtime_error(
+                "Opening quote not in beginning of field");
           } else if (i+1 >= line.size() || line[i+1] == ',') {
             isQuoted = false;
             continue;
           } else if (line[i+1] == '"') {
             ++i;
           } else {
-            throw std::runtime_error("Closing quote not at the end of field");
+            throw std::runtime_error(
+                "Closing quote not at the end of field");
           }
           break;
       }
@@ -185,7 +246,8 @@ vrfb::Table readTable_CSV(const std::filesystem::path& path) {
 }
 
 
-vrfb::Table readTable_XLSX(const std::filesystem::path& path, const std::string& title) {
+vrfb::Table readTable_XLSX(
+      const std::filesystem::path& path, const std::string& title) {
   std::ifstream ifs = openFile_r<std::ios_base::binary>(path);
   xlnt::workbook wb;
   wb.load(ifs);
@@ -231,7 +293,9 @@ vrfb::Table readTable_XLSX(const std::filesystem::path& path, const std::string&
 }
 
 
-void saveData_XLSX(const std::filesystem::path& path, const vrfb::Table& t, const DataSet_CE& data) {
+void saveData_XLSX(
+      const std::filesystem::path& path,
+      const vrfb::Table& t, const DataSet_CE& data) {
   xlnt::workbook wb;
 
   auto ws = wb.active_sheet();
@@ -239,7 +303,8 @@ void saveData_XLSX(const std::filesystem::path& path, const vrfb::Table& t, cons
   auto hdrs = t.headers();
   for (std::size_t i = 0; i < t.numCols(); ++i) {
     ws.cell(i+1, 1).value(hdrs[i]);
-    ws.column_properties(i+1).width = (i > 0) ? kNormColWidth : kCycNumColWidth;
+    ws.column_properties(i+1).width = (i > 0) ?
+        kNormColWidth : kCycNumColWidth;
   }
   for (std::size_t r = 0; r < t.numRows(); ++r) {
     for (std::size_t c = 0; c < t.numCols(); ++c) {
@@ -270,5 +335,5 @@ void saveData_XLSX(const std::filesystem::path& path, const vrfb::Table& t, cons
 }
 
 
-}
-}
+} // END OF NAMESPACE <vrfbdriver::io> -----------------------------------------
+} // END OF NAMESPACE <vrfbdriver> ---------------------------------------------

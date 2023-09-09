@@ -30,7 +30,7 @@ CEDataEntryForm::~CEDataEntryForm() {
 
 vrfbdriver::DataEntry_CE CEDataEntryForm::getEntry() const {
   vrfb::Config_CE cfg = (ui->lfpRadioBtn->isChecked()) ?
-        vrfbdriver::loadConfig_CE(ui->presetPathField->text().toStdString())
+        vrfbdriver::io::loadConfig_CE(ui->presetPathField->text().toStdString())
       : getConfig();
   return {
     ui->pathField->text().toStdString(),
