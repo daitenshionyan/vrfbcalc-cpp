@@ -2,8 +2,6 @@
 
 cmake_minimum_required(VERSION 3.21.0)
 
-set(CMAKE_PREFIX_PATH "C:/Qt/6.5.2/msvc2019_64")
-
 set(CMAKE_AUTOUIC on)
 set(CMAKE_AUTOMOC on)
 set(CMAKE_AUTORCC on)
