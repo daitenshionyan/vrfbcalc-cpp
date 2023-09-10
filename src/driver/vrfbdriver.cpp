@@ -14,26 +14,26 @@
 #include "driver/vrfbdriver_io.hpp"
 
 
-namespace vrfbdriver {
+namespace vrfbdriver { // BEGINING OF NAMESPACE <vrfbdriver> ===================
+
+
+namespace { // BEGINING OF NAMESPACE <vrfbdriver::UNNAMED> =====================
 
 
 vrfb::Table readTable(const DataEntry_CE& entry) {
   auto path = std::filesystem::u8path<std::string>(entry.path);
-  if (!std::filesystem::exists(path)) {
-    throw std::runtime_error(strutils::format_string(
-        "Cannot find the file '%s'",
-        path.string().c_str()));
-  }
   if (path.extension() == ".csv") {
     return io::readTable_CSV(path);
   } else if (path.extension() == ".xlsx") {
     return io::readTable_XLSX(path, entry.sheet_title);
-  } else {
-    throw std::runtime_error(strutils::format_string(
-        "Unsupported file format '%s' for '%s'",
-        path.extension().string().c_str(), path.string().c_str()));
   }
+  throw std::runtime_error(strutils::format_string(
+      "Unsupported file format '%s' for '%s'",
+      path.extension().string().c_str(), path.string().c_str()));
 }
+
+
+} // END OF NAMESPACE <vrfbdriver::UNNAMED> ------------------------------------
 
 
 int calcCellEff_s(const std::string& name, const DataSet_CE& set_d, Writer& w) {

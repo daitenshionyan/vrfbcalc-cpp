@@ -80,13 +80,13 @@ std::ifstream openFile_r(const std::filesystem::path& path) {
   if (!std::filesystem::exists(path)) {
     throw std::runtime_error(strutils::format_string(
         "Cannot find file `%s`",
-        path.filename().c_str()));
+        path.string().c_str()));
   }
   std::ifstream ifs{path, Mode};
   if (!ifs.good()) {
     throw std::runtime_error(strutils::format_string(
         "Error while reading file '%s' (state = %d)",
-        path.filename().c_str(), ifs.exceptions()));
+        path.string().c_str(), ifs.exceptions()));
   }
   return ifs;
 }
@@ -101,7 +101,7 @@ std::ofstream openFile_w(const std::filesystem::path& path) {
   if (!ofs.good()) {
     throw std::runtime_error(strutils::format_string(
         "Error while writing file '%s' (state = %d)",
-        path.filename().c_str(), ofs.exceptions()));
+        path.string().c_str(), ofs.exceptions()));
   }
   return ofs;
 }
@@ -330,7 +330,7 @@ void saveData_XLSX(
   if (!ofs.good()) {
     throw std::runtime_error(strutils::format_string(
         "Error occured while writing to '%s' (state = %d)",
-        path.filename().c_str(), ofs.exceptions()));
+        path.string().c_str(), ofs.exceptions()));
   }
 }
 

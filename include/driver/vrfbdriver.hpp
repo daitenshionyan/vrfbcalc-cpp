@@ -43,8 +43,6 @@ class Writer {
     }
 };
 
-vrfb::Table readTable(const DataEntry_CE&);
-
 
 int calcCellEff_s(const std::string& name, const DataSet_CE& set_d, Writer& w);
 
