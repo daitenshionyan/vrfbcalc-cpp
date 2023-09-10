@@ -4,8 +4,6 @@
 #include <cmath>
 #include <ctime>
 
-#include <iostream>
-
 
 namespace strutils {
 

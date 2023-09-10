@@ -9,7 +9,7 @@
 #include <utility>
 #include <vector>
 
-#include <xlnt/xlnt.hpp>
+#include "xlnt/xlnt.hpp"
 #include "nlohmann/json.hpp"
 
 #include "strutils.hpp"

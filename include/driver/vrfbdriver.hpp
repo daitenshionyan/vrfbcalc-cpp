@@ -1,12 +1,8 @@
 #pragma once
 
-#include <filesystem>
 #include <functional>
-#include <istream>
 #include <string>
-#include <unordered_map>
 
-#include "strutils.hpp"
 #include "vrfbcalc.hpp"
 
 
@@ -45,9 +41,7 @@ class Writer {
 
 
 using SetSupplierVec_CE = std::vector<std::pair<std::string, std::function<vrfbdriver::DataSet_CE()>>>;
-using SetMap_CE = std::unordered_map<std::string, vrfbdriver::DataSet_CE>;
 
-std::pair<SetMap_CE, std::size_t> toSetMap(const SetSupplierVec_CE&, Writer&);
 void calcCellEff(const SetSupplierVec_CE&, Writer&);
 
 
