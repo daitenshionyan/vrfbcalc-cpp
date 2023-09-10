@@ -8,7 +8,7 @@ Calculates cell cycle performance from raw cycling data.
 
 1. Click the configuration button and enter the relavent details for the data files. See below for more details.
 2. Click start to run the calculations.
-3. Cell performance output are output into the folder `output/${DATA_SET_NAME}.csv`. To quickly open output folder, navigate `Files` > `Open output`.
+3. Cell performance output are output into the folder `output/${DATA_SET_NAME}.xlsx`. To quickly open output folder, navigate `Files` > `Open output`.
 
 ### Data Set
 
@@ -43,8 +43,36 @@ Additional points to note:
 * All fields are case sensitive.
 * Leading and trailing whitespaces are significant and not ignored. Thus for **Chg Type Name** field, `CC Chg, Chg` will match to `<SPACE>Chg`, where `<SPACE>` is a space character.
 
-## Acknowledgements
+## Dependencies
 
 * GUI framework: [Qt Framework](https://www.qt.io/)
 * JSON library: [nlohmann/json](https://github.com/nlohmann/json)
 * XLSX library: [xlnt](https://github.com/tfussell/xlnt)
+
+## Building
+
+Install all dependencies and VS then configure and build by entering the following in powershell (for CMD replace `` ` `` with `^`).
+
+```text
+cmake --no-warn-unused-cli `
+  -DCMAKE_TOOLCHAIN_FILE:STRING=${TOOLCHAIN_PATH} `
+  -DCMAKE_PREFIX_PATH:STRING=${QT_PATH} `
+  -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE `
+  -S . `
+  -B build `
+  -G "Visual Studio 17 2022" `
+  -T host=x64 `
+  -A x64
+
+cmake --build build --config Release --target ALL_BUILD --
+```
+
+Replace `${TOOLCHAIN_PATH}` and `${QT_PATH}` with toolchain and qt path respectively.
+
+## Packaging
+
+Packaging script requires [7-zip](https://www.7-zip.org/) to be installed exactly in `C:\Program Files\7-Zip\7z.exe`. This should be the default install path.
+
+```text
+./package
+```

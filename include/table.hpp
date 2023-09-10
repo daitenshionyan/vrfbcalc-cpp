@@ -2,7 +2,6 @@
 
 
 #include <exception>
-#include <iostream>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -11,11 +10,9 @@
 namespace vrfb {
 
 
-using ColMap = std::unordered_map<std::string, std::vector<std::string>>;
-
-
 class Table {
   public:
+    using ColMap = std::unordered_map<std::string, std::vector<std::string>>;
     using iterator = std::vector<std::string>::const_iterator;
 
     struct list_view {
@@ -36,6 +33,7 @@ class Table {
     };
 
     Table(const std::vector<std::string>& h, const std::vector<std::string>& elems);
+    Table(std::vector<std::string>&& h, ColMap&& colVec);
 
     Table() = default;
     Table(const Table&) = default;
@@ -50,7 +48,7 @@ class Table {
     inline std::size_t numRows() const {return r_size;}
 
     /* Returns the number of columns the table has. */
-    inline std::size_t numCols() const {return c_size;}
+    inline std::size_t numCols() const {return hdrs.size();}
 
     /* Returns list like view of the headers of the table. */
     inline list_view headers() const {return {hdrs.begin(), hdrs.end()};}
@@ -126,7 +124,6 @@ class Table {
 
 
   private:
-    std::size_t c_size;
     std::size_t r_size;
     std::vector<std::string> hdrs;
     ColMap colMap;
@@ -144,15 +141,6 @@ class invalid_csv_format : public std::exception {
   private:
     std::string desc;
 };
-
-
-void readLine_CSV(std::istream&, std::vector<std::string>&);
-Table readTable_CSV(std::istream&);
-
-Table readTable_XLSX(std::istream&, const std::string&);
-
-void writeCell_CSV(std::ostream&, const std::string&);
-void writeTable_CSV(std::ostream&, const Table&);
 
 
 

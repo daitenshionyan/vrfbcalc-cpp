@@ -25,8 +25,8 @@ struct Config_CE {
 
 
 struct Data_CE {
-  const Table* table;
-  const Config_CE* cfg;
+  const Table table;
+  const Config_CE cfg;
 };
 
 
