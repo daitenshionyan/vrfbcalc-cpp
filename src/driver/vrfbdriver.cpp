@@ -33,21 +33,6 @@ vrfb::Table readTable(const DataEntry_CE& entry) {
 }
 
 
-std::vector<vrfb::Data_CE> readDatas(const DataSet_CE& set_d) {
-  std::vector<vrfb::Data_CE> datas {};
-  for (std::size_t i = 0; i < set_d.entries.size(); ++i) {
-    try {
-      datas.push_back({readTable(set_d.entries[i]), set_d.entries[i].cfg});
-    } catch (std::exception& ex) {
-      throw std::runtime_error(strutils::format_string(
-          "Failed to form table - %s",
-          ex.what()));
-    }
-  }
-  return datas;
-}
-
-
 int calcCE(const std::string& name, const DataSet_CE& set_d, Writer& w) {
   w.writeln(strutils::format_string("[%s] Processing data set...",
       name.c_str()));
@@ -66,7 +51,18 @@ int calcCE(const std::string& name, const DataSet_CE& set_d, Writer& w) {
         name.c_str(), set_d.area));
   }
 
-  auto datas = readDatas(set_d);
+  // read data files to create Data_CE
+  std::vector<vrfb::Data_CE> datas;
+  try {
+    for (std::size_t i = 0; i < set_d.entries.size(); ++i) {
+      datas.push_back({readTable(set_d.entries[i]), set_d.entries[i].cfg});
+    }
+  } catch (std::exception& ex) {
+    w.writeln_fail(strutils::format_string(
+        "[%s] Error while reading data files - %s",
+        name.c_str(), ex.what()));
+    return 1;
+  }
 
   // process data and generate output table
   vrfb::Table data_pro;
@@ -82,7 +78,6 @@ int calcCE(const std::string& name, const DataSet_CE& set_d, Writer& w) {
   // write output table to hard disk
   try {
     auto path_o = std::filesystem::u8path<std::string>("output/" + name + ".xlsx");
-    std::filesystem::create_directories(path_o.parent_path());
     io::saveData_XLSX(path_o, data_pro, set_d);
   } catch (std::exception& ex) {
     w.writeln_fail(strutils::format_string(
