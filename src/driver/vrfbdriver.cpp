@@ -160,4 +160,4 @@ void calcCellEff(const SetSupplierVec_CE& ssv, Writer& w) {
 }
 
 
-}
+} // END OF NAMESPACE <vrfbdriver> ---------------------------------------------
