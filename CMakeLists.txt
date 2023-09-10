@@ -98,23 +98,20 @@ add_executable(vrfbcalc-cpp WIN32
     src/view/celleffdataentryform.ui
     src/view/celleffdataentryform.cpp
 )
-set_target_properties(vrfbcalc-cpp PROPERTIES OUTPUT_NAME "vrfbcalc_v${VRFBCALC-CPP_VERSION}")
+
+set(VRFBCALC_EXECUTABLE_NAME "vrfbcalc_v${VRFBCALC-CPP_VERSION}" CACHE STRING "Output executable name")
+set_target_properties(vrfbcalc-cpp PROPERTIES OUTPUT_NAME ${VRFBCALC_EXECUTABLE_NAME})
 
 target_link_libraries(vrfbcalc-cpp PRIVATE vrfbcalc)
 target_link_libraries(vrfbcalc-cpp PRIVATE xlnt::xlnt)
 target_link_libraries(vrfbcalc-cpp PRIVATE nlohmann_json::nlohmann_json)
 target_link_libraries(vrfbcalc-cpp PRIVATE Qt6::Widgets)
 
-# ---- < Copty Qt dll >------------------------------------------------------- #
-
-get_target_property(_qmake_executable Qt6::qmake IMPORTED_LOCATION)
-get_filename_component(_qt_bin_dir ${_qmake_executable} DIRECTORY)
-
 set(PACKAGE_OUTPUT_DIR ${CMAKE_BINARY_DIR}/package)
 file(MAKE_DIRECTORY ${PACKAGE_OUTPUT_DIR})
 
 add_custom_command(TARGET vrfbcalc-cpp POST_BUILD
-    COMMAND ${_qt_bin_dir}/windeployqt.exe
+    COMMAND ${WINDEPLOYQT_EXECUTABLE}
         --verbose 1
         --release
         --no-compiler-runtime
@@ -128,9 +125,4 @@ add_custom_command(TARGET vrfbcalc-cpp POST_BUILD
         --no-system-d3d-compiler
         --no-translations
         \"$<TARGET_FILE:vrfbcalc-cpp>\"
-    COMMAND "${PROJECT_SOURCE_DIR}/package.bat"
-        "vrfbcalc_v${VRFBCALC-CPP_VERSION}"
-        "${CMAKE_BINARY_DIR}/Release"
-        "${PROJECT_SOURCE_DIR}"
-        "${PACKAGE_OUTPUT_DIR}"
 )
