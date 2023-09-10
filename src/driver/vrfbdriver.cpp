@@ -33,11 +33,23 @@ vrfb::Table readTable(const DataEntry_CE& entry) {
 }
 
 
-} // END OF NAMESPACE <vrfbdriver::UNNAMED> ------------------------------------
+std::vector<vrfb::Data_CE> readDatas(const DataSet_CE& set_d) {
+  std::vector<vrfb::Data_CE> datas {};
+  for (std::size_t i = 0; i < set_d.entries.size(); ++i) {
+    try {
+      datas.push_back({readTable(set_d.entries[i]), set_d.entries[i].cfg});
+    } catch (std::exception& ex) {
+      throw std::runtime_error(strutils::format_string(
+          "Failed to form table - %s",
+          ex.what()));
+    }
+  }
+  return datas;
+}
 
 
-int calcCellEff_s(const std::string& name, const DataSet_CE& set_d, Writer& w) {
-  w.writeln(strutils::format_string("[%s] Processing data set",
+int calcCE(const std::string& name, const DataSet_CE& set_d, Writer& w) {
+  w.writeln(strutils::format_string("[%s] Processing data set...",
       name.c_str()));
   auto beg = std::chrono::high_resolution_clock::now();
 
@@ -54,28 +66,7 @@ int calcCellEff_s(const std::string& name, const DataSet_CE& set_d, Writer& w) {
         name.c_str(), set_d.area));
   }
 
-  // read raw data and convert to tables
-  std::vector<vrfb::Table> tables {};
-  for (auto entry : set_d.entries) {
-    try {
-      tables.push_back(readTable(entry));
-    } catch (std::exception& ex) {
-      w.writeln_fail(strutils::format_string(
-          "[%s] Failed to form table - %s",
-          name.c_str(), ex.what()));
-      return 1;
-    }
-
-    w.writeln(strutils::format_string(
-        "[%s] %s : %d points",
-        name.c_str(), entry.path.c_str(), tables[tables.size()-1].numRows()));
-  }
-
-  // combine generated tables and corresponding DataEntry_CE
-  std::vector<vrfb::Data_CE> datas {};
-  for (std::size_t i = 0; i < tables.size(); ++i) {
-    datas.push_back({&tables[i], &set_d.entries[i].cfg});
-  }
+  auto datas = readDatas(set_d);
 
   // process data and generate output table
   vrfb::Table data_pro;
@@ -110,6 +101,10 @@ int calcCellEff_s(const std::string& name, const DataSet_CE& set_d, Writer& w) {
       name.c_str(), dur.count()/1000.));
   return 0;
 }
+
+
+} // END OF NAMESPACE <vrfbdriver::UNNAMED> ------------------------------------
+// namespace <vrfbdriver>
 
 
 std::pair<SetMap_CE, std::size_t> toSetMap(const SetSupplierVec_CE& ssv, Writer& w) {
@@ -153,7 +148,7 @@ void calcCellEff(const SetSupplierVec_CE& ssv, Writer& w) {
   auto cfgGenRpt = toSetMap(ssv, w);
   std::size_t num_err = cfgGenRpt.second;
   for (const auto entry : cfgGenRpt.first) {
-    num_err += calcCellEff_s(entry.first, entry.second, w);
+    num_err += calcCE(entry.first, entry.second, w);
   }
   std::string resText = strutils::format_string(
       "Total = %d || Success = %d || Failure = %d",

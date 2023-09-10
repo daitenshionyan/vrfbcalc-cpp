@@ -44,9 +44,6 @@ class Writer {
 };
 
 
-int calcCellEff_s(const std::string& name, const DataSet_CE& set_d, Writer& w);
-
-
 using SetSupplierVec_CE = std::vector<std::pair<std::string, std::function<vrfbdriver::DataSet_CE()>>>;
 using SetMap_CE = std::unordered_map<std::string, vrfbdriver::DataSet_CE>;
 
