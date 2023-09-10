@@ -20,6 +20,45 @@ namespace vrfbdriver { // BEGINING OF NAMESPACE <vrfbdriver> ===================
 namespace { // BEGINING OF NAMESPACE <vrfbdriver::UNNAMED> =====================
 
 
+using SetMap_CE = std::unordered_map<std::string, vrfbdriver::DataSet_CE>;
+
+
+std::pair<SetMap_CE, std::size_t> toSetMap(const SetSupplierVec_CE& ssv, Writer& w) {
+  std::size_t num_err = 0;
+  SetMap_CE map {};
+  std::vector<std::string> dupeNames;
+  for (auto entry : ssv) {
+    if (entry.first.empty()) {
+      w.writeln_fail("Blank set name will not be processed");
+      ++num_err;
+      continue;
+    } else if (map.find(entry.first) != map.end()) {
+      w.writeln_fail(strutils::format_string(
+          "Duplicate set names all will not be processed '%s'",
+          entry.first.c_str()));
+      ++num_err;
+      dupeNames.push_back(entry.first);
+      continue;
+    }
+    try {
+      map.insert({entry.first, entry.second()});
+      w.writeln(strutils::format_string(
+          "Configuration for '%s' generated",
+          entry.first.c_str()));
+    } catch (std::exception& ex) {
+      w.writeln_fail(strutils::format_string(
+          "Failed to generate configuration for '%s' - %s",
+          entry.first.c_str(), ex.what()));
+    }
+  }
+  for (const std::string& name : dupeNames) {
+    map.erase(name);
+    ++num_err;
+  }
+  return {map, num_err};
+}
+
+
 vrfb::Table readTable(const DataEntry_CE& entry) {
   auto path = std::filesystem::u8path<std::string>(entry.path);
   if (path.extension() == ".csv") {
@@ -100,43 +139,6 @@ int calcCE(const std::string& name, const DataSet_CE& set_d, Writer& w) {
 
 } // END OF NAMESPACE <vrfbdriver::UNNAMED> ------------------------------------
 // namespace <vrfbdriver>
-
-
-std::pair<SetMap_CE, std::size_t> toSetMap(const SetSupplierVec_CE& ssv, Writer& w) {
-  std::size_t num_err = 0;
-  SetMap_CE map {};
-  std::vector<std::string> dupeNames;
-  for (auto entry : ssv) {
-    if (entry.first.empty()) {
-      w.writeln_fail(strutils::format_string(
-          "Blank set name will not be processed"));
-      ++num_err;
-      continue;
-    } else if (map.find(entry.first) != map.end()) {
-      w.writeln_fail(strutils::format_string(
-          "Duplicate set names all will not be processed '%s'",
-          entry.first.c_str()));
-      ++num_err;
-      dupeNames.push_back(entry.first);
-      continue;
-    }
-    try {
-      map.insert({entry.first, entry.second()});
-      w.writeln(strutils::format_string(
-          "Configuration for '%s' generated",
-          entry.first.c_str()));
-    } catch (std::exception& ex) {
-      w.writeln_fail(strutils::format_string(
-          "Failed to generate configuration for '%s' - %s",
-          entry.first.c_str(), ex.what()));
-    }
-  }
-  for (const std::string& name : dupeNames) {
-    map.erase(name);
-    ++num_err;
-  }
-  return {map, num_err};
-}
 
 
 void calcCellEff(const SetSupplierVec_CE& ssv, Writer& w) {
