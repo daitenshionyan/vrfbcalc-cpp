@@ -3,10 +3,44 @@
 
 #include <filesystem>
 
+#include <QtCore/qpromise.h>
+#include <QtConcurrent/qtconcurrentrun.h>
 #include <QDesktopServices>
 
 #include "strutils.hpp"
 #include "vrfbcalccfg.hpp"
+
+
+namespace {
+
+
+class promise_writer : public vrfbdriver::Writer {
+  public:
+    promise_writer(QPromise<MainWindow::log_msg>& prom) : prom_p{&prom} {}
+
+    void writeln(const std::string& text = "") override {
+      prom_p->addResult(MainWindow::log_msg{MainWindow::msg_state::kInfo, text});
+    }
+
+    void writeln_succ(const std::string& text) override {
+      prom_p->addResult(MainWindow::log_msg{MainWindow::msg_state::kSucc, text});
+    }
+
+    void writeln_warn(const std::string& text) override {
+      prom_p->addResult(MainWindow::log_msg{MainWindow::msg_state::kWarn, text});
+    }
+
+    void writeln_fail(const std::string& text) override {
+      prom_p->addResult(MainWindow::log_msg{MainWindow::msg_state::kFail, text});
+    }
+
+
+  private:
+    QPromise<MainWindow::log_msg>* prom_p;
+};
+
+
+}
 
 
 MainWindow::MainWindow(QWidget* parent)
@@ -23,6 +57,8 @@ MainWindow::MainWindow(QWidget* parent)
                 vrfbcfg::licence_notice,
                 "================================================================================"))
       + QString("</p>"));
+  connect(&watcher, &QFutureWatcher<log_msg>::resultReadyAt,
+    this, &MainWindow::on_resultReadyAt);
 }
 
 
@@ -46,7 +82,13 @@ void MainWindow::on_action_openOutput_triggered(bool) {
 
 
 void MainWindow::on_startBtn_clicked() {
-  vrfbdriver::calcCellEff(popup_ce->getSetSupplierMap(), *this);
+  if (watcher.isRunning()) {
+    return;
+  }
+  watcher.setFuture(QtConcurrent::run([&](QPromise<log_msg>& p) {
+    auto w = promise_writer{p};
+    vrfbdriver::calcCellEff(popup_ce->getSetSupplierMap(), w);
+  }));
 }
 
 
@@ -92,4 +134,23 @@ void MainWindow::writeln_fail(const std::string& text) {
           strutils::getftime().c_str(), text.c_str()))
       .toHtmlEscaped();
   ui->outputArea->appendHtml("<p style=\"color:red;white-space:pre\">" + outText + "</p>");
+}
+
+
+void MainWindow::on_resultReadyAt(int index) {
+  log_msg lm = watcher.future().resultAt(index);
+  switch (lm.state) {
+    case msg_state::kSucc:
+      writeln_succ(lm.msg);
+      break;
+    case msg_state::kInfo:
+      writeln(lm.msg);
+      break;
+    case msg_state::kWarn:
+      writeln_warn(lm.msg);
+      break;
+    case msg_state::kFail:
+      writeln_fail(lm.msg);
+      break;
+  }
 }

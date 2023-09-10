@@ -1,5 +1,8 @@
 #pragma once
 
+#include <string>
+
+#include <QtCore/qfuturewatcher.h>
 #include <QMainWindow>
 
 #include "view/celleffconfigpopup.h"
@@ -17,6 +20,12 @@ class MainWindow : public QMainWindow, public vrfbdriver::Writer {
   Q_OBJECT
 
   public:
+    enum class msg_state {kSucc, kInfo, kWarn, kFail};
+    struct log_msg {
+      msg_state state;
+      std::string msg;
+    };
+
     MainWindow(QWidget* parent = nullptr);
     ~MainWindow();
 
@@ -34,6 +43,11 @@ class MainWindow : public QMainWindow, public vrfbdriver::Writer {
 
 
   private:
+    void on_resultReadyAt(int index);
+
     Ui::MainWindow* ui;
     CEConfigPopup* popup_ce;
+
+    QFutureWatcher<log_msg> watcher;
+    QThreadPool pool;
 };

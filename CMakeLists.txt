@@ -63,12 +63,16 @@ install(FILES ${VRFBCALC_PUBLIC_HEADERS} DESTINATION ${INSTALL_LIBRARY_INC_DIR})
 
 # ==== EXECUTABLE ============================================================ #
 
-set(VRFBCALC-CPP_VERSION "0.1.0-EA5")
+set(VRFBCALC-CPP_VERSION "0.1.0-EA6")
 
 configure_file(include/vrfbcalccfg.hpp.in include/vrfbcalccfg.hpp)
 
 find_package(nlohmann_json CONFIG REQUIRED)
-find_package(Qt6 REQUIRED COMPONENTS Widgets)
+find_package(Qt6 REQUIRED COMPONENTS
+    Concurrent
+    Core
+    Gui
+    Widgets)
 
 add_executable(vrfbcalc-cpp WIN32
     src/main.cpp
@@ -103,7 +107,11 @@ set_target_properties(vrfbcalc-cpp PROPERTIES OUTPUT_NAME ${VRFBCALC_EXECUTABLE_
 target_link_libraries(vrfbcalc-cpp PRIVATE vrfbcalc)
 target_link_libraries(vrfbcalc-cpp PRIVATE xlnt::xlnt)
 target_link_libraries(vrfbcalc-cpp PRIVATE nlohmann_json::nlohmann_json)
-target_link_libraries(vrfbcalc-cpp PRIVATE Qt6::Widgets)
+target_link_libraries(vrfbcalc-cpp PRIVATE
+    Qt6::Concurrent
+    Qt6::Core
+    Qt6::Gui
+    Qt6::Widgets)
 
 set(PACKAGE_OUTPUT_DIR ${CMAKE_BINARY_DIR}/package)
 file(MAKE_DIRECTORY ${PACKAGE_OUTPUT_DIR})
