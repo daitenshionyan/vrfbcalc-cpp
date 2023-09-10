@@ -90,7 +90,11 @@ int calcCE(const std::string& name, const DataSet_CE& set_d, Writer& w) {
   std::vector<vrfb::Data_CE> datas;
   try {
     for (std::size_t i = 0; i < set_d.entries.size(); ++i) {
-      datas.push_back({readTable(set_d.entries[i]), set_d.entries[i].cfg});
+      auto t = readTable(set_d.entries[i]);
+      datas.push_back({t, set_d.entries[i].cfg});
+      w.writeln(strutils::format_string(
+          "[%s] Read '%s' with %d points",
+          name.c_str(), set_d.entries[i].path.c_str(), t.numRows()));
     }
   } catch (std::exception& ex) {
     w.writeln_fail(strutils::format_string(
