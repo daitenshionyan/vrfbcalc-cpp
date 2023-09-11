@@ -7,6 +7,7 @@
 
 #include "view/celleffconfigpopup.h"
 #include "driver/vrfbdriver.hpp"
+#include "logger.hpp"
 
 
 QT_BEGIN_NAMESPACE
@@ -16,33 +17,30 @@ namespace Ui {
 QT_END_NAMESPACE
 
 
-class MainWindow : public QMainWindow, public vrfbdriver::Writer {
+class MainWindow : public QMainWindow, private logger::Logger {
   Q_OBJECT
 
   public:
-    enum class msg_state {kSucc, kInfo, kWarn, kFail};
-    struct log_msg {
-      msg_state state;
-      std::string msg;
-    };
-
     MainWindow(QWidget* parent = nullptr);
     ~MainWindow();
 
-    void writeln(const std::string& text = "") override;
-    void writeln_succ(const std::string&) override;
-    void writeln_warn(const std::string&) override;
-    void writeln_fail(const std::string&) override;
+
+  signals:
+    void availableLogMsg(const logger::LogMsg&);
 
 
   private:
     void startCalc();
-    void logMsgAt(int index);
+    void log(const logger::LogMsg&) override;
+    void logMsg(const logger::LogMsg&);
+    inline void logMsgAt(int index) {
+      log(watcher.future().resultAt(index));
+    }
 
     Ui::MainWindow* ui;
     CEConfigPopup* popup_ce;
 
-    QFutureWatcher<log_msg> watcher;
+    QFutureWatcher<logger::LogMsg> watcher;
     QThreadPool pool;
 
 
