@@ -101,7 +101,7 @@ add_executable(vrfbcalc-cpp WIN32
     src/view/celleffdataentryform.cpp
 )
 
-set(VRFBCALC_EXECUTABLE_NAME "vrfbcalc_v${VRFBCALC-CPP_VERSION}" CACHE STRING "Output executable name")
+set(VRFBCALC_EXECUTABLE_NAME "vrfbcalc_v${VRFBCALC-CPP_VERSION}" CACHE STRING "Output executable name" FORCE)
 set_target_properties(vrfbcalc-cpp PROPERTIES OUTPUT_NAME ${VRFBCALC_EXECUTABLE_NAME})
 
 target_link_libraries(vrfbcalc-cpp PRIVATE vrfbcalc)
