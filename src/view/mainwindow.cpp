@@ -57,6 +57,8 @@ MainWindow::MainWindow(QWidget* parent)
                 vrfbcfg::licence_notice,
                 "================================================================================"))
       + QString("</p>"));
+  connect(popup_ce, &CEConfigPopup::accepted,
+    this, &MainWindow::startCalc);
   connect(&watcher, &QFutureWatcher<log_msg>::resultReadyAt,
     this, &MainWindow::logMsgAt);
 }
@@ -85,14 +87,6 @@ void MainWindow::on_startBtn_clicked() {
   if (watcher.isRunning()) {
     return;
   }
-  watcher.setFuture(QtConcurrent::run([&](QPromise<log_msg>& p) {
-    auto w = promise_writer{p};
-    vrfbdriver::calcCellEff(popup_ce->getSetSupplierMap(), w);
-  }));
-}
-
-
-void MainWindow::on_cfgBtn_clicked() {
   popup_ce->exec();
 }
 
@@ -134,6 +128,14 @@ void MainWindow::writeln_fail(const std::string& text) {
           strutils::getftime().c_str(), text.c_str()))
       .toHtmlEscaped();
   ui->outputArea->appendHtml("<p style=\"color:red;white-space:pre\">" + outText + "</p>");
+}
+
+
+void MainWindow::startCalc() {
+  watcher.setFuture(QtConcurrent::run([&](QPromise<log_msg>& p) {
+    auto w = promise_writer{p};
+    vrfbdriver::calcCellEff(popup_ce->getSetSupplierMap(), w);
+  }));
 }
 
 

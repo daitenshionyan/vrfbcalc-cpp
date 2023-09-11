@@ -36,6 +36,7 @@ class MainWindow : public QMainWindow, public vrfbdriver::Writer {
 
 
   private:
+    void startCalc();
     void logMsgAt(int index);
 
     Ui::MainWindow* ui;
@@ -48,5 +49,4 @@ class MainWindow : public QMainWindow, public vrfbdriver::Writer {
   private slots:
     void on_action_openOutput_triggered(bool);
     void on_startBtn_clicked();
-    void on_cfgBtn_clicked();
 };
