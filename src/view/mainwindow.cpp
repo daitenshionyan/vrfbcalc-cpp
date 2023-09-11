@@ -132,10 +132,12 @@ void MainWindow::writeln_fail(const std::string& text) {
 
 
 void MainWindow::startCalc() {
-  watcher.setFuture(QtConcurrent::run([&](QPromise<log_msg>& p) {
-    auto w = promise_writer{p};
-    vrfbdriver::calcCellEff(popup_ce->getSetSupplierMap(), w);
-  }));
+  watcher.setFuture(QtConcurrent::run(
+      &pool,
+      [&](QPromise<log_msg>& p) {
+        auto w = promise_writer{p};
+        vrfbdriver::calcCellEff(popup_ce->getSetSupplierMap(), w);
+      }));
 }
 
 
