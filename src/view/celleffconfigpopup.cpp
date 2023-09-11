@@ -32,13 +32,13 @@ vrfbdriver::SetSupplierVec_CE CEConfigPopup::getSetSupplierMap() const {
 void CEConfigPopup::on_addBtn_clicked() {
   forms.push_back(new CEDataSetForm(this));
   ui->entriesArea->layout()->addWidget(forms[forms.size()-1]);
-  connect(forms[forms.size()-1], &CEDataSetForm::handleDelete,
-      this, &CEConfigPopup::on_entry_del);
+  connect(forms[forms.size()-1], &CEDataSetForm::formDeleted,
+      this, &CEConfigPopup::delForm);
   forms[forms.size()-1]->show();
 }
 
 
-void CEConfigPopup::on_entry_del(CEDataSetForm* f) {
+void CEConfigPopup::delForm(CEDataSetForm* f) {
   ui->entriesArea->layout()->removeWidget(f);
   forms.erase(std::remove(forms.begin(), forms.end(), f), forms.end());
   delete f;

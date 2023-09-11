@@ -30,24 +30,23 @@ class MainWindow : public QMainWindow, public vrfbdriver::Writer {
     ~MainWindow();
 
     void writeln(const std::string& text = "") override;
-
     void writeln_succ(const std::string&) override;
     void writeln_warn(const std::string&) override;
     void writeln_fail(const std::string&) override;
 
 
-  private slots:
-    void on_action_openOutput_triggered(bool);
-    void on_startBtn_clicked();
-    void on_cfgBtn_clicked();
-
-
   private:
-    void on_resultReadyAt(int index);
+    void logMsgAt(int index);
 
     Ui::MainWindow* ui;
     CEConfigPopup* popup_ce;
 
     QFutureWatcher<log_msg> watcher;
     QThreadPool pool;
+
+
+  private slots:
+    void on_action_openOutput_triggered(bool);
+    void on_startBtn_clicked();
+    void on_cfgBtn_clicked();
 };

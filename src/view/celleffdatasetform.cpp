@@ -36,20 +36,20 @@ std::pair<std::string, std::function<vrfbdriver::DataSet_CE()>> CEDataSetForm::g
 
 
 void CEDataSetForm::on_delBtn_clicked() {
-  emit handleDelete(this);
+  emit formDeleted(this);
 }
 
 
 void CEDataSetForm::on_addEntryBtn_clicked() {
   forms.push_back(new CEDataEntryForm(this));
   ui->entriesArea->layout()->addWidget(forms[forms.size()-1]);
-  connect(forms[forms.size()-1], &CEDataEntryForm::handleDelete,
-      this, &CEDataSetForm::on_entry_del);
+  connect(forms[forms.size()-1], &CEDataEntryForm::formDeleted,
+      this, &CEDataSetForm::delForm);
   forms[forms.size()-1]->show();
 }
 
 
-void CEDataSetForm::on_entry_del(CEDataEntryForm* f) {
+void CEDataSetForm::delForm(CEDataEntryForm* f) {
   ui->entriesArea->layout()->removeWidget(f);
   forms.erase(std::remove(forms.begin(), forms.end(), f), forms.end());
   delete f;

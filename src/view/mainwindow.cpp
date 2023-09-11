@@ -58,7 +58,7 @@ MainWindow::MainWindow(QWidget* parent)
                 "================================================================================"))
       + QString("</p>"));
   connect(&watcher, &QFutureWatcher<log_msg>::resultReadyAt,
-    this, &MainWindow::on_resultReadyAt);
+    this, &MainWindow::logMsgAt);
 }
 
 
@@ -137,7 +137,7 @@ void MainWindow::writeln_fail(const std::string& text) {
 }
 
 
-void MainWindow::on_resultReadyAt(int index) {
+void MainWindow::logMsgAt(int index) {
   log_msg lm = watcher.future().resultAt(index);
   switch (lm.state) {
     case msg_state::kSucc:
