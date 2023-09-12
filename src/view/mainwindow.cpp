@@ -105,7 +105,7 @@ void MainWindow::logMsg(const logger::LogMsg& lm) {
       lvlTxt = "FINE";
       break;
     case logger::Level::kInfo:
-      color = "black";
+      color = "white";
       lvlTxt = "INFO";
       break;
     case logger::Level::kWarn:

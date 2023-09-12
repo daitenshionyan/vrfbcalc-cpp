@@ -82,7 +82,7 @@ add_executable(vrfbcalc-cpp WIN32
     include/driver/vrfbdriver_io.hpp
     src/driver/vrfbdriver_io.cpp
 
-    src/view/resource.qrc
+    resource/resource.qrc
 
     include/view/mainwindow.h
     src/view/mainwindow.ui

@@ -13,6 +13,222 @@
   <property name="windowTitle">
    <string>vrfbcalc</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true">QWidget {
+	background-color: #1A1C29;
+	color: white;
+}
+
+QMenuBar {
+	background-color: #3B3F5C;
+	spacing: 3px;
+}
+
+QMenuBar::item {
+	background-color: transparent;
+	border-radius: 5px;
+	color: white;
+	padding: 5px 5px;
+}
+
+QMenuBar::item:selected {
+	background: #657FF8;
+}
+
+QMenuBar::item:pressed {
+	background: #657FF8;
+}
+
+QPlainTextEdit {
+	background-color: #303340;
+	border-color: #606680;
+	border-radius: 5px;
+	border-style: solid;
+	border-width: 3px;
+}
+
+QPushButton {
+	border-radius: 5px;
+	background-color: #4C4E5C;
+	padding: 5px 5px;
+}
+
+QPushButton:disable {
+	background-color: #272833;
+}
+
+#startBtn, #buttonBox *[text=OK], #buttonBox *[text=Cancel] {
+	border-radius: 13px;
+}
+
+#buttonBox *[text=OK], #buttonBox *[text=Cancel] {
+	width: 100px;
+}
+
+#startBtn, #buttonBox *[text=OK] {
+	background-color: #657FF8;
+}
+
+#startBtn:hover, #buttonBox *[text=OK]:hover {
+	background-color: #5166C5;
+}
+
+#startBtn:pressed, #buttonBox *[text=OK]:pressed {
+	background-color: #3C4C92;
+}
+
+#delBtn {
+	background-color: #CD1B1B;
+}
+
+#delBtn:hover {
+	background-color: #9A1414;
+}
+
+#delBtn:pressed {
+	background-color: #660D0D;
+}
+
+
+QLineEdit {
+	background-color: #303340;
+	height: 22px;
+	border-color: #606680;
+	border-radius: 5px;
+	border-style: solid;
+	border-width: 2px;
+}
+
+QLineEdit:disabled {
+	background-color: #272833;
+	border-color: transparent;
+}
+
+
+
+QWidget {
+	background-color: #1A1C29;
+	color: white;
+}
+
+QMenuBar {
+	background-color: #3B3F5C;
+	spacing: 3px;
+}
+
+QMenuBar::item {
+	background-color: transparent;
+	border-radius: 5px;
+	color: white;
+	padding: 5px 5px;
+}
+
+QMenuBar::item:selected {
+	background: #657FF8;
+}
+
+QMenuBar::item:pressed {
+	background: #657FF8;
+}
+
+QPlainTextEdit {
+	background-color: #303340;
+	border-color: #606680;
+	border-radius: 5px;
+	border-style: solid;
+	border-width: 3px;
+}
+
+QPushButton {
+	border-radius: 5px;
+	background-color: #4C4E5C;
+	padding: 5px 5px;
+}
+
+QPushButton:disable {
+	background-color: #272833;
+}
+
+#startBtn, #buttonBox *[text=OK], #buttonBox *[text=Cancel] {
+	border-radius: 13px;
+}
+
+#buttonBox *[text=OK], #buttonBox *[text=Cancel] {
+	width: 100px;
+}
+
+#startBtn, #buttonBox *[text=OK] {
+	background-color: #657FF8;
+}
+
+#startBtn:hover, #buttonBox *[text=OK]:hover {
+	background-color: #5166C5;
+}
+
+#startBtn:pressed, #buttonBox *[text=OK]:pressed {
+	background-color: #3C4C92;
+}
+
+#delBtn {
+	background-color: #CD1B1B;
+}
+
+#delBtn:hover {
+	background-color: #9A1414;
+}
+
+#delBtn:pressed {
+	background-color: #660D0D;
+}
+
+
+QLineEdit {
+	background-color: #303340;
+	height: 22px;
+	border-color: #606680;
+	border-radius: 5px;
+	border-style: solid;
+	border-width: 2px;
+}
+
+QLineEdit:disabled {
+	background-color: #272833;
+	border-color: transparent;
+}
+
+
+
+ QScrollBar:vertical {
+     background: #1A1C29;
+     width: 10px;
+     margin: 10px 0 10px 0;
+ }
+ QScrollBar::handle:vertical {
+     background: #43475A;
+     min-height: 20px;
+	margin: 4px 0px 4px 0px;
+	border-radius: 5px;
+ }
+ QScrollBar::add-line:vertical {
+     border: 2px solid #606680;
+     background: #606680;
+     height: 10px;
+     subcontrol-position: bottom;
+     subcontrol-origin: margin;
+ }
+
+ QScrollBar::sub-line:vertical {
+     border: 2px solid #606680;
+     background: #606680;
+     height: 10px;
+     subcontrol-position: top;
+     subcontrol-origin: margin;
+ }
+
+ QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+     background: none;
+ }</string>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
@@ -21,6 +237,18 @@
        <font>
         <family>Cascadia Mono</family>
        </font>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::NoFrame</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Plain</enum>
+      </property>
+      <property name="verticalScrollBarPolicy">
+       <enum>Qt::ScrollBarAlwaysOn</enum>
+      </property>
+      <property name="horizontalScrollBarPolicy">
+       <enum>Qt::ScrollBarAlwaysOff</enum>
       </property>
       <property name="readOnly">
        <bool>true</bool>
@@ -45,7 +273,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>22</height>
+     <height>27</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
