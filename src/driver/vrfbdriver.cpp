@@ -19,17 +19,18 @@ namespace { // BEGINING OF NAMESPACE <vrfbdriver::UNNAMED> =====================
 using SetMap_CE = std::unordered_map<std::string, vrfbdriver::DataSet_CE>;
 
 
-std::pair<SetMap_CE, std::size_t> toSetMap(const SetSupplierVec_CE& ssv, Writer& w) {
+std::pair<SetMap_CE, std::size_t> toSetMap(
+      const SetSupplierVec_CE& ssv, logger::Logger& logger) {
   std::size_t num_err = 0;
   SetMap_CE map {};
   std::vector<std::string> dupeNames;
   for (auto entry : ssv) {
     if (entry.first.empty()) {
-      w.writeln_fail("Blank set name will not be processed");
+      logger.fail("Blank set name will not be processed");
       ++num_err;
       continue;
     } else if (map.find(entry.first) != map.end()) {
-      w.writeln_fail(strutils::format_string(
+      logger.fail(strutils::format_string(
           "Duplicate set names all will not be processed '%s'",
           entry.first.c_str()));
       ++num_err;
@@ -38,11 +39,11 @@ std::pair<SetMap_CE, std::size_t> toSetMap(const SetSupplierVec_CE& ssv, Writer&
     }
     try {
       map.insert({entry.first, entry.second()});
-      w.writeln(strutils::format_string(
+      logger.info(strutils::format_string(
           "Configuration for '%s' generated",
           entry.first.c_str()));
     } catch (std::exception& ex) {
-      w.writeln_fail(strutils::format_string(
+      logger.fail(strutils::format_string(
           "Failed to generate configuration for '%s' - %s",
           entry.first.c_str(), ex.what()));
     }
@@ -68,20 +69,20 @@ vrfb::Table readTable(const DataEntry_CE& entry) {
 }
 
 
-int calcCE(const std::string& name, const DataSet_CE& set_d, Writer& w) {
-  w.writeln(strutils::format_string("[%s] Processing data set...",
+int calcCE(const std::string& name, const DataSet_CE& set_d, logger::Logger& logger) {
+  logger.info(strutils::format_string("[%s] Processing data set...",
       name.c_str()));
   auto beg = std::chrono::high_resolution_clock::now();
 
   if (!strutils::isValidFileName(name)) {
     // warn if illegal path characters present
-    w.writeln_warn(strutils::format_string(
+    logger.warn(strutils::format_string(
         "[%s] Output file name may contain illegal path characters to system and may not be saved",
         name.c_str()));
   }
   if (set_d.area <= 0) {
     // warn if area is negative or zero
-    w.writeln_warn(strutils::format_string(
+    logger.warn(strutils::format_string(
         "[%s] Negative or zero area set '%.2f'",
         name.c_str(), set_d.area));
   }
@@ -92,12 +93,12 @@ int calcCE(const std::string& name, const DataSet_CE& set_d, Writer& w) {
     for (std::size_t i = 0; i < set_d.entries.size(); ++i) {
       auto t = readTable(set_d.entries[i]);
       datas.push_back({t, set_d.entries[i].cfg});
-      w.writeln(strutils::format_string(
+      logger.info(strutils::format_string(
           "[%s] Read '%s' with %d points",
           name.c_str(), set_d.entries[i].path.c_str(), t.numRows()));
     }
   } catch (std::exception& ex) {
-    w.writeln_fail(strutils::format_string(
+    logger.fail(strutils::format_string(
         "[%s] Error while reading data files - %s",
         name.c_str(), ex.what()));
     return 1;
@@ -108,7 +109,7 @@ int calcCE(const std::string& name, const DataSet_CE& set_d, Writer& w) {
   try {
     data_pro = vrfb::calcPerf_CE(set_d.area, datas);
   } catch (std::exception& ex) {
-    w.writeln_fail(strutils::format_string(
+    logger.fail(strutils::format_string(
         "[%s] Error while processing data - %s",
         name.c_str(), ex.what()));
     return 1;
@@ -119,18 +120,18 @@ int calcCE(const std::string& name, const DataSet_CE& set_d, Writer& w) {
     auto path_o = std::filesystem::u8path<std::string>("output/" + name + ".xlsx");
     io::saveData_XLSX(path_o, data_pro, set_d);
   } catch (std::exception& ex) {
-    w.writeln_fail(strutils::format_string(
+    logger.fail(strutils::format_string(
         "[%s] Failed to save processed data - %s",
         name.c_str(), ex.what()));
     return 1;
   }
-  w.writeln(strutils::format_string(
+  logger.info(strutils::format_string(
       "[%s] Output table : %d cycles",
       name.c_str(), data_pro.numRows()));
 
   auto end = std::chrono::high_resolution_clock::now();
   auto dur = std::chrono::duration_cast<std::chrono::microseconds>(end - beg);
-  w.writeln(strutils::format_string(
+  logger.info(strutils::format_string(
       "[%s] Completed in %.3f ms",
       name.c_str(), dur.count()/1000.));
   return 0;
@@ -141,21 +142,21 @@ int calcCE(const std::string& name, const DataSet_CE& set_d, Writer& w) {
 // namespace <vrfbdriver>
 
 
-void calcCellEff(const SetSupplierVec_CE& ssv, Writer& w) {
-  auto cfgGenRpt = toSetMap(ssv, w);
+void calcCellEff(const SetSupplierVec_CE& ssv, logger::Logger& logger) {
+  auto cfgGenRpt = toSetMap(ssv, logger);
   std::size_t num_err = cfgGenRpt.second;
   for (const auto entry : cfgGenRpt.first) {
-    num_err += calcCE(entry.first, entry.second, w);
+    num_err += calcCE(entry.first, entry.second, logger);
   }
   std::string resText = strutils::format_string(
       "Total = %d || Success = %d || Failure = %d",
       ssv.size(), ssv.size()-num_err, num_err);
   if (num_err == 0) {
-    w.writeln_succ(resText);
+    logger.succ(resText);
   } else if (num_err < ssv.size()) {
-    w.writeln_warn(resText);
+    logger.warn(resText);
   } else {
-    w.writeln_fail(resText);
+    logger.fail(resText);
   }
 }
 

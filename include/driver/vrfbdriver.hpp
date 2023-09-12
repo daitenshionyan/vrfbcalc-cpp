@@ -3,6 +3,7 @@
 #include <functional>
 #include <string>
 
+#include "logger.hpp"
 #include "vrfbcalc.hpp"
 
 
@@ -22,27 +23,9 @@ struct DataSet_CE {
 };
 
 
-class Writer {
-  public:
-    virtual void writeln(const std::string& text = "") = 0;
-
-    virtual void writeln_succ(const std::string& text) {
-      writeln(text);
-    }
-
-    virtual void writeln_warn(const std::string& text) {
-      writeln(text);
-    }
-
-    virtual void writeln_fail(const std::string& text) {
-      writeln(text);
-    }
-};
-
-
 using SetSupplierVec_CE = std::vector<std::pair<std::string, std::function<vrfbdriver::DataSet_CE()>>>;
 
-void calcCellEff(const SetSupplierVec_CE&, Writer&);
+void calcCellEff(const SetSupplierVec_CE&, logger::Logger&);
 
 
 }

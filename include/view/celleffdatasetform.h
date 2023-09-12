@@ -29,17 +29,17 @@ class CEDataSetForm : public QWidget {
 
 
   signals:
-    void handleDelete(CEDataSetForm*);
+    void formDeleted(CEDataSetForm*);
+
+
+  private:
+    void delForm(CEDataEntryForm*);
+
+    Ui::CEDataSetForm* ui;
+    std::vector<CEDataEntryForm*> forms;
 
 
   private slots:
     void on_delBtn_clicked();
     void on_addEntryBtn_clicked();
-
-
-  private:
-    void on_entry_del(CEDataEntryForm*);
-
-    Ui::CEDataSetForm* ui;
-    std::vector<CEDataEntryForm*> forms;
 };

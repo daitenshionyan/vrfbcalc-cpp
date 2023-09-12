@@ -26,7 +26,16 @@ class CEDataEntryForm : public QFrame {
 
 
   signals:
-    void handleDelete(CEDataEntryForm*);
+    void formDeleted(CEDataEntryForm*);
+
+
+  private:
+    void syncCapField();
+    void synchEnergyField();
+
+    vrfb::Config_CE getConfig() const;
+
+    Ui::CEDataEntryForm* ui;
 
 
   private slots:
@@ -35,13 +44,4 @@ class CEDataEntryForm : public QFrame {
     void on_d_capRBtn_toggled(bool);
     void on_d_energyRBtn_toggled(bool);
     void on_delBtn_clicked();
-
-
-  private:
-    void on_c_capField_changed();
-    void on_c_energyField_changed();
-
-    vrfb::Config_CE getConfig() const;
-
-    Ui::CEDataEntryForm* ui;
 };

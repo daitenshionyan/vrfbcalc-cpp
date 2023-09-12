@@ -14,10 +14,10 @@ CEDataEntryForm::CEDataEntryForm(QWidget* parent)
   ui->setupUi(this);
   connect(
       ui->c_capHdrField, &QLineEdit::textChanged,
-      this, &CEDataEntryForm::on_c_capField_changed);
+      this, &CEDataEntryForm::syncCapField);
   connect(
       ui->c_energyHdrField, &QLineEdit::textChanged,
-      this, &CEDataEntryForm::on_c_energyField_changed);
+      this, &CEDataEntryForm::synchEnergyField);
   ui->d_capRBtn->setChecked(true);
   ui->d_energyRBtn->setChecked(true);
 }
@@ -98,18 +98,18 @@ void CEDataEntryForm::on_d_energyRBtn_toggled(bool t) {
 
 
 void CEDataEntryForm::on_delBtn_clicked() {
-  emit handleDelete(this);
+  emit formDeleted(this);
 }
 
 
-void CEDataEntryForm::on_c_capField_changed() {
+void CEDataEntryForm::syncCapField() {
   if (ui->d_capRBtn->isChecked()) {
     ui->d_capHdrField->setText(ui->c_capHdrField->text());
   }
 }
 
 
-void CEDataEntryForm::on_c_energyField_changed() {
+void CEDataEntryForm::synchEnergyField() {
   if (ui->d_energyRBtn->isChecked()) {
     ui->d_energyHdrField->setText(ui->c_energyHdrField->text());
   }

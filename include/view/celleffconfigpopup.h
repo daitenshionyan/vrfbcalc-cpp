@@ -33,7 +33,7 @@ class CEConfigPopup : public QDialog {
 
 
   private:
-    void on_entry_del(CEDataSetForm*);
+    void delForm(CEDataSetForm*);
 
     Ui::CEConfigPopup* ui;
     std::vector<CEDataSetForm*> forms;

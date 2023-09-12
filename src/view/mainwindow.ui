@@ -31,13 +31,6 @@
      </widget>
     </item>
     <item>
-     <widget class="QPushButton" name="cfgBtn">
-      <property name="text">
-       <string>Configure</string>
-      </property>
-     </widget>
-    </item>
-    <item>
      <widget class="QPushButton" name="startBtn">
       <property name="text">
        <string>Start</string>
