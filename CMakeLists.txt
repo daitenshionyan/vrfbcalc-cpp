@@ -50,7 +50,7 @@ add_library(vrfbcalc SHARED
 
 # ==== EXECUTABLE ============================================================ #
 
-set(VRFBCALC-CPP_VERSION "0.1.0-EA6")
+set(VRFBCALC-CPP_VERSION "0.1.0")
 
 configure_file(include/vrfbcalccfg.hpp.in include/vrfbcalccfg.hpp)
 
