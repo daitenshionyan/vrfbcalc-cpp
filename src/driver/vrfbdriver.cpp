@@ -46,6 +46,7 @@ std::pair<SetMap_CE, std::size_t> toSetMap(
       logger.fail(strutils::format_string(
           "Failed to generate configuration for '%s' - %s",
           entry.first.c_str(), ex.what()));
+      ++num_err;
     }
   }
   for (const std::string& name : dupeNames) {
