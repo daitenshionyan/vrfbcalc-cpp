@@ -15,9 +15,18 @@
   </property>
   <property name="styleSheet">
    <string notr="true">QWidget {
-	background-color: #1A1C29;
+	background-color: transparent;
 	color: white;
 }
+
+
+
+QDialog, #windowBackground {
+	background-color: #1A1C29;
+}
+
+
+
 
 QMenuBar {
 	background-color: #3B3F5C;
@@ -39,6 +48,31 @@ QMenuBar::item:pressed {
 	background: #657FF8;
 }
 
+
+
+QGroupBox {
+	font: bold;
+    border: 2px solid #4A4C5E;
+    border-radius: 5px;
+    margin-top: 6px;
+}
+
+QGroupBox::title {
+	color: #4A4C5E;
+	subcontrol-origin: margin;
+    left: 9px;
+	padding: 0px 5px 0px 5px;
+}
+
+
+
+#CEDataSetFormFrame, #CEDataEntryForm  {
+	background-color: rgba(148, 148, 148, 30);
+	border-radius: 5px;
+}
+
+
+
 QPlainTextEdit {
 	background-color: #303340;
 	border-color: #606680;
@@ -47,17 +81,31 @@ QPlainTextEdit {
 	border-width: 3px;
 }
 
+
+
+
 QPushButton {
 	border-radius: 5px;
 	background-color: #4C4E5C;
 	padding: 5px 5px;
 }
 
-QPushButton:disable {
+QPushButton:hover {
+	background-color: #41434F;
+} 
+
+QPushButton:pressed {
+	background-color: #373943;
+}
+	
+QPushButton:disabled {
 	background-color: #272833;
 }
 
-#startBtn, #buttonBox *[text=OK], #buttonBox *[text=Cancel] {
+QPushButton[text=&quot;Start&quot;],
+QPushButton[text=&quot;OK&quot;],
+QPushButton[text=&quot;Cancel&quot;],
+QPushButton[text=&quot;Add&quot;] {
 	border-radius: 13px;
 }
 
@@ -65,34 +113,35 @@ QPushButton:disable {
 	width: 100px;
 }
 
-#startBtn, #buttonBox *[text=OK] {
+QPushButton[text=&quot;Start&quot;], QPushButton[text=&quot;OK&quot;]  {
 	background-color: #657FF8;
 }
 
-#startBtn:hover, #buttonBox *[text=OK]:hover {
+QPushButton[text=&quot;Start&quot;]:hover, QPushButton[text=&quot;OK&quot;]:hover  {
 	background-color: #5166C5;
 }
 
-#startBtn:pressed, #buttonBox *[text=OK]:pressed {
+QPushButton[text=&quot;Start&quot;]:pressed, QPushButton[text=&quot;OK&quot;]:pressed  {
 	background-color: #3C4C92;
 }
 
-#delBtn {
-	background-color: #CD1B1B;
+QPushButton[text=&quot;Delete&quot;] {
+	background-color: #C85252;
 }
 
-#delBtn:hover {
-	background-color: #9A1414;
+QPushButton[text=&quot;Delete&quot;]:hover {
+	background-color: #AE4747;
 }
 
-#delBtn:pressed {
-	background-color: #660D0D;
+QPushButton[text=&quot;Delete&quot;]:pressed {
+	background-color: #943D3D;
 }
+
+
 
 
 QLineEdit {
 	background-color: #303340;
-	height: 22px;
 	border-color: #606680;
 	border-radius: 5px;
 	border-style: solid;
@@ -106,121 +155,55 @@ QLineEdit:disabled {
 
 
 
-QWidget {
-	background-color: #1A1C29;
-	color: white;
-}
-
-QMenuBar {
-	background-color: #3B3F5C;
-	spacing: 3px;
-}
-
-QMenuBar::item {
-	background-color: transparent;
-	border-radius: 5px;
-	color: white;
-	padding: 5px 5px;
-}
-
-QMenuBar::item:selected {
-	background: #657FF8;
-}
-
-QMenuBar::item:pressed {
-	background: #657FF8;
-}
-
-QPlainTextEdit {
+QDoubleSpinBox {
 	background-color: #303340;
-	border-color: #606680;
-	border-radius: 5px;
-	border-style: solid;
-	border-width: 3px;
-}
-
-QPushButton {
-	border-radius: 5px;
-	background-color: #4C4E5C;
-	padding: 5px 5px;
-}
-
-QPushButton:disable {
-	background-color: #272833;
-}
-
-#startBtn, #buttonBox *[text=OK], #buttonBox *[text=Cancel] {
-	border-radius: 13px;
-}
-
-#buttonBox *[text=OK], #buttonBox *[text=Cancel] {
-	width: 100px;
-}
-
-#startBtn, #buttonBox *[text=OK] {
-	background-color: #657FF8;
-}
-
-#startBtn:hover, #buttonBox *[text=OK]:hover {
-	background-color: #5166C5;
-}
-
-#startBtn:pressed, #buttonBox *[text=OK]:pressed {
-	background-color: #3C4C92;
-}
-
-#delBtn {
-	background-color: #CD1B1B;
-}
-
-#delBtn:hover {
-	background-color: #9A1414;
-}
-
-#delBtn:pressed {
-	background-color: #660D0D;
-}
-
-
-QLineEdit {
-	background-color: #303340;
-	height: 22px;
 	border-color: #606680;
 	border-radius: 5px;
 	border-style: solid;
 	border-width: 2px;
 }
 
-QLineEdit:disabled {
-	background-color: #272833;
-	border-color: transparent;
+QDoubleSpinBox::up-button, QDoubleSpinBox::down-button  {
+	width: 0px;
 }
 
 
 
- QScrollBar:vertical {
-     background: #1A1C29;
-     width: 10px;
-     margin: 10px 0 10px 0;
- }
- QScrollBar::handle:vertical {
-     background: #43475A;
-     min-height: 20px;
+
+QScrollArea {
+	border: 2px solid #606680;
+	border-radius: 5px;
+}
+
+
+
+
+QScrollBar:vertical {
+	background: #3A3C4D;
+	border-color: #606680;
+	width: 10px;
+	margin: 5px 0 5px 0;
+}
+
+QScrollBar::handle:vertical {
+	background: #4C5066;
+	min-height: 20px;
 	margin: 4px 0px 4px 0px;
 	border-radius: 5px;
- }
- QScrollBar::add-line:vertical {
-     border: 2px solid #606680;
-     background: #606680;
-     height: 10px;
-     subcontrol-position: bottom;
-     subcontrol-origin: margin;
- }
+}
+
+QScrollBar::add-line:vertical {
+    border: 2px solid #606680;
+    background: #606680;
+    height: 5px;
+    subcontrol-position: bottom;
+    subcontrol-origin: margin;
+}
 
  QScrollBar::sub-line:vertical {
      border: 2px solid #606680;
      background: #606680;
-     height: 10px;
+     height: 5px;
      subcontrol-position: top;
      subcontrol-origin: margin;
  }
@@ -229,7 +212,7 @@ QLineEdit:disabled {
      background: none;
  }</string>
   </property>
-  <widget class="QWidget" name="centralwidget">
+  <widget class="QWidget" name="windowBackground">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
      <widget class="QPlainTextEdit" name="outputArea">
@@ -243,9 +226,6 @@ QLineEdit:disabled {
       </property>
       <property name="frameShadow">
        <enum>QFrame::Plain</enum>
-      </property>
-      <property name="verticalScrollBarPolicy">
-       <enum>Qt::ScrollBarAlwaysOn</enum>
       </property>
       <property name="horizontalScrollBarPolicy">
        <enum>Qt::ScrollBarAlwaysOff</enum>
