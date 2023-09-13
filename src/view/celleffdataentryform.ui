@@ -130,7 +130,17 @@
           </widget>
          </item>
          <item row="1" column="1">
-          <widget class="QLineEdit" name="sheetTitleField"/>
+          <widget class="QLineEdit" name="sheetTitleField">
+           <property name="inputMask">
+            <string/>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="placeholderText">
+            <string>Active sheet assumed...</string>
+           </property>
+          </widget>
          </item>
         </layout>
        </widget>
