@@ -4,8 +4,6 @@
 #include <exception>
 #include <utility>
 
-#include <xlnt/xlnt.hpp>
-
 #include "strutils.hpp"
 
 

@@ -31,10 +31,6 @@ include_directories(src include ${CMAKE_CURRENT_BINARY_DIR}/include)
 
 # ==== LIBRARY =============================================================== #
 
-set(INSTALL_LIBRARY_BIN_DIR ${CMAKE_BINARY_DIR}/install/library/bin)
-set(INSTALL_LIBRARY_LIB_DIR ${CMAKE_BINARY_DIR}/install/library/lib)
-set(INSTALL_LIBRARY_INC_DIR ${CMAKE_BINARY_DIR}/install/library/include)
-
 set(VRFBCALC_PUBLIC_HEADERS
     include/table.hpp
     ${CMAKE_CURRENT_BINARY_DIR}/include/vrfbcalccfg.hpp
@@ -52,21 +48,13 @@ add_library(vrfbcalc SHARED
     ${VRFBCALC_PRIVATE_HEADERS}
     ${VRFBCALC_SOURCES})
 
-find_package(Xlnt CONFIG REQUIRED)
-target_link_libraries(vrfbcalc PRIVATE xlnt::xlnt)
-
-install(TARGETS vrfbcalc
-    RUNTIME DESTINATION ${INSTALL_LIBRARY_BIN_DIR}
-    ARCHIVE DESTINATION ${INSTALL_LIBRARY_LIB_DIR}
-    LIBRARY DESTINATION ${INSTALL_LIBRARY_LIB_DIR})
-install(FILES ${VRFBCALC_PUBLIC_HEADERS} DESTINATION ${INSTALL_LIBRARY_INC_DIR})
-
 # ==== EXECUTABLE ============================================================ #
 
 set(VRFBCALC-CPP_VERSION "0.1.0-EA6")
 
 configure_file(include/vrfbcalccfg.hpp.in include/vrfbcalccfg.hpp)
 
+find_package(Xlnt CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(Qt6 REQUIRED COMPONENTS
     Concurrent
