@@ -14,6 +14,8 @@ QT_END_NAMESPACE
 
 
 class CEManualConfigForm : public CEDataEntryForm::ConfigForm {
+  Q_OBJECT
+
   public:
     CEManualConfigForm(QWidget* parent);
     ~CEManualConfigForm();
