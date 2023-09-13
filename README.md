@@ -76,3 +76,7 @@ Packaging script requires [7-zip](https://www.7-zip.org/) to be installed exactl
 ```text
 ./package
 ```
+
+## Acknowledgements
+
+* Icons by [icon8](https://icons8.com/)

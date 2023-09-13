@@ -135,7 +135,6 @@ add_custom_command(TARGET vrfbcalc-cpp POST_BUILD
             imageformats
         --no-opengl
         --no-opengl-sw
-        --no-svg
         --no-system-d3d-compiler
         --no-translations
         \"$<TARGET_FILE:vrfbcalc-cpp>\"

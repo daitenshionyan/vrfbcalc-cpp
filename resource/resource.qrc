@@ -1,5 +1,7 @@
 <!DOCTYPE RCC>
 <RCC version="1.0">
     <qresource>
+        <file>images/folder.svg</file>
+        <file>images/calculator_icon.png</file>
     </qresource>
 </RCC>

@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>vrfbcalc</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="../../resource/resource.qrc">
+    <normaloff>:/images/calculator_icon.png</normaloff>:/images/calculator_icon.png</iconset>
+  </property>
   <property name="styleSheet">
    <string notr="true">QWidget {
 	background-color: transparent;
@@ -288,6 +292,8 @@ QScrollBar::add-line:vertical {
    </property>
   </action>
  </widget>
- <resources/>
+ <resources>
+  <include location="../../resource/resource.qrc"/>
+ </resources>
  <connections/>
 </ui>
