@@ -1,6 +1,8 @@
 #include "view/celleffloadpresetconfigform.h"
 #include "./ui_celleffloadpresetconfigform.h"
 
+#include <filesystem>
+
 #include <QFileDialog>
 
 #include "driver/vrfbdriver_io.hpp"
@@ -25,7 +27,11 @@ vrfb::Config_CE CELoadPresetConfigForm::getConfig() const {
 
 
 void CELoadPresetConfigForm::on_browseBtn_clicked() {
+  QString openPath = "presets";
+  if (!std::filesystem::exists(openPath.toStdString())) {
+    openPath = QString();
+  }
   QString path = QFileDialog::getOpenFileName(this, "Open preset",
-      QString(), "Preset files (*.json)");
+      openPath, "Preset files (*.json)");
   ui->pathField->setText(path);
 }
