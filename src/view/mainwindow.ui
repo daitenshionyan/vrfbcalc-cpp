@@ -50,6 +50,24 @@ QMenuBar::item:pressed {
 
 
 
+QMenu {
+    background-color: #3B3F5C;
+}
+
+QMenu::item {
+    background-color: transparent;
+}
+
+QMenu::item:selected {
+    background-color: #657FF8;
+}
+
+QMenu::item:pressed {
+	background: #657FF8;
+}
+
+
+
 QGroupBox {
 	font: bold;
     border: 2px solid #4A4C5E;
