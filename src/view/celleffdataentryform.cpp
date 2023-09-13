@@ -6,59 +6,56 @@
 
 #include <QFileDialog>
 
-#include "driver/vrfbdriver_io.hpp"
+#include "view/celleffloadpresetconfigform.h"
+#include "view/celleffmanualconfigform.h"
 
 
 CEDataEntryForm::CEDataEntryForm(QWidget* parent)
       : QFrame(parent), ui(new Ui::CEDataEntryForm) {
   ui->setupUi(this);
-  connect(
-      ui->c_capHdrField, &QLineEdit::textChanged,
-      this, &CEDataEntryForm::syncCapField);
-  connect(
-      ui->c_energyHdrField, &QLineEdit::textChanged,
-      this, &CEDataEntryForm::synchEnergyField);
-  ui->d_capRBtn->setChecked(true);
-  ui->d_energyRBtn->setChecked(true);
+  ui->presetCfgBtn->setDisabled(true);
+  cfgForm = new CELoadPresetConfigForm(this);
+  ui->cfgFormArea->layout()->addWidget(cfgForm);
+
+  connect(ui->manualCfgBtn, &QPushButton::clicked,
+      this, &CEDataEntryForm::changeToManual);
+  connect(ui->presetCfgBtn, &QPushButton::clicked,
+      this, &CEDataEntryForm::changeToPreset);
 }
 
 
 CEDataEntryForm::~CEDataEntryForm() {
   delete ui;
+  delete cfgForm;
 }
 
 
 vrfbdriver::DataEntry_CE CEDataEntryForm::getEntry() const {
-  vrfb::Config_CE cfg = (ui->lfpRadioBtn->isChecked()) ?
-        vrfbdriver::io::loadConfig_CE(ui->presetPathField->text().toStdString())
-      : getConfig();
   return {
     ui->pathField->text().toStdString(),
     ui->sheetTitleField->text().toStdString(),
-    cfg
+    cfgForm->getConfig()
   };
 }
 
 
-vrfb::Config_CE CEDataEntryForm::getConfig() const {
-  vrfb::Config_CE cfg {};
-  cfg.t_time_h = ui->timeHdrField->text().toStdString();
-  cfg.type_h = ui->typeHdrField->text().toStdString();
-  cfg.c_capacity_h = ui->c_capHdrField->text().toStdString();
-  cfg.d_capacity_h = ui->d_capHdrField->text().toStdString();
-  cfg.c_energy_h = ui->c_energyHdrField->text().toStdString();
-  cfg.d_energy_h = ui->d_energyHdrField->text().toStdString();
-  // read charging type names
-  std::vector<std::string> c_names {};
-  std::stringstream cn_ss{ui->c_typeNameField->text().toStdString()};
-  vrfbdriver::io::readLine_CSV(cn_ss, c_names);
-  cfg.c_type_names.insert(c_names.begin(), c_names.end());
-  // read discharging type names
-  std::vector<std::string> d_names {};
-  std::stringstream dn_ss{ui->d_typeNameField->text().toStdString()};
-  vrfbdriver::io::readLine_CSV(dn_ss, d_names);
-  cfg.d_type_names.insert(d_names.begin(), d_names.end());
-  return cfg;
+void CEDataEntryForm::changeToManual() {
+  ui->cfgFormArea->layout()->removeWidget(cfgForm);
+  delete cfgForm;
+  cfgForm = new CEManualConfigForm(this);
+  ui->cfgFormArea->layout()->addWidget(cfgForm);
+  ui->manualCfgBtn->setDisabled(true);
+  ui->presetCfgBtn->setDisabled(false);
+}
+
+
+void CEDataEntryForm::changeToPreset() {
+  ui->cfgFormArea->layout()->removeWidget(cfgForm);
+  delete cfgForm;
+  cfgForm = new CELoadPresetConfigForm(this);
+  ui->cfgFormArea->layout()->addWidget(cfgForm);
+  ui->manualCfgBtn->setDisabled(false);
+  ui->presetCfgBtn->setDisabled(true);
 }
 
 
@@ -69,48 +66,6 @@ void CEDataEntryForm::on_browseBtn_clicked() {
 }
 
 
-void CEDataEntryForm::on_presetBrowseBtn_clicked() {
-  QString preset_path{};
-  std::filesystem::path output_path {"presets"};
-  if (std::filesystem::exists(output_path) && std::filesystem::is_directory(output_path)) {
-    preset_path = "presets";
-  }
-  QString path = QFileDialog::getOpenFileName(this, "Open file",
-      preset_path, "JSON files (*.json)");
-  ui->presetPathField->setText(path);
-}
-
-
-void CEDataEntryForm::on_d_capRBtn_toggled(bool t) {
-  if (t) {
-    ui->d_capHdrField->setText(ui->c_capHdrField->text());
-  }
-  ui->d_capHdrField->setDisabled(t);
-}
-
-
-void CEDataEntryForm::on_d_energyRBtn_toggled(bool t) {
-  if (t) {
-    ui->d_energyHdrField->setText(ui->c_energyHdrField->text());
-  }
-  ui->d_energyHdrField->setDisabled(t);
-}
-
-
 void CEDataEntryForm::on_delBtn_clicked() {
   emit formDeleted(this);
-}
-
-
-void CEDataEntryForm::syncCapField() {
-  if (ui->d_capRBtn->isChecked()) {
-    ui->d_capHdrField->setText(ui->c_capHdrField->text());
-  }
-}
-
-
-void CEDataEntryForm::synchEnergyField() {
-  if (ui->d_energyRBtn->isChecked()) {
-    ui->d_energyHdrField->setText(ui->c_energyHdrField->text());
-  }
 }

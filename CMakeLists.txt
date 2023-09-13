@@ -99,6 +99,14 @@ add_executable(vrfbcalc-cpp WIN32
     include/view/celleffdataentryform.h
     src/view/celleffdataentryform.ui
     src/view/celleffdataentryform.cpp
+
+    include/view/celleffloadpresetconfigform.h
+    src/view/celleffloadpresetconfigform.ui
+    src/view/celleffloadpresetconfigform.cpp
+
+    include/view/celleffmanualconfigform.h
+    src/view/celleffmanualconfigform.ui
+    src/view/celleffmanualconfigform.cpp
 )
 
 set(VRFBCALC_EXECUTABLE_NAME "vrfbcalc_v${VRFBCALC-CPP_VERSION}" CACHE STRING "Output executable name" FORCE)
