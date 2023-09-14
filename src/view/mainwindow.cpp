@@ -10,7 +10,7 @@
 
 #include "strutils.hpp"
 #include "vrfbcalccfg.hpp"
-#include "view/celleffresultview.h"
+#include "driver/vrfbdriver_io.hpp"
 
 
 namespace {
@@ -28,6 +28,23 @@ class PromLogger : public logger::Logger {
   private:
     QPromise<logger::LogMsg>* prom_p;
 };
+
+
+std::vector<vrfb::Table> readPerformanceData(const QStringList& strPaths, logger::Logger& l) {
+  std::vector<vrfb::Table> tables {};
+  for (const QString& strPath : strPaths) {
+    auto path = std::filesystem::u8path<std::string>(strPath.toStdString());
+    try {
+      tables.push_back(vrfbdriver::io::readTable_XLSX(path, "Dat"));
+    } catch (std::exception& ex) {
+      l.fail(strutils::format_string("Failed to read '%s' - %s",
+          path.string().c_str(), ex.what()));
+    }
+  }
+  l.fine(strutils::format_string("Successfully read %d performance data",
+      tables.size()));
+  return tables;
+}
 
 
 }
@@ -53,6 +70,9 @@ MainWindow::MainWindow(QWidget* parent)
     this, &MainWindow::startCalc);
   connect(&watcher, &QFutureWatcher<logger::LogMsg>::resultReadyAt,
     this, &MainWindow::logMsgAt);
+  connect(this, &MainWindow::completedPerformanceReading,
+      this, &MainWindow::displayPerformanceView,
+      Qt::ConnectionType::QueuedConnection);
 }
 
 
@@ -115,6 +135,13 @@ void MainWindow::logMsg(const logger::LogMsg& lm) {
 }
 
 
+void MainWindow::displayPerformanceView(const std::vector<vrfb::Table>& tables) {
+  CEResultView* rv = new CEResultView(this);
+  rv->createGraphs(tables);
+  rv->show();
+}
+
+
 // ---- < SLOTS > --------------------------------------------------------------
 
 
@@ -140,6 +167,10 @@ void MainWindow::on_startBtn_clicked() {
 
 
 void MainWindow::on_actionPerformanceAnalysis_triggered(bool) {
+  if (watcher.isRunning()) {
+    warn("Cannot analyse data as another process is already running");
+    return;
+  }
   QString openPath = "output";
   if (!std::filesystem::exists(openPath.toStdString())) {
     openPath = QString();
@@ -150,12 +181,11 @@ void MainWindow::on_actionPerformanceAnalysis_triggered(bool) {
       openPath,
       "XLSX Files (*.xlsx)"
   );
-  try {
-    CEResultView* rv = new CEResultView(this, files);
-    rv->exec();
-    delete rv;
-  } catch (std::exception& ex) {
-    fail(strutils::format_string("Failed to generate result view - %s",
-        ex.what()));
-  }
+  watcher.setFuture(QtConcurrent::run(
+      &pool,
+      [&, files](QPromise<logger::LogMsg>& p) {
+        auto l = PromLogger{p};
+        std::vector<vrfb::Table> tables = readPerformanceData(files, l);
+        emit completedPerformanceReading(tables);
+      }));
 }

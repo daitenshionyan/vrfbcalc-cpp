@@ -6,6 +6,7 @@
 #include <QMainWindow>
 
 #include "view/celleffconfigpopup.h"
+#include "view/celleffresultview.h"
 #include "driver/vrfbdriver.hpp"
 #include "logger.hpp"
 
@@ -27,6 +28,8 @@ class MainWindow : public QMainWindow, private logger::Logger {
 
   signals:
     void availableLogMsg(const logger::LogMsg&);
+  signals:
+    void completedPerformanceReading(const std::vector<vrfb::Table>&);
 
 
   private:
@@ -36,6 +39,8 @@ class MainWindow : public QMainWindow, private logger::Logger {
     inline void logMsgAt(int index) {
       log(watcher.future().resultAt(index));
     }
+
+    void displayPerformanceView(const std::vector<vrfb::Table>&);
 
     Ui::MainWindow* ui;
     CEConfigPopup* popup_ce;

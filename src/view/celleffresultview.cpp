@@ -30,11 +30,14 @@ int calcInterval(int diff, int targetCount = kMaxHorizontalTick) {
 
 
 QValueAxis* createAxisWhole(int min, int max) {
+  QValueAxis* axis = new QValueAxis();
   int diff = max - min;
+  if (diff <= 0) {
+    return axis;
+  }
   int interval = calcInterval(diff);
   int tickCount = (int) std::ceil((double) diff / interval) + 1;
   int maxRange = min + interval * (tickCount-1);
-  QValueAxis* axis = new QValueAxis();
   axis->setRange(min, maxRange);
   axis->setTickInterval(interval);
   axis->setTickCount(tickCount);
@@ -44,7 +47,11 @@ QValueAxis* createAxisWhole(int min, int max) {
 
 
 QValueAxis* createAxisDouble(double min, double max, int targetCount) {
+  QValueAxis* axis = new QValueAxis();
   double diff = max - min;
+  if (diff <= 0) {
+    return axis;
+  }
   int pow = 0;
   for (double num = diff; std::ceil(num) < targetCount-1; num *= 10) {
     ++pow;
@@ -53,7 +60,6 @@ QValueAxis* createAxisDouble(double min, double max, int targetCount) {
       / std::pow(10, pow);
   int tickCount = (int) std::ceil(diff / interval) + 1;
   double maxRange = min + interval * (tickCount-1);
-  QValueAxis* axis = new QValueAxis();
   axis->setRange(min, maxRange);
   axis->setTickInterval(interval);
   axis->setTickCount(tickCount);
@@ -93,15 +99,14 @@ QChartView* createChart_CE(const std::vector<vrfb::Table>& tables) {
 }
 
 
-CEResultView::CEResultView(
-    QWidget* parent, const QStringList& files)
+CEResultView::CEResultView(QWidget* parent)
     : QDialog(parent), ui(new Ui::CEResultView) {
   ui->setupUi(this);
-  std::vector<vrfb::Table> tables {};
-  for (const QString& file : files) {
-    std::filesystem::path fp = std::filesystem::u8path<std::string>(file.toStdString());
-    tables.push_back(vrfbdriver::io::readTable_XLSX(fp, "Data"));
-  }
+  connect(this, &QDialog::finished, this, &CEResultView::deleteSelf);
+}
+
+
+void CEResultView::createGraphs(const std::vector<vrfb::Table>& tables) {
   ui->ceArea->layout()->addWidget(createChart_CE(tables));
 }
 
