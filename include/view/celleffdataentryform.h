@@ -19,6 +19,14 @@ class CEDataEntryForm : public QFrame {
   Q_OBJECT
 
   public:
+    class ConfigForm : public QWidget {
+      public:
+        ConfigForm(QWidget* parent) : QWidget(parent) {};
+        virtual ~ConfigForm() = default;
+        virtual vrfb::Config_CE getConfig() const = 0;
+    };
+
+
     CEDataEntryForm(QWidget* parent);
     ~CEDataEntryForm();
 
@@ -30,18 +38,14 @@ class CEDataEntryForm : public QFrame {
 
 
   private:
-    void syncCapField();
-    void synchEnergyField();
-
-    vrfb::Config_CE getConfig() const;
+    void changeToManual();
+    void changeToPreset();
 
     Ui::CEDataEntryForm* ui;
+    ConfigForm* cfgForm;
 
 
   private slots:
     void on_browseBtn_clicked();
-    void on_presetBrowseBtn_clicked();
-    void on_d_capRBtn_toggled(bool);
-    void on_d_energyRBtn_toggled(bool);
     void on_delBtn_clicked();
 };

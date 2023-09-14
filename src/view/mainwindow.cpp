@@ -101,23 +101,23 @@ void MainWindow::logMsg(const logger::LogMsg& lm) {
   std::string lvlTxt = "";
   switch (lm.lvl) {
     case logger::Level::kFine:
-      color = "grey";
+      color = "#A0A0A0";
       lvlTxt = "FINE";
       break;
     case logger::Level::kInfo:
-      color = "black";
+      color = "white";
       lvlTxt = "INFO";
       break;
     case logger::Level::kWarn:
-      color = "orange";
+      color = "#FF9933";
       lvlTxt = "WARN";
       break;
     case logger::Level::kFail:
-      color = "red";
+      color = "#FF3333";
       lvlTxt = "FAIL";
       break;
     case logger::Level::kSucc:
-      color = "green";
+      color = "#33FF33";
       lvlTxt = "SUCC";
   }
   QString outText = QString::fromStdString(

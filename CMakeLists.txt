@@ -31,10 +31,6 @@ include_directories(src include ${CMAKE_CURRENT_BINARY_DIR}/include)
 
 # ==== LIBRARY =============================================================== #
 
-set(INSTALL_LIBRARY_BIN_DIR ${CMAKE_BINARY_DIR}/install/library/bin)
-set(INSTALL_LIBRARY_LIB_DIR ${CMAKE_BINARY_DIR}/install/library/lib)
-set(INSTALL_LIBRARY_INC_DIR ${CMAKE_BINARY_DIR}/install/library/include)
-
 set(VRFBCALC_PUBLIC_HEADERS
     include/table.hpp
     ${CMAKE_CURRENT_BINARY_DIR}/include/vrfbcalccfg.hpp
@@ -52,21 +48,13 @@ add_library(vrfbcalc SHARED
     ${VRFBCALC_PRIVATE_HEADERS}
     ${VRFBCALC_SOURCES})
 
-find_package(Xlnt CONFIG REQUIRED)
-target_link_libraries(vrfbcalc PRIVATE xlnt::xlnt)
-
-install(TARGETS vrfbcalc
-    RUNTIME DESTINATION ${INSTALL_LIBRARY_BIN_DIR}
-    ARCHIVE DESTINATION ${INSTALL_LIBRARY_LIB_DIR}
-    LIBRARY DESTINATION ${INSTALL_LIBRARY_LIB_DIR})
-install(FILES ${VRFBCALC_PUBLIC_HEADERS} DESTINATION ${INSTALL_LIBRARY_INC_DIR})
-
 # ==== EXECUTABLE ============================================================ #
 
-set(VRFBCALC-CPP_VERSION "0.1.0-EA6")
+set(VRFBCALC-CPP_VERSION "0.1.0")
 
 configure_file(include/vrfbcalccfg.hpp.in include/vrfbcalccfg.hpp)
 
+find_package(Xlnt CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(Qt6 REQUIRED COMPONENTS
     Concurrent
@@ -82,7 +70,7 @@ add_executable(vrfbcalc-cpp WIN32
     include/driver/vrfbdriver_io.hpp
     src/driver/vrfbdriver_io.cpp
 
-    src/view/resource.qrc
+    resource/resource.qrc
 
     include/view/mainwindow.h
     src/view/mainwindow.ui
@@ -99,6 +87,16 @@ add_executable(vrfbcalc-cpp WIN32
     include/view/celleffdataentryform.h
     src/view/celleffdataentryform.ui
     src/view/celleffdataentryform.cpp
+
+    include/view/celleffloadpresetconfigform.h
+    src/view/celleffloadpresetconfigform.ui
+    src/view/celleffloadpresetconfigform.cpp
+
+    include/view/celleffmanualconfigform.h
+    src/view/celleffmanualconfigform.ui
+    src/view/celleffmanualconfigform.cpp
+
+    resource/app.o
 )
 
 set(VRFBCALC_EXECUTABLE_NAME "vrfbcalc_v${VRFBCALC-CPP_VERSION}" CACHE STRING "Output executable name" FORCE)
@@ -127,7 +125,6 @@ add_custom_command(TARGET vrfbcalc-cpp POST_BUILD
             imageformats
         --no-opengl
         --no-opengl-sw
-        --no-svg
         --no-system-d3d-compiler
         --no-translations
         \"$<TARGET_FILE:vrfbcalc-cpp>\"

@@ -13,7 +13,228 @@
   <property name="windowTitle">
    <string>vrfbcalc</string>
   </property>
-  <widget class="QWidget" name="centralwidget">
+  <property name="windowIcon">
+   <iconset resource="../../resource/resource.qrc">
+    <normaloff>:/images/calculator_icon.png</normaloff>:/images/calculator_icon.png</iconset>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">QWidget {
+	background-color: transparent;
+	color: white;
+}
+
+
+
+QDialog, #windowBackground {
+	background-color: #1A1C29;
+}
+
+
+
+
+QMenuBar {
+	background-color: #3B3F5C;
+	spacing: 3px;
+}
+
+QMenuBar::item {
+	background-color: transparent;
+	border-radius: 5px;
+	color: white;
+	padding: 5px 5px;
+}
+
+QMenuBar::item:selected {
+	background: #657FF8;
+}
+
+QMenuBar::item:pressed {
+	background: #657FF8;
+}
+
+
+
+QMenu {
+    background-color: #3B3F5C;
+}
+
+QMenu::item {
+    background-color: transparent;
+}
+
+QMenu::item:selected {
+    background-color: #657FF8;
+}
+
+QMenu::item:pressed {
+	background: #657FF8;
+}
+
+
+
+QGroupBox {
+	font: bold;
+    border: 2px solid #4A4C5E;
+    border-radius: 5px;
+    margin-top: 6px;
+}
+
+QGroupBox::title {
+	color: #4A4C5E;
+	subcontrol-origin: margin;
+    left: 9px;
+	padding: 0px 5px 0px 5px;
+}
+
+
+
+#CEDataSetFormFrame, #CEDataEntryForm  {
+	background-color: rgba(148, 148, 148, 30);
+	border-radius: 5px;
+}
+
+
+
+QPlainTextEdit {
+	background-color: #303340;
+	border-color: #606680;
+	border-radius: 5px;
+	border-style: solid;
+	border-width: 3px;
+}
+
+
+
+
+QPushButton {
+	border-radius: 5px;
+	background-color: #4C4E5C;
+	padding: 5px 5px;
+}
+
+QPushButton:hover {
+	background-color: #41434F;
+} 
+
+QPushButton:pressed {
+	background-color: #373943;
+}
+	
+QPushButton:disabled {
+	background-color: #272833;
+}
+
+QPushButton[text=&quot;Start&quot;],
+QPushButton[text=&quot;OK&quot;],
+QPushButton[text=&quot;Cancel&quot;],
+QPushButton[text=&quot;Add&quot;] {
+	border-radius: 13px;
+}
+
+#buttonBox *[text=OK], #buttonBox *[text=Cancel] {
+	width: 100px;
+}
+
+QPushButton[text=&quot;Start&quot;], QPushButton[text=&quot;OK&quot;]  {
+	background-color: #657FF8;
+}
+
+QPushButton[text=&quot;Start&quot;]:hover, QPushButton[text=&quot;OK&quot;]:hover  {
+	background-color: #5166C5;
+}
+
+QPushButton[text=&quot;Start&quot;]:pressed, QPushButton[text=&quot;OK&quot;]:pressed  {
+	background-color: #3C4C92;
+}
+
+QPushButton[text=&quot;Delete&quot;] {
+	background-color: #C85252;
+}
+
+QPushButton[text=&quot;Delete&quot;]:hover {
+	background-color: #AE4747;
+}
+
+QPushButton[text=&quot;Delete&quot;]:pressed {
+	background-color: #943D3D;
+}
+
+
+
+
+QLineEdit {
+	background-color: #303340;
+	border-color: #606680;
+	border-radius: 5px;
+	border-style: solid;
+	border-width: 2px;
+}
+
+QLineEdit:disabled {
+	background-color: #272833;
+	border-color: transparent;
+}
+
+
+
+QDoubleSpinBox {
+	background-color: #303340;
+	border-color: #606680;
+	border-radius: 5px;
+	border-style: solid;
+	border-width: 2px;
+}
+
+QDoubleSpinBox::up-button, QDoubleSpinBox::down-button  {
+	width: 0px;
+}
+
+
+
+
+QScrollArea {
+	border: 2px solid #606680;
+	border-radius: 5px;
+}
+
+
+
+
+QScrollBar:vertical {
+	background: #3A3C4D;
+	border-color: #606680;
+	width: 10px;
+	margin: 5px 0 5px 0;
+}
+
+QScrollBar::handle:vertical {
+	background: #4C5066;
+	min-height: 20px;
+	margin: 4px 0px 4px 0px;
+	border-radius: 5px;
+}
+
+QScrollBar::add-line:vertical {
+    border: 2px solid #606680;
+    background: #606680;
+    height: 5px;
+    subcontrol-position: bottom;
+    subcontrol-origin: margin;
+}
+
+ QScrollBar::sub-line:vertical {
+     border: 2px solid #606680;
+     background: #606680;
+     height: 5px;
+     subcontrol-position: top;
+     subcontrol-origin: margin;
+ }
+
+ QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+     background: none;
+ }</string>
+  </property>
+  <widget class="QWidget" name="windowBackground">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
      <widget class="QPlainTextEdit" name="outputArea">
@@ -21,6 +242,15 @@
        <font>
         <family>Cascadia Mono</family>
        </font>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::NoFrame</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Plain</enum>
+      </property>
+      <property name="horizontalScrollBarPolicy">
+       <enum>Qt::ScrollBarAlwaysOff</enum>
       </property>
       <property name="readOnly">
        <bool>true</bool>
@@ -45,7 +275,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>22</height>
+     <height>27</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -62,6 +292,8 @@
    </property>
   </action>
  </widget>
- <resources/>
+ <resources>
+  <include location="../../resource/resource.qrc"/>
+ </resources>
  <connections/>
 </ui>
