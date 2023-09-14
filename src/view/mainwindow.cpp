@@ -6,9 +6,11 @@
 #include <QtCore/qpromise.h>
 #include <QtConcurrent/qtconcurrentrun.h>
 #include <QDesktopServices>
+#include <QFileDialog>
 
 #include "strutils.hpp"
 #include "vrfbcalccfg.hpp"
+#include "view/celleffresultview.h"
 
 
 namespace {
@@ -57,27 +59,6 @@ MainWindow::MainWindow(QWidget* parent)
 MainWindow::~MainWindow() {
   delete popup_ce;
   delete ui;
-}
-
-
-void MainWindow::on_action_openOutput_triggered(bool) {
-  std::filesystem::path output_path {"output"};
-  if (!std::filesystem::exists(output_path)) {
-    fail("Output folder does not exist yet");
-    return;
-  } else if (!std::filesystem::is_directory(output_path)) {
-    fail("The file 'output' exists but it is not a directory");
-    return;
-  }
-  QDesktopServices::openUrl(QUrl::fromLocalFile("output"));
-}
-
-
-void MainWindow::on_startBtn_clicked() {
-  if (watcher.isRunning()) {
-    return;
-  }
-  popup_ce->exec();
 }
 
 
@@ -131,4 +112,50 @@ void MainWindow::logMsg(const logger::LogMsg& lm) {
           strutils::format_string("<p style=\"color:%s;white-space:pre\">",
               color.c_str()))
       + outText + "</p>");
+}
+
+
+// ---- < SLOTS > --------------------------------------------------------------
+
+
+void MainWindow::on_action_openOutput_triggered(bool) {
+  std::filesystem::path output_path {"output"};
+  if (!std::filesystem::exists(output_path)) {
+    fail("Output folder does not exist yet");
+    return;
+  } else if (!std::filesystem::is_directory(output_path)) {
+    fail("The file 'output' exists but it is not a directory");
+    return;
+  }
+  QDesktopServices::openUrl(QUrl::fromLocalFile("output"));
+}
+
+
+void MainWindow::on_startBtn_clicked() {
+  if (watcher.isRunning()) {
+    return;
+  }
+  popup_ce->exec();
+}
+
+
+void MainWindow::on_actionPerformanceAnalysis_triggered(bool) {
+  QString openPath = "output";
+  if (!std::filesystem::exists(openPath.toStdString())) {
+    openPath = QString();
+  }
+  QStringList files = QFileDialog::getOpenFileNames(
+      this,
+      "Select one or more performance files to open",
+      openPath,
+      "XLSX Files (*.xlsx)"
+  );
+  try {
+    CEResultView* rv = new CEResultView(this, files);
+    rv->exec();
+    delete rv;
+  } catch (std::exception& ex) {
+    fail(strutils::format_string("Failed to generate result view - %s",
+        ex.what()));
+  }
 }

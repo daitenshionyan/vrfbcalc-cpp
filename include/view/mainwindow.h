@@ -47,4 +47,5 @@ class MainWindow : public QMainWindow, private logger::Logger {
   private slots:
     void on_action_openOutput_triggered(bool);
     void on_startBtn_clicked();
+    void on_actionPerformanceAnalysis_triggered(bool);
 };

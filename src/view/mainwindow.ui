@@ -284,11 +284,23 @@ QScrollBar::add-line:vertical {
     </property>
     <addaction name="action_openOutput"/>
    </widget>
+   <widget class="QMenu" name="menuAnalyse">
+    <property name="title">
+     <string>Analyse</string>
+    </property>
+    <addaction name="actionPerformanceAnalysis"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuAnalyse"/>
   </widget>
   <action name="action_openOutput">
    <property name="text">
     <string>Open output</string>
+   </property>
+  </action>
+  <action name="actionPerformanceAnalysis">
+   <property name="text">
+    <string>Performance</string>
    </property>
   </action>
  </widget>

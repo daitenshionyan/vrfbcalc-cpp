@@ -60,7 +60,8 @@ find_package(Qt6 REQUIRED COMPONENTS
     Concurrent
     Core
     Gui
-    Widgets)
+    Widgets
+    Charts)
 
 add_executable(vrfbcalc-cpp WIN32
     src/main.cpp
@@ -96,6 +97,10 @@ add_executable(vrfbcalc-cpp WIN32
     src/view/celleffmanualconfigform.ui
     src/view/celleffmanualconfigform.cpp
 
+    include/view/celleffresultview.h
+    src/view/celleffresultview.ui
+    src/view/celleffresultview.cpp
+
     resource/app.o
 )
 
@@ -109,7 +114,8 @@ target_link_libraries(vrfbcalc-cpp PRIVATE
     Qt6::Concurrent
     Qt6::Core
     Qt6::Gui
-    Qt6::Widgets)
+    Qt6::Widgets
+    Qt6::Charts)
 
 set(PACKAGE_OUTPUT_DIR ${CMAKE_BINARY_DIR}/package)
 file(MAKE_DIRECTORY ${PACKAGE_OUTPUT_DIR})
@@ -123,7 +129,6 @@ add_custom_command(TARGET vrfbcalc-cpp POST_BUILD
         --no-pdf
         --skip-plugin-types
             imageformats
-        --no-opengl
         --no-opengl-sw
         --no-system-d3d-compiler
         --no-translations
