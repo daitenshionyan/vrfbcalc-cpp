@@ -10,6 +10,8 @@
 #include <QtCharts/QLineSeries>
 #include <QtCharts/QValueAxis>
 
+#include "qcustomplot.h"
+
 #include "driver/vrfbdriver_io.hpp"
 
 
@@ -107,7 +109,8 @@ CEResultView::CEResultView(QWidget* parent)
 
 
 void CEResultView::createGraphs(const std::vector<vrfb::Table>& tables) {
-  ui->ceArea->layout()->addWidget(createChart_CE(tables));
+  QCustomPlot* customPlot = new QCustomPlot();
+  ui->ceArea->layout()->addWidget(customPlot);
 }
 
 

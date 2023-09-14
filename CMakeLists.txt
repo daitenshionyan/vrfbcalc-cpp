@@ -10,6 +10,8 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED true)
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS on)
 
+set(PROJECT_ARCH_TARGET "amd64")
+
 # ==== PROJECT CONFIGURATION ================================================= #
 
 project(vrfbcalc-cpp
@@ -53,6 +55,8 @@ add_library(vrfbcalc SHARED
 set(VRFBCALC-CPP_VERSION "0.1.0")
 
 configure_file(include/vrfbcalccfg.hpp.in include/vrfbcalccfg.hpp)
+
+add_subdirectory(dependencies/qcustomplot)
 
 find_package(Xlnt CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
@@ -116,6 +120,9 @@ target_link_libraries(vrfbcalc-cpp PRIVATE
     Qt6::Gui
     Qt6::Widgets
     Qt6::Charts)
+target_link_libraries(vrfbcalc-cpp PRIVATE qcustomplot)
+
+target_compile_definitions(vrfbcalc-cpp PRIVATE QCUSTOMPLOT_USE_LIBRARY)
 
 set(PACKAGE_OUTPUT_DIR ${CMAKE_BINARY_DIR}/package)
 file(MAKE_DIRECTORY ${PACKAGE_OUTPUT_DIR})
@@ -132,5 +139,6 @@ add_custom_command(TARGET vrfbcalc-cpp POST_BUILD
         --no-opengl-sw
         --no-system-d3d-compiler
         --no-translations
+        -printsupport
         \"$<TARGET_FILE:vrfbcalc-cpp>\"
 )
