@@ -14,24 +14,26 @@ constexpr double kEndSpacePortion = 0.1;
 
 
 double correctLowerValue(double lv, double uv, double corrDiff, int pow) {
-  double clv = std::ceil(uv * std::pow(10, pow)) - corrDiff;
-  clv = (clv + (10 - std::abs((int) clv % 10))) / std::pow(10, pow);
-  if (clv > lv) {
-    clv = std::ceil(lv * std::pow(10, pow));
-    clv = (clv - std::abs((int) clv % 10)) / std::pow(10, pow);
+  double fac = std::pow(10, pow);
+  int clv = std::floor(std::ceil(uv * fac) - corrDiff);
+  clv += 10 - std::abs(clv % 10);
+  if (clv > std::ceil(lv * fac)) {
+    clv = std::ceil(lv * fac);
+    clv -= std::abs(clv % 10);
   }
-  return clv;
+  return clv / fac;
 }
 
 
 double correctUpperValue(double lv, double uv, double corrDiff, int pow) {
-  double cuv = std::ceil(lv * std::pow(10, pow)) + corrDiff;
-  cuv = (cuv - std::abs((int) cuv % 10)) / std::pow(10, pow);
-  if (cuv < uv) {
-    cuv = std::ceil(uv * std::pow(10, pow));
-    cuv = (cuv + (10 + std::abs((int) cuv % 10))) / std::pow(10, pow);
+  double fac = std::pow(10, pow);
+  int cuv = std::floor(std::ceil(lv * fac) + corrDiff);
+  cuv -= std::abs(cuv % 10);
+  if (cuv < std::ceil(uv * fac)) {
+    cuv = std::ceil(uv * fac);
+    cuv += 10 - std::abs(cuv % 10);
   }
-  return cuv;
+  return cuv / fac;
 }
 
 
