@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>940</width>
-    <height>600</height>
+    <width>1172</width>
+    <height>849</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -36,8 +36,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>921</width>
-        <height>1108</height>
+        <width>1170</width>
+        <height>847</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -79,24 +79,10 @@
         </widget>
        </item>
        <item>
-        <widget class="QCustomPlot" name="ceCycPlot" native="true">
-         <property name="minimumSize">
-          <size>
-           <width>900</width>
-           <height>520</height>
-          </size>
-         </property>
-        </widget>
+        <widget class="GraphPlotForm" name="ceCycPlot" native="true"/>
        </item>
        <item>
-        <widget class="QCustomPlot" name="ceTimePlot" native="true">
-         <property name="minimumSize">
-          <size>
-           <width>900</width>
-           <height>520</height>
-          </size>
-         </property>
-        </widget>
+        <widget class="GraphPlotForm" name="ceTimePlot" native="true"/>
        </item>
       </layout>
      </widget>
@@ -106,9 +92,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>QCustomPlot</class>
+   <class>GraphPlotForm</class>
    <extends>QWidget</extends>
-   <header>qcustomplot.h</header>
+   <header>view/graphplotform.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

@@ -1,0 +1,166 @@
+#include "view/graphplotform.h"
+#include "./ui_graphplotform.h"
+
+#include <cmath>
+#include <limits>
+#include <vector>
+
+
+namespace { // BEGIN OF NAMESPACE <GLOBAL::UNNAMED> ============================
+
+
+constexpr double kZeroAreaPortion = 0.2;
+constexpr double kEndSpacePortion = 0.1;
+
+
+double correctLowerValue(double lv, double uv, double corrDiff, int pow) {
+  double clv = std::ceil(uv * std::pow(10, pow)) - corrDiff;
+  clv = (clv + (10 - std::abs((int) clv % 10))) / std::pow(10, pow);
+  if (clv > lv) {
+    clv = std::ceil(lv * std::pow(10, pow));
+    clv = (clv - std::abs((int) clv % 10)) / std::pow(10, pow);
+  }
+  return clv;
+}
+
+
+double correctUpperValue(double lv, double uv, double corrDiff, int pow) {
+  double cuv = std::ceil(lv * std::pow(10, pow)) + corrDiff;
+  cuv = (cuv - std::abs((int) cuv % 10)) / std::pow(10, pow);
+  if (cuv < uv) {
+    cuv = std::ceil(uv * std::pow(10, pow));
+    cuv = (cuv + (10 + std::abs((int) cuv % 10))) / std::pow(10, pow);
+  }
+  return cuv;
+}
+
+
+void adjustAxisRange(QCPAxis* axis) {
+  auto r = axis->range();
+  double diff = r.upper - r.lower;
+  if (diff == 0) {
+    return;
+  }
+
+  // find inverse power to get ceil of diff to at least a 100
+  // 100 so that modulo operator works
+  int pow = 0;
+  for (double num = diff; std::ceil(num) < 10; num *= 10) {
+    ++pow;
+  }
+
+  double lower = r.lower;
+  double upper = r.upper;
+  double corrDiff = std::ceil(diff * std::pow(10, pow)) * (1+kEndSpacePortion);
+  if (upper < 0 || lower < 0) {
+    // correct lower
+    lower = correctLowerValue(r.lower, r.upper, corrDiff, pow);
+    // correct upper
+    if (diff*kZeroAreaPortion > -upper || upper == 0) {
+      upper = 0;
+    } else {
+      upper = correctUpperValue(r.lower, r.upper, corrDiff, pow);
+    }
+  } else {
+    // correct lower
+    if (diff*kZeroAreaPortion > lower || lower == 0) {
+      lower = 0;
+    } else {
+      lower = correctLowerValue(r.lower, r.upper, corrDiff, pow);
+    }
+    // correct upper
+    upper = correctUpperValue(r.lower, r.upper, corrDiff, pow);
+  }
+
+  axis->setRange(lower, upper);
+}
+
+
+} // END OF NAMESPACE <GLOBAL::UNNAMED> ----------------------------------------
+// namespace <GLOBAL>
+
+
+GraphPlotForm::GraphPlotForm(QWidget* parent)
+    : QWidget(parent), ui(new Ui::GraphPlotForm) {
+  ui->setupUi(this);
+}
+
+
+GraphPlotForm::~GraphPlotForm() {
+  delete ui;
+}
+
+
+void GraphPlotForm::initialiseData(const std::vector<vrfb::Table>& tables,
+      const std::string& xHdr, const std::string& yHdr) {
+  double min_x = std::numeric_limits<double>::max();
+  double max_x = -std::numeric_limits<double>::max();
+  double min_y = std::numeric_limits<double>::max();
+  double max_y = -std::numeric_limits<double>::max();
+
+  std::size_t i_series = 0;
+  for (const vrfb::Table& table : tables) {
+    auto graph = ui->plot->addGraph();
+
+    // set graph style
+    QColor color {};
+    color.setHsvF((float) ((double) i_series / tables.size()), 1, 0.7);
+    graph->setPen(color);
+    graph->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ScatterShape::ssCross));
+    graph->setAntialiased(true);
+
+    // add graph data
+    for (std::size_t i = 0; i < table.numRows(); ++i) {
+      double x = table.get<double>(xHdr, i);
+      double y = table.get<double>(yHdr, i);
+      graph->addData(x, y);
+      min_x = (min_x < x) ? min_x : x;
+      max_x = (max_x < x) ? x : max_x;
+      min_y = (min_y < y) ? min_y : y;
+      max_y = (max_y < y) ? y : max_y;
+    }
+    ++i_series;
+  }
+
+  // set initial range
+  ui->plot->xAxis->setRange(min_x, max_x);
+  ui->plot->yAxis->setRange(min_y, max_y);
+  adjustAxisRange(ui->plot->xAxis);
+  adjustAxisRange(ui->plot->yAxis);
+  ui->plot->xAxis->setLabel(QString::fromStdString(xHdr));
+  ui->plot->yAxis->setLabel(QString::fromStdString(yHdr));
+  ui->plot->replot();
+
+  // initialize range field values
+  auto xr = ui->plot->xAxis->range();
+  auto yr = ui->plot->yAxis->range();
+  ui->xAxisLowerField->setValue(xr.lower);
+  ui->xAxisUpperField->setValue(xr.upper);
+  ui->yAxisLowerField->setValue(yr.lower);
+  ui->yAxisUpperField->setValue(yr.upper);
+
+  connect(ui->xAxisLowerField, &QDoubleSpinBox::valueChanged,
+      this, &GraphPlotForm::updateXAxis);
+  connect(ui->xAxisUpperField, &QDoubleSpinBox::valueChanged,
+      this, &GraphPlotForm::updateXAxis);
+  connect(ui->yAxisLowerField, &QDoubleSpinBox::valueChanged,
+      this, &GraphPlotForm::updateYAxis);
+  connect(ui->yAxisUpperField, &QDoubleSpinBox::valueChanged,
+      this, &GraphPlotForm::updateYAxis);
+}
+
+
+void GraphPlotForm::updateXAxis() {
+  ui->plot->xAxis->setRange(
+      ui->xAxisLowerField->value(),
+      ui->xAxisUpperField->value());
+  ui->plot->replot();
+}
+
+
+void GraphPlotForm::updateYAxis() {
+  ui->plot->yAxis->setRange(
+      ui->yAxisLowerField->value(),
+      ui->yAxisUpperField->value());
+  ui->plot->replot();
+}

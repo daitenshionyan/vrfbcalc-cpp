@@ -105,6 +105,10 @@ add_executable(vrfbcalc-cpp WIN32
     src/view/celleffresultview.ui
     src/view/celleffresultview.cpp
 
+    include/view/graphplotform.h
+    src/view/graphplotform.ui
+    src/view/graphplotform.cpp
+
     resource/app.o
 )
 
