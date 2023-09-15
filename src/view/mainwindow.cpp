@@ -35,7 +35,7 @@ std::vector<vrfb::Table> readPerformanceData(const QStringList& strPaths, logger
   for (const QString& strPath : strPaths) {
     auto path = std::filesystem::u8path<std::string>(strPath.toStdString());
     try {
-      tables.push_back(vrfbdriver::io::readTable_XLSX(path, "Dat"));
+      tables.push_back(vrfbdriver::io::readTable_XLSX(path, "Data"));
     } catch (std::exception& ex) {
       l.fail(strutils::format_string("Failed to read '%s' - %s",
           path.string().c_str(), ex.what()));
@@ -137,8 +137,8 @@ void MainWindow::logMsg(const logger::LogMsg& lm) {
 
 void MainWindow::displayPerformanceView(const std::vector<vrfb::Table>& tables) {
   CEResultView* rv = new CEResultView(this);
-  rv->createGraphs(tables);
-  rv->show();
+  rv->plotGraphs(tables);
+  rv->open();
 }
 
 

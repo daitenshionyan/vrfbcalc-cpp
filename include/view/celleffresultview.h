@@ -22,7 +22,7 @@ class CEResultView : public QDialog {
     CEResultView(QWidget*);
     ~CEResultView();
 
-    void createGraphs(const std::vector<vrfb::Table>&);
+    void plotGraphs(const std::vector<vrfb::Table>&);
 
 
   private:

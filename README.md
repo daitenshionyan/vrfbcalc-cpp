@@ -48,6 +48,7 @@ Additional points to note:
 * GUI framework: [Qt Framework](https://www.qt.io/)
 * JSON library: [nlohmann/json](https://github.com/nlohmann/json)
 * XLSX library: [xlnt](https://github.com/tfussell/xlnt)
+* Graphs: [QCustomPlot](https://www.qcustomplot.com/index.php/introduction)
 
 ## Building
 
