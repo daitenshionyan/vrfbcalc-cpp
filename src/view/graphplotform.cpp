@@ -101,6 +101,17 @@ void GraphPlotForm::initialiseData(
   double min_y = std::numeric_limits<double>::max();
   double max_y = -std::numeric_limits<double>::max();
 
+  QCPLayoutGrid *subLayout = new QCPLayoutGrid;
+  ui->plot->plotLayout()->addElement(0, 1, subLayout);
+  ui->plot->plotLayout()->addElement(0, 2, new QCPLayoutElement);
+  subLayout->addElement(0, 0, new QCPLayoutElement);
+  subLayout->addElement(1, 1, ui->plot->legend);
+  subLayout->setRowStretchFactor(1, 0.001);
+  subLayout->addElement(2, 2, new QCPLayoutElement);
+  ui->plot->plotLayout()->setColumnStretchFactor(1, 0.001);
+  ui->plot->plotLayout()->setColumnStretchFactor(2, 0.001);
+  ui->plot->legend->setVisible(true);
+
   std::size_t i_series = 0;
   for (const vrfbdriver::PerformanceEntry_CE& entry : entries) {
     auto graph = ui->plot->addGraph();
@@ -109,6 +120,7 @@ void GraphPlotForm::initialiseData(
     QColor color {};
     color.setHsvF((float) ((double) i_series / entries.size()), 1, 0.7);
     graph->setPen(color);
+    graph->setName(QString::fromStdString(entry.name));
     graph->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ScatterShape::ssCross));
     graph->setAntialiased(true);
 
