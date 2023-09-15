@@ -5,8 +5,8 @@
 
 #include <QDialog>
 
-#include "table.hpp"
 #include "logger.hpp"
+#include "driver/vrfbdriver.hpp"
 
 
 QT_BEGIN_NAMESPACE
@@ -23,7 +23,7 @@ class CEResultView : public QDialog {
     CEResultView(QWidget*);
     ~CEResultView();
 
-    void plotGraphs(const std::vector<vrfb::Table>&);
+    void plotGraphs(const std::vector<vrfbdriver::PerformanceEntry_CE>&);
     void exportPng();
 
 

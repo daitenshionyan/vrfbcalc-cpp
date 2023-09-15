@@ -10,9 +10,10 @@ CEResultView::CEResultView(QWidget* parent)
 }
 
 
-void CEResultView::plotGraphs(const std::vector<vrfb::Table>& tables) {
-  ui->ceCycPlot->initialiseData(tables, "Cycle No.", "CE (Fractional)");
-  ui->ceTimePlot->initialiseData(tables, "Total Time (s)", "CE (Fractional)");
+void CEResultView::plotGraphs(
+      const std::vector<vrfbdriver::PerformanceEntry_CE>& entries) {
+  ui->ceCycPlot->initialiseData(entries, "Cycle No.", "CE (Fractional)");
+  ui->ceTimePlot->initialiseData(entries, "Total Time (s)", "CE (Fractional)");
 }
 
 

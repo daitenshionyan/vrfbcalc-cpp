@@ -29,7 +29,7 @@ class MainWindow : public QMainWindow, private logger::Logger {
   signals:
     void availableLogMsg(const logger::LogMsg&);
   signals:
-    void completedPerformanceReading(const std::vector<vrfb::Table>&);
+    void completedPerformanceReading(const std::vector<vrfbdriver::PerformanceEntry_CE>&);
 
 
   private:
@@ -40,7 +40,7 @@ class MainWindow : public QMainWindow, private logger::Logger {
       log(watcher.future().resultAt(index));
     }
 
-    void displayPerformanceView(const std::vector<vrfb::Table>&);
+    void displayPerformanceView(const std::vector<vrfbdriver::PerformanceEntry_CE>&);
 
     Ui::MainWindow* ui;
     CEConfigPopup* popup_ce;

@@ -162,4 +162,27 @@ void calcCellEff(const SetSupplierVec_CE& ssv, logger::Logger& logger) {
 }
 
 
+std::vector<PerformanceEntry_CE> readPerformance_CE(
+      const std::vector<std::string>& strPaths, logger::Logger& l) {
+  std::vector<PerformanceEntry_CE> perfs {};
+  for (const std::string& strPath : strPaths) {
+    auto path = std::filesystem::u8path<std::string>(strPath);
+    std::string name = path.filename().replace_extension("").string();
+    try {
+      perfs.push_back({
+        name,
+        vrfbdriver::io::readTable_XLSX(path, std::string(kDataSheetTitle_CE))
+      });
+      l.info(strutils::format_string("Successfully read %s performance data",
+          name.c_str()));
+    } catch (std::exception& ex) {
+      l.fail(strutils::format_string("Failed to read '%s' performance data - %s",
+          name.c_str(),
+          ex.what()));
+    }
+  }
+  return perfs;
+}
+
+
 } // END OF NAMESPACE <vrfbdriver> ---------------------------------------------

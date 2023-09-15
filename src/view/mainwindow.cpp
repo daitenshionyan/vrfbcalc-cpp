@@ -30,23 +30,6 @@ class PromLogger : public logger::Logger {
 };
 
 
-std::vector<vrfb::Table> readPerformanceData(const QStringList& strPaths, logger::Logger& l) {
-  std::vector<vrfb::Table> tables {};
-  for (const QString& strPath : strPaths) {
-    auto path = std::filesystem::u8path<std::string>(strPath.toStdString());
-    try {
-      tables.push_back(vrfbdriver::io::readTable_XLSX(path, "Data"));
-    } catch (std::exception& ex) {
-      l.fail(strutils::format_string("Failed to read '%s' - %s",
-          path.string().c_str(), ex.what()));
-    }
-  }
-  l.fine(strutils::format_string("Successfully read %d performance data",
-      tables.size()));
-  return tables;
-}
-
-
 }
 
 
@@ -135,9 +118,10 @@ void MainWindow::logMsg(const logger::LogMsg& lm) {
 }
 
 
-void MainWindow::displayPerformanceView(const std::vector<vrfb::Table>& tables) {
+void MainWindow::displayPerformanceView(
+      const std::vector<vrfbdriver::PerformanceEntry_CE>& entries) {
   CEResultView* rv = new CEResultView(this);
-  rv->plotGraphs(tables);
+  rv->plotGraphs(entries);
   rv->open();
 }
 
@@ -175,7 +159,7 @@ void MainWindow::on_actionPerformanceAnalysis_triggered(bool) {
   if (!std::filesystem::exists(openPath.toStdString())) {
     openPath = QString();
   }
-  QStringList files = QFileDialog::getOpenFileNames(
+  QStringList qstrPaths = QFileDialog::getOpenFileNames(
       this,
       "Select one or more performance files to open",
       openPath,
@@ -183,9 +167,12 @@ void MainWindow::on_actionPerformanceAnalysis_triggered(bool) {
   );
   watcher.setFuture(QtConcurrent::run(
       &pool,
-      [&, files](QPromise<logger::LogMsg>& p) {
+      [&, qstrPaths](QPromise<logger::LogMsg>& p) {
         auto l = PromLogger{p};
-        std::vector<vrfb::Table> tables = readPerformanceData(files, l);
-        emit completedPerformanceReading(tables);
+        std::vector<std::string> strPaths {};
+        for (const QString& qstrPath : qstrPaths) {
+          strPaths.push_back(qstrPath.toStdString());
+        }
+        emit completedPerformanceReading(vrfbdriver::readPerformance_CE(strPaths, l));
       }));
 }

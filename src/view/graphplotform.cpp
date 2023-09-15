@@ -93,7 +93,8 @@ GraphPlotForm::~GraphPlotForm() {
 }
 
 
-void GraphPlotForm::initialiseData(const std::vector<vrfb::Table>& tables,
+void GraphPlotForm::initialiseData(
+      const std::vector<vrfbdriver::PerformanceEntry_CE>& entries,
       const std::string& xHdr, const std::string& yHdr) {
   double min_x = std::numeric_limits<double>::max();
   double max_x = -std::numeric_limits<double>::max();
@@ -101,20 +102,20 @@ void GraphPlotForm::initialiseData(const std::vector<vrfb::Table>& tables,
   double max_y = -std::numeric_limits<double>::max();
 
   std::size_t i_series = 0;
-  for (const vrfb::Table& table : tables) {
+  for (const vrfbdriver::PerformanceEntry_CE& entry : entries) {
     auto graph = ui->plot->addGraph();
 
     // set graph style
     QColor color {};
-    color.setHsvF((float) ((double) i_series / tables.size()), 1, 0.7);
+    color.setHsvF((float) ((double) i_series / entries.size()), 1, 0.7);
     graph->setPen(color);
     graph->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ScatterShape::ssCross));
     graph->setAntialiased(true);
 
     // add graph data
-    for (std::size_t i = 0; i < table.numRows(); ++i) {
-      double x = table.get<double>(xHdr, i);
-      double y = table.get<double>(yHdr, i);
+    for (std::size_t i = 0; i < entry.table.numRows(); ++i) {
+      double x = entry.table.get<double>(xHdr, i);
+      double y = entry.table.get<double>(yHdr, i);
       graph->addData(x, y);
       min_x = (min_x < x) ? min_x : x;
       max_x = (max_x < x) ? x : max_x;

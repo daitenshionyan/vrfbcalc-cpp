@@ -299,7 +299,7 @@ void saveData_XLSX(
   xlnt::workbook wb;
 
   auto ws = wb.active_sheet();
-  ws.title("Data");
+  ws.title(std::string(kDataSheetTitle_CE));
   auto hdrs = t.headers();
   for (std::size_t i = 0; i < t.numCols(); ++i) {
     ws.cell(i+1, 1).value(hdrs[i]);
@@ -320,8 +320,7 @@ void saveData_XLSX(
   ws.freeze_panes("B2");
 
   ws = wb.create_sheet();
-  ws.title("Config");
-  ws.title("Config");
+  ws.title(std::string(kConfigSheetTitle_CE));
   ws.cell(1, 1).value("Area (cm2)");
   ws.cell(2, 1).value(data.area);
 

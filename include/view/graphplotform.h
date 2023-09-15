@@ -5,7 +5,7 @@
 
 #include <QWidget>
 
-#include "table.hpp"
+#include "driver/vrfbdriver.hpp"
 
 
 QT_BEGIN_NAMESPACE
@@ -22,7 +22,8 @@ class GraphPlotForm : public QWidget {
     GraphPlotForm(QWidget* parent);
     ~GraphPlotForm();
 
-    void initialiseData(const std::vector<vrfb::Table>&,
+    void initialiseData(
+        const std::vector<vrfbdriver::PerformanceEntry_CE>&,
         const std::string&, const std::string&);
     bool savePng(const QString&);
 
