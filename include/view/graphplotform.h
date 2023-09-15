@@ -24,6 +24,7 @@ class GraphPlotForm : public QWidget {
 
     void initialiseData(const std::vector<vrfb::Table>&,
         const std::string&, const std::string&);
+    bool savePng(const QString&);
 
 
   private:

@@ -152,6 +152,11 @@ void GraphPlotForm::initialiseData(const std::vector<vrfb::Table>& tables,
 }
 
 
+bool GraphPlotForm::savePng(const QString& path) {
+  return ui->plot->savePng(path);
+}
+
+
 void GraphPlotForm::updateXAxis() {
   ui->plot->xAxis->setRange(
       ui->xAxisLowerField->value(),

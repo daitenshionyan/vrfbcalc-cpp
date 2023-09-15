@@ -125,6 +125,7 @@ QPushButton:disabled {
 }
 
 QPushButton[text=&quot;Start&quot;],
+QPushButton[text=&quot;Export&quot;],
 QPushButton[text=&quot;OK&quot;],
 QPushButton[text=&quot;Cancel&quot;],
 QPushButton[text=&quot;Add&quot;] {
@@ -135,15 +136,21 @@ QPushButton[text=&quot;Add&quot;] {
 	width: 100px;
 }
 
-QPushButton[text=&quot;Start&quot;], QPushButton[text=&quot;OK&quot;]  {
+QPushButton[text=&quot;Start&quot;],
+QPushButton[text=&quot;Export&quot;],
+QPushButton[text=&quot;OK&quot;]  {
 	background-color: #657FF8;
 }
 
-QPushButton[text=&quot;Start&quot;]:hover, QPushButton[text=&quot;OK&quot;]:hover  {
+QPushButton[text=&quot;Start&quot;]:hover,
+QPushButton[text=&quot;Export&quot;]:hover,
+QPushButton[text=&quot;OK&quot;]:hover  {
 	background-color: #5166C5;
 }
 
-QPushButton[text=&quot;Start&quot;]:pressed, QPushButton[text=&quot;OK&quot;]:pressed  {
+QPushButton[text=&quot;Start&quot;]:pressed,
+QPushButton[text=&quot;Export&quot;]:pressed,
+QPushButton[text=&quot;OK&quot;]:pressed  {
 	background-color: #3C4C92;
 }
 

@@ -6,6 +6,7 @@
 #include <QDialog>
 
 #include "table.hpp"
+#include "logger.hpp"
 
 
 QT_BEGIN_NAMESPACE
@@ -23,10 +24,15 @@ class CEResultView : public QDialog {
     ~CEResultView();
 
     void plotGraphs(const std::vector<vrfb::Table>&);
+    void exportPng();
 
 
   private:
     void deleteSelf(int) {delete this;}
 
     Ui::CEResultView* ui;
+
+
+  private slots:
+    void on_exportBtn_clicked();
 };
