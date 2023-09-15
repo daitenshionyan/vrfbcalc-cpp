@@ -28,8 +28,12 @@ class GraphPlotForm : public QWidget {
 
 
   private:
-    void updateXAxis();
-    void updateYAxis();
-
     Ui::GraphPlotForm* ui;
+
+
+  private slots:
+    void on_xAxisLowerField_valueChanged(double);
+    void on_xAxisUpperField_valueChanged(double);
+    void on_yAxisLowerField_valueChanged(double);
+    void on_yAxisUpperField_valueChanged(double);
 };

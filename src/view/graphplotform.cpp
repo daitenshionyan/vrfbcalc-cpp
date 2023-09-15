@@ -140,15 +140,6 @@ void GraphPlotForm::initialiseData(const std::vector<vrfb::Table>& tables,
   ui->xAxisUpperField->setValue(xr.upper);
   ui->yAxisLowerField->setValue(yr.lower);
   ui->yAxisUpperField->setValue(yr.upper);
-
-  connect(ui->xAxisLowerField, &QDoubleSpinBox::valueChanged,
-      this, &GraphPlotForm::updateXAxis);
-  connect(ui->xAxisUpperField, &QDoubleSpinBox::valueChanged,
-      this, &GraphPlotForm::updateXAxis);
-  connect(ui->yAxisLowerField, &QDoubleSpinBox::valueChanged,
-      this, &GraphPlotForm::updateYAxis);
-  connect(ui->yAxisUpperField, &QDoubleSpinBox::valueChanged,
-      this, &GraphPlotForm::updateYAxis);
 }
 
 
@@ -157,17 +148,28 @@ bool GraphPlotForm::savePng(const QString& path) {
 }
 
 
-void GraphPlotForm::updateXAxis() {
-  ui->plot->xAxis->setRange(
-      ui->xAxisLowerField->value(),
-      ui->xAxisUpperField->value());
+// ---- < SLOTS > --------------------------------------------------------------
+
+
+void GraphPlotForm::on_xAxisLowerField_valueChanged(double value) {
+  ui->plot->xAxis->setRangeLower(value);
   ui->plot->replot();
 }
 
 
-void GraphPlotForm::updateYAxis() {
-  ui->plot->yAxis->setRange(
-      ui->yAxisLowerField->value(),
-      ui->yAxisUpperField->value());
+void GraphPlotForm::on_xAxisUpperField_valueChanged(double value) {
+  ui->plot->xAxis->setRangeUpper(value);
+  ui->plot->replot();
+}
+
+
+void GraphPlotForm::on_yAxisLowerField_valueChanged(double value) {
+  ui->plot->yAxis->setRangeLower(value);
+  ui->plot->replot();
+}
+
+
+void GraphPlotForm::on_yAxisUpperField_valueChanged(double value) {
+  ui->plot->yAxis->setRangeUpper(value);
   ui->plot->replot();
 }
