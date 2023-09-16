@@ -88,7 +88,9 @@ QGroupBox::title {
 
 
 
-#CEDataSetFormFrame, #CEDataEntryForm  {
+QWidget#CEDataSetFormFrame,
+QWidget#CEDataEntryForm,
+#panelWidgetHolder {
 	background-color: rgba(148, 148, 148, 30);
 	border-radius: 5px;
 }
@@ -206,16 +208,17 @@ QScrollArea {
 
 
 
+/* VERTICAL SCROLL BAR */
 
 QScrollBar:vertical {
-	background: #3A3C4D;
+	background: #303340;
 	border-color: #606680;
 	width: 10px;
 	margin: 5px 0 5px 0;
 }
 
 QScrollBar::handle:vertical {
-	background: #4C5066;
+	background: #606680;
 	min-height: 20px;
 	margin: 4px 0px 4px 0px;
 	border-radius: 5px;
@@ -239,6 +242,44 @@ QScrollBar::add-line:vertical {
 
  QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
      background: none;
+ }
+
+
+
+/* HORIZONTAL SCROLL BAR */
+
+QScrollBar:horizontal {
+	background: #303340;
+	border-color: #606680;
+	height: 10px;
+	margin: 0px 5px 0px 5px;
+}
+
+QScrollBar::handle:horizontal {
+	background: #606680;
+	min-width: 20px;
+	margin: 0px 4px 0px 4px;
+	border-radius: 5px;
+}
+
+QScrollBar::add-line:horizontal {
+    border: 2px solid #606680;
+    background: #606680;
+    width: 5px;
+    subcontrol-position: right;
+    subcontrol-origin: margin;
+}
+
+ QScrollBar::sub-line:horizontal {
+     border: 2px solid #606680;
+     background: #606680;
+     width: 5px;
+     subcontrol-position: left;
+     subcontrol-origin: margin;
+ }
+
+ QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
+     background: none;
  }</string>
   </property>
   <widget class="QWidget" name="windowBackground">
@@ -255,6 +296,9 @@ QScrollBar::add-line:vertical {
       </property>
       <property name="frameShadow">
        <enum>QFrame::Plain</enum>
+      </property>
+      <property name="verticalScrollBarPolicy">
+       <enum>Qt::ScrollBarAsNeeded</enum>
       </property>
       <property name="horizontalScrollBarPolicy">
        <enum>Qt::ScrollBarAlwaysOff</enum>
