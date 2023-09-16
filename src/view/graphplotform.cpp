@@ -5,8 +5,6 @@
 #include <limits>
 #include <vector>
 
-#include <iostream>
-
 
 namespace { // BEGIN OF NAMESPACE <GLOBAL::UNNAMED> ============================
 
@@ -57,7 +55,7 @@ void adjustAxisRange(QCPAxis* axis) {
     return;
   }
 
-  // find inverse power to get ceil of diff to at least a 100
+  // find inverse power to get ceil of diff to at least a 10
   // 10 so that modulo operator works
   int pow = 0;
   for (double num = diff; std::ceil(num) < 10; num *= 10) {
@@ -99,6 +97,7 @@ void adjustAxisRange(QCPAxis* axis) {
 class GraphPlotForm::SignalHandler : public QObject {
   public:
     SignalHandler(Ui::GraphPlotForm* uip) : ui(uip) {
+      // range fields -> plot axis range
       connect(ui->xAxisLowerField, &QDoubleSpinBox::valueChanged,
           this, &SignalHandler::setXAxisLowerPlot);
       connect(ui->xAxisUpperField, &QDoubleSpinBox::valueChanged,
@@ -107,6 +106,11 @@ class GraphPlotForm::SignalHandler : public QObject {
           this, &SignalHandler::setYAxisLowerPlot);
       connect(ui->yAxisUpperField, &QDoubleSpinBox::valueChanged,
           this, &SignalHandler::setYAxisUpperPlot);
+      // plot axis range -> range fields
+      connect(ui->plot->xAxis, static_cast<void (QCPAxis::*)(const QCPRange&)>(&QCPAxis::rangeChanged),
+          this, &SignalHandler::setXAxisRangeFields);
+      connect(ui->plot->yAxis, static_cast<void (QCPAxis::*)(const QCPRange&)>(&QCPAxis::rangeChanged),
+          this, &SignalHandler::setYAxisRangeFields);
     }
 
 
@@ -119,36 +123,24 @@ class GraphPlotForm::SignalHandler : public QObject {
     }
 
 
-  private: // :::: fields slots ::::::::::::::::::::::::::::::::::::::::::::::::
-    void setXAxisLowerField(double value) {
-      if (ui->xAxisLowerField->value() - value < xDiffThreshold) {
-        return;
+  public slots: // :::: fields slots ::::::::::::::::::::::::::::::::::::::::::::::::
+    void setXAxisRangeFields(const QCPRange& range) {
+      if (std::abs(ui->xAxisLowerField->value() - range.lower) >= xDiffThreshold) {
+        ui->xAxisLowerField->setValue(range.lower);
       }
-      ui->xAxisLowerField->setValue(value);
+      if (std::abs(ui->xAxisUpperField->value() - range.upper) >= xDiffThreshold) {
+        ui->xAxisUpperField->setValue(range.upper);
+      }
     }
 
 
-    void setXAxisUpperField(double value) {
-      if (ui->xAxisUpperField->value() - value < xDiffThreshold) {
-        return;
+    void setYAxisRangeFields(const QCPRange& range) {
+      if (std::abs(ui->yAxisLowerField->value() - range.lower) >= yDiffThreshold) {
+        ui->yAxisLowerField->setValue(range.lower);
       }
-      ui->xAxisUpperField->setValue(value);
-    }
-
-
-    void setYAxisLowerField(double value) {
-      if (ui->yAxisLowerField->value() - value < yDiffThreshold) {
-        return;
+      if (std::abs(ui->yAxisUpperField->value() - range.upper) >= yDiffThreshold) {
+        ui->yAxisUpperField->setValue(range.upper);
       }
-      ui->yAxisLowerField->setValue(value);
-    }
-
-
-    void setYAxisUpperField(double value) {
-      if (ui->yAxisUpperField->value() - value < yDiffThreshold) {
-        return;
-      }
-      ui->yAxisUpperField->setValue(value);
     }
 
 
@@ -267,14 +259,6 @@ void GraphPlotForm::setupPlot(
   ui->plot->xAxis->setLabel(QString::fromStdString(xHdr));
   ui->plot->yAxis->setLabel(QString::fromStdString(yHdr));
   ui->plot->replot();
-
-  // initialize range field values
-  auto xr = ui->plot->xAxis->range();
-  auto yr = ui->plot->yAxis->range();
-  ui->xAxisLowerField->setValue(xr.lower);
-  ui->xAxisUpperField->setValue(xr.upper);
-  ui->yAxisLowerField->setValue(yr.lower);
-  ui->yAxisUpperField->setValue(yr.upper);
 }
 
 
