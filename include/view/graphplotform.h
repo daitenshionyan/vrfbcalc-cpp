@@ -22,19 +22,26 @@ class GraphPlotForm : public QWidget {
     GraphPlotForm(QWidget* parent);
     ~GraphPlotForm();
 
-    void initialiseData(
+    void setupPlot(
         const std::vector<vrfbdriver::PerformanceEntry_CE>&,
         const std::string&, const std::string&);
     bool savePng(const QString&);
 
 
-  private:
+  protected:
+    void setupXFields(double min, double max);
+    void setupYFields(double min, double max);
+
+
+  private:  // :::: private slots ::::::::::::::::::::::::::::::::::::::::::::::
+    void setXAxisLowerPlot(double);
+    void setXAxisUpperPlot(double);
+    void setYAxisLowerPlot(double);
+    void setYAxisUpperPlot(double);
+
+
+  private: // :::: private data members ::::::::::::::::::::::::::::::::::::::::
     Ui::GraphPlotForm* ui;
-
-
-  private slots:
-    void on_xAxisLowerField_valueChanged(double);
-    void on_xAxisUpperField_valueChanged(double);
-    void on_yAxisLowerField_valueChanged(double);
-    void on_yAxisUpperField_valueChanged(double);
+    double xDiffThreshold;
+    double yDiffThreshold;
 };

@@ -5,12 +5,29 @@
 #include <limits>
 #include <vector>
 
+#include <iostream>
+
 
 namespace { // BEGIN OF NAMESPACE <GLOBAL::UNNAMED> ============================
 
 
 constexpr double kZeroAreaPortion = 0.2;
 constexpr double kEndSpacePortion = 0.1;
+
+
+int getFieldDecimals(double min, double max) {
+  int min_pow = 0;
+  while (std::abs(min) < 1 && min != 0) {
+    min *= 10;
+    ++min_pow;
+  }
+  int max_pow = 0;
+  while (std::abs(max) < 1 && max != 0) {
+    max *= 10;
+    ++max_pow;
+  }
+  return (max_pow > min_pow) ? max_pow : min_pow;
+}
 
 
 double correctLowerValue(double lv, double uv, double corrDiff, int pow) {
@@ -45,7 +62,7 @@ void adjustAxisRange(QCPAxis* axis) {
   }
 
   // find inverse power to get ceil of diff to at least a 100
-  // 100 so that modulo operator works
+  // 10 so that modulo operator works
   int pow = 0;
   for (double num = diff; std::ceil(num) < 10; num *= 10) {
     ++pow;
@@ -85,6 +102,14 @@ void adjustAxisRange(QCPAxis* axis) {
 GraphPlotForm::GraphPlotForm(QWidget* parent)
     : QWidget(parent), ui(new Ui::GraphPlotForm) {
   ui->setupUi(this);
+  connect(ui->xAxisLowerField, &QDoubleSpinBox::valueChanged,
+      this, &GraphPlotForm::setXAxisLowerPlot);
+  connect(ui->xAxisUpperField, &QDoubleSpinBox::valueChanged,
+      this, &GraphPlotForm::setXAxisUpperPlot);
+  connect(ui->yAxisLowerField, &QDoubleSpinBox::valueChanged,
+      this, &GraphPlotForm::setYAxisLowerPlot);
+  connect(ui->yAxisUpperField, &QDoubleSpinBox::valueChanged,
+      this, &GraphPlotForm::setYAxisUpperPlot);
 }
 
 
@@ -93,10 +118,10 @@ GraphPlotForm::~GraphPlotForm() {
 }
 
 
-void GraphPlotForm::initialiseData(
+void GraphPlotForm::setupPlot(
       const std::vector<vrfbdriver::PerformanceEntry_CE>& entries,
       const std::string& xHdr, const std::string& yHdr) {
-  double min_x = std::numeric_limits<double>::max();
+    double min_x = std::numeric_limits<double>::max();
   double max_x = -std::numeric_limits<double>::max();
   double min_y = std::numeric_limits<double>::max();
   double max_y = -std::numeric_limits<double>::max();
@@ -137,6 +162,10 @@ void GraphPlotForm::initialiseData(
     ++i_series;
   }
 
+  // set up fields
+  setupXFields(min_x, max_x);
+  setupYFields(min_y, max_y);
+
   // set initial range
   ui->plot->xAxis->setRange(min_x, max_x);
   ui->plot->yAxis->setRange(min_y, max_y);
@@ -156,33 +185,64 @@ void GraphPlotForm::initialiseData(
 }
 
 
+void GraphPlotForm::setupXFields(double min, double max) {
+  int decimals = getFieldDecimals(min, max);
+  xDiffThreshold = std::pow(10, -decimals);
+  ui->xAxisLowerField->setDecimals(decimals);
+  ui->xAxisUpperField->setDecimals(decimals);
+}
+
+
+void GraphPlotForm::setupYFields(double min, double max) {
+  int decimals = getFieldDecimals(min, max);
+  yDiffThreshold = std::pow(10, -decimals);
+  ui->yAxisLowerField->setDecimals(decimals);
+  ui->yAxisUpperField->setDecimals(decimals);
+}
+
+
 bool GraphPlotForm::savePng(const QString& path) {
   return ui->plot->savePng(path);
 }
 
 
-// ---- < SLOTS > --------------------------------------------------------------
+// :::: private slots ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 
-void GraphPlotForm::on_xAxisLowerField_valueChanged(double value) {
+// PLOTS
+
+
+void GraphPlotForm::setXAxisLowerPlot(double value) {
+  if (ui->plot->xAxis->range().lower == value) {
+    return;
+  }
   ui->plot->xAxis->setRangeLower(value);
   ui->plot->replot();
 }
 
 
-void GraphPlotForm::on_xAxisUpperField_valueChanged(double value) {
+void GraphPlotForm::setXAxisUpperPlot(double value) {
+  if (ui->plot->xAxis->range().upper == value) {
+    return;
+  }
   ui->plot->xAxis->setRangeUpper(value);
   ui->plot->replot();
 }
 
 
-void GraphPlotForm::on_yAxisLowerField_valueChanged(double value) {
+void GraphPlotForm::setYAxisLowerPlot(double value) {
+  if (ui->plot->yAxis->range().lower == value) {
+    return;
+  }
   ui->plot->yAxis->setRangeLower(value);
   ui->plot->replot();
 }
 
 
-void GraphPlotForm::on_yAxisUpperField_valueChanged(double value) {
+void GraphPlotForm::setYAxisUpperPlot(double value) {
+  if (ui->plot->yAxis->range().upper == value) {
+    return;
+  }
   ui->plot->yAxis->setRangeUpper(value);
   ui->plot->replot();
 }
