@@ -111,6 +111,15 @@ class GraphPlotForm::SignalHandler : public QObject {
           this, &SignalHandler::setXAxisRangeFields);
       connect(ui->plot->yAxis, static_cast<void (QCPAxis::*)(const QCPRange&)>(&QCPAxis::rangeChanged),
           this, &SignalHandler::setYAxisRangeFields);
+      // tick count fields -> plot
+      connect(ui->xAxisTickCountField, &QSpinBox::valueChanged,
+          this, &SignalHandler::setXAxisTickCount);
+      connect(ui->yAxisTickCountField, &QSpinBox::valueChanged,
+          this, &SignalHandler::setYAxisTickCount);
+      connect(ui->xAxisForceCountCB, &QCheckBox::toggled,
+          this, &SignalHandler::setXAxisForceCountPlot);
+      connect(ui->yAxisForceCountCB, &QCheckBox::toggled,
+          this, &SignalHandler::setYAxisForceCountPlot);
     }
 
 
@@ -123,7 +132,7 @@ class GraphPlotForm::SignalHandler : public QObject {
     }
 
 
-  public slots: // :::: fields slots ::::::::::::::::::::::::::::::::::::::::::::::::
+  private: // :::: fields slots ::::::::::::::::::::::::::::::::::::::::::::::::
     void setXAxisRangeFields(const QCPRange& range) {
       if (std::abs(ui->xAxisLowerField->value() - range.lower) >= xDiffThreshold) {
         ui->xAxisLowerField->setValue(range.lower);
@@ -177,6 +186,50 @@ class GraphPlotForm::SignalHandler : public QObject {
         return;
       }
       ui->plot->yAxis->setRangeUpper(value);
+      ui->plot->replot();
+    }
+
+
+    void setXAxisTickCount(int count) {
+      ui->plot->xAxis->ticker()->setTickCount(count);
+      ui->plot->replot();
+    }
+
+
+    void setYAxisTickCount(int count) {
+      ui->plot->yAxis->ticker()->setTickCount(count);
+      ui->plot->replot();
+    }
+
+
+    void setXAxisForceCountPlot(bool is_force) {
+      auto ticker = QSharedPointer<QCPAxisTickerFixed>(new QCPAxisTickerFixed);
+      if (is_force) {
+        ticker.get()->setTickStepStrategy(QCPAxisTicker::TickStepStrategy::tssMeetTickCount);
+        ticker.get()->setScaleStrategy(QCPAxisTickerFixed::ScaleStrategy::ssMultiples);
+      } else {
+        ticker.get()->setTickStepStrategy(QCPAxisTicker::TickStepStrategy::tssReadability);
+        ticker.get()->setScaleStrategy(QCPAxisTickerFixed::ScaleStrategy::ssMultiples);
+      }
+      ticker.get()->setTickCount(ui->xAxisTickCountField->value());
+      ticker.get()->setTickStep(std::pow(10, -ui->plot->xAxis->numberPrecision()));
+      ui->plot->xAxis->setTicker(ticker);
+      ui->plot->replot();
+    }
+
+
+    void setYAxisForceCountPlot(bool is_force) {
+      auto ticker = QSharedPointer<QCPAxisTickerFixed>(new QCPAxisTickerFixed);
+      if (is_force) {
+        ticker.get()->setTickStepStrategy(QCPAxisTicker::TickStepStrategy::tssMeetTickCount);
+        ticker.get()->setScaleStrategy(QCPAxisTickerFixed::ScaleStrategy::ssMultiples);
+      } else {
+        ticker.get()->setTickStepStrategy(QCPAxisTicker::TickStepStrategy::tssReadability);
+        ticker.get()->setScaleStrategy(QCPAxisTickerFixed::ScaleStrategy::ssMultiples);
+      }
+      ticker.get()->setTickCount(ui->yAxisTickCountField->value());
+      ticker.get()->setTickStep(std::pow(10, -ui->plot->yAxis->numberPrecision()));
+      ui->plot->yAxis->setTicker(ticker);
       ui->plot->replot();
     }
 
@@ -267,6 +320,7 @@ void GraphPlotForm::setupXFields(double min, double max) {
   handler->setXDiffThreshold(std::pow(10, -decimals));
   ui->xAxisLowerField->setDecimals(decimals);
   ui->xAxisUpperField->setDecimals(decimals);
+  ui->xAxisTickCountField->setValue(ui->plot->xAxis->ticker()->tickCount());
 }
 
 
@@ -275,6 +329,7 @@ void GraphPlotForm::setupYFields(double min, double max) {
   handler->setYDiffThreshold(std::pow(10, -decimals));
   ui->yAxisLowerField->setDecimals(decimals);
   ui->yAxisUpperField->setDecimals(decimals);
+  ui->yAxisTickCountField->setValue(ui->plot->yAxis->ticker()->tickCount());
 }
 
 

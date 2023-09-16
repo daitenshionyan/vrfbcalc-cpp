@@ -72,6 +72,12 @@ QMenu::item:pressed {
 
 
 
+Line {
+    border: 2px solid #4A4C5E;
+}
+
+
+
 QGroupBox {
 	font: bold;
     border: 2px solid #4A4C5E;
@@ -171,6 +177,25 @@ QPushButton[text=&quot;Delete&quot;]:pressed {
 
 
 
+QCheckBox {
+	spacing: 5px;
+}
+
+QCheckBox::indicator {
+	width: 10px;
+	height: 10px;
+	background-color: #303340;
+	border: 2px solid #606680;
+	border-radius: 2px;
+}
+
+QCheckBox::indicator::checked {
+	background-color: #657FF8;
+}
+
+
+
+
 QLineEdit {
 	background-color: #303340;
 	border-color: #606680;
@@ -186,7 +211,7 @@ QLineEdit:disabled {
 
 
 
-QDoubleSpinBox {
+QDoubleSpinBox, QSpinBox {
 	background-color: #303340;
 	border-color: #606680;
 	border-radius: 5px;
@@ -194,7 +219,10 @@ QDoubleSpinBox {
 	border-width: 2px;
 }
 
-QDoubleSpinBox::up-button, QDoubleSpinBox::down-button  {
+QDoubleSpinBox::up-button,
+QDoubleSpinBox::down-button,
+QSpinBox::up-button,
+QSpinBox::down-button  {
 	width: 0px;
 }
 
