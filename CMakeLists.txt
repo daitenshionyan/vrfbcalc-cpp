@@ -134,7 +134,7 @@ file(MAKE_DIRECTORY ${PACKAGE_OUTPUT_DIR})
 add_custom_command(TARGET vrfbcalc-cpp POST_BUILD
     COMMAND ${WINDEPLOYQT_EXECUTABLE}
         --verbose 1
-        --release
+        $<IF:$<CONFIG:Debug>,--debug,--release>
         --no-compiler-runtime
         --no-network
         --no-pdf
