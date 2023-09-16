@@ -33,15 +33,11 @@ class GraphPlotForm : public QWidget {
     void setupYFields(double min, double max);
 
 
-  private:  // :::: private slots ::::::::::::::::::::::::::::::::::::::::::::::
-    void setXAxisLowerPlot(double);
-    void setXAxisUpperPlot(double);
-    void setYAxisLowerPlot(double);
-    void setYAxisUpperPlot(double);
+  private:
+    class SignalHandler;
 
 
   private: // :::: private data members ::::::::::::::::::::::::::::::::::::::::
     Ui::GraphPlotForm* ui;
-    double xDiffThreshold;
-    double yDiffThreshold;
+    SignalHandler* handler;
 };

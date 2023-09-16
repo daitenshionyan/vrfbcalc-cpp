@@ -11,22 +11,18 @@
 namespace { // BEGIN OF NAMESPACE <GLOBAL::UNNAMED> ============================
 
 
+constexpr int kBaseDecimals = 2;
+
 constexpr double kZeroAreaPortion = 0.2;
 constexpr double kEndSpacePortion = 0.1;
 
 
 int getFieldDecimals(double min, double max) {
-  int min_pow = 0;
-  while (std::abs(min) < 1 && min != 0) {
-    min *= 10;
-    ++min_pow;
+  int pow = kBaseDecimals;
+  for (double diff = max - min; diff < 1 && diff != 0; diff *= 10) {
+    ++pow;
   }
-  int max_pow = 0;
-  while (std::abs(max) < 1 && max != 0) {
-    max *= 10;
-    ++max_pow;
-  }
-  return (max_pow > min_pow) ? max_pow : min_pow;
+  return pow;
 }
 
 
@@ -99,17 +95,114 @@ void adjustAxisRange(QCPAxis* axis) {
 // namespace <GLOBAL>
 
 
+// BEGIN OF CLASS <GraphPlotForm::SignalHandler> ===============================
+class GraphPlotForm::SignalHandler : public QObject {
+  public:
+    SignalHandler(Ui::GraphPlotForm* uip) : ui(uip) {
+      connect(ui->xAxisLowerField, &QDoubleSpinBox::valueChanged,
+          this, &SignalHandler::setXAxisLowerPlot);
+      connect(ui->xAxisUpperField, &QDoubleSpinBox::valueChanged,
+          this, &SignalHandler::setXAxisUpperPlot);
+      connect(ui->yAxisLowerField, &QDoubleSpinBox::valueChanged,
+          this, &SignalHandler::setYAxisLowerPlot);
+      connect(ui->yAxisUpperField, &QDoubleSpinBox::valueChanged,
+          this, &SignalHandler::setYAxisUpperPlot);
+    }
+
+
+    inline void setXDiffThreshold(double value) {
+      xDiffThreshold = value;
+    }
+
+    inline void setYDiffThreshold(double value) {
+      yDiffThreshold = value;
+    }
+
+
+  private: // :::: fields slots ::::::::::::::::::::::::::::::::::::::::::::::::
+    void setXAxisLowerField(double value) {
+      if (ui->xAxisLowerField->value() - value < xDiffThreshold) {
+        return;
+      }
+      ui->xAxisLowerField->setValue(value);
+    }
+
+
+    void setXAxisUpperField(double value) {
+      if (ui->xAxisUpperField->value() - value < xDiffThreshold) {
+        return;
+      }
+      ui->xAxisUpperField->setValue(value);
+    }
+
+
+    void setYAxisLowerField(double value) {
+      if (ui->yAxisLowerField->value() - value < yDiffThreshold) {
+        return;
+      }
+      ui->yAxisLowerField->setValue(value);
+    }
+
+
+    void setYAxisUpperField(double value) {
+      if (ui->yAxisUpperField->value() - value < yDiffThreshold) {
+        return;
+      }
+      ui->yAxisUpperField->setValue(value);
+    }
+
+
+  private: // :::: plot slots ::::::::::::::::::::::::::::::::::::::::::::::::::
+    void setXAxisLowerPlot(double value) {
+      if (ui->plot->xAxis->range().lower == value) {
+        return;
+      }
+      ui->plot->xAxis->setRangeLower(value);
+      ui->plot->replot();
+    }
+
+
+    void setXAxisUpperPlot(double value) {
+      if (ui->plot->xAxis->range().upper == value) {
+        return;
+      }
+      ui->plot->xAxis->setRangeUpper(value);
+      ui->plot->replot();
+    }
+
+
+    void setYAxisLowerPlot(double value) {
+      if (ui->plot->yAxis->range().lower == value) {
+        return;
+      }
+      ui->plot->yAxis->setRangeLower(value);
+      ui->plot->replot();
+    }
+
+
+    void setYAxisUpperPlot(double value) {
+      if (ui->plot->yAxis->range().upper == value) {
+        return;
+      }
+      ui->plot->yAxis->setRangeUpper(value);
+      ui->plot->replot();
+    }
+
+
+  private:
+    double xDiffThreshold = 1;
+    double yDiffThreshold = 1;
+
+    Ui::GraphPlotForm* ui;
+};  // END OF CLASS <GraphPlotForm::SignalHandler> -----------------------------
+// namespace <GLOBAL>
+
+
 GraphPlotForm::GraphPlotForm(QWidget* parent)
-    : QWidget(parent), ui(new Ui::GraphPlotForm) {
+    : QWidget(parent),
+      ui(new Ui::GraphPlotForm) {
   ui->setupUi(this);
-  connect(ui->xAxisLowerField, &QDoubleSpinBox::valueChanged,
-      this, &GraphPlotForm::setXAxisLowerPlot);
-  connect(ui->xAxisUpperField, &QDoubleSpinBox::valueChanged,
-      this, &GraphPlotForm::setXAxisUpperPlot);
-  connect(ui->yAxisLowerField, &QDoubleSpinBox::valueChanged,
-      this, &GraphPlotForm::setYAxisLowerPlot);
-  connect(ui->yAxisUpperField, &QDoubleSpinBox::valueChanged,
-      this, &GraphPlotForm::setYAxisUpperPlot);
+  handler = new SignalHandler(ui);
 }
 
 
@@ -187,7 +280,7 @@ void GraphPlotForm::setupPlot(
 
 void GraphPlotForm::setupXFields(double min, double max) {
   int decimals = getFieldDecimals(min, max);
-  xDiffThreshold = std::pow(10, -decimals);
+  handler->setXDiffThreshold(std::pow(10, -decimals));
   ui->xAxisLowerField->setDecimals(decimals);
   ui->xAxisUpperField->setDecimals(decimals);
 }
@@ -195,7 +288,7 @@ void GraphPlotForm::setupXFields(double min, double max) {
 
 void GraphPlotForm::setupYFields(double min, double max) {
   int decimals = getFieldDecimals(min, max);
-  yDiffThreshold = std::pow(10, -decimals);
+  handler->setYDiffThreshold(std::pow(10, -decimals));
   ui->yAxisLowerField->setDecimals(decimals);
   ui->yAxisUpperField->setDecimals(decimals);
 }
@@ -203,46 +296,4 @@ void GraphPlotForm::setupYFields(double min, double max) {
 
 bool GraphPlotForm::savePng(const QString& path) {
   return ui->plot->savePng(path);
-}
-
-
-// :::: private slots ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-
-
-// PLOTS
-
-
-void GraphPlotForm::setXAxisLowerPlot(double value) {
-  if (ui->plot->xAxis->range().lower == value) {
-    return;
-  }
-  ui->plot->xAxis->setRangeLower(value);
-  ui->plot->replot();
-}
-
-
-void GraphPlotForm::setXAxisUpperPlot(double value) {
-  if (ui->plot->xAxis->range().upper == value) {
-    return;
-  }
-  ui->plot->xAxis->setRangeUpper(value);
-  ui->plot->replot();
-}
-
-
-void GraphPlotForm::setYAxisLowerPlot(double value) {
-  if (ui->plot->yAxis->range().lower == value) {
-    return;
-  }
-  ui->plot->yAxis->setRangeLower(value);
-  ui->plot->replot();
-}
-
-
-void GraphPlotForm::setYAxisUpperPlot(double value) {
-  if (ui->plot->yAxis->range().upper == value) {
-    return;
-  }
-  ui->plot->yAxis->setRangeUpper(value);
-  ui->plot->replot();
 }
