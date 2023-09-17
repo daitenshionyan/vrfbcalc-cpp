@@ -1,6 +1,8 @@
 #include "view/celleffresultview.h"
 #include "./ui_celleffresultview.h"
 
+#include <filesystem>
+
 #include "strutils.hpp"
 
 
@@ -27,10 +29,14 @@ bool CEResultView::exportImages(logger::Logger& l) {
         "Prefix field may contain illegal file characters '%s'",
         prefix.c_str()));
   }
+  if (!prefix.empty()) {
+    prefix += "_";
+  }
+  std::filesystem::create_directories("output/images");
   bool is_success = true;
   for (const auto& form : plotForms) {
     QString strPath = QString::fromStdString(strutils::format_string(
-        "output/images/%s_%s.png",
+        "output/images/%s%s.png",
         prefix.c_str(), form.first.c_str()));
     bool is_saved = form.second->savePng(strPath);
     if (is_saved) {
