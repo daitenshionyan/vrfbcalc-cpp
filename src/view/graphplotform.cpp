@@ -97,6 +97,11 @@ void adjustAxisRange(QCPAxis* axis) {
 class GraphPlotForm::SignalHandler : public QObject {
   public:
     SignalHandler(Ui::GraphPlotForm* uip) : ui(uip) {
+      // dimension fields -> plot dimensions
+      connect(ui->plotWidthField, &QSpinBox::valueChanged,
+          this, &SignalHandler::setWidthPlot);
+      connect(ui->plotHeightField, &QSpinBox::valueChanged,
+          this, &SignalHandler::setHeightPlot);
       // range fields -> plot axis range
       connect(ui->xAxisLowerField, &QDoubleSpinBox::valueChanged,
           this, &SignalHandler::setXAxisLowerPlot);
@@ -154,6 +159,26 @@ class GraphPlotForm::SignalHandler : public QObject {
 
 
   private: // :::: plot slots ::::::::::::::::::::::::::::::::::::::::::::::::::
+    void setWidthPlot(int width) {
+      if (ui->plot->width() == width) {
+        return;
+      }
+      ui->plot->setMinimumWidth(width);
+      ui->plot->setMaximumWidth(width);
+      ui->plot->replot();
+    }
+
+
+    void setHeightPlot(int height) {
+      if (ui->plot->height() == height) {
+        return;
+      }
+      ui->plot->setMinimumHeight(height);
+      ui->plot->setMaximumHeight(height);
+      ui->plot->replot();
+    }
+
+
     void setXAxisLowerPlot(double value) {
       if (ui->plot->xAxis->range().lower == value) {
         return;
@@ -312,6 +337,9 @@ void GraphPlotForm::setupPlot(
   ui->plot->xAxis->setLabel(QString::fromStdString(xHdr));
   ui->plot->yAxis->setLabel(QString::fromStdString(yHdr));
   ui->plot->replot();
+
+  ui->plotWidthField->setValue(ui->plot->width());
+  ui->plotHeightField->setValue(ui->plot->height());
 }
 
 
