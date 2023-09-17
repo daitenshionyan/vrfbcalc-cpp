@@ -8,6 +8,11 @@
 #include "logger.hpp"
 #include "driver/vrfbdriver.hpp"
 
+#include <utility>
+#include <vector>
+
+#include "graphplotform.h"
+
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -24,13 +29,17 @@ class CEResultView : public QDialog {
     ~CEResultView();
 
     void plotGraphs(const std::vector<vrfbdriver::PerformanceEntry_CE>&);
-    void exportPng();
+    bool exportImages(logger::Logger&);
+
+  signals:
+    void exportRequested(CEResultView*);
 
 
   private:
     void deleteSelf(int) {delete this;}
 
     Ui::CEResultView* ui;
+    std::vector<std::pair<std::string, GraphPlotForm*>> plotForms;
 
 
   private slots:

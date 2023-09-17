@@ -41,6 +41,7 @@ class MainWindow : public QMainWindow, private logger::Logger {
     }
 
     void displayPerformanceView(const std::vector<vrfbdriver::PerformanceEntry_CE>&);
+    void exportCEPerformance(CEResultView*);
 
     Ui::MainWindow* ui;
     CEConfigPopup* popup_ce;

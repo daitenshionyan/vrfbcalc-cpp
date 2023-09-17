@@ -121,8 +121,31 @@ void MainWindow::logMsg(const logger::LogMsg& lm) {
 void MainWindow::displayPerformanceView(
       const std::vector<vrfbdriver::PerformanceEntry_CE>& entries) {
   CEResultView* rv = new CEResultView(this);
+  connect(rv, &CEResultView::exportRequested,
+      this, &MainWindow::exportCEPerformance);
   rv->plotGraphs(entries);
   rv->open();
+}
+
+
+void MainWindow::exportCEPerformance(CEResultView* rv) {
+  if (watcher.isRunning()) {
+    warn("Cannot export as another process is already running");
+    return;
+  }
+  rv->hide();
+  watcher.setFuture(QtConcurrent::run(
+      &pool,
+      [&, rv](QPromise<logger::LogMsg>& p) {
+        auto l = PromLogger{p};
+        bool is_success = rv->exportImages(l);
+        if (is_success) {
+          rv->done(QDialog::Accepted);
+        } else {
+          rv->show();
+        }
+      }
+  ));
 }
 
 
