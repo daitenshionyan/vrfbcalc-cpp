@@ -6,6 +6,11 @@
 /.vs
 /CMakeSettings.json
 
+# Ignore dependencies (manual install)
+/dependencies/qcustomplot/qcustomplot.cpp
+/dependencies/qcustomplot/qcustomplot.h
+
+
 # Ignore app files
 *.csv
 CellEffConfig.json
