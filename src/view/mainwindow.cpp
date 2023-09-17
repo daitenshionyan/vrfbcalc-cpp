@@ -48,11 +48,17 @@ MainWindow::MainWindow(QWidget* parent)
                 "================================================================================"))
       + QString("</p>"));
   connect(this, &MainWindow::availableLogMsg,
-    this, &MainWindow::logMsg);
+      this, &MainWindow::logMsg);
   connect(popup_ce, &CEConfigPopup::accepted,
-    this, &MainWindow::startCalc);
+      this, &MainWindow::startCalc);
   connect(&watcher, &QFutureWatcher<logger::LogMsg>::resultReadyAt,
-    this, &MainWindow::logMsgAt);
+      this, &MainWindow::logMsgAt);
+  connect(&watcher, &QFutureWatcher<logger::LogMsg>::started,
+      this, &MainWindow::disableActions);
+  connect(&watcher, &QFutureWatcher<logger::LogMsg>::canceled,
+      this, &MainWindow::enableActions);
+  connect(&watcher, &QFutureWatcher<logger::LogMsg>::finished,
+      this, &MainWindow::enableActions);
   connect(this, &MainWindow::completedPerformanceReading,
       this, &MainWindow::displayPerformanceView,
       Qt::ConnectionType::QueuedConnection);
@@ -118,6 +124,16 @@ void MainWindow::logMsg(const logger::LogMsg& lm) {
 }
 
 
+void MainWindow::disableActions() {
+  ui->menuRun->setDisabled(true);
+}
+
+
+void MainWindow::enableActions() {
+  ui->menuRun->setDisabled(false);
+}
+
+
 void MainWindow::displayPerformanceView(
       const std::vector<vrfbdriver::PerformanceEntry_CE>& entries) {
   CEResultView* rv = new CEResultView(this);
@@ -165,15 +181,16 @@ void MainWindow::on_action_openOutput_triggered(bool) {
 }
 
 
-void MainWindow::on_startBtn_clicked() {
+void MainWindow::on_actionCECalculations_triggered(bool) {
   if (watcher.isRunning()) {
+    warn("Cannot perform calculations as another process is already running");
     return;
   }
   popup_ce->exec();
 }
 
 
-void MainWindow::on_actionPerformanceAnalysis_triggered(bool) {
+void MainWindow::on_actionCEAnalysis_triggered(bool) {
   if (watcher.isRunning()) {
     warn("Cannot analyse data as another process is already running");
     return;

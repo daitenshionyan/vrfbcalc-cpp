@@ -39,6 +39,8 @@ class MainWindow : public QMainWindow, private logger::Logger {
     inline void logMsgAt(int index) {
       log(watcher.future().resultAt(index));
     }
+    void disableActions();
+    void enableActions();
 
     void displayPerformanceView(const std::vector<vrfbdriver::PerformanceEntry_CE>&);
     void exportCEPerformance(CEResultView*);
@@ -52,6 +54,6 @@ class MainWindow : public QMainWindow, private logger::Logger {
 
   private slots:
     void on_action_openOutput_triggered(bool);
-    void on_startBtn_clicked();
-    void on_actionPerformanceAnalysis_triggered(bool);
+    void on_actionCECalculations_triggered(bool);
+    void on_actionCEAnalysis_triggered(bool);
 };

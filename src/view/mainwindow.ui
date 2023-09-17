@@ -2,6 +2,9 @@
 <ui version="4.0">
  <class>MainWindow</class>
  <widget class="QMainWindow" name="MainWindow">
+  <property name="enabled">
+   <bool>true</bool>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -50,6 +53,10 @@ QMenuBar::item:selected {
 
 QMenuBar::item:pressed {
 	background: #657FF8;
+}
+
+QMenuBar::item:disabled {
+	color: #4A4C5E;
 }
 
 
@@ -339,13 +346,6 @@ QScrollBar::add-line:horizontal {
       </property>
      </widget>
     </item>
-    <item>
-     <widget class="QPushButton" name="startBtn">
-      <property name="text">
-       <string>Start</string>
-      </property>
-     </widget>
-    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menuBar">
@@ -357,29 +357,43 @@ QScrollBar::add-line:horizontal {
      <height>27</height>
     </rect>
    </property>
+   <property name="font">
+    <font>
+     <bold>true</bold>
+    </font>
+   </property>
    <widget class="QMenu" name="menuFile">
     <property name="title">
      <string>File</string>
     </property>
     <addaction name="action_openOutput"/>
    </widget>
-   <widget class="QMenu" name="menuAnalyse">
-    <property name="title">
-     <string>Analyse</string>
+   <widget class="QMenu" name="menuRun">
+    <property name="enabled">
+     <bool>true</bool>
     </property>
-    <addaction name="actionPerformanceAnalysis"/>
+    <property name="title">
+     <string>Run</string>
+    </property>
+    <addaction name="actionCECalculations"/>
+    <addaction name="actionCEAnalysis"/>
    </widget>
    <addaction name="menuFile"/>
-   <addaction name="menuAnalyse"/>
+   <addaction name="menuRun"/>
   </widget>
   <action name="action_openOutput">
    <property name="text">
     <string>Open output</string>
    </property>
   </action>
-  <action name="actionPerformanceAnalysis">
+  <action name="actionCEAnalysis">
    <property name="text">
-    <string>Performance</string>
+    <string>CE Analysis</string>
+   </property>
+  </action>
+  <action name="actionCECalculations">
+   <property name="text">
+    <string>CE Calculations</string>
    </property>
   </action>
  </widget>
