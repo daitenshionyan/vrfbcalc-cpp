@@ -51,7 +51,9 @@ Additional points to note:
 
 ## Building
 
-Install all dependencies and VS then configure and build by entering the following in powershell (for CMD replace `` ` `` with `^`).
+Install all dependencies and VS. QCustomPlot v2.1.1 source files should be placed in `dependencies/qcustomplot`.
+
+Configure and build by entering the following in powershell (for CMD replace `` ` `` with `^`).
 
 ```text
 cmake --no-warn-unused-cli `
