@@ -277,6 +277,7 @@ GraphPlotForm::GraphPlotForm(QWidget* parent)
 
 
 GraphPlotForm::~GraphPlotForm() {
+  delete handler;
   delete ui;
 }
 
@@ -284,7 +285,13 @@ GraphPlotForm::~GraphPlotForm() {
 void GraphPlotForm::setupPlot(
       const std::vector<vrfbdriver::PerformanceEntry_CE>& entries,
       const std::string& xHdr, const std::string& yHdr) {
-    double min_x = std::numeric_limits<double>::max();
+  ui->plotWidthField->setValue(ui->plot->width());
+  ui->plotHeightField->setValue(ui->plot->height());
+  if (entries.empty()) {
+    return;
+  }
+
+  double min_x = std::numeric_limits<double>::max();
   double max_x = -std::numeric_limits<double>::max();
   double min_y = std::numeric_limits<double>::max();
   double max_y = -std::numeric_limits<double>::max();
@@ -337,9 +344,6 @@ void GraphPlotForm::setupPlot(
   ui->plot->xAxis->setLabel(QString::fromStdString(xHdr));
   ui->plot->yAxis->setLabel(QString::fromStdString(yHdr));
   ui->plot->replot();
-
-  ui->plotWidthField->setValue(ui->plot->width());
-  ui->plotHeightField->setValue(ui->plot->height());
 }
 
 

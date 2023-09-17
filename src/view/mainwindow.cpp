@@ -136,10 +136,20 @@ void MainWindow::enableActions() {
 
 void MainWindow::displayPerformanceView(
       const std::vector<vrfbdriver::PerformanceEntry_CE>& entries) {
+  if (entries.empty()) {
+    return;
+  }
   CEResultView* rv = new CEResultView(this);
+  try {
+    rv->plotGraphs(entries);
+  } catch (std::exception& ex) {
+    fail(strutils::format_string("Failed to plot graphs due to - %s",
+        ex.what()));
+    delete rv;
+    return;
+  }
   connect(rv, &CEResultView::exportRequested,
       this, &MainWindow::exportCEPerformance);
-  rv->plotGraphs(entries);
   rv->open();
 }
 

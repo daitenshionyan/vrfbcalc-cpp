@@ -8,6 +8,7 @@
 #include "logger.hpp"
 #include "driver/vrfbdriver.hpp"
 
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -24,6 +25,14 @@ QT_END_NAMESPACE
 class CEResultView : public QDialog {
   Q_OBJECT
 
+  struct PlotFormData {
+    std::string title;
+    std::string name;
+    std::string xHdr;
+    std::string yHdr;
+    GraphPlotForm* plot;
+  };
+
   public:
     CEResultView(QWidget*);
     ~CEResultView();
@@ -39,7 +48,7 @@ class CEResultView : public QDialog {
     void deleteSelf(int) {delete this;}
 
     Ui::CEResultView* ui;
-    std::vector<std::pair<std::string, GraphPlotForm*>> plotForms;
+    std::vector<PlotFormData> plotForms;
 
 
   private slots:

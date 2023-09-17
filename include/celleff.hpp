@@ -3,32 +3,8 @@
 #include "strutils.hpp"
 #include "vrfbcalc.hpp"
 
-
+namespace vrfb {
 namespace celleff {
-
-
-/* Output cell cycle headers. */
-const std::vector<std::string> kCycleTableHdrs {
-  "Cycle No.",
-  "Total Time (s)",
-  "Cycle Time (s)",
-  "Chg Step Time (s)",
-  "DChg Step Time (s)",
-  "Chg Current (A)",
-  "DChg Current (A)",
-  "Chg Charge Density (A cm-2)",
-  "DChg Charge Density (A cm-2)",
-  "Chg Voltage (V)",
-  "DChg Voltage (V)",
-  "Chg Capacity (Ah)",
-  "DChg Capacity (Ah)",
-  "Chg Energy (Wh)",
-  "DChg Energy (Wh)",
-  "CE (Fractional)",
-  "EE (Fractional)",
-  "VE (Fractional)",
-  "ASR (Ohm cm-2)"
-};
 
 
 /* Structure containing performance data of a cell cycle. */
@@ -159,4 +135,5 @@ extern inline void extractCycle(const double area,
 extern inline void pushIn(const CellCycle& cyc, std::vector<std::string>& elems);
 
 
+}
 }
