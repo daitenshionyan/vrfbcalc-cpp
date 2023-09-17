@@ -10,6 +10,8 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED true)
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS on)
 
+set(PROJECT_ARCH_TARGET "amd64")
+
 # ==== PROJECT CONFIGURATION ================================================= #
 
 project(vrfbcalc-cpp
@@ -50,9 +52,11 @@ add_library(vrfbcalc SHARED
 
 # ==== EXECUTABLE ============================================================ #
 
-set(VRFBCALC-CPP_VERSION "0.1.0")
+set(VRFBCALC-CPP_VERSION "0.2.0")
 
 configure_file(include/vrfbcalccfg.hpp.in include/vrfbcalccfg.hpp)
+
+add_subdirectory(dependencies/qcustomplot)
 
 find_package(Xlnt CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
@@ -60,7 +64,8 @@ find_package(Qt6 REQUIRED COMPONENTS
     Concurrent
     Core
     Gui
-    Widgets)
+    Widgets
+    Charts)
 
 add_executable(vrfbcalc-cpp WIN32
     src/main.cpp
@@ -96,6 +101,14 @@ add_executable(vrfbcalc-cpp WIN32
     src/view/celleffmanualconfigform.ui
     src/view/celleffmanualconfigform.cpp
 
+    include/view/celleffresultview.h
+    src/view/celleffresultview.ui
+    src/view/celleffresultview.cpp
+
+    include/view/graphplotform.h
+    src/view/graphplotform.ui
+    src/view/graphplotform.cpp
+
     resource/app.o
 )
 
@@ -109,7 +122,11 @@ target_link_libraries(vrfbcalc-cpp PRIVATE
     Qt6::Concurrent
     Qt6::Core
     Qt6::Gui
-    Qt6::Widgets)
+    Qt6::Widgets
+    Qt6::Charts)
+target_link_libraries(vrfbcalc-cpp PRIVATE qcustomplot)
+
+target_compile_definitions(vrfbcalc-cpp PRIVATE QCUSTOMPLOT_USE_LIBRARY)
 
 set(PACKAGE_OUTPUT_DIR ${CMAKE_BINARY_DIR}/package)
 file(MAKE_DIRECTORY ${PACKAGE_OUTPUT_DIR})
@@ -117,15 +134,15 @@ file(MAKE_DIRECTORY ${PACKAGE_OUTPUT_DIR})
 add_custom_command(TARGET vrfbcalc-cpp POST_BUILD
     COMMAND ${WINDEPLOYQT_EXECUTABLE}
         --verbose 1
-        --release
+        $<IF:$<CONFIG:Debug>,--debug,--release>
         --no-compiler-runtime
         --no-network
         --no-pdf
         --skip-plugin-types
             imageformats
-        --no-opengl
         --no-opengl-sw
         --no-system-d3d-compiler
         --no-translations
+        -printsupport
         \"$<TARGET_FILE:vrfbcalc-cpp>\"
 )

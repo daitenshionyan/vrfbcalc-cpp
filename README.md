@@ -6,9 +6,8 @@ Utility application to perform vanadium redox flow battery related calculations.
 
 Calculates cell cycle performance from raw cycling data.
 
-1. Click the configuration button and enter the relavent details for the data files. See below for more details.
-2. Click start to run the calculations.
-3. Cell performance output are output into the folder `output/${DATA_SET_NAME}.xlsx`. To quickly open output folder, navigate `Files` > `Open output`.
+1. Navigate `Run` > `CE Calculation` and enter the relavent details. See [Data Set](#data-set) and [Data Entry](#data-entry) for more details.
+2. Cell performance output are output into the folder `output/${DATA_SET_NAME}.xlsx`. To quickly open output folder, navigate `Files` > `Open output`.
 
 ### Data Set
 
@@ -48,10 +47,13 @@ Additional points to note:
 * GUI framework: [Qt Framework](https://www.qt.io/)
 * JSON library: [nlohmann/json](https://github.com/nlohmann/json)
 * XLSX library: [xlnt](https://github.com/tfussell/xlnt)
+* Graphs: [QCustomPlot v2.1.1](https://www.qcustomplot.com/index.php/introduction)
 
 ## Building
 
-Install all dependencies and VS then configure and build by entering the following in powershell (for CMD replace `` ` `` with `^`).
+Install all dependencies and VS. QCustomPlot v2.1.1 source files should be placed in `dependencies/qcustomplot`.
+
+Configure and build by entering the following in powershell (for CMD replace `` ` `` with `^`).
 
 ```text
 cmake --no-warn-unused-cli `

@@ -10,6 +10,10 @@
 namespace vrfbdriver {
 
 
+constexpr std::string_view kDataSheetTitle_CE = "Data";
+constexpr std::string_view kConfigSheetTitle_CE = "Config";
+
+
 struct DataEntry_CE {
   std::string path;
   std::string sheet_title;
@@ -23,9 +27,16 @@ struct DataSet_CE {
 };
 
 
+struct PerformanceEntry_CE {
+  std::string name;
+  vrfb::Table table;
+};
+
+
 using SetSupplierVec_CE = std::vector<std::pair<std::string, std::function<vrfbdriver::DataSet_CE()>>>;
 
 void calcCellEff(const SetSupplierVec_CE&, logger::Logger&);
+std::vector<PerformanceEntry_CE> readPerformance_CE(const std::vector<std::string>&, logger::Logger&);
 
 
 }

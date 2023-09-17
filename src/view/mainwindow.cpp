@@ -6,9 +6,11 @@
 #include <QtCore/qpromise.h>
 #include <QtConcurrent/qtconcurrentrun.h>
 #include <QDesktopServices>
+#include <QFileDialog>
 
 #include "strutils.hpp"
 #include "vrfbcalccfg.hpp"
+#include "driver/vrfbdriver_io.hpp"
 
 
 namespace {
@@ -46,38 +48,26 @@ MainWindow::MainWindow(QWidget* parent)
                 "================================================================================"))
       + QString("</p>"));
   connect(this, &MainWindow::availableLogMsg,
-    this, &MainWindow::logMsg);
+      this, &MainWindow::logMsg);
   connect(popup_ce, &CEConfigPopup::accepted,
-    this, &MainWindow::startCalc);
+      this, &MainWindow::startCalc);
   connect(&watcher, &QFutureWatcher<logger::LogMsg>::resultReadyAt,
-    this, &MainWindow::logMsgAt);
+      this, &MainWindow::logMsgAt);
+  connect(&watcher, &QFutureWatcher<logger::LogMsg>::started,
+      this, &MainWindow::disableActions);
+  connect(&watcher, &QFutureWatcher<logger::LogMsg>::canceled,
+      this, &MainWindow::enableActions);
+  connect(&watcher, &QFutureWatcher<logger::LogMsg>::finished,
+      this, &MainWindow::enableActions);
+  connect(this, &MainWindow::completedPerformanceReading,
+      this, &MainWindow::displayPerformanceView,
+      Qt::ConnectionType::QueuedConnection);
 }
 
 
 MainWindow::~MainWindow() {
   delete popup_ce;
   delete ui;
-}
-
-
-void MainWindow::on_action_openOutput_triggered(bool) {
-  std::filesystem::path output_path {"output"};
-  if (!std::filesystem::exists(output_path)) {
-    fail("Output folder does not exist yet");
-    return;
-  } else if (!std::filesystem::is_directory(output_path)) {
-    fail("The file 'output' exists but it is not a directory");
-    return;
-  }
-  QDesktopServices::openUrl(QUrl::fromLocalFile("output"));
-}
-
-
-void MainWindow::on_startBtn_clicked() {
-  if (watcher.isRunning()) {
-    return;
-  }
-  popup_ce->exec();
 }
 
 
@@ -131,4 +121,108 @@ void MainWindow::logMsg(const logger::LogMsg& lm) {
           strutils::format_string("<p style=\"color:%s;white-space:pre\">",
               color.c_str()))
       + outText + "</p>");
+}
+
+
+void MainWindow::disableActions() {
+  ui->menuRun->setDisabled(true);
+}
+
+
+void MainWindow::enableActions() {
+  ui->menuRun->setDisabled(false);
+}
+
+
+void MainWindow::displayPerformanceView(
+      const std::vector<vrfbdriver::PerformanceEntry_CE>& entries) {
+  if (entries.empty()) {
+    return;
+  }
+  CEResultView* rv = new CEResultView(this);
+  try {
+    rv->plotGraphs(entries);
+  } catch (std::exception& ex) {
+    fail(strutils::format_string("Failed to plot graphs due to - %s",
+        ex.what()));
+    delete rv;
+    return;
+  }
+  connect(rv, &CEResultView::exportRequested,
+      this, &MainWindow::exportCEPerformance);
+  rv->open();
+}
+
+
+void MainWindow::exportCEPerformance(CEResultView* rv) {
+  if (watcher.isRunning()) {
+    warn("Cannot export as another process is already running");
+    return;
+  }
+  rv->hide();
+  watcher.setFuture(QtConcurrent::run(
+      &pool,
+      [&, rv](QPromise<logger::LogMsg>& p) {
+        auto l = PromLogger{p};
+        bool is_success = rv->exportImages(l);
+        if (is_success) {
+          rv->done(QDialog::Accepted);
+        } else {
+          rv->show();
+        }
+      }
+  ));
+}
+
+
+// ---- < SLOTS > --------------------------------------------------------------
+
+
+void MainWindow::on_action_openOutput_triggered(bool) {
+  std::filesystem::path output_path {"output"};
+  if (!std::filesystem::exists(output_path)) {
+    fail("Output folder does not exist yet");
+    return;
+  } else if (!std::filesystem::is_directory(output_path)) {
+    fail("The file 'output' exists but it is not a directory");
+    return;
+  }
+  QDesktopServices::openUrl(QUrl::fromLocalFile("output"));
+}
+
+
+void MainWindow::on_actionCECalculations_triggered(bool) {
+  if (watcher.isRunning()) {
+    warn("Cannot perform calculations as another process is already running");
+    return;
+  }
+  popup_ce->exec();
+}
+
+
+void MainWindow::on_actionCEAnalysis_triggered(bool) {
+  if (watcher.isRunning()) {
+    warn("Cannot analyse data as another process is already running");
+    return;
+  }
+  QString openPath = "output";
+  if (!std::filesystem::exists(openPath.toStdString())) {
+    openPath = QString();
+  }
+  QStringList qstrPaths = QFileDialog::getOpenFileNames(
+      this,
+      "Select one or more performance files to open",
+      openPath,
+      "XLSX Files (*.xlsx)"
+  );
+  watcher.setFuture(QtConcurrent::run(
+      &pool,
+      [&, qstrPaths](QPromise<logger::LogMsg>& p) {
+        auto l = PromLogger{p};
+        std::vector<std::string> strPaths {};
+        for (const QString& qstrPath : qstrPaths) {
+          strPaths.push_back(qstrPath.toStdString());
+        }
+        emit completedPerformanceReading(vrfbdriver::readPerformance_CE(strPaths, l));
+      }));
 }

@@ -10,6 +10,7 @@
 ================================================================================
 */
 
+namespace vrfb {
 namespace celleff {
 
 
@@ -97,6 +98,7 @@ std::vector<Step> extractSteps(const vrfb::Table& t, const vrfb::Config_CE& cfg)
 }
 
 
+}
 }
 
 
