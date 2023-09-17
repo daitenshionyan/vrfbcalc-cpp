@@ -12,12 +12,6 @@ set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS on)
 
 set(PROJECT_ARCH_TARGET "amd64")
 
-# ==== PROJECT CONFIGURATION ================================================= #
-
-project(vrfbcalc-cpp
-    LANGUAGES CXX
-)
-
 set(dir ${CMAKE_BINARY_DIR}/output)
 set(EXECUTABLE_OUTPUT_PATH ${dir} CACHE PATH "Build directory" FORCE)
 set(LIBRARY_OUTPUT_PATH ${dir} CACHE PATH "Build directory" FORCE)
@@ -25,9 +19,15 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${dir})
 set(CMAKE_BUILD_FILES_DIRECTORY ${dir})
 set(CMAKE_BUILD_DIRECTORY ${dir})
 set(CMAKE_BINARY_DIR  ${dir})
-SET(EXECUTABLE_OUTPUT_PATH ${dir})
-SET(LIBRARY_OUTPUT_PATH ${dir}lib)
-SET(CMAKE_CACHEFILE_DIR ${dir})
+set(EXECUTABLE_OUTPUT_PATH ${dir})
+set(LIBRARY_OUTPUT_PATH ${dir}lib)
+set(CMAKE_CACHEFILE_DIR ${dir})
+
+# ==== PROJECT CONFIGURATION ================================================= #
+
+project(vrfbcalc-cpp
+    LANGUAGES CXX
+)
 
 include_directories(src include ${CMAKE_CURRENT_BINARY_DIR}/include)
 
@@ -57,15 +57,6 @@ set(VRFBCALC-CPP_VERSION "0.2.0")
 configure_file(include/vrfbcalccfg.hpp.in include/vrfbcalccfg.hpp)
 
 add_subdirectory(dependencies/qcustomplot)
-
-find_package(Xlnt CONFIG REQUIRED)
-find_package(nlohmann_json CONFIG REQUIRED)
-find_package(Qt6 REQUIRED COMPONENTS
-    Concurrent
-    Core
-    Gui
-    Widgets
-    Charts)
 
 add_executable(vrfbcalc-cpp WIN32
     src/main.cpp
@@ -115,6 +106,15 @@ add_executable(vrfbcalc-cpp WIN32
 set(VRFBCALC_EXECUTABLE_NAME "vrfbcalc_v${VRFBCALC-CPP_VERSION}" CACHE STRING "Output executable name" FORCE)
 set_target_properties(vrfbcalc-cpp PROPERTIES OUTPUT_NAME ${VRFBCALC_EXECUTABLE_NAME})
 
+find_package(Xlnt CONFIG REQUIRED)
+find_package(nlohmann_json CONFIG REQUIRED)
+find_package(Qt6 REQUIRED COMPONENTS
+    Concurrent
+    Core
+    Gui
+    Widgets
+    Charts)
+
 target_link_libraries(vrfbcalc-cpp PRIVATE vrfbcalc)
 target_link_libraries(vrfbcalc-cpp PRIVATE xlnt::xlnt)
 target_link_libraries(vrfbcalc-cpp PRIVATE nlohmann_json::nlohmann_json)
@@ -143,6 +143,6 @@ add_custom_command(TARGET vrfbcalc-cpp POST_BUILD
         --no-opengl-sw
         --no-system-d3d-compiler
         --no-translations
-        -printsupport
+        -printsupport                           # for qcustomplot
         \"$<TARGET_FILE:vrfbcalc-cpp>\"
 )
