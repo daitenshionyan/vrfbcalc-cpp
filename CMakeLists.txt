@@ -35,7 +35,6 @@ include_directories(src include ${CMAKE_CURRENT_BINARY_DIR}/include)
 
 set(VRFBCALC_PUBLIC_HEADERS
     include/table.hpp
-    ${CMAKE_CURRENT_BINARY_DIR}/include/vrfbcalccfg.hpp
     include/vrfbcalc.hpp)
 set(VRFBCALC_PRIVATE_HEADERS
     include/celleff.hpp
@@ -59,6 +58,7 @@ configure_file(include/vrfbcalccfg.hpp.in include/vrfbcalccfg.hpp)
 add_subdirectory(dependencies/qcustomplot)
 
 add_executable(vrfbcalc-cpp WIN32
+    ${CMAKE_CURRENT_BINARY_DIR}/include/vrfbcalccfg.hpp
     src/main.cpp
 
     include/driver/vrfbdriver.hpp
