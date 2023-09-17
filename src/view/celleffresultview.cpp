@@ -43,10 +43,14 @@ CEResultView::CEResultView(QWidget* parent)
     std::string(vrfb::celleff::kTotalTimeHdr),
     std::string(vrfb::celleff::kASRHdr),
     ui->asrTimePlot});
-  plotForms.push_back({"TIME", "Cycle time vs Cycle number",
+  plotForms.push_back({"TIME", "Total time vs Cycle number",
     std::string(vrfb::celleff::kCycleNumberHdr),
     std::string(vrfb::celleff::kTotalTimeHdr),
     ui->totalTimeCycPlot});
+  plotForms.push_back({"TIME", "Cycle time vs Cycle number",
+    std::string(vrfb::celleff::kCycleNumberHdr),
+    std::string(vrfb::celleff::kCycleTimeHdr),
+    ui->cycTimeCycPlot});
   plotForms.push_back({"TIME", "Chg time vs Cycle number",
     std::string(vrfb::celleff::kCycleNumberHdr),
     std::string(vrfb::celleff::kChgTimeHdr),

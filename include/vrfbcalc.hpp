@@ -15,6 +15,7 @@ namespace celleff {
 
 constexpr std::string_view kCycleNumberHdr = "Cycle No.";
 constexpr std::string_view kTotalTimeHdr = "Total Time (s)";
+constexpr std::string_view kCycleTimeHdr = "Cycle Time (s)";
 constexpr std::string_view kChgTimeHdr = "Chg Step Time (s)";
 constexpr std::string_view kDChgTimeHdr = "DChg Step Time (s)";
 constexpr std::string_view kChgCurrentHdr = "Chg Current (A)";
@@ -37,6 +38,7 @@ constexpr std::string_view kASRHdr = "ASR (Ohm cm-2)";
 const std::vector<std::string> kCycleTableHdrs {
   std::string(kCycleNumberHdr),
   std::string(kTotalTimeHdr),
+  std::string(kCycleTimeHdr),
   std::string(kChgTimeHdr),
   std::string(kDChgTimeHdr),
   std::string(kChgCurrentHdr),

@@ -197,6 +197,9 @@
         <widget class="GraphPlotForm" name="totalTimeCycPlot" native="true"/>
        </item>
        <item>
+        <widget class="GraphPlotForm" name="cycTimeCycPlot" native="true"/>
+       </item>
+       <item>
         <widget class="GraphPlotForm" name="chgTimeCycPlot" native="true"/>
        </item>
        <item>
