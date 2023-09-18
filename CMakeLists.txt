@@ -2,16 +2,16 @@
 
 cmake_minimum_required(VERSION 3.21.0)
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED true)
+set(PROJECT_ARCH_TARGET "amd64")
+
+# qt generators
 set(CMAKE_AUTOUIC on)
 set(CMAKE_AUTOMOC on)
 set(CMAKE_AUTORCC on)
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED true)
-set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS on)
-
-set(PROJECT_ARCH_TARGET "amd64")
-
+# configure to outbut required binaries to a single folder
 set(dir ${CMAKE_BINARY_DIR}/output)
 set(EXECUTABLE_OUTPUT_PATH ${dir} CACHE PATH "Build directory" FORCE)
 set(LIBRARY_OUTPUT_PATH ${dir} CACHE PATH "Build directory" FORCE)
@@ -29,8 +29,21 @@ project(vrfbcalc-cpp
     LANGUAGES CXX
 )
 
-include_directories(src include ${CMAKE_CURRENT_BINARY_DIR}/include)
+# find libraries
+find_package(Xlnt CONFIG REQUIRED)
+find_package(nlohmann_json CONFIG REQUIRED)
+find_package(Qt6 REQUIRED COMPONENTS
+    Concurrent
+    Core
+    Gui
+    Widgets
+    Charts
+)
 
+# add dependency sub directory
+add_subdirectory(dependency/qcustomplot)
+
+# add library sub directory
 add_subdirectory(library/utillib)
 add_subdirectory(library/vrfblib)
 
@@ -39,8 +52,6 @@ add_subdirectory(library/vrfblib)
 set(VRFBCALC-CPP_VERSION "0.2.0")
 
 configure_file(include/vrfbcalccfg.hpp.in include/vrfbcalccfg.hpp)
-
-add_subdirectory(dependencies/qcustomplot)
 
 add_executable(vrfbcalc-cpp WIN32
     ${CMAKE_CURRENT_BINARY_DIR}/include/vrfbcalccfg.hpp
@@ -85,21 +96,22 @@ add_executable(vrfbcalc-cpp WIN32
     src/view/graphplotform.ui
     src/view/graphplotform.cpp
 
-    resource/app.o
+    resource/app.o          # executable icon
 )
 
-set(VRFBCALC_EXECUTABLE_NAME "vrfbcalc_v${VRFBCALC-CPP_VERSION}" CACHE STRING "Output executable name" FORCE)
-set_target_properties(vrfbcalc-cpp PROPERTIES OUTPUT_NAME ${VRFBCALC_EXECUTABLE_NAME})
+target_include_directories(vrfbcalc-cpp PRIVATE
+    include
+    ${CMAKE_CURRENT_BINARY_DIR}/include
+)
 
-find_package(Xlnt CONFIG REQUIRED)
-find_package(nlohmann_json CONFIG REQUIRED)
-find_package(Qt6 REQUIRED COMPONENTS
-    Concurrent
-    Core
-    Gui
-    Widgets
-    Charts)
+# cache variable used by package.bat
+set(VRFBCALC_EXECUTABLE_NAME "vrfbcalc_v${VRFBCALC-CPP_VERSION}"
+    CACHE STRING "Output executable name" FORCE)
+set_target_properties(vrfbcalc-cpp PROPERTIES OUTPUT_NAME
+    ${VRFBCALC_EXECUTABLE_NAME}
+)
 
+# link libraries
 target_link_libraries(vrfbcalc-cpp PRIVATE xlnt::xlnt)
 target_link_libraries(vrfbcalc-cpp PRIVATE nlohmann_json::nlohmann_json)
 target_link_libraries(vrfbcalc-cpp PRIVATE
@@ -112,11 +124,10 @@ target_link_libraries(vrfbcalc-cpp PRIVATE qcustomplot)
 target_link_libraries(vrfbcalc-cpp PRIVATE utillib)
 target_link_libraries(vrfbcalc-cpp PRIVATE vrfblib)
 
+# compile definition for qcustomplot
 target_compile_definitions(vrfbcalc-cpp PRIVATE QCUSTOMPLOT_USE_LIBRARY)
 
-set(PACKAGE_OUTPUT_DIR ${CMAKE_BINARY_DIR}/package)
-file(MAKE_DIRECTORY ${PACKAGE_OUTPUT_DIR})
-
+# post build to install required qt dlls
 add_custom_command(TARGET vrfbcalc-cpp POST_BUILD
     COMMAND ${WINDEPLOYQT_EXECUTABLE}
         --verbose 1
@@ -129,6 +140,6 @@ add_custom_command(TARGET vrfbcalc-cpp POST_BUILD
         --no-opengl-sw
         --no-system-d3d-compiler
         --no-translations
-        -printsupport                           # for qcustomplot
+        -printsupport                               # for qcustomplot
         \"$<TARGET_FILE:vrfbcalc-cpp>\"
 )
