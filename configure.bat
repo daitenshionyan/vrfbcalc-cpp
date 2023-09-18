@@ -63,9 +63,13 @@ if not exist "%QCP_DIR%" (
 )
 
 echo Downloading qcustomplot archive...
-bitsadmin /transfer "qcustomplot download" ^
-    https://www.qcustomplot.com/release/2.1.1/QCustomPlot-source.tar.gz ^
-    "%SRC_PATH%QCustomPlot-source.tar.gz"
+where curl
+if errorlevel 1 (
+    echo %ERROR_LABEL% Cannot find curl
+    exit 1
+)
+curl https://www.qcustomplot.com/release/2.1.1/QCustomPlot-source.tar.gz ^
+    --output "%SRC_PATH%QCustomPlot-source.tar.gz"
 
 echo Extracting qcustomplot...
 "%ZIPPER%" e -aoa "%SRC_PATH%QCustomPlot-source.tar.gz" > NUL
