@@ -1,6 +1,9 @@
 @echo off
 SETLOCAL DISABLEDELAYEDEXPANSION
 
+set ERROR_LABEL=[91m[ERROR][0m
+set SUCC_LABEL=[92m[SUCCESS][0m
+
 set SRC_PATH=%~dp0
 
 set EXE_NAME_VAR_NAME=VRFBCALC_EXECUTABLE_NAME
@@ -10,11 +13,11 @@ set CMAKE_CACHE_PATH=%SRC_PATH%build\CMakeCache.txt
 set ZIPPER=C:\Program Files\7-Zip\7z.exe
 
 if not exist "%ZIPPER%" (
-    echo [91m[ERROR][0m Cannot find 7z executable - %ZIPPER%
+    echo %ERROR_LABEL% Cannot find 7z executable - %ZIPPER%
     exit 1
 )
 if not exist "%CMAKE_CACHE_PATH%" (
-    echo [91m[ERROR][0m Cannot find CMakeCache.txt file - %CMAKE_CACHE_PATH%
+    echo %ERROR_LABEL% Cannot find CMakeCache.txt file - %CMAKE_CACHE_PATH%
     exit 1
 )
 
@@ -34,29 +37,32 @@ for /f "usebackq tokens=1 eol=/ delims=" %%G in ("%CMAKE_CACHE_PATH%") do (
 )
 
 if %EXE_NAME_FOUND%==false (
-    echo [91m[ERROR][0m %EXE_NAME_VAR_NAME% variable not found in CMakeCache.txt
+    echo %ERROR_LABEL% %EXE_NAME_VAR_NAME% variable not found in CMakeCache.txt
     exit 1
 )
 if %EXE_OUTP_FOUND%==false (
-    echo [91m[ERROR][0m %EXE_OUTP_VAR_NAME% variable not found in CMakeCache.txt
+    echo %ERROR_LABEL% %EXE_OUTP_VAR_NAME% variable not found in CMakeCache.txt
     exit 1
 )
 
+set PAK_DIR=%OUT_PATH%\package
 set BIN_PATH=%OUT_PATH%\Release
 set EXE_PATH=%OUT_PATH%\Release\%EXE_NAME%.exe
-set PAK_PATH=%OUT_PATH%\package\%EXE_NAME%.zip
+set PAK_PATH=%PAK_DIR%\%EXE_NAME%.zip
 
 if not exist "%BIN_PATH%" (
-    echo [91m[ERROR][0m Cannot find binary output folder - %BIN_PATH%
+    echo %ERROR_LABEL% Cannot find binary output folder - %BIN_PATH%
     exit 1
 )
 if not exist "%EXE_PATH%" (
-    echo [91m[ERROR][0m Cannot find executable file - %EXE_PATH%
+    echo %ERROR_LABEL% Cannot find executable file - %EXE_PATH%
     exit 1
 )
 if exist "%PAK_PATH%" (
     del "%PAK_PATH%"
     echo Deleted old package
+) else (
+    if not exist "%PAK_DIR%" mkdir "%PAK_DIR%"
 )
 
 echo Packaging executable...
@@ -65,7 +71,10 @@ echo Packaging executable...
         /c:"Add new data to archive:"
 
 echo Packaging dependencies...
-"%ZIPPER%" a -tzip "-x!*.exe" "-x!output" "%PAK_PATH%" "%BIN_PATH%\*" ^
+"%ZIPPER%" a -tzip "%PAK_PATH%" "%BIN_PATH%\*.dll" ^
+    | findstr ^
+        /c:"Add new data to archive:"
+"%ZIPPER%" a -tzip "%PAK_PATH%" "%BIN_PATH%\**\*.dll" ^
     | findstr ^
         /c:"Add new data to archive:"
 
@@ -75,5 +84,4 @@ echo Packaging readme and license...
         /c:"Add new data to archive:" ^
         /c:"Archive size"
 
-echo.
-echo [92m[SUCCESS][0m Packaging completed - %PAK_PATH%
+echo %SUCC_LABEL% Packaging completed - %PAK_PATH%

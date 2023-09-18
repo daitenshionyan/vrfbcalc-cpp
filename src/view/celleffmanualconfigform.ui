@@ -27,7 +27,7 @@
     <number>0</number>
    </property>
    <item row="0" column="0">
-    <widget class="QLabel" name="label">
+    <widget class="QLabel" name="timeHdrLabel">
      <property name="text">
       <string>Time Hdr</string>
      </property>
@@ -37,7 +37,7 @@
     <widget class="QLineEdit" name="timeHdrField"/>
    </item>
    <item row="1" column="0">
-    <widget class="QLabel" name="label_2">
+    <widget class="QLabel" name="typeHdrLabel">
      <property name="text">
       <string>Type Hdr</string>
      </property>
@@ -47,7 +47,7 @@
     <widget class="QLineEdit" name="typeHdrField"/>
    </item>
    <item row="2" column="0">
-    <widget class="QLabel" name="label_3">
+    <widget class="QLabel" name="chgCapHdrLabel">
      <property name="text">
       <string>Chg Cap Hdr</string>
      </property>
@@ -57,14 +57,14 @@
     <widget class="QLineEdit" name="chgCapHdrField"/>
    </item>
    <item row="3" column="0">
-    <widget class="QLabel" name="label_4">
+    <widget class="QLabel" name="dchgCapHdrLabel">
      <property name="text">
       <string>DChg Cap Hdr</string>
      </property>
     </widget>
    </item>
    <item row="3" column="1">
-    <widget class="QWidget" name="horizontalWidget" native="true">
+    <widget class="QWidget" name="dchgCapHdrBox" native="true">
      <layout class="QHBoxLayout" name="horizontalLayout">
       <property name="leftMargin">
        <number>0</number>
@@ -92,7 +92,7 @@
     </widget>
    </item>
    <item row="4" column="0">
-    <widget class="QLabel" name="label_5">
+    <widget class="QLabel" name="chgEnergyHdrLabel">
      <property name="text">
       <string>Chg Energy Hdr</string>
      </property>
@@ -102,14 +102,14 @@
     <widget class="QLineEdit" name="chgEnergyHdrField"/>
    </item>
    <item row="5" column="0">
-    <widget class="QLabel" name="label_6">
+    <widget class="QLabel" name="dchgEnergyHdrLabel">
      <property name="text">
       <string>DChg Energy Hdr</string>
      </property>
     </widget>
    </item>
    <item row="5" column="1">
-    <widget class="QWidget" name="horizontalWidget" native="true">
+    <widget class="QWidget" name="dchgEnergyHdrBox" native="true">
      <layout class="QHBoxLayout" name="horizontalLayout_2">
       <property name="leftMargin">
        <number>0</number>
@@ -137,7 +137,7 @@
     </widget>
    </item>
    <item row="6" column="0">
-    <widget class="QLabel" name="label_7">
+    <widget class="QLabel" name="chgTypeNamesLabel">
      <property name="text">
       <string>Chg Type Names</string>
      </property>
@@ -147,7 +147,7 @@
     <widget class="QLineEdit" name="chgTypeNamesField"/>
    </item>
    <item row="7" column="0">
-    <widget class="QLabel" name="label_8">
+    <widget class="QLabel" name="dchgTypeNamesLabel">
      <property name="text">
       <string>DChg Type Names</string>
      </property>

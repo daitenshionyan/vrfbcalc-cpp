@@ -2,22 +2,16 @@
 
 cmake_minimum_required(VERSION 3.21.0)
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED true)
+set(PROJECT_ARCH_TARGET "amd64")
+
+# qt generators
 set(CMAKE_AUTOUIC on)
 set(CMAKE_AUTOMOC on)
 set(CMAKE_AUTORCC on)
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED true)
-set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS on)
-
-set(PROJECT_ARCH_TARGET "amd64")
-
-# ==== PROJECT CONFIGURATION ================================================= #
-
-project(vrfbcalc-cpp
-    LANGUAGES CXX
-)
-
+# configure to outbut required binaries to a single folder
 set(dir ${CMAKE_BINARY_DIR}/output)
 set(EXECUTABLE_OUTPUT_PATH ${dir} CACHE PATH "Build directory" FORCE)
 set(LIBRARY_OUTPUT_PATH ${dir} CACHE PATH "Build directory" FORCE)
@@ -25,39 +19,17 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${dir})
 set(CMAKE_BUILD_FILES_DIRECTORY ${dir})
 set(CMAKE_BUILD_DIRECTORY ${dir})
 set(CMAKE_BINARY_DIR  ${dir})
-SET(EXECUTABLE_OUTPUT_PATH ${dir})
-SET(LIBRARY_OUTPUT_PATH ${dir}lib)
-SET(CMAKE_CACHEFILE_DIR ${dir})
+set(EXECUTABLE_OUTPUT_PATH ${dir})
+set(LIBRARY_OUTPUT_PATH ${dir}lib)
+set(CMAKE_CACHEFILE_DIR ${dir})
 
-include_directories(src include ${CMAKE_CURRENT_BINARY_DIR}/include)
+# ==== PROJECT CONFIGURATION ================================================= #
 
-# ==== LIBRARY =============================================================== #
+project(vrfbcalc-cpp
+    LANGUAGES CXX
+)
 
-set(VRFBCALC_PUBLIC_HEADERS
-    include/table.hpp
-    ${CMAKE_CURRENT_BINARY_DIR}/include/vrfbcalccfg.hpp
-    include/vrfbcalc.hpp)
-set(VRFBCALC_PRIVATE_HEADERS
-    include/celleff.hpp
-    include/strutils.hpp)
-set(VRFBCALC_SOURCES
-    src/strutils.cpp
-    src/table.cpp
-    src/celleff.cpp)
-
-add_library(vrfbcalc SHARED
-    ${VRFBCALC_PUBLIC_HEADERS}
-    ${VRFBCALC_PRIVATE_HEADERS}
-    ${VRFBCALC_SOURCES})
-
-# ==== EXECUTABLE ============================================================ #
-
-set(VRFBCALC-CPP_VERSION "0.2.0")
-
-configure_file(include/vrfbcalccfg.hpp.in include/vrfbcalccfg.hpp)
-
-add_subdirectory(dependencies/qcustomplot)
-
+# find libraries
 find_package(Xlnt CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(Qt6 REQUIRED COMPONENTS
@@ -65,9 +37,24 @@ find_package(Qt6 REQUIRED COMPONENTS
     Core
     Gui
     Widgets
-    Charts)
+    Charts
+)
+
+# add dependency sub directory
+add_subdirectory(dependency/qcustomplot)
+
+# add library sub directory
+add_subdirectory(library/utillib)
+add_subdirectory(library/vrfblib)
+
+# ==== EXECUTABLE ============================================================ #
+
+set(VRFBCALC-CPP_VERSION "0.2.0")
+
+configure_file(include/vrfbcalccfg.hpp.in include/vrfbcalccfg.hpp)
 
 add_executable(vrfbcalc-cpp WIN32
+    ${CMAKE_CURRENT_BINARY_DIR}/include/vrfbcalccfg.hpp
     src/main.cpp
 
     include/driver/vrfbdriver.hpp
@@ -109,13 +96,22 @@ add_executable(vrfbcalc-cpp WIN32
     src/view/graphplotform.ui
     src/view/graphplotform.cpp
 
-    resource/app.o
+    resource/app.o          # executable icon
 )
 
-set(VRFBCALC_EXECUTABLE_NAME "vrfbcalc_v${VRFBCALC-CPP_VERSION}" CACHE STRING "Output executable name" FORCE)
-set_target_properties(vrfbcalc-cpp PROPERTIES OUTPUT_NAME ${VRFBCALC_EXECUTABLE_NAME})
+target_include_directories(vrfbcalc-cpp PRIVATE
+    include
+    ${CMAKE_CURRENT_BINARY_DIR}/include
+)
 
-target_link_libraries(vrfbcalc-cpp PRIVATE vrfbcalc)
+# cache variable used by package.bat
+set(VRFBCALC_EXECUTABLE_NAME "vrfbcalc_v${VRFBCALC-CPP_VERSION}"
+    CACHE STRING "Output executable name" FORCE)
+set_target_properties(vrfbcalc-cpp PROPERTIES OUTPUT_NAME
+    ${VRFBCALC_EXECUTABLE_NAME}
+)
+
+# link libraries
 target_link_libraries(vrfbcalc-cpp PRIVATE xlnt::xlnt)
 target_link_libraries(vrfbcalc-cpp PRIVATE nlohmann_json::nlohmann_json)
 target_link_libraries(vrfbcalc-cpp PRIVATE
@@ -125,12 +121,13 @@ target_link_libraries(vrfbcalc-cpp PRIVATE
     Qt6::Widgets
     Qt6::Charts)
 target_link_libraries(vrfbcalc-cpp PRIVATE qcustomplot)
+target_link_libraries(vrfbcalc-cpp PRIVATE utillib)
+target_link_libraries(vrfbcalc-cpp PRIVATE vrfblib)
 
+# compile definition for qcustomplot
 target_compile_definitions(vrfbcalc-cpp PRIVATE QCUSTOMPLOT_USE_LIBRARY)
 
-set(PACKAGE_OUTPUT_DIR ${CMAKE_BINARY_DIR}/package)
-file(MAKE_DIRECTORY ${PACKAGE_OUTPUT_DIR})
-
+# post build to install required qt dlls
 add_custom_command(TARGET vrfbcalc-cpp POST_BUILD
     COMMAND ${WINDEPLOYQT_EXECUTABLE}
         --verbose 1
@@ -143,6 +140,6 @@ add_custom_command(TARGET vrfbcalc-cpp POST_BUILD
         --no-opengl-sw
         --no-system-d3d-compiler
         --no-translations
-        -printsupport
+        -printsupport                               # for qcustomplot
         \"$<TARGET_FILE:vrfbcalc-cpp>\"
 )
