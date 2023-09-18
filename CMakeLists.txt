@@ -32,24 +32,7 @@ project(vrfbcalc-cpp
 include_directories(src include ${CMAKE_CURRENT_BINARY_DIR}/include)
 
 add_subdirectory(library/utillib)
-
-# ==== LIBRARY =============================================================== #
-
-set(VRFBCALC_PUBLIC_HEADERS
-    include/table.hpp
-    include/vrfbcalc.hpp)
-set(VRFBCALC_PRIVATE_HEADERS
-    include/celleff.hpp)
-set(VRFBCALC_SOURCES
-    src/table.cpp
-    src/celleff.cpp)
-
-add_library(vrfbcalc SHARED
-    ${VRFBCALC_PUBLIC_HEADERS}
-    ${VRFBCALC_PRIVATE_HEADERS}
-    ${VRFBCALC_SOURCES})
-
-target_link_libraries(vrfbcalc PRIVATE utillib)
+add_subdirectory(library/vrfblib)
 
 # ==== EXECUTABLE ============================================================ #
 
@@ -117,7 +100,6 @@ find_package(Qt6 REQUIRED COMPONENTS
     Widgets
     Charts)
 
-target_link_libraries(vrfbcalc-cpp PRIVATE vrfbcalc)
 target_link_libraries(vrfbcalc-cpp PRIVATE xlnt::xlnt)
 target_link_libraries(vrfbcalc-cpp PRIVATE nlohmann_json::nlohmann_json)
 target_link_libraries(vrfbcalc-cpp PRIVATE
@@ -128,6 +110,7 @@ target_link_libraries(vrfbcalc-cpp PRIVATE
     Qt6::Charts)
 target_link_libraries(vrfbcalc-cpp PRIVATE qcustomplot)
 target_link_libraries(vrfbcalc-cpp PRIVATE utillib)
+target_link_libraries(vrfbcalc-cpp PRIVATE vrfblib)
 
 target_compile_definitions(vrfbcalc-cpp PRIVATE QCUSTOMPLOT_USE_LIBRARY)
 
