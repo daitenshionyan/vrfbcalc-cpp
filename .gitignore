@@ -7,8 +7,8 @@
 /CMakeSettings.json
 
 # Ignore dependencies (manual install)
-/dependencies/qcustomplot/qcustomplot.cpp
-/dependencies/qcustomplot/qcustomplot.h
+/dependency/qcustomplot/qcustomplot.cpp
+/dependency/qcustomplot/qcustomplot.h
 
 
 # Ignore app files
