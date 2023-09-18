@@ -53,7 +53,7 @@ Additional points to note:
 
 Install all dependencies and VS.
 
-QCustomPlot v2.1.1 source files should be placed in `dependencies/qcustomplot`. The batch script `installdep.bat` can be ran to do this.
+QCustomPlot v2.1.1 source files should be placed in `dependencies/qcustomplot`. The batch script `configure.bat` can be ran to do this.
 
 Configure and build by entering the following in powershell (for CMD replace `` ` `` with `^`).
 
