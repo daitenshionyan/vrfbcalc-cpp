@@ -31,16 +31,16 @@ project(vrfbcalc-cpp
 
 include_directories(src include ${CMAKE_CURRENT_BINARY_DIR}/include)
 
+add_subdirectory(library/utillib)
+
 # ==== LIBRARY =============================================================== #
 
 set(VRFBCALC_PUBLIC_HEADERS
     include/table.hpp
     include/vrfbcalc.hpp)
 set(VRFBCALC_PRIVATE_HEADERS
-    include/celleff.hpp
-    include/strutils.hpp)
+    include/celleff.hpp)
 set(VRFBCALC_SOURCES
-    src/strutils.cpp
     src/table.cpp
     src/celleff.cpp)
 
@@ -48,6 +48,8 @@ add_library(vrfbcalc SHARED
     ${VRFBCALC_PUBLIC_HEADERS}
     ${VRFBCALC_PRIVATE_HEADERS}
     ${VRFBCALC_SOURCES})
+
+target_link_libraries(vrfbcalc PRIVATE utillib)
 
 # ==== EXECUTABLE ============================================================ #
 
@@ -125,6 +127,7 @@ target_link_libraries(vrfbcalc-cpp PRIVATE
     Qt6::Widgets
     Qt6::Charts)
 target_link_libraries(vrfbcalc-cpp PRIVATE qcustomplot)
+target_link_libraries(vrfbcalc-cpp PRIVATE utillib)
 
 target_compile_definitions(vrfbcalc-cpp PRIVATE QCUSTOMPLOT_USE_LIBRARY)
 
