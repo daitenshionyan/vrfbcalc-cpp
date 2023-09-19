@@ -1,4 +1,4 @@
-#include "view/celleffdataentryform.h"
+#include "view/celleff/celleffdataentryform.h"
 #include "./ui_celleffdataentryform.h"
 
 #include <filesystem>
@@ -6,8 +6,8 @@
 
 #include <QFileDialog>
 
-#include "view/celleffloadpresetconfigform.h"
-#include "view/celleffmanualconfigform.h"
+#include "view/celleff/celleffloadpresetconfigform.h"
+#include "view/celleff/celleffmanualconfigform.h"
 
 
 CEDataEntryForm::CEDataEntryForm(QWidget* parent)

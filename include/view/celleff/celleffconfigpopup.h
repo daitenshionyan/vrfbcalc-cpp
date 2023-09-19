@@ -7,7 +7,7 @@
 
 #include <QDialog>
 
-#include "view/celleffdatasetform.h"
+#include "view/celleff/celleffdatasetform.h"
 #include "driver/vrfbdriver.hpp"
 
 

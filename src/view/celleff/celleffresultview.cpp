@@ -1,4 +1,4 @@
-#include "view/celleffresultview.h"
+#include "view/celleff/celleffresultview.h"
 #include "./ui_celleffresultview.h"
 
 #include <filesystem>

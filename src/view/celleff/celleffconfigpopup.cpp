@@ -1,4 +1,4 @@
-#include "view/celleffconfigpopup.h"
+#include "view/celleff/celleffconfigpopup.h"
 #include "./ui_celleffconfigpopup.h"
 
 #include <algorithm>

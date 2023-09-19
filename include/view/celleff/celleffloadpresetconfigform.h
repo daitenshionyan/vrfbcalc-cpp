@@ -3,7 +3,7 @@
 
 #include <QWidget>
 
-#include "view/celleffdataentryform.h"
+#include "view/celleff/celleffdataentryform.h"
 
 
 QT_BEGIN_NAMESPACE

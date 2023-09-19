@@ -68,29 +68,29 @@ add_executable(vrfbcalc-cpp WIN32
     src/view/mainwindow.ui
     src/view/mainwindow.cpp
 
-    include/view/celleffconfigpopup.h
-    src/view/celleffconfigpopup.ui
-    src/view/celleffconfigpopup.cpp
+    include/view/celleff/celleffconfigpopup.h
+    src/view/celleff/celleffconfigpopup.ui
+    src/view/celleff/celleffconfigpopup.cpp
 
-    include/view/celleffdatasetform.h
-    src/view/celleffdatasetform.ui
-    src/view/celleffdatasetform.cpp
+    include/view/celleff/celleffdatasetform.h
+    src/view/celleff/celleffdatasetform.ui
+    src/view/celleff/celleffdatasetform.cpp
 
-    include/view/celleffdataentryform.h
-    src/view/celleffdataentryform.ui
-    src/view/celleffdataentryform.cpp
+    include/view/celleff/celleffdataentryform.h
+    src/view/celleff/celleffdataentryform.ui
+    src/view/celleff/celleffdataentryform.cpp
 
-    include/view/celleffloadpresetconfigform.h
-    src/view/celleffloadpresetconfigform.ui
-    src/view/celleffloadpresetconfigform.cpp
+    include/view/celleff/celleffloadpresetconfigform.h
+    src/view/celleff/celleffloadpresetconfigform.ui
+    src/view/celleff/celleffloadpresetconfigform.cpp
 
-    include/view/celleffmanualconfigform.h
-    src/view/celleffmanualconfigform.ui
-    src/view/celleffmanualconfigform.cpp
+    include/view/celleff/celleffmanualconfigform.h
+    src/view/celleff/celleffmanualconfigform.ui
+    src/view/celleff/celleffmanualconfigform.cpp
 
-    include/view/celleffresultview.h
-    src/view/celleffresultview.ui
-    src/view/celleffresultview.cpp
+    include/view/celleff/celleffresultview.h
+    src/view/celleff/celleffresultview.ui
+    src/view/celleff/celleffresultview.cpp
 
     include/view/graphplotform.h
     src/view/graphplotform.ui

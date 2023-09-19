@@ -5,8 +5,8 @@
 #include <QtCore/qfuturewatcher.h>
 #include <QMainWindow>
 
-#include "view/celleffconfigpopup.h"
-#include "view/celleffresultview.h"
+#include "view/celleff/celleffconfigpopup.h"
+#include "view/celleff/celleffresultview.h"
 #include "driver/vrfbdriver.hpp"
 #include "logger.hpp"
 

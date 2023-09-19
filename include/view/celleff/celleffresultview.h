@@ -12,7 +12,7 @@
 #include <utility>
 #include <vector>
 
-#include "graphplotform.h"
+#include "view/graphplotform.h"
 
 
 QT_BEGIN_NAMESPACE

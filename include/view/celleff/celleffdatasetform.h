@@ -7,7 +7,7 @@
 
 #include <QWidget>
 
-#include "view/celleffdataentryform.h"
+#include "view/celleff/celleffdataentryform.h"
 #include "driver/vrfbdriver.hpp"
 
 

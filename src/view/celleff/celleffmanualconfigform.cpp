@@ -1,4 +1,4 @@
-#include "view/celleffmanualconfigform.h"
+#include "view/celleff/celleffmanualconfigform.h"
 #include "./ui_celleffmanualconfigform.h"
 
 #include <sstream>
