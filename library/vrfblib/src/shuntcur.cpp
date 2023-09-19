@@ -1,6 +1,8 @@
 #include "vrfbcalc.hpp"
 #include "shuntcur.hpp"
 
+#include <Eigen/Dense>
+
 
 namespace vrfb { // BEGIN OF NAMESPACE <vrfb> ==================================
 namespace shuntcur { // BEGIN OF NAMESPACE <vrfb::shuntcur> ====================
@@ -16,6 +18,84 @@ inline double calcChanResist(double rho, double l, double a) {
 
 inline double calcCellResist(double asr, double area) {
   return asr / area;
+}
+
+
+Eigen::MatrixXd formMatrix(const SystemParam& s) {
+  Eigen::MatrixXd m(4*s.numCells() - 3, 4*s.numCells() - 3);
+
+  for (std::size_t i = 0; i < s.numCells(); ++i) {
+    // main loop
+    m(0, 0                      ) += s.getCellResist(i);
+    m(0, i + 1                  ) = s.getCellResist(i);
+    m(0, i + s.numCells()       ) = s.getCellResist(i);
+    m(0, i + 2*s.numCells() - 1 ) = s.getCellResist(i);
+    m(0, i + 3*s.numCells() - 2 ) = s.getCellResist(i);
+
+    // positive loops
+    if (i+1 < s.numCells()) {
+      // main loop contribution
+      m(i + 1           , 0) = s.getCellResist(i);
+      m(i + s.numCells(), 0) = s.getCellResist(i);
+
+      // previous loop contribution
+      if (i > 0) {
+        m(i + 1           , i                   ) = -s.getShuntResist(Position::kPosTop, i);
+        m(i + s.numCells(), i + s.numCells() - 1) = -s.getShuntResist(Position::kPosBot, i);
+      }
+
+      // current loop contribution
+      m(i + 1           , i + 1           ) =
+            s.getCellResist(i)
+          + s.getManiResist(Position::kPosTop, i)
+          + s.getShuntResist(Position::kPosTop, i)
+          + s.getShuntResist(Position::kPosTop, i+1);
+      m(i + s.numCells(), i + s.numCells()) =
+            s.getCellResist(i)
+          + s.getManiResist(Position::kPosBot, i)
+          + s.getShuntResist(Position::kPosBot, i)
+          + s.getShuntResist(Position::kPosBot, i+1);
+
+      // next loop contribution
+      if (i+2 < s.numCells()) {
+        m(i + 1           , i + 2               ) = -s.getShuntResist(Position::kPosTop, i+1);
+        m(i + s.numCells(), i + s.numCells() + 1) = -s.getShuntResist(Position::kPosBot, i+1);
+      }
+    }
+
+    // negative loops
+    if (i > 0) {
+      // main loop contribution
+      m(i + 2*s.numCells() - 1, 0) = s.getCellResist(i);
+      m(i + 3*s.numCells() - 2, 0) = s.getCellResist(i);
+
+      // previous loop contribution
+      if (i > 1) {
+        m(i + 2*s.numCells() - 1, i + 2*s.numCells() - 2) = -s.getShuntResist(Position::kNegTop, i-1);
+        m(i + 3*s.numCells() - 2, i + 3*s.numCells() - 3) = -s.getShuntResist(Position::kNegBot, i-1);
+      }
+
+      // current loop contribution
+      m(i + 2*s.numCells() - 1, i + 2*s.numCells() - 1) =
+            s.getCellResist(i)
+          + s.getManiResist(Position::kNegTop, i-1)
+          + s.getShuntResist(Position::kNegTop, i-1)
+          + s.getShuntResist(Position::kNegTop, i);
+      m(i + 3*s.numCells() - 2, i + 3*s.numCells() - 2) =
+            s.getCellResist(i)
+          + s.getManiResist(Position::kNegBot, i-1)
+          + s.getShuntResist(Position::kNegBot, i-1)
+          + s.getShuntResist(Position::kNegBot, i);
+
+      // next loop contribution
+      if (i+1 < s.numCells()) {
+        m(i + 2*s.numCells() - 1, i + 2*s.numCells()    ) = -s.getShuntResist(Position::kPosTop, i+1);
+        m(i + 3*s.numCells() - 2, i + 3*s.numCells() - 1) = -s.getShuntResist(Position::kPosBot, i+1);
+      }
+    }
+  }
+
+  return m;
 }
 
 

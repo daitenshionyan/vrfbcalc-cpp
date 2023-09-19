@@ -12,6 +12,8 @@ set(CMAKE_AUTORCC off)
 
 # ==== LIBRARY CONFIGURATION ================================================= #
 
+find_package(Eigen3 CONFIG REQUIRED)
+
 add_library(vrfblib SHARED
     include/public/table.hpp
     include/public/vrfbcalc.hpp
@@ -24,6 +26,7 @@ add_library(vrfblib SHARED
     src/shuntcur.cpp
 )
 
+target_link_libraries(vrfblib PRIVATE Eigen3::Eigen)
 target_link_libraries(vrfblib PRIVATE utillib)
 
 target_include_directories(vrfblib PUBLIC include/public)

@@ -35,8 +35,12 @@ class SystemParam {
       return maniResists.at(static_cast<int>(p)).at(i);
     }
 
-    double getCellResist(std::size_t i) const {
+    inline double getCellResist(std::size_t i) const {
       return cellResists.at(i);
+    }
+
+    inline std::size_t numCells() const {
+      return cellResists.size();
     }
 
 
