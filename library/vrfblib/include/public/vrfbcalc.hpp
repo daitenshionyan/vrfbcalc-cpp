@@ -7,10 +7,10 @@
 #include "table.hpp"
 
 
-namespace vrfb {
+namespace vrfb { // BEGIN OF NAMESPACE <vrfb> ==================================
 
 
-namespace celleff {
+namespace celleff { // BEGIN OF NAMESPACE <vrfb::celleff> ======================
 
 
 constexpr std::string_view kCycleNumberHdr = "Cycle No.";
@@ -58,8 +58,8 @@ const std::vector<std::string> kCycleTableHdrs {
 };
 
 
-}
-
+} // END OF NAMESPACE <vrfb::celleff> ------------------------------------------
+// namespace <vrfb>
 
 /* Structure containing cell efficiency calculation configuration. */
 struct Config_CE {
@@ -87,6 +87,26 @@ struct Data_CE {
   @param datas List of data to process.
 */
 vrfb::Table calcPerf_CE(const double area, const std::vector<Data_CE>& datas);
+
+
+namespace shuntcur { // BEGIN OF NAMESPACE <vrfb::shuntcur> ====================
+
+
+struct ResistConfig {
+  std::string asrHdr;
+  std::string shuntLengthHdr;
+  std::string shuntAreaHdr;
+  std::string maniLengthHdr;
+  std::string maniAreaHdr;
+
+  double resistivity;
+};
+
+
+vrfb::Table calcPerf(const double chgVolt, const vrfb::Table& table, const ResistConfig& cfg_r);
+
+
+} // END OF NAMESPACE <vrfb::shuntcur> -----------------------------------------
 
 
 }
