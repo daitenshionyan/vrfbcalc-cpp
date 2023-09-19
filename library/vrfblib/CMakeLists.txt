@@ -17,9 +17,11 @@ add_library(vrfblib SHARED
     include/public/vrfbcalc.hpp
 
     include/private/celleff.hpp
+    include/private/shuntcur.hpp
 
     src/table.cpp
     src/celleff.cpp
+    src/shuntcur.cpp
 )
 
 target_link_libraries(vrfblib PRIVATE utillib)

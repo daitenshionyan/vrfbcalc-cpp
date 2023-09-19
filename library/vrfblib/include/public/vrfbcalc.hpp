@@ -94,12 +94,27 @@ namespace shuntcur { // BEGIN OF NAMESPACE <vrfb::shuntcur> ====================
 
 struct ResistConfig {
   std::string asrHdr;
-  std::string shuntLengthHdr;
-  std::string shuntAreaHdr;
-  std::string maniLengthHdr;
-  std::string maniAreaHdr;
+
+  std::string shuntLengthPosTopHdr;
+  std::string shuntLengthPosBotHdr;
+  std::string shuntLengthNegTopHdr;
+  std::string shuntLengthNegBotHdr;
+  std::string shuntAreaPosTopHdr;
+  std::string shuntAreaPosBotHdr;
+  std::string shuntAreaNegTopHdr;
+  std::string shuntAreaNegBotHdr;
+
+  std::string maniLengthPosTopHdr;
+  std::string maniLengthPosBotHdr;
+  std::string maniLengthNegTopHdr;
+  std::string maniLengthNegBotHdr;
+  std::string maniAreaPosTopHdr;
+  std::string maniAreaPosBotHdr;
+  std::string maniAreaNegTopHdr;
+  std::string maniAreaNegBotHdr;
 
   double resistivity;
+  double area;
 };
 
 
