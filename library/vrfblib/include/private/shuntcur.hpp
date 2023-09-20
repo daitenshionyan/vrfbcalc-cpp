@@ -1,9 +1,10 @@
 #pragma once
 
+#include <vector>
+
+#include <Eigen/Dense>
 
 #include "vrfbcalc.hpp"
-
-#include <vector>
 
 
 namespace vrfb {
@@ -49,6 +50,9 @@ class SystemParam {
     std::vector<std::vector<double>> maniResists;
     std::vector<double> cellResists;
 };
+
+
+Eigen::MatrixXd formMatrix(const SystemParam& s);
 
 
 }

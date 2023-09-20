@@ -143,3 +143,7 @@ add_custom_command(TARGET vrfbcalc-cpp POST_BUILD
         -printsupport                               # for qcustomplot
         \"$<TARGET_FILE:vrfbcalc-cpp>\"
 )
+
+# ==== TESTING =============================================================== #
+
+enable_testing()
