@@ -48,8 +48,8 @@ add_executable(shunttest test/shunttest.cpp)
 
 target_link_libraries(shunttest PRIVATE GTest::gtest_main)
 target_link_libraries(shunttest PRIVATE Eigen3::Eigen)
+target_link_libraries(shunttest PRIVATE vrfblib)
 
-target_include_directories(shunttest PRIVATE include/public)
 target_include_directories(shunttest PRIVATE include/private)
 
 include(GoogleTest)
