@@ -52,7 +52,10 @@ class SystemParam {
 };
 
 
-Eigen::MatrixXd formMatrix(const SystemParam& s);
+Eigen::MatrixXd formCurrMat(const SystemParam& s);
+Eigen::VectorXd formVoltVec(double chgVolt, std::size_t numCells);
+
+Eigen::VectorXd calcCurrLoops(double chgVolt, const SystemParam& s);
 
 
 }

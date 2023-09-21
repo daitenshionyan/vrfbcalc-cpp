@@ -9,6 +9,9 @@
 namespace {
 
 
+const double kTestChgVolt = 10;
+
+
 const std::vector<std::string> kTestHeaders = {
   "ASR",
   "SLPT", "SLPB", "SLNT", "SLNB", "SAPT", "SAPB", "SANT", "SANB",
@@ -32,7 +35,7 @@ const vrfb::shuntcur::ResistConfig kTestCfg = {
 };
 
 
-const Eigen::Matrix<double, 17, 17> kExpectedMat {
+const Eigen::Matrix<double, 17, 17> kExpectedCurrMat {
 /*  MAIN  | I1PT  , I2PT  , I3PT  , I4PT  | I1PB  , I2PB  , I3PB  , I4PB  | I2NT  , I3NT  , I4NT  , I5NT  | I2NB  , I3NB  , I4NB  , I5NB  */
   { 15    , 1     , 2     , 3     , 4     , 1     , 2     , 3     , 4     , 2     , 3     , 4     , 5     , 2     , 3     , 4     , 5     },
 /*  MAIN  | I1PT  , I2PT  , I3PT  , I4PT  | I1PB  , I2PB  , I3PB  , I4PB  | I2NT  , I3NT  , I4NT  , I5NT  | I2NB  , I3NB  , I4NB  , I5NB  */
@@ -58,31 +61,43 @@ const Eigen::Matrix<double, 17, 17> kExpectedMat {
 };
 
 
+const Eigen::Matrix<double, 17, 1> kExpectedVoltVec {
+  3.1,
+  -1.38, -1.38, -1.38, -1.38,
+  -1.38, -1.38, -1.38, -1.38,
+  -1.38, -1.38, -1.38, -1.38,
+  -1.38, -1.38, -1.38, -1.38
+};
+
+
+const Eigen::Matrix<double, 17, 1> kExpectedCurrVec { // results from matlab
+  0.4523,
+  -0.0892, -0.0947, -0.0761, -0.0445,
+  -0.0892, -0.0947, -0.0761, -0.0445,
+  -0.0952, -0.1070, -0.0911, -0.0564,
+  -0.0952, -0.1070, -0.0911, -0.0564
+};
+
+
 }
 
 
-// Demonstrate some basic assertions.
-TEST(vrfblib, ShuntTest) {
+TEST(vrfblib, SHUNTCurrMatTest) {
   vrfb::shuntcur::SystemParam s{kTestTable, kTestCfg};
-  Eigen::MatrixXd actual;
-  try {
-    actual = vrfb::shuntcur::formMatrix(s);
-  } catch (std::exception& ex) {
-    FAIL();
-  }
+  Eigen::MatrixXd actual = vrfb::shuntcur::formCurrMat(s);
 
   auto actualRows = actual.rows();
-  auto expectedRows = kExpectedMat.rows();
+  auto expectedRows = kExpectedCurrMat.rows();
   EXPECT_EQ(actualRows, expectedRows) << "Expected " << expectedRows << " but got " << actualRows;
 
   auto actualCols = actual.cols();
-  auto expectedCols = kExpectedMat.cols();
+  auto expectedCols = kExpectedCurrMat.cols();
   EXPECT_EQ(actualCols, expectedCols) << "Expected " << expectedCols << " but got " << actualCols;
 
   bool is_same = true;
   for (std::size_t r = 0; r < expectedRows; ++r) {
     for (std::size_t c = 0; c < expectedCols; ++c) {
-      if (std::abs(actual(r, c) - kExpectedMat(r, c)) > 0.001) {
+      if (std::abs(actual(r, c) - kExpectedCurrMat(r, c)) > 0.001) {
         is_same = false;
         break;
       }
@@ -92,5 +107,44 @@ TEST(vrfblib, ShuntTest) {
     }
   }
 
-  EXPECT_TRUE(is_same) << "Expected:\n" << kExpectedMat << "\nBut got:\n" << actual;
+  EXPECT_TRUE(is_same) << "Expected:\n" << kExpectedCurrMat << "\nBut got:\n" << actual;
+}
+
+
+TEST(vrfblib, SHUNTVoltMatTest) {
+  auto actual = vrfb::shuntcur::formVoltVec(kTestChgVolt, 5);
+
+  auto actualRows = actual.rows();
+  auto expectedRows = kExpectedVoltVec.rows();
+  EXPECT_EQ(actualRows, expectedRows) << "Expected " << expectedRows << " but got " << actualRows;
+
+  bool is_same = true;
+  for (Eigen::Index i = 0; i < kExpectedVoltVec.rows(); ++i) {
+    if (std::abs(actual(i) - kExpectedVoltVec(i)) > 0.001) {
+      is_same = false;
+      break;
+    }
+  }
+
+  EXPECT_TRUE(is_same) << "Expected:\n" << kExpectedVoltVec << "\nBut got:\n" << actual;
+}
+
+
+TEST(vrfblib, SHUNTCurrVecTest) {
+  vrfb::shuntcur::SystemParam s{kTestTable, kTestCfg};
+  auto actual = vrfb::shuntcur::calcCurrLoops(kTestChgVolt, s);
+
+  auto actualRows = actual.rows();
+  auto expectedRows = kExpectedVoltVec.rows();
+  EXPECT_EQ(actualRows, expectedRows) << "Expected " << expectedRows << " but got " << actualRows;
+
+  bool is_same = true;
+  for (Eigen::Index i = 0; i < kExpectedCurrVec.rows(); ++i) {
+    if (std::abs(actual(i) - kExpectedCurrVec(i)) > 0.001) {
+      is_same = false;
+      break;
+    }
+  }
+
+  EXPECT_TRUE(is_same) << "Expected:\n" << kExpectedCurrVec << "\nBut got:\n" << actual;
 }

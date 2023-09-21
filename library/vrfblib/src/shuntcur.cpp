@@ -72,7 +72,7 @@ SystemParam::SystemParam(const vrfb::Table& table, const ResistConfig& cfg_r)
 }
 
 
-Eigen::MatrixXd formMatrix(const SystemParam& s) {
+Eigen::MatrixXd formCurrMat(const SystemParam& s) {
   Eigen::MatrixXd m = Eigen::MatrixXd::Zero(4*s.numCells() - 3, 4*s.numCells() - 3);
 
   for (std::size_t i = 0; i < s.numCells(); ++i) {
@@ -179,8 +179,21 @@ Eigen::MatrixXd formMatrix(const SystemParam& s) {
 }
 
 
+Eigen::VectorXd formVoltVec(double chgVolt, std::size_t numCells) {
+  Eigen::VectorXd v = Eigen::VectorXd::Constant(4*numCells -3, -1.38);
+  v(0) = chgVolt - 1.38*numCells;
+  return v;
+}
+
+Eigen::VectorXd calcCurrLoops(double chgVolt, const SystemParam& s) {
+  auto currMat = formCurrMat(s);
+  auto voltVec = formVoltVec(chgVolt, s.numCells());
+  return currMat.colPivHouseholderQr().solve(voltVec);
+}
+
+
 vrfb::Table calcPerf(const double chgVolt, const vrfb::Table& table, const ResistConfig& cfg_r) {
-  SystemParam sysParam{table, cfg_r};
+  SystemParam s{table, cfg_r};
 
   return vrfb::Table{};
 }
