@@ -21,6 +21,71 @@ inline double calcCellResist(double asr, double area) {
 }
 
 
+void addCellStats(const Eigen::VectorXd& v, const SystemParam& s, Eigen::Index i, std::vector<std::string>& elems) {
+  Eigen::Index numCells = (v.rows()+3) / 4;
+
+  double mainLoopCur = v(0);
+
+  double posTopPrevLoopCur = 0;
+  double posBotPrevLoopCur = 0;
+  double negTopPrevLoopCur = 0;
+  double negBotPrevLoopCur = 0;
+
+  double posTopLoopCur = 0;
+  double posBotLoopCur = 0;
+  double negTopLoopCur = 0;
+  double negBotLoopCur = 0;
+
+  Eigen::Index curPosTop = i + 1;
+  Eigen::Index curPosBot = i + numCells;
+  Eigen::Index curNegTop = i + 2*numCells - 1;
+  Eigen::Index curNegBot = i + 3*numCells - 2;
+
+  if (i+1 < numCells) {
+    posTopLoopCur = v(curPosTop);
+    posBotLoopCur = v(curPosBot);
+    negTopLoopCur = v(curNegTop);
+    negBotLoopCur = v(curNegBot);
+  }
+
+  if (i > 0) {
+    posTopPrevLoopCur = v(curPosTop-1);
+    posBotPrevLoopCur = v(curPosBot-1);
+    negTopPrevLoopCur = v(curNegTop-1);
+    negBotPrevLoopCur = v(curNegBot-1);
+  }
+
+  double cellCur = mainLoopCur + posTopLoopCur + posBotLoopCur + negTopLoopCur + negBotLoopCur;
+  double shuntPosTopCur = posTopLoopCur - posTopPrevLoopCur;
+  double shuntPosBotCur = posBotLoopCur - posBotPrevLoopCur;
+  double shuntNegTopCur = negTopLoopCur - negTopPrevLoopCur;
+  double shuntNegBotCur = negBotLoopCur - negBotPrevLoopCur;
+
+  // addition to elements
+  elems.push_back(std::to_string(i+1));
+
+  elems.push_back(std::to_string(cellCur));
+  elems.push_back(std::to_string(shuntPosTopCur));
+  elems.push_back(std::to_string(shuntPosBotCur));
+  elems.push_back(std::to_string(shuntNegTopCur));
+  elems.push_back(std::to_string(shuntNegBotCur));
+  elems.push_back(std::to_string(posTopLoopCur));
+  elems.push_back(std::to_string(posBotLoopCur));
+  elems.push_back(std::to_string(negTopLoopCur));
+  elems.push_back(std::to_string(negBotLoopCur));
+
+  elems.push_back(std::to_string(std::pow(cellCur, 2) * s.getCellResist(i)));
+  elems.push_back(std::to_string(std::pow(shuntPosTopCur, 2) * s.getShuntResist(Position::kPosTop, i)));
+  elems.push_back(std::to_string(std::pow(shuntPosBotCur, 2) * s.getShuntResist(Position::kPosBot, i)));
+  elems.push_back(std::to_string(std::pow(shuntNegTopCur, 2) * s.getShuntResist(Position::kNegTop, i)));
+  elems.push_back(std::to_string(std::pow(shuntNegBotCur, 2) * s.getShuntResist(Position::kNegBot, i)));
+  elems.push_back(std::to_string(std::pow(posTopLoopCur, 2) * s.getManiResist(Position::kPosTop, i)));
+  elems.push_back(std::to_string(std::pow(posBotLoopCur, 2) * s.getManiResist(Position::kPosBot, i)));
+  elems.push_back(std::to_string(std::pow(negTopLoopCur, 2) * s.getManiResist(Position::kNegTop, i)));
+  elems.push_back(std::to_string(std::pow(negBotLoopCur, 2) * s.getManiResist(Position::kNegBot, i)));
+}
+
+
 } // END OF NAMESPACE <vrfb::shuntcur::UNNAMED> --------------------------------
 // namespace <vrfb::shuntcur>
 
@@ -195,7 +260,13 @@ Eigen::VectorXd calcCurrLoops(double chgVolt, const SystemParam& s) {
 vrfb::Table calcPerf(const double chgVolt, const vrfb::Table& table, const ResistConfig& cfg_r) {
   SystemParam s{table, cfg_r};
 
-  return vrfb::Table{};
+  auto v = calcCurrLoops(chgVolt, s);
+  std::vector<std::string> elems {};
+  for (std::size_t i = 0; i < s.numCells(); ++i) {
+    addCellStats(v, s, i, elems);
+  }
+
+  return vrfb::Table{kShuntLossTableHdrs, elems};
 }
 
 

@@ -2,6 +2,7 @@
 
 
 #include <exception>
+#include <ostream>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -128,6 +129,9 @@ class Table {
     std::vector<std::string> hdrs;
     ColMap colMap;
 };
+
+
+std::ostream& operator<<(std::ostream&, const Table&);
 
 
 class invalid_csv_format : public std::exception {

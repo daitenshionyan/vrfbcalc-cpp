@@ -148,3 +148,10 @@ TEST(vrfblib, SHUNTCurrVecTest) {
 
   EXPECT_TRUE(is_same) << "Expected:\n" << kExpectedCurrVec << "\nBut got:\n" << actual;
 }
+
+
+TEST(vrfblib, SHUNTLossCalc) {
+  auto actual = vrfb::shuntcur::calcPerf(kTestChgVolt, kTestTable, kTestCfg);
+
+  EXPECT_TRUE(false) << actual;
+}

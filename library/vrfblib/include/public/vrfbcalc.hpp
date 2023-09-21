@@ -92,6 +92,54 @@ vrfb::Table calcPerf_CE(const double area, const std::vector<Data_CE>& datas);
 namespace shuntcur { // BEGIN OF NAMESPACE <vrfb::shuntcur> ====================
 
 
+constexpr std::string_view kCellNumHdr = "Cell No.";
+
+constexpr std::string_view kCellCurHdr = "Cell Current (A)";
+constexpr std::string_view kShuntPosTopCurHdr = "SPT Current (A)";
+constexpr std::string_view kShuntPosBotCurHdr = "SPB Current (A)";
+constexpr std::string_view kShuntNegTopCurHdr = "SNT Current (A)";
+constexpr std::string_view kShuntNegBotCurHdr = "SNB Current (A)";
+constexpr std::string_view kManiPosTopCurHdr = "MPT Current (A)";
+constexpr std::string_view kManiPosBotCurHdr = "MPB Current (A)";
+constexpr std::string_view kManiNegTopCurHdr = "MNT Current (A)";
+constexpr std::string_view kManiNegBotCurHdr = "MNB Current (A)";
+
+constexpr std::string_view kCellPowHdr = "Cell Power (W)";
+constexpr std::string_view kShuntPosTopPowHdr = "SPT Power (W)";
+constexpr std::string_view kShuntPosBotPowHdr = "SPB Power (W)";
+constexpr std::string_view kShuntNegTopPowHdr = "SNT Power (W)";
+constexpr std::string_view kShuntNegBotPowHdr = "SNB Power (W)";
+constexpr std::string_view kManiPosTopPowHdr = "MPT Power (W)";
+constexpr std::string_view kManiPosBotPowHdr = "MPB Power (W)";
+constexpr std::string_view kManiNegTopPowHdr = "MNT Power (W)";
+constexpr std::string_view kManiNegBotPowHdr = "MNB Power (W)";
+
+
+const std::vector<std::string> kShuntLossTableHdrs {
+  std::string(kCellNumHdr),
+
+  std::string(kCellCurHdr),
+  std::string(kShuntPosTopCurHdr),
+  std::string(kShuntPosBotCurHdr),
+  std::string(kShuntNegTopCurHdr),
+  std::string(kShuntNegBotCurHdr),
+  std::string(kManiPosTopCurHdr),
+  std::string(kManiPosBotCurHdr),
+  std::string(kManiNegTopCurHdr),
+  std::string(kManiNegBotCurHdr),
+
+  std::string(kCellPowHdr),
+  std::string(kShuntPosTopPowHdr),
+  std::string(kShuntPosBotPowHdr),
+  std::string(kShuntNegTopPowHdr),
+  std::string(kShuntNegBotPowHdr),
+  std::string(kManiPosTopPowHdr),
+  std::string(kManiPosBotPowHdr),
+  std::string(kManiNegTopPowHdr),
+  std::string(kManiNegBotPowHdr)
+};
+
+
 struct ResistConfig {
   std::string asrHdr;
 

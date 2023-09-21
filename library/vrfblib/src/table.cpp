@@ -71,4 +71,28 @@ const std::vector<std::string>& Table::at(const std::string& h) const {
 }
 
 
+std::ostream& operator<<(std::ostream& os, const Table& t) {
+  auto headers = t.headers();
+  for (std::size_t i = 0; i < t.numCols(); ++i) {
+    if (i+1 < t.numCols()) {
+      os << headers[i] << ", ";
+    } else {
+      os << headers[i] << "\n";
+    }
+  }
+
+  for (std::size_t r = 0; r < t.numRows(); ++r) {
+    for (std::size_t c = 0; c < t.numCols(); ++c) {
+      if (c+1 < t.numCols()) {
+        os << t.get(c, r) << ", ";
+      } else {
+        os << t.get(c, r) << "\n";
+      }
+    }
+  }
+
+  return os;
+}
+
+
 }
