@@ -1,6 +1,8 @@
 #include "vrfbcalc.hpp"
 #include "shuntcur.hpp"
 
+#include <stdexcept>
+
 
 namespace vrfb { // BEGIN OF NAMESPACE <vrfb> ==================================
 namespace shuntcur { // BEGIN OF NAMESPACE <vrfb::shuntcur> ====================
@@ -71,35 +73,50 @@ SystemParam::SystemParam(const vrfb::Table& table, const ResistConfig& cfg_r)
 
 
 Eigen::MatrixXd formMatrix(const SystemParam& s) {
-  Eigen::MatrixXd m(4*s.numCells() - 3, 4*s.numCells() - 3);
+  Eigen::MatrixXd m = Eigen::MatrixXd::Zero(4*s.numCells() - 3, 4*s.numCells() - 3);
 
   for (std::size_t i = 0; i < s.numCells(); ++i) {
     // main loop
-    m(0, 0                      ) += s.getCellResist(i);
-    m(0, i + 1                  ) = s.getCellResist(i);
-    m(0, i + s.numCells()       ) = s.getCellResist(i);
-    m(0, i + 2*s.numCells() - 1 ) = s.getCellResist(i);
-    m(0, i + 3*s.numCells() - 2 ) = s.getCellResist(i);
+    m(0, 0) += s.getCellResist(i);
+
+    Eigen::Index curPosTop = i + 1;
+    Eigen::Index curPosBot = i + s.numCells();
+    Eigen::Index curNegTop = i + 2*s.numCells() - 2;
+    Eigen::Index curNegBot = i + 3*s.numCells() - 3;
 
     // positive loops
     if (i+1 < s.numCells()) {
+      // main loop
+      m(0, curPosTop) = s.getCellResist(i);
+      m(0, curPosBot) = s.getCellResist(i);
+
       // main loop contribution
-      m(i + 1           , 0) = s.getCellResist(i);
-      m(i + s.numCells(), 0) = s.getCellResist(i);
+      m(curPosTop, 0) = s.getCellResist(i);
+      m(curPosBot, 0) = s.getCellResist(i);
 
       // previous loop contribution
       if (i > 0) {
-        m(i + 1           , i                   ) = -s.getShuntResist(Position::kPosTop, i);
-        m(i + s.numCells(), i + s.numCells() - 1) = -s.getShuntResist(Position::kPosBot, i);
+        m(curPosTop, curPosTop-1) = -s.getShuntResist(Position::kPosTop, i);
+        m(curPosBot, curPosBot-1) = -s.getShuntResist(Position::kPosBot, i);
+
+        // contribution from negative loops
+        m(curPosTop, curNegTop) = s.getCellResist(i);
+        m(curPosTop, curNegBot) = s.getCellResist(i);
+        m(curPosBot, curNegTop) = s.getCellResist(i);
+        m(curPosBot, curNegBot) = s.getCellResist(i);
       }
 
+      // contribution from other side positive loop
+      m(curPosTop, curPosBot) = s.getCellResist(i);
+      m(curPosBot, curPosTop) = s.getCellResist(i);
+
       // current loop contribution
-      m(i + 1           , i + 1           ) =
+      m(curPosTop, curPosTop) =
             s.getCellResist(i)
           + s.getManiResist(Position::kPosTop, i)
           + s.getShuntResist(Position::kPosTop, i)
           + s.getShuntResist(Position::kPosTop, i+1);
-      m(i + s.numCells(), i + s.numCells()) =
+      m(curPosBot, curPosBot) =
             s.getCellResist(i)
           + s.getManiResist(Position::kPosBot, i)
           + s.getShuntResist(Position::kPosBot, i)
@@ -107,30 +124,34 @@ Eigen::MatrixXd formMatrix(const SystemParam& s) {
 
       // next loop contribution
       if (i+2 < s.numCells()) {
-        m(i + 1           , i + 2               ) = -s.getShuntResist(Position::kPosTop, i+1);
-        m(i + s.numCells(), i + s.numCells() + 1) = -s.getShuntResist(Position::kPosBot, i+1);
+        m(curPosTop, curPosTop+1) = -s.getShuntResist(Position::kPosTop, i+1);
+        m(curPosBot, curPosBot+1) = -s.getShuntResist(Position::kPosBot, i+1);
       }
     }
 
     // negative loops
     if (i > 0) {
+      // main loop
+      m(0, curNegTop) = s.getCellResist(i);
+      m(0, curNegBot) = s.getCellResist(i);
+
       // main loop contribution
-      m(i + 2*s.numCells() - 1, 0) = s.getCellResist(i);
-      m(i + 3*s.numCells() - 2, 0) = s.getCellResist(i);
+      m(curNegTop, 0) = s.getCellResist(i);
+      m(curNegBot, 0) = s.getCellResist(i);
 
       // previous loop contribution
       if (i > 1) {
-        m(i + 2*s.numCells() - 1, i + 2*s.numCells() - 2) = -s.getShuntResist(Position::kNegTop, i-1);
-        m(i + 3*s.numCells() - 2, i + 3*s.numCells() - 3) = -s.getShuntResist(Position::kNegBot, i-1);
+        m(curNegTop, curNegTop-1) = -s.getShuntResist(Position::kNegTop, i-1);
+        m(curNegBot, curNegBot-1) = -s.getShuntResist(Position::kNegBot, i-1);
       }
 
       // current loop contribution
-      m(i + 2*s.numCells() - 1, i + 2*s.numCells() - 1) =
+      m(curNegTop, curNegTop) =
             s.getCellResist(i)
           + s.getManiResist(Position::kNegTop, i-1)
           + s.getShuntResist(Position::kNegTop, i-1)
           + s.getShuntResist(Position::kNegTop, i);
-      m(i + 3*s.numCells() - 2, i + 3*s.numCells() - 2) =
+      m(curNegBot, curNegBot) =
             s.getCellResist(i)
           + s.getManiResist(Position::kNegBot, i-1)
           + s.getShuntResist(Position::kNegBot, i-1)
@@ -138,9 +159,19 @@ Eigen::MatrixXd formMatrix(const SystemParam& s) {
 
       // next loop contribution
       if (i+1 < s.numCells()) {
-        m(i + 2*s.numCells() - 1, i + 2*s.numCells()    ) = -s.getShuntResist(Position::kPosTop, i+1);
-        m(i + 3*s.numCells() - 2, i + 3*s.numCells() - 1) = -s.getShuntResist(Position::kPosBot, i+1);
+        m(curNegTop, curNegTop+1) = -s.getShuntResist(Position::kPosTop, i);
+        m(curNegBot, curNegBot+1) = -s.getShuntResist(Position::kPosBot, i);
+
+        // contribution from positive loops
+        m(curNegTop, curPosTop) = s.getCellResist(i);
+        m(curNegTop, curPosBot) = s.getCellResist(i);
+        m(curNegBot, curPosTop) = s.getCellResist(i);
+        m(curNegBot, curPosBot) = s.getCellResist(i);
       }
+
+      // contribution from other side negative loop
+      m(curNegTop, curNegBot) = s.getCellResist(i);
+      m(curNegBot, curNegTop) = s.getCellResist(i);
     }
   }
 
