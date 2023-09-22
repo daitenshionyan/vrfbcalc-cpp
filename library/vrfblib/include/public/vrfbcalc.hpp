@@ -166,6 +166,17 @@ struct ResistConfig {
 };
 
 
+class SystemParam;
+
+
+SystemParam formSysParam_Stack(
+      std::size_t numCells,
+      double asr, double cellArea,
+      double shuntLen, double shungArea,
+      double maniLen, double maniArea,
+      double resistivity);
+
+
 vrfb::Table calcPerf(const double chgVolt, const vrfb::Table& table, const ResistConfig& cfg_r);
 
 

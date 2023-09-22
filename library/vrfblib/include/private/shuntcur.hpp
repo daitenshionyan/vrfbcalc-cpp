@@ -18,6 +18,14 @@ enum class Position {
 
 class SystemParam {
   public:
+    SystemParam(
+        const std::vector<std::vector<double>>& sr,
+        const std::vector<std::vector<double>>& mr,
+        const std::vector<double>& cr);
+    SystemParam(
+        std::vector<std::vector<double>>&& sr,
+        std::vector<std::vector<double>>&& mr,
+        std::vector<double>&& cr);
     SystemParam(const vrfb::Table&, const ResistConfig&);
 
     SystemParam(const SystemParam&) = default;

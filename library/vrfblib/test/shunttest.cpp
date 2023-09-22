@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include <cmath>
+#include <exception>
 #include <vector>
 
 #include "shuntcur.hpp"
@@ -183,4 +184,30 @@ TEST(vrfblib, SHUNTLossCalc) {
   }
 
   EXPECT_TRUE(is_same) << "Expected table:\n" << kExpectedPerfTable << "Actual table:\n" << actual;
+}
+
+
+TEST(vrfblib, SHUNTFormSysParamStack) {
+  auto actual = vrfb::shuntcur::formSysParam_Stack(100, 1, 1, 2, 1, 3, 1, 1);
+
+  ASSERT_EQ(100, actual.numCells()) << "Wrong number of cells\nExpected: 100 | Actual: " << actual.numCells();
+
+  for (std::size_t i = 0; i < actual.numCells(); ++i) {
+    ASSERT_EQ(1, actual.getCellResist(i))
+        << "Wrong cell resistance at index "
+        << i << "\nExpected: 1 | Actual: " << actual.getCellResist(i);
+    for (int p = 0; p < 4; ++p) {
+      ASSERT_EQ(2, actual.getShuntResist(static_cast<vrfb::shuntcur::Position>(p), i))
+          << "Wrong shunt resistance at position " << p << " index " << i
+          << "\nExpected: 2 | Actual: " << actual.getShuntResist(static_cast<vrfb::shuntcur::Position>(p), i);
+      if (i+1 < 100) {
+        ASSERT_EQ(3, actual.getManiResist(static_cast<vrfb::shuntcur::Position>(p), i))
+            << "Wrong manifold resistance at position " << p << " index " << i
+            << "\nExpected: 3 | Actual: " << actual.getManiResist(static_cast<vrfb::shuntcur::Position>(p), i);
+      } else {
+        ASSERT_THROW(actual.getManiResist(static_cast<vrfb::shuntcur::Position>(p), i), std::out_of_range)
+            << "Extra manifold resist";
+      }
+    }
+  }
 }

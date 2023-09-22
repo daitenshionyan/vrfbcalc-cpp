@@ -90,6 +90,27 @@ void addCellStats(const Eigen::VectorXd& v, const SystemParam& s, Eigen::Index i
 // namespace <vrfb::shuntcur>
 
 
+SystemParam::SystemParam(
+    const std::vector<std::vector<double>>& sr,
+    const std::vector<std::vector<double>>& mr,
+    const std::vector<double>& cr)
+    : shuntResists{sr}, maniResists{mr}, cellResists{cr} {
+  if (shuntResists.size() != 4 && maniResists.size() != 4) {
+    throw std::runtime_error("Shunt or Manifold resistance vector size not equals 4");
+  }
+  for (const auto& r : shuntResists) {
+    if (r.size() != cellResists.size()) {
+      throw std::runtime_error("Size of a side of shunt resist not equals to size of cell resist");
+    }
+  }
+  for (const auto& r : maniResists) {
+    if (r.size() != cellResists.size() && r.size()+1 != cellResists.size()) {
+      throw std::runtime_error("Size of a side of manifiold resist not equals to plus minus 1 size of cell resist");
+    }
+  }
+}
+
+
 SystemParam::SystemParam(const vrfb::Table& table, const ResistConfig& cfg_r)
     : shuntResists{std::vector<std::vector<double>>(4, std::vector<double>(table.numRows()))},
       maniResists{std::vector<std::vector<double>>(4, std::vector<double>(table.numRows()))},
@@ -134,6 +155,25 @@ SystemParam::SystemParam(const vrfb::Table& table, const ResistConfig& cfg_r)
         table.get<double>(cfg_r.asrHdr, i),
         cfg_r.area);
   }
+}
+
+
+SystemParam formSysParam_Stack(
+      std::size_t numCells,
+      double asr, double cellArea,
+      double shuntLen, double shuntArea,
+      double maniLen, double maniArea,
+      double resistivity) {
+  double shuntResist = calcChanResist(resistivity, shuntLen, shuntArea);
+  auto sr = std::vector<std::vector<double>>(4, std::vector<double>(numCells, shuntResist));
+
+  double maniResist = calcChanResist(resistivity, maniLen, maniArea);
+  auto mr = std::vector<std::vector<double>>(4, std::vector<double>(numCells-1, maniResist));
+
+  double cellResist = calcCellResist(asr, cellArea);
+  auto cr = std::vector<double>(numCells, cellResist);
+
+  return {sr, mr, cr};
 }
 
 
