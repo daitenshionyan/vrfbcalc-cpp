@@ -55,7 +55,7 @@ void addCellStats(const Eigen::VectorXd& v, const SystemParam& s, Eigen::Index i
     negBotPrevLoopCur = v(curNegBot-1);
   }
 
-  double cellCur = mainLoopCur + posTopLoopCur + posBotLoopCur + negTopLoopCur + negBotLoopCur;
+  double cellCur = mainLoopCur + posTopLoopCur + posBotLoopCur + negTopPrevLoopCur + negBotPrevLoopCur;
   double shuntPosTopCur = posTopLoopCur - posTopPrevLoopCur;
   double shuntPosBotCur = posBotLoopCur - posBotPrevLoopCur;
   double shuntNegTopCur = negTopLoopCur - negTopPrevLoopCur;

@@ -79,6 +79,18 @@ const Eigen::Matrix<double, 17, 1> kExpectedCurrVec { // results from matlab
 };
 
 
+const vrfb::Table kExpectedPerfTable {
+  vrfb::shuntcur::kShuntLossTableHdrs,
+  {/* Cell No.  | Cell Curr | SPT Curr  , SPB Curr  , SNT Curr  , SNB Curr  | MPT Curr  , MPB Curr  , MNT Curr  , MNB Curr  | Cell Powr | SPT Powr  , SPB Powr  , SNT Powr  , SNB Powr  | MPT Powr  , MPB Powr  , MNT Powr  , MNB Powr    */
+      "1"       , "0.2741"  , "-0.0892" , "-0.0892" , "-0.0952" , "-0.0952" , "-0.0892" , "-0.0892" , "-0.0952" , "-0.0952" , "0.0751"  , "0.1591"  , "0.1591"  , "0.1813"  , "0.1813"  , "0.0080"  , "0.0080"  , "0.0091"  , "0.0091"  ,
+      "2"       , "0.0725"  , "-0.0055" , "-0.0055" , "-0.0118" , "-0.0118" , "-0.0947" , "-0.0947" , "-0.1070" , "-0.1070" , "0.0105"  , "0.0012"  , "0.0012"  , "0.0056"  , "0.0056"  , "0.0179"  , "0.0179"  , "0.0229"  , "0.0229"  ,
+      "3"       , "0.0861"  , "0.0186"  , "0.0186"  , "0.0159"  , "0.0159"  , "-0.0761" , "-0.0761" , "-0.0911" , "-0.0911" , "0.0222"  , "0.0208"  , "0.0208"  , "0.0152"  , "0.0152"  , "0.0174"  , "0.0174"  , "0.0249"  , "0.0249"  ,
+      "4"       , "0.1811"  , "0.0316"  , "0.0316"  , "0.0347"  , "0.0347"  , "-0.0445" , "-0.0445" , "-0.0564" , "-0.0564" , "0.1312"  , "0.0799"  , "0.0799"  , "0.0963"  , "0.0963"  , "0.0079"  , "0.0079"  , "0.0127"  , "0.0127"  ,
+      "5"       , "0.3395"  , "0.0445"  , "0.0445"  , "0.0564"  , "0.0564"  , "0"       , "0"       , "0"       , "0"       , "0.5763"  , "0.1980"  , "0.1980"  , "0.3181"  , "0.3181"  , "0"       , "0"       , "0"       , "0"
+  }
+};
+
+
 }
 
 
@@ -153,5 +165,22 @@ TEST(vrfblib, SHUNTCurrVecTest) {
 TEST(vrfblib, SHUNTLossCalc) {
   auto actual = vrfb::shuntcur::calcPerf(kTestChgVolt, kTestTable, kTestCfg);
 
-  EXPECT_TRUE(false) << actual;
+  EXPECT_EQ(actual.numCols(), kExpectedPerfTable.numCols()) << "Expected " << actual.numCols() << "cols but got " << actual.numCols();
+  EXPECT_EQ(actual.numRows(), kExpectedPerfTable.numRows()) << "Expected " << actual.numRows() << "rows but got " << actual.numRows();
+
+  bool is_same = true;
+  for (std::size_t r = 0; r < kExpectedPerfTable.numRows(); ++r) {
+    for (std::size_t c = 0; c < kExpectedPerfTable.numCols(); ++c) {
+      bool is_cell_same = std::abs(actual.get<double>(c, r) - kExpectedPerfTable.get<double>(c, r)) < 0.001;
+      EXPECT_TRUE(is_cell_same)
+          << "(" << r << ", " << c << ")"
+          << " | Expected: " << kExpectedPerfTable.get<double>(c, r)
+          << " | Actual: " << actual.get<double>(c, r);
+      if (!is_cell_same) {
+        is_same = false;
+      }
+    }
+  }
+
+  EXPECT_TRUE(is_same) << "Expected table:\n" << kExpectedPerfTable << "Actual table:\n" << actual;
 }
