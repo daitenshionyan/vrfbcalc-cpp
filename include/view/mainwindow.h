@@ -7,6 +7,7 @@
 
 #include "view/celleff/celleffconfigpopup.h"
 #include "view/celleff/celleffresultview.h"
+#include "view/shuntcur/shuntcurconfigpopup.h"
 #include "driver/vrfbdriver.hpp"
 #include "logger.hpp"
 
@@ -47,6 +48,7 @@ class MainWindow : public QMainWindow, private logger::Logger {
 
     Ui::MainWindow* ui;
     CEConfigPopup* popup_ce;
+    SCConfigPopup* popup_se;
 
     QFutureWatcher<logger::LogMsg> watcher;
     QThreadPool pool;
@@ -56,4 +58,6 @@ class MainWindow : public QMainWindow, private logger::Logger {
     void on_action_openOutput_triggered(bool);
     void on_actionCECalculations_triggered(bool);
     void on_actionCEAnalysis_triggered(bool);
+
+    void on_actionSCCalculations_triggered(bool);
 };

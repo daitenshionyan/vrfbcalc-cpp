@@ -36,7 +36,8 @@ class PromLogger : public logger::Logger {
 MainWindow::MainWindow(QWidget* parent)
       : QMainWindow(parent),
         ui(new Ui::MainWindow),
-        popup_ce(new CEConfigPopup(this)) {
+        popup_ce(new CEConfigPopup(this)),
+        popup_se(new SCConfigPopup(this)) {
   ui->setupUi(this);
   ui->outputArea->appendHtml(
       QString("<p style=\"color:grey;white-space:pre\">")
@@ -67,6 +68,7 @@ MainWindow::MainWindow(QWidget* parent)
 
 MainWindow::~MainWindow() {
   delete popup_ce;
+  delete popup_se;
   delete ui;
 }
 
@@ -225,4 +227,9 @@ void MainWindow::on_actionCEAnalysis_triggered(bool) {
         }
         emit completedPerformanceReading(vrfbdriver::readPerformance_CE(strPaths, l));
       }));
+}
+
+
+void MainWindow::on_actionSCCalculations_triggered(bool) {
+  popup_se->open();
 }
