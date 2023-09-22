@@ -297,16 +297,18 @@ Eigen::VectorXd calcCurrLoops(double chgVolt, const SystemParam& s) {
 }
 
 
-vrfb::Table calcPerf(const double chgVolt, const vrfb::Table& table, const ResistConfig& cfg_r) {
-  SystemParam s{table, cfg_r};
-
+vrfb::Table calcPerf(double chgVolt, const SystemParam& s) {
   auto v = calcCurrLoops(chgVolt, s);
   std::vector<std::string> elems {};
   for (std::size_t i = 0; i < s.numCells(); ++i) {
     addCellStats(v, s, i, elems);
   }
-
   return vrfb::Table{kShuntLossTableHdrs, elems};
+}
+
+
+vrfb::Table calcPerf(const double chgVolt, const vrfb::Table& table, const ResistConfig& cfg_r) {
+  return calcPerf(chgVolt, {table, cfg_r});
 }
 
 

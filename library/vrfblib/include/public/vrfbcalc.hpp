@@ -177,6 +177,7 @@ SystemParam formSysParam_Stack(
       double resistivity);
 
 
+vrfb::Table calcPerf(double chgVolt, const SystemParam&);
 vrfb::Table calcPerf(const double chgVolt, const vrfb::Table& table, const ResistConfig& cfg_r);
 
 
