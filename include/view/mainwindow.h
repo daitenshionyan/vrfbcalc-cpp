@@ -34,7 +34,8 @@ class MainWindow : public QMainWindow, private logger::Logger {
 
 
   private:
-    void startCalc();
+    void startCalc_CE();
+    void startCalc_SC();
     void log(const logger::LogMsg&) override;
     void logMsg(const logger::LogMsg&);
     inline void logMsgAt(int index) {

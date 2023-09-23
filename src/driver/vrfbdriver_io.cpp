@@ -293,6 +293,39 @@ vrfb::Table readTable_XLSX(
 }
 
 
+void saveTable_XLSX(const std::filesystem::path& path, const vrfb::Table& t) {
+  xlnt::workbook wb;
+
+  auto ws = wb.active_sheet();
+  auto hdrs = t.headers();
+  for (std::size_t i = 0; i < t.numCols(); ++i) {
+    ws.cell(i+1, 1).value(hdrs[i]);
+    ws.column_properties(i+1).width = (i > 0) ?
+        kNormColWidth : kCycNumColWidth;
+  }
+  for (std::size_t r = 0; r < t.numRows(); ++r) {
+    for (std::size_t c = 0; c < t.numCols(); ++c) {
+      double value = t.get<double>(c, r);
+      // +1 row to account for header row
+      if (std::isfinite(value)) {
+        ws.cell(c+1, r+2).value(value);
+      } else {
+        ws.cell(c+1, r+2).value("NaN");
+      }
+    }
+  }
+  ws.freeze_panes("B2");
+
+  std::ofstream ofs = openFile_w<std::ios_base::binary>(path);
+  wb.save(ofs);
+  if (!ofs.good()) {
+    throw std::runtime_error(strutils::format_string(
+        "Error occured while writing to '%s' (state = %d)",
+        path.string().c_str(), ofs.exceptions()));
+  }
+}
+
+
 void saveData_XLSX(
       const std::filesystem::path& path,
       const vrfb::Table& t, const DataSet_CE& data) {

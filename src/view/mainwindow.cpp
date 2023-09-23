@@ -51,7 +51,9 @@ MainWindow::MainWindow(QWidget* parent)
   connect(this, &MainWindow::availableLogMsg,
       this, &MainWindow::logMsg);
   connect(popup_ce, &CEConfigPopup::accepted,
-      this, &MainWindow::startCalc);
+      this, &MainWindow::startCalc_CE);
+  connect(popup_se, &SCConfigPopup::accepted,
+      this, &MainWindow::startCalc_SC);
   connect(&watcher, &QFutureWatcher<logger::LogMsg>::resultReadyAt,
       this, &MainWindow::logMsgAt);
   connect(&watcher, &QFutureWatcher<logger::LogMsg>::started,
@@ -73,13 +75,25 @@ MainWindow::~MainWindow() {
 }
 
 
-void MainWindow::startCalc() {
+void MainWindow::startCalc_CE() {
   watcher.setFuture(QtConcurrent::run(
       &pool,
       [&](QPromise<logger::LogMsg>& p) {
         auto w = PromLogger{p};
         vrfbdriver::calcCellEff(popup_ce->getSetSupplierMap(), w);
       }));
+}
+
+
+void MainWindow::startCalc_SC() {
+  watcher.setFuture(QtConcurrent::run(
+      &pool,
+      [&](QPromise<logger::LogMsg>& p) {
+        auto w = PromLogger{p};
+        auto job = popup_se->getJob();
+        vrfbdriver::calcPerf_SE(job.name, job.chgCurr, *job.gen, w);
+      }
+  ));
 }
 
 

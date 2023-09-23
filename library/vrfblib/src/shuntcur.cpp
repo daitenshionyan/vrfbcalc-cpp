@@ -80,10 +80,18 @@ void addCellStats(const Eigen::VectorXd& v, const SystemParam& s, Eigen::Index i
   elems.push_back(std::to_string(std::pow(shuntPosBotCur, 2) * s.getShuntResist(Position::kPosBot, i)));
   elems.push_back(std::to_string(std::pow(shuntNegTopCur, 2) * s.getShuntResist(Position::kNegTop, i)));
   elems.push_back(std::to_string(std::pow(shuntNegBotCur, 2) * s.getShuntResist(Position::kNegBot, i)));
-  elems.push_back(std::to_string(std::pow(posTopLoopCur, 2) * s.getManiResist(Position::kPosTop, i)));
-  elems.push_back(std::to_string(std::pow(posBotLoopCur, 2) * s.getManiResist(Position::kPosBot, i)));
-  elems.push_back(std::to_string(std::pow(negTopLoopCur, 2) * s.getManiResist(Position::kNegTop, i)));
-  elems.push_back(std::to_string(std::pow(negBotLoopCur, 2) * s.getManiResist(Position::kNegBot, i)));
+
+  if (i+1 < numCells) {
+    elems.push_back(std::to_string(std::pow(posTopLoopCur, 2) * s.getManiResist(Position::kPosTop, i)));
+    elems.push_back(std::to_string(std::pow(posBotLoopCur, 2) * s.getManiResist(Position::kPosBot, i)));
+    elems.push_back(std::to_string(std::pow(negTopLoopCur, 2) * s.getManiResist(Position::kNegTop, i)));
+    elems.push_back(std::to_string(std::pow(negBotLoopCur, 2) * s.getManiResist(Position::kNegBot, i)));
+  } else {
+    elems.push_back(std::to_string(0));
+    elems.push_back(std::to_string(0));
+    elems.push_back(std::to_string(0));
+    elems.push_back(std::to_string(0));
+  }
 }
 
 

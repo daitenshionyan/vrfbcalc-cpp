@@ -39,4 +39,7 @@ void calcCellEff(const SetSupplierVec_CE&, logger::Logger&);
 std::vector<PerformanceEntry_CE> readPerformance_CE(const std::vector<std::string>&, logger::Logger&);
 
 
+void calcPerf_SE(const std::string&, double, const vrfb::shuntcur::ParamGenerator&, logger::Logger&);
+
+
 }
