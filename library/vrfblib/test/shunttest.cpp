@@ -188,22 +188,51 @@ TEST(vrfblib, SHUNTLossCalc) {
 
 
 TEST(vrfblib, SHUNTFormSysParamStack) {
-  auto actual = vrfb::shuntcur::formSysParam_Stack(100, 1, 1, 2, 1, 3, 1, 1);
+  std::size_t numCells = 100;
+  double asr = 1;
+  double cellArea = 1;
+  double shuntLen = 2;
+  double shuntArea = 1;
+  double maniLen = 3;
+  double maniArea = 1;
+  double resistivity = 1;
 
-  ASSERT_EQ(100, actual.numCells()) << "Wrong number of cells\nExpected: 100 | Actual: " << actual.numCells();
+  std::size_t numStack = 5;
+  double conLen = 4;
+  double conArea = 1;
+
+  std::size_t totalCells = numCells * numStack;
+
+  auto generator = vrfb::shuntcur::StackArrGenerator(
+      {numCells, asr, cellArea, shuntLen, shuntArea, maniLen, maniArea, resistivity},
+      numStack, conLen, conArea);
+  auto actual = generator.generate();
+
+  ASSERT_EQ(totalCells, actual.numCells())
+      << "Wrong number of cells\nExpected: " << totalCells
+      << " | Actual: " << actual.numCells();
 
   for (std::size_t i = 0; i < actual.numCells(); ++i) {
-    ASSERT_EQ(1, actual.getCellResist(i))
-        << "Wrong cell resistance at index "
-        << i << "\nExpected: 1 | Actual: " << actual.getCellResist(i);
+    ASSERT_EQ(asr, actual.getCellResist(i))
+        << "Wrong cell resistance at index "  << i
+        << "\nExpected: " << asr << " | Actual: " << actual.getCellResist(i);
     for (int p = 0; p < 4; ++p) {
-      ASSERT_EQ(2, actual.getShuntResist(static_cast<vrfb::shuntcur::Position>(p), i))
+      ASSERT_EQ(shuntLen, actual.getShuntResist(static_cast<vrfb::shuntcur::Position>(p), i))
           << "Wrong shunt resistance at position " << p << " index " << i
-          << "\nExpected: 2 | Actual: " << actual.getShuntResist(static_cast<vrfb::shuntcur::Position>(p), i);
-      if (i+1 < 100) {
-        ASSERT_EQ(3, actual.getManiResist(static_cast<vrfb::shuntcur::Position>(p), i))
-            << "Wrong manifold resistance at position " << p << " index " << i
-            << "\nExpected: 3 | Actual: " << actual.getManiResist(static_cast<vrfb::shuntcur::Position>(p), i);
+          << "\nExpected: " << shuntLen
+          << " | Actual: " << actual.getShuntResist(static_cast<vrfb::shuntcur::Position>(p), i);
+      if (i+1 < totalCells) {
+        if ((i+1)%numCells == 0) {
+          ASSERT_EQ(conLen, actual.getManiResist(static_cast<vrfb::shuntcur::Position>(p), i))
+              << "Wrong manifold resistance at position " << p << " index " << i
+              << "\nExpected: " << conLen
+              << " | Actual: " << actual.getManiResist(static_cast<vrfb::shuntcur::Position>(p), i);
+        } else {
+          ASSERT_EQ(maniLen, actual.getManiResist(static_cast<vrfb::shuntcur::Position>(p), i))
+              << "Wrong manifold resistance at position " << p << " index " << i
+              << "\nExpected: " << maniLen
+              << " | Actual: " << actual.getManiResist(static_cast<vrfb::shuntcur::Position>(p), i);
+        }
       } else {
         ASSERT_THROW(actual.getManiResist(static_cast<vrfb::shuntcur::Position>(p), i), std::out_of_range)
             << "Extra manifold resist";

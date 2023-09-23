@@ -60,6 +60,10 @@ class SystemParam {
 };
 
 
+vrfb::Table calcPerf(double chgVolt, const SystemParam&);
+vrfb::Table calcPerf(const double chgVolt, const vrfb::Table& table, const ResistConfig& cfg_r);
+
+
 Eigen::MatrixXd formCurrMat(const SystemParam& s);
 Eigen::VectorXd formVoltVec(double chgVolt, std::size_t numCells);
 

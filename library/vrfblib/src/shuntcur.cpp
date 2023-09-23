@@ -2,6 +2,7 @@
 #include "shuntcur.hpp"
 
 #include <stdexcept>
+#include <utility>
 
 
 namespace vrfb { // BEGIN OF NAMESPACE <vrfb> ==================================
@@ -111,6 +112,27 @@ SystemParam::SystemParam(
 }
 
 
+SystemParam::SystemParam(
+    std::vector<std::vector<double>>&& sr,
+    std::vector<std::vector<double>>&& mr,
+    std::vector<double>&& cr)
+    : shuntResists{std::move(sr)}, maniResists{std::move(mr)}, cellResists{std::move(cr)} {
+  if (shuntResists.size() != 4 && maniResists.size() != 4) {
+    throw std::runtime_error("Shunt or Manifold resistance vector size not equals 4");
+  }
+  for (const auto& r : shuntResists) {
+    if (r.size() != cellResists.size()) {
+      throw std::runtime_error("Size of a side of shunt resist not equals to size of cell resist");
+    }
+  }
+  for (const auto& r : maniResists) {
+    if (r.size() != cellResists.size() && r.size()+1 != cellResists.size()) {
+      throw std::runtime_error("Size of a side of manifiold resist not equals to plus minus 1 size of cell resist");
+    }
+  }
+}
+
+
 SystemParam::SystemParam(const vrfb::Table& table, const ResistConfig& cfg_r)
     : shuntResists{std::vector<std::vector<double>>(4, std::vector<double>(table.numRows()))},
       maniResists{std::vector<std::vector<double>>(4, std::vector<double>(table.numRows()))},
@@ -158,22 +180,37 @@ SystemParam::SystemParam(const vrfb::Table& table, const ResistConfig& cfg_r)
 }
 
 
-SystemParam formSysParam_Stack(
-      std::size_t numCells,
-      double asr, double cellArea,
-      double shuntLen, double shuntArea,
-      double maniLen, double maniArea,
-      double resistivity) {
-  double shuntResist = calcChanResist(resistivity, shuntLen, shuntArea);
-  auto sr = std::vector<std::vector<double>>(4, std::vector<double>(numCells, shuntResist));
+SystemParam StackArrGenerator::generate() const {
+  std::size_t totalCells = stackParam.numCells * numStack;
 
-  double maniResist = calcChanResist(resistivity, maniLen, maniArea);
-  auto mr = std::vector<std::vector<double>>(4, std::vector<double>(numCells-1, maniResist));
+  double shuntResist = calcChanResist(
+      stackParam.resistivity,
+      stackParam.shuntLen,
+      stackParam.shuntArea);
+  auto sr = std::vector<std::vector<double>>(4, std::vector<double>(
+      totalCells, shuntResist));
 
-  double cellResist = calcCellResist(asr, cellArea);
-  auto cr = std::vector<double>(numCells, cellResist);
+  double maniResist = calcChanResist(
+    stackParam.resistivity,
+    stackParam.maniLen,
+    stackParam.maniArea);
+  double conResist = calcChanResist(
+    stackParam.resistivity,
+    conLen,
+    conArea);
+  auto mr = std::vector<std::vector<double>>(4, std::vector<double>(
+      totalCells - 1,
+      maniResist));
+  for (std::size_t i = stackParam.numCells-1; i < totalCells-1; i += stackParam.numCells) {
+    for (auto& r : mr) {
+      r[i] = conResist;
+    }
+  }
 
-  return {sr, mr, cr};
+  double cellResist = calcCellResist(stackParam.asr, stackParam.cellArea);
+  auto cr = std::vector<double>(totalCells, cellResist);
+
+  return {std::move(sr), std::move(mr), std::move(cr)};
 }
 
 
@@ -304,6 +341,11 @@ vrfb::Table calcPerf(double chgVolt, const SystemParam& s) {
     addCellStats(v, s, i, elems);
   }
   return vrfb::Table{kShuntLossTableHdrs, elems};
+}
+
+
+vrfb::Table calcPerf(double chgVolt, const ParamGenerator& gen) {
+  return calcPerf(chgVolt, gen.generate());
 }
 
 

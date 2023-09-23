@@ -169,16 +169,53 @@ struct ResistConfig {
 class SystemParam;
 
 
-SystemParam formSysParam_Stack(
-      std::size_t numCells,
-      double asr, double cellArea,
-      double shuntLen, double shungArea,
-      double maniLen, double maniArea,
-      double resistivity);
+struct StackParam {
+  std::size_t numCells;
+  double asr;
+  double cellArea;
+  double shuntLen;
+  double shuntArea;
+  double maniLen;
+  double maniArea;
+  double resistivity;
+};
 
 
-vrfb::Table calcPerf(double chgVolt, const SystemParam&);
-vrfb::Table calcPerf(const double chgVolt, const vrfb::Table& table, const ResistConfig& cfg_r);
+class ParamGenerator {
+  public:
+    ParamGenerator(StackParam param_s)
+        : stackParam{param_s} {}
+
+    virtual ~ParamGenerator() = default;
+    virtual SystemParam generate() const = 0;
+
+
+  protected:
+    StackParam stackParam;
+};
+
+
+class StackArrGenerator : public ParamGenerator {
+  public:
+    StackArrGenerator(
+        StackParam param_s,
+        std::size_t num_s, double cl, double ca)
+        : ParamGenerator{param_s},
+          numStack{num_s}, conLen{cl}, conArea{ca} {}
+
+    ~StackArrGenerator() override = default;
+
+    SystemParam generate() const override;
+
+
+  private:
+    std::size_t numStack;
+    double conLen;
+    double conArea;
+};
+
+
+vrfb::Table calcPerf(const double chgVolt, const ParamGenerator& gen);
 
 
 } // END OF NAMESPACE <vrfb::shuntcur> -----------------------------------------
