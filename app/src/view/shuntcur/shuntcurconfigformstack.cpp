@@ -18,16 +18,16 @@ vrfb::shuntcur::ParamGenerator* SCConfigFormStack::getGenerator() {
   return new vrfb::shuntcur::StackArrGenerator(
     {
       static_cast<std::size_t>(ui->numCellField->value()),
-      ui->asrField->value(),
-      ui->cellAreaField->value(),
-      ui->shuntLenField->value(),
-      ui->shuntAreaField->value(),
-      ui->maniLenField->value(),
-      ui->maniAreaField->value(),
+      ui->asrField->value() / 10000,
+      ui->cellAreaField->value() / 10000,
+      ui->shuntLenField->value() / 100,
+      ui->shuntAreaField->value() / 10000,
+      ui->maniLenField->value() / 100,
+      ui->maniAreaField->value() / 10000,
       ui->resistivityField->value()
     },
     ui->numStacksField->value(),
-    ui->conLenField->value(),
-    ui->conAreaField->value()
+    ui->conLenField->value() / 10000,
+    ui->conAreaField->value() / 10000
   );
 }
