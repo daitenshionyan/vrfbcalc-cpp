@@ -1,12 +1,14 @@
 #pragma once
 
+#include <memory>
 #include <ostream>
+#include <stdexcept>
 #include <string>
 #include <unordered_map>
 #include <vector>
 
 
-namespace comutils {
+namespace comutils { // ==== <comutils> ========================================
 
 
 // :::: [ Table ] ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -140,4 +142,53 @@ inline double Table::get<double>(std::size_t c, std::size_t r) const {
 }
 
 
+namespace string { // ==== <comutils::string> ==================================
+
+
+std::string strip(const std::string& str, const std::string& chars = " \t\f\v\n\r");
+
+
+std::vector<std::string> split(const std::string& line, char delim = ',');
+void split(const std::string& line, std::vector<std::string>& vec, char delim = ',');
+
+
+double parseTimestamp(const std::string& timeStr, char delim = ':');
+
+
+template<typename ... Args>
+std::string format_string(const std::string& format, const Args& ... args) {
+  std::size_t count = std::snprintf(nullptr, 0, format.c_str(), args ...);
+  if (count < 0) {
+    throw std::runtime_error("Error while formatting");
+  }
+  std::unique_ptr<char[]> buf(new char[count+1]);
+  std::snprintf(buf.get(), count+1, format.c_str(), args ...);
+  return std::string(buf.get(), count);
 }
+
+
+} // ---- namespace <comutils::string>
+// namespace <comutils>
+
+
+namespace io { // ==== <comutils::io> ==========================================
+
+
+bool isValidFileName(const std::string&);
+
+
+} // ---- <comutils::io>
+// namespace <comutils>
+
+
+namespace time { // ==== <comutils::time> ======================================
+
+
+std::string getftime();
+
+
+} // ---- <comutils::time>
+// namespace <comutils>
+
+
+} // ---- <comutils>
