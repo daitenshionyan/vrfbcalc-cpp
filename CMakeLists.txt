@@ -29,17 +29,6 @@ project(vrfbcalc-cpp
     LANGUAGES CXX
 )
 
-# find libraries
-find_package(Xlnt CONFIG REQUIRED)
-find_package(nlohmann_json CONFIG REQUIRED)
-find_package(Qt6 REQUIRED COMPONENTS
-    Concurrent
-    Core
-    Gui
-    Widgets
-    Charts
-)
-
 # add dependency sub directory
 add_subdirectory(dependency/qcustomplot)
 
@@ -47,114 +36,8 @@ add_subdirectory(dependency/qcustomplot)
 add_subdirectory(library/utillib)
 add_subdirectory(library/vrfblib)
 
-# ==== EXECUTABLE ============================================================ #
-
-set(VRFBCALC-CPP_VERSION "0.2.0")
-
-configure_file(include/vrfbcalccfg.hpp.in include/vrfbcalccfg.hpp)
-
-add_executable(vrfbcalc-cpp WIN32
-    ${CMAKE_CURRENT_BINARY_DIR}/include/vrfbcalccfg.hpp
-    src/main.cpp
-
-    include/driver/vrfbdriver.hpp
-    src/driver/vrfbdriver.cpp
-    include/driver/vrfbdriver_io.hpp
-    src/driver/vrfbdriver_io.cpp
-
-    resource/resource.qrc
-
-    include/view/mainwindow.h
-    src/view/mainwindow.ui
-    src/view/mainwindow.cpp
-
-    # :::: Cell Efficiency ::::::::::::::::::::::::::::::::::::::::::::::::::: #
-
-    include/view/celleff/celleffconfigpopup.h
-    src/view/celleff/celleffconfigpopup.ui
-    src/view/celleff/celleffconfigpopup.cpp
-
-    include/view/celleff/celleffdatasetform.h
-    src/view/celleff/celleffdatasetform.ui
-    src/view/celleff/celleffdatasetform.cpp
-
-    include/view/celleff/celleffdataentryform.h
-    src/view/celleff/celleffdataentryform.ui
-    src/view/celleff/celleffdataentryform.cpp
-
-    include/view/celleff/celleffloadpresetconfigform.h
-    src/view/celleff/celleffloadpresetconfigform.ui
-    src/view/celleff/celleffloadpresetconfigform.cpp
-
-    include/view/celleff/celleffmanualconfigform.h
-    src/view/celleff/celleffmanualconfigform.ui
-    src/view/celleff/celleffmanualconfigform.cpp
-
-    include/view/celleff/celleffresultview.h
-    src/view/celleff/celleffresultview.ui
-    src/view/celleff/celleffresultview.cpp
-
-    # :::: Shunt Current ::::::::::::::::::::::::::::::::::::::::::::::::::::: #
-
-    include/view/shuntcur/shuntcurconfigpopup.h
-    src/view/shuntcur/shuntcurconfigpopup.ui
-    src/view/shuntcur/shuntcurconfigpopup.cpp
-
-    include/view/shuntcur/shuntcurconfigformstack.h
-    src/view/shuntcur/shuntcurconfigformstack.ui
-    src/view/shuntcur/shuntcurconfigformstack.cpp
-
-    include/view/graphplotform.h
-    src/view/graphplotform.ui
-    src/view/graphplotform.cpp
-
-    resource/app.o          # executable icon
-)
-
-target_include_directories(vrfbcalc-cpp PRIVATE
-    include
-    ${CMAKE_CURRENT_BINARY_DIR}/include
-)
-
-# cache variable used by package.bat
-set(VRFBCALC_EXECUTABLE_NAME "vrfbcalc_v${VRFBCALC-CPP_VERSION}"
-    CACHE STRING "Output executable name" FORCE)
-set_target_properties(vrfbcalc-cpp PROPERTIES OUTPUT_NAME
-    ${VRFBCALC_EXECUTABLE_NAME}
-)
-
-# link libraries
-target_link_libraries(vrfbcalc-cpp PRIVATE xlnt::xlnt)
-target_link_libraries(vrfbcalc-cpp PRIVATE nlohmann_json::nlohmann_json)
-target_link_libraries(vrfbcalc-cpp PRIVATE
-    Qt6::Concurrent
-    Qt6::Core
-    Qt6::Gui
-    Qt6::Widgets
-    Qt6::Charts)
-target_link_libraries(vrfbcalc-cpp PRIVATE qcustomplot)
-target_link_libraries(vrfbcalc-cpp PRIVATE utillib)
-target_link_libraries(vrfbcalc-cpp PRIVATE vrfblib)
-
-# compile definition for qcustomplot
-target_compile_definitions(vrfbcalc-cpp PRIVATE QCUSTOMPLOT_USE_LIBRARY)
-
-# post build to install required qt dlls
-add_custom_command(TARGET vrfbcalc-cpp POST_BUILD
-    COMMAND ${WINDEPLOYQT_EXECUTABLE}
-        --verbose 1
-        $<IF:$<CONFIG:Debug>,--debug,--release>
-        --no-compiler-runtime
-        --no-network
-        --no-pdf
-        --skip-plugin-types
-            imageformats
-        --no-opengl-sw
-        --no-system-d3d-compiler
-        --no-translations
-        -printsupport                               # for qcustomplot
-        \"$<TARGET_FILE:vrfbcalc-cpp>\"
-)
+# add executable sub directory
+add_subdirectory(app)
 
 # ==== TESTING =============================================================== #
 
