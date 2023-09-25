@@ -6,7 +6,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "strutils.hpp"
+#include "utillib/utils.hpp"
 #include "driver/vrfbdriver_io.hpp"
 
 
@@ -30,7 +30,7 @@ std::pair<SetMap_CE, std::size_t> toSetMap(
       ++num_err;
       continue;
     } else if (map.find(entry.first) != map.end()) {
-      logger.fail(strutils::format_string(
+      logger.fail(comutils::string::format_string(
           "Duplicate set names all will not be processed '%s'",
           entry.first.c_str()));
       ++num_err;
@@ -39,11 +39,11 @@ std::pair<SetMap_CE, std::size_t> toSetMap(
     }
     try {
       map.insert({entry.first, entry.second()});
-      logger.info(strutils::format_string(
+      logger.info(comutils::string::format_string(
           "Configuration for '%s' generated",
           entry.first.c_str()));
     } catch (std::exception& ex) {
-      logger.fail(strutils::format_string(
+      logger.fail(comutils::string::format_string(
           "Failed to generate configuration for '%s' - %s",
           entry.first.c_str(), ex.what()));
       ++num_err;
@@ -64,26 +64,26 @@ vrfb::Table readTable(const DataEntry_CE& entry) {
   } else if (path.extension() == ".xlsx") {
     return io::readTable_XLSX(path, entry.sheet_title);
   }
-  throw std::runtime_error(strutils::format_string(
+  throw std::runtime_error(comutils::string::format_string(
       "Unsupported file format '%s' for '%s'",
       path.extension().string().c_str(), path.string().c_str()));
 }
 
 
 int calcCE(const std::string& name, const DataSet_CE& set_d, logger::Logger& logger) {
-  logger.info(strutils::format_string("[%s] Processing data set...",
+  logger.info(comutils::string::format_string("[%s] Processing data set...",
       name.c_str()));
   auto beg = std::chrono::high_resolution_clock::now();
 
-  if (!strutils::isValidFileName(name)) {
+  if (!comutils::io::isValidFileName(name)) {
     // warn if illegal path characters present
-    logger.warn(strutils::format_string(
+    logger.warn(comutils::string::format_string(
         "[%s] Output file name may contain illegal path characters to system and may not be saved",
         name.c_str()));
   }
   if (set_d.area <= 0) {
     // warn if area is negative or zero
-    logger.warn(strutils::format_string(
+    logger.warn(comutils::string::format_string(
         "[%s] Negative or zero area set '%.2f'",
         name.c_str(), set_d.area));
   }
@@ -94,12 +94,12 @@ int calcCE(const std::string& name, const DataSet_CE& set_d, logger::Logger& log
     for (std::size_t i = 0; i < set_d.entries.size(); ++i) {
       auto t = readTable(set_d.entries[i]);
       datas.push_back({t, set_d.entries[i].cfg});
-      logger.info(strutils::format_string(
+      logger.info(comutils::string::format_string(
           "[%s] Read '%s' with %d points",
           name.c_str(), set_d.entries[i].path.c_str(), t.numRows()));
     }
   } catch (std::exception& ex) {
-    logger.fail(strutils::format_string(
+    logger.fail(comutils::string::format_string(
         "[%s] Error while reading data files - %s",
         name.c_str(), ex.what()));
     return 1;
@@ -110,7 +110,7 @@ int calcCE(const std::string& name, const DataSet_CE& set_d, logger::Logger& log
   try {
     data_pro = vrfb::calcPerf_CE(set_d.area, datas);
   } catch (std::exception& ex) {
-    logger.fail(strutils::format_string(
+    logger.fail(comutils::string::format_string(
         "[%s] Error while processing data - %s",
         name.c_str(), ex.what()));
     return 1;
@@ -121,18 +121,18 @@ int calcCE(const std::string& name, const DataSet_CE& set_d, logger::Logger& log
     auto path_o = std::filesystem::u8path<std::string>("output/" + name + ".xlsx");
     io::saveData_XLSX(path_o, data_pro, set_d);
   } catch (std::exception& ex) {
-    logger.fail(strutils::format_string(
+    logger.fail(comutils::string::format_string(
         "[%s] Failed to save processed data - %s",
         name.c_str(), ex.what()));
     return 1;
   }
-  logger.info(strutils::format_string(
+  logger.info(comutils::string::format_string(
       "[%s] Output table : %d cycles",
       name.c_str(), data_pro.numRows()));
 
   auto end = std::chrono::high_resolution_clock::now();
   auto dur = std::chrono::duration_cast<std::chrono::microseconds>(end - beg);
-  logger.info(strutils::format_string(
+  logger.info(comutils::string::format_string(
       "[%s] Completed in %.3f ms",
       name.c_str(), dur.count()/1000.));
   return 0;
@@ -149,7 +149,7 @@ void calcCellEff(const SetSupplierVec_CE& ssv, logger::Logger& logger) {
   for (const auto entry : cfgGenRpt.first) {
     num_err += calcCE(entry.first, entry.second, logger);
   }
-  std::string resText = strutils::format_string(
+  std::string resText = comutils::string::format_string(
       "Total = %d || Success = %d || Failure = %d",
       ssv.size(), ssv.size()-num_err, num_err);
   if (num_err == 0) {
@@ -173,10 +173,10 @@ std::vector<PerformanceEntry_CE> readPerformance_CE(
         name,
         vrfbdriver::io::readTable_XLSX(path, std::string(kDataSheetTitle_CE))
       });
-      l.info(strutils::format_string("Successfully read %s performance data",
+      l.info(comutils::string::format_string("Successfully read %s performance data",
           name.c_str()));
     } catch (std::exception& ex) {
-      l.fail(strutils::format_string("Failed to read '%s' performance data - %s",
+      l.fail(comutils::string::format_string("Failed to read '%s' performance data - %s",
           name.c_str(),
           ex.what()));
     }
@@ -190,7 +190,7 @@ void calcPerf_SE(const std::string& name, double chgVolt, const vrfb::shuntcur::
   try {
     table = vrfb::shuntcur::calcPerf(chgVolt, gen);
   } catch (std::exception& ex) {
-    l.fail(strutils::format_string("Failed to calculate performance - %s", ex.what()));
+    l.fail(comutils::string::format_string("Failed to calculate performance - %s", ex.what()));
     return;
   }
 
@@ -198,7 +198,7 @@ void calcPerf_SE(const std::string& name, double chgVolt, const vrfb::shuntcur::
     auto path = std::filesystem::u8path<std::string>("output/" + name + ".xlsx");
     io::saveTable_XLSX(path, table);
   } catch (std::exception& ex) {
-    l.fail(strutils::format_string("Failed to save data - %s", ex.what()));
+    l.fail(comutils::string::format_string("Failed to save data - %s", ex.what()));
     return;
   }
 

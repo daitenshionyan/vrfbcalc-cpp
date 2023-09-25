@@ -12,7 +12,7 @@
 #include "xlnt/xlnt.hpp"
 #include "nlohmann/json.hpp"
 
-#include "strutils.hpp"
+#include "utillib/utils.hpp"
 
 
 namespace { // BEGINING OF NAMESPACE <GLOBAL::UNNAMED> =========================
@@ -78,13 +78,13 @@ constexpr double kNormColWidth = 25;
 template<std::ios_base::openmode Mode = std::ios_base::in>
 std::ifstream openFile_r(const std::filesystem::path& path) {
   if (!std::filesystem::exists(path)) {
-    throw std::runtime_error(strutils::format_string(
+    throw std::runtime_error(comutils::string::format_string(
         "Cannot find file `%s`",
         path.string().c_str()));
   }
   std::ifstream ifs{path, Mode};
   if (!ifs.good()) {
-    throw std::runtime_error(strutils::format_string(
+    throw std::runtime_error(comutils::string::format_string(
         "Error while reading file '%s' (state = %d)",
         path.string().c_str(), ifs.exceptions()));
   }
@@ -99,7 +99,7 @@ std::ofstream openFile_w(const std::filesystem::path& path) {
   }
   std::ofstream ofs{path, Mode};
   if (!ofs.good()) {
-    throw std::runtime_error(strutils::format_string(
+    throw std::runtime_error(comutils::string::format_string(
         "Error while writing file '%s' (state = %d)",
         path.string().c_str(), ofs.exceptions()));
   }
@@ -131,7 +131,7 @@ inline void initColMap(
             isKeeps.push_back(!hdr.empty());
             if (isKeeps.back()) {
               if (colMap.find(hdr) != colMap.end()) {
-                throw std::runtime_error(strutils::format_string(
+                throw std::runtime_error(comutils::string::format_string(
                     "Duplicate headers '%s'",
                     hdr.c_str()));
               }
@@ -260,7 +260,7 @@ vrfb::Table readTable_XLSX(
     if (wb.contains(title)) {
       ws = wb.sheet_by_title(title);
     } else {
-      throw std::runtime_error(strutils::format_string(
+      throw std::runtime_error(comutils::string::format_string(
           "Cannot find XLSX sheet '%s'",
           title.c_str()));
     }
@@ -319,7 +319,7 @@ void saveTable_XLSX(const std::filesystem::path& path, const vrfb::Table& t) {
   std::ofstream ofs = openFile_w<std::ios_base::binary>(path);
   wb.save(ofs);
   if (!ofs.good()) {
-    throw std::runtime_error(strutils::format_string(
+    throw std::runtime_error(comutils::string::format_string(
         "Error occured while writing to '%s' (state = %d)",
         path.string().c_str(), ofs.exceptions()));
   }
@@ -360,7 +360,7 @@ void saveData_XLSX(
   std::ofstream ofs = openFile_w<std::ios_base::binary>(path);
   wb.save(ofs);
   if (!ofs.good()) {
-    throw std::runtime_error(strutils::format_string(
+    throw std::runtime_error(comutils::string::format_string(
         "Error occured while writing to '%s' (state = %d)",
         path.string().c_str(), ofs.exceptions()));
   }

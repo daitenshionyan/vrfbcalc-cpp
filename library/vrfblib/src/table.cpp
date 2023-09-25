@@ -4,7 +4,7 @@
 #include <exception>
 #include <utility>
 
-#include "strutils.hpp"
+#include "utillib/utils.hpp"
 
 
 namespace vrfb {
@@ -14,7 +14,7 @@ Table::Table(const std::vector<std::string>& h, const std::vector<std::string>& 
     : r_size{elems.size()/h.size()},
       hdrs{} {
   if (elems.size() % h.size() != 0) {
-    throw std::runtime_error(strutils::format_string("Incomplete table %d cols for %d elems",
+    throw std::runtime_error(comutils::string::format_string("Incomplete table %d cols for %d elems",
         h.size(), elems.size()));
   }
 
@@ -65,7 +65,7 @@ const std::vector<std::string>& Table::at(const std::string& h) const {
   try {
     return colMap.at(h);
   } catch (std::out_of_range oor) {
-    throw std::out_of_range(strutils::format_string("Header does not exist '%s'",
+    throw std::out_of_range(comutils::string::format_string("Header does not exist '%s'",
         h.c_str()));
   }
 }

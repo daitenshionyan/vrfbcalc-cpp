@@ -1,6 +1,6 @@
 #pragma once
 
-#include "strutils.hpp"
+#include "utillib/utils.hpp"
 #include "vrfbcalc.hpp"
 
 namespace vrfb {
@@ -61,8 +61,8 @@ class Step {
     }
 
     inline double time() const {
-      return strutils::parseTimestamp(table->get(cfg->t_time_h, end))
-          - strutils::parseTimestamp(table->get(cfg->t_time_h, beg))
+      return comutils::time::parseTimestamp(table->get(cfg->t_time_h, end))
+          - comutils::time::parseTimestamp(table->get(cfg->t_time_h, beg))
           + off_tim;
     }
 

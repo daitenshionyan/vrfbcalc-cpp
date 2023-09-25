@@ -22,7 +22,7 @@ std::vector<std::string> split(const std::string& line, char delim) {
 }
 
 
-void split(const std::string& line, std::vector<std::string>& vec, char delim = ',') {
+void split(const std::string& line, std::vector<std::string>& vec, char delim) {
   if (line.empty()) {
     return;
   }
