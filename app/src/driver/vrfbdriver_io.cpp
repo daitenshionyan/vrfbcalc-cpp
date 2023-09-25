@@ -34,8 +34,8 @@ constexpr std::string_view kLblDTypeNames_CE    =    "d_type_names";
 
 NLOHMANN_JSON_NAMESPACE_BEGIN
 template<>
-struct adl_serializer<vrfb::Config_CE> {
-  static void to_json(json& j, const vrfb::Config_CE& cfg) {
+struct adl_serializer<vrfb::celleff::Config> {
+  static void to_json(json& j, const vrfb::celleff::Config& cfg) {
     j = nlohmann::json{
       {kLblTTimeHdr_CE, cfg.t_time_h},
       {kLblTypeHdr_CE, cfg.type_h},
@@ -48,7 +48,7 @@ struct adl_serializer<vrfb::Config_CE> {
     };
   }
 
-  static void from_json(const json& j, vrfb::Config_CE& cfg) {
+  static void from_json(const json& j, vrfb::celleff::Config& cfg) {
     j.at(kLblTTimeHdr_CE).get_to(cfg.t_time_h);
     j.at(kLblTypeHdr_CE).get_to(cfg.type_h);
     j.at(kLblCCapHdr_CE).get_to(cfg.c_capacity_h);
@@ -99,10 +99,10 @@ inline void initColMap(
 // namespace <vrfbdriver::io>
 
 
-inline vrfb::Config_CE loadConfig_CE(const std::filesystem::path& path) {
+inline vrfb::celleff::Config loadConfig_CE(const std::filesystem::path& path) {
   nlohmann::json j;
   comutils::io::openFile_r(path) >> j;
-  return j.get<vrfb::Config_CE>();
+  return j.get<vrfb::celleff::Config>();
 }
 
 

@@ -58,11 +58,8 @@ const std::vector<std::string> kCycleTableHdrs {
 };
 
 
-} // END OF NAMESPACE <vrfb::celleff> ------------------------------------------
-// namespace <vrfb>
-
 /* Structure containing cell efficiency calculation configuration. */
-struct Config_CE {
+struct Config {
   std::string t_time_h;                           /* Total time header */
   std::string type_h;                             /* Step type header */
   std::string c_capacity_h;                       /* Charging capacity header */
@@ -75,9 +72,9 @@ struct Config_CE {
 };
 
 
-struct Data_CE {
+struct Data {
   comutils::Table table;
-  Config_CE cfg;
+  Config cfg;
 };
 
 
@@ -86,7 +83,11 @@ struct Data_CE {
 
   @param datas List of data to process.
 */
-comutils::Table calcPerf_CE(const double area, const std::vector<Data_CE>& datas);
+comutils::Table calcPerf(const double area, const std::vector<Data>& datas);
+
+
+} // END OF NAMESPACE <vrfb::celleff> ------------------------------------------
+// namespace <vrfb>
 
 
 namespace shuntcur { // BEGIN OF NAMESPACE <vrfb::shuntcur> ====================

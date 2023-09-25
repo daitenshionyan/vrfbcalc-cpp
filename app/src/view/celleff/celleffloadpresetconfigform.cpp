@@ -20,7 +20,7 @@ CELoadPresetConfigForm::~CELoadPresetConfigForm() {
 }
 
 
-vrfb::Config_CE CELoadPresetConfigForm::getConfig() const {
+vrfb::celleff::Config CELoadPresetConfigForm::getConfig() const {
   auto p = std::filesystem::u8path<std::string>(ui->pathField->text().toStdString());
   return vrfbdriver::io::loadConfig_CE(p);
 }

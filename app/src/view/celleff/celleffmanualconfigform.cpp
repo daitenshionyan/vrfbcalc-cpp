@@ -20,8 +20,8 @@ CEManualConfigForm::~CEManualConfigForm() {
 }
 
 
-vrfb::Config_CE CEManualConfigForm::getConfig() const {
-  vrfb::Config_CE cfg {};
+vrfb::celleff::Config CEManualConfigForm::getConfig() const {
+  vrfb::celleff::Config cfg {};
   cfg.t_time_h = ui->timeHdrField->text().toStdString();
   cfg.type_h = ui->typeHdrField->text().toStdString();
   cfg.c_capacity_h = ui->chgCapHdrField->text().toStdString();

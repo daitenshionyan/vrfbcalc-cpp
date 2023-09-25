@@ -44,7 +44,7 @@ enum class StepType {
 class Step {
   public:
     Step(const StepType st,
-        const comutils::Table* t, const vrfb::Config_CE* c,
+        const comutils::Table* t, const Config* c,
         const std::size_t b, const std::size_t e,
         const int off)
         : s_type{st}, table{t}, cfg{c},
@@ -91,7 +91,7 @@ class Step {
     StepType s_type;
 
     const comutils::Table* table;
-    const vrfb::Config_CE* cfg;
+    const Config* cfg;
     std::size_t beg;
     std::size_t end;
     int off_row;
@@ -107,7 +107,7 @@ class Step {
   @param cfg Configuration information.
   @return A std::vector containing the extracted cycle steps.
 */
-std::vector<Step> extractSteps(const comutils::Table& t, const vrfb::Config_CE& cfg);
+std::vector<Step> extractSteps(const comutils::Table& t, const Config& cfg);
 
 
 /*

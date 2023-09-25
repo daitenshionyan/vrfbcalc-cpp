@@ -14,7 +14,7 @@ namespace vrfbdriver {
 namespace io {
 
 
-extern inline vrfb::Config_CE loadConfig_CE(const std::filesystem::path&);
+extern inline vrfb::celleff::Config loadConfig_CE(const std::filesystem::path&);
 
 std::size_t readLine_CSV(std::istream&, std::vector<std::string>&);
 

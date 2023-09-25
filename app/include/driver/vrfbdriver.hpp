@@ -17,7 +17,7 @@ constexpr std::string_view kConfigSheetTitle_CE = "Config";
 struct DataEntry_CE {
   std::string path;
   std::string sheet_title;
-  vrfb::Config_CE cfg;
+  vrfb::celleff::Config cfg;
 };
 
 

@@ -88,8 +88,8 @@ int calcCE(const std::string& name, const DataSet_CE& set_d, logger::Logger& log
         name.c_str(), set_d.area));
   }
 
-  // read data files to create Data_CE
-  std::vector<vrfb::Data_CE> datas;
+  // read data files to create Data
+  std::vector<vrfb::celleff::Data> datas;
   try {
     for (std::size_t i = 0; i < set_d.entries.size(); ++i) {
       auto t = readTable(set_d.entries[i]);
@@ -108,7 +108,7 @@ int calcCE(const std::string& name, const DataSet_CE& set_d, logger::Logger& log
   // process data and generate output table
   comutils::Table data_pro;
   try {
-    data_pro = vrfb::calcPerf_CE(set_d.area, datas);
+    data_pro = vrfb::celleff::calcPerf(set_d.area, datas);
   } catch (std::exception& ex) {
     logger.fail(comutils::string::format_string(
         "[%s] Error while processing data - %s",

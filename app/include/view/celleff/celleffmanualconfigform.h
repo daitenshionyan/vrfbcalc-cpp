@@ -20,7 +20,7 @@ class CEManualConfigForm : public CEDataEntryForm::ConfigForm {
     CEManualConfigForm(QWidget* parent);
     ~CEManualConfigForm();
 
-    vrfb::Config_CE getConfig() const override;
+    vrfb::celleff::Config getConfig() const override;
 
 
   private:

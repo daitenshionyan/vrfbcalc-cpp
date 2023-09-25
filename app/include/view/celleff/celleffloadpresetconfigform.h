@@ -20,7 +20,7 @@ class CELoadPresetConfigForm : public CEDataEntryForm::ConfigForm {
     CELoadPresetConfigForm(QWidget* parent);
     ~CELoadPresetConfigForm();
 
-    vrfb::Config_CE getConfig() const override;
+    vrfb::celleff::Config getConfig() const override;
 
 
   private:
