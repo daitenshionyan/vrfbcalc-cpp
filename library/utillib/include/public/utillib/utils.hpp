@@ -152,9 +152,6 @@ std::vector<std::string> split(const std::string& line, char delim = ',');
 void split(const std::string& line, std::vector<std::string>& vec, char delim = ',');
 
 
-double parseTimestamp(const std::string& timeStr, char delim = ':');
-
-
 template<typename ... Args>
 std::string format_string(const std::string& format, const Args& ... args) {
   std::size_t count = std::snprintf(nullptr, 0, format.c_str(), args ...);
@@ -182,6 +179,9 @@ bool isValidFileName(const std::string&);
 
 
 namespace time { // ==== <comutils::time> ======================================
+
+
+double parseTimestamp(const std::string& timeStr, char delim = ':');
 
 
 std::string getftime();
