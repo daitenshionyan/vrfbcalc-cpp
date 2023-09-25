@@ -15,13 +15,44 @@ namespace comutils { // ==== <comutils> ========================================
 namespace string { // ==== <comutils::string> ==================================
 
 
+/**
+ * Strips away leading and trailing characters of a specified set of characters
+ * from a given string.
+ *
+ * @param str The string to strip.
+ * @param chars The set of character to strip away. Defaults to whitespace
+ *    characters.
+*/
 std::string strip(const std::string& str, const std::string& chars = " \t\f\v\n\r");
 
 
-std::vector<std::string> split(const std::string& line, char delim = ',');
-void split(const std::string& line, std::vector<std::string>& vec, char delim = ',');
+/**
+ * Splits a given string around the specified delimiter character.
+ *
+ * @param str The string to split.
+ * @param delim The delimiter to split at. Defaults to a commar (`,`).
+ * @return A vector of substrings obtained by splitting the given string at the
+ *    specified delimiter.
+*/
+std::vector<std::string> split(const std::string& str, char delim = ',');
+
+/**
+ * Splits a given string around the specified delimiter characters. Split
+ * substrings are pushed back into the given vector of strings.
+ *
+ * @param str The string to split.
+ * @param delim The delimiter to split at. Defaults to a commar (`,`).
+*/
+void split(const std::string& str, std::vector<std::string>& vec, char delim = ',');
 
 
+/**
+ * Returns a formatted string using the specified format string and arguments.
+ *
+ * @param format The formatted string.
+ * @param args Arguments to be referenced by the formatted string.
+ * @throws std::runtime_error if formatting fails.
+*/
 template<typename ... Args>
 std::string format_string(const std::string& format, const Args& ... args) {
   std::size_t count = std::snprintf(nullptr, 0, format.c_str(), args ...);
@@ -41,7 +72,12 @@ std::string format_string(const std::string& format, const Args& ... args) {
 namespace io { // ==== <comutils::io> ==========================================
 
 
-bool isValidFileName(const std::string&);
+/**
+ * Returns `true` if the specified file name is valid and `false` otherwise.
+ *
+ * @param name The name to validate.
+*/
+bool isValidFileName(const std::string& name);
 
 
 } // ---- <comutils::io>
@@ -51,9 +87,18 @@ bool isValidFileName(const std::string&);
 namespace time { // ==== <comutils::time> ======================================
 
 
+/**
+ * Returns the time in seconds of a given string timestamp.
+ *
+ * @param timeStr The string to parse the timestamp from.
+ * @param delim The delimiter to separate hours, minutes and seconds.
+*/
 double parseTimestamp(const std::string& timeStr, char delim = ':');
 
 
+/**
+ * Returns the current local time as a formatted string.
+*/
 std::string getftime();
 
 
@@ -112,9 +157,25 @@ class Table {
     inline std::size_t numCols() const {return hdrs.size();}
     inline ListView headers() const {return {hdrs.begin(), hdrs.end()};}
 
+    /**
+     * Returns the value of the specified element in the tbble in the specified
+     * type `T`.
+     *
+     * @param <T> The type to get the value as. Defaults to a string.
+     * @param h The column header of the element to retrieve.
+     * @param r The row number of the element to retrieve.
+    */
     template<typename T = std::string>
     T get(const std::string& h, std::size_t r) const;
 
+    /**
+     * Returns the value of the specified element in the tbble in the specified
+     * type `T`.
+     *
+     * @param <T> The type to get the value as. Defaults to a string.
+     * @param c The column number of the element to retrieve.
+     * @param r The row number of the element to retrieve.
+    */
     template<typename T = std::string>
     T get(std::size_t c, std::size_t r) const;
 
