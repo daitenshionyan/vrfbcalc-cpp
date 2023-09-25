@@ -29,7 +29,7 @@ struct DataSet_CE {
 
 struct PerformanceEntry_CE {
   std::string name;
-  vrfb::Table table;
+  comutils::Table table;
 };
 
 

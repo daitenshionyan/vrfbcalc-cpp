@@ -14,6 +14,7 @@ set(CMAKE_AUTORCC off)
 
 add_library(utillib SHARED
     include/public/utillib/utils.hpp
+
     src/table.cpp
     src/strutils.cpp
     src/ioutils.cpp

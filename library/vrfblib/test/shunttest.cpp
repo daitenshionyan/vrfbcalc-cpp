@@ -19,7 +19,7 @@ const std::vector<std::string> kTestHeaders = {
   "MLPT", "MLPB", "MLNT", "MLNB", "MAPT", "MAPB", "MANT", "MANB"
 };
 
-const vrfb::Table kTestTable = {
+const comutils::Table kTestTable = {
   { "ASR" , "SLPT", "SLPB", "SLNT", "SLNB", "SAPT", "SAPB", "SANT", "SANB", "MLPT", "MLPB", "MLNT", "MLNB", "MAPT", "MAPB", "MANT", "MANB" },
   { "1   ", "10  ", "10  ", "10  ", "10  ", "0.5 ", "0.5 ", "0.5 ", "0.5 ", "1   ", "1   ", "1   ", "1   ", "1   ", "1   ", "1   ", "1   " ,
     "2   ", "20  ", "20  ", "20  ", "20  ", "0.5 ", "0.5 ", "0.5 ", "0.5 ", "2   ", "2   ", "2   ", "2   ", "1   ", "1   ", "1   ", "1   " ,
@@ -80,7 +80,7 @@ const Eigen::Matrix<double, 17, 1> kExpectedCurrVec { // results from matlab
 };
 
 
-const vrfb::Table kExpectedPerfTable {
+const comutils::Table kExpectedPerfTable {
   vrfb::shuntcur::kShuntLossTableHdrs,
   {/* Cell No.  | Cell Curr | SPT Curr  , SPB Curr  , SNT Curr  , SNB Curr  | MPT Curr  , MPB Curr  , MNT Curr  , MNB Curr  | Cell Powr | SPT Powr  , SPB Powr  , SNT Powr  , SNB Powr  | MPT Powr  , MPB Powr  , MNT Powr  , MNB Powr    */
       "1"       , "0.2741"  , "-0.0892" , "-0.0892" , "-0.0952" , "-0.0952" , "-0.0892" , "-0.0892" , "-0.0952" , "-0.0952" , "0.0751"  , "0.1591"  , "0.1591"  , "0.1813"  , "0.1813"  , "0.0080"  , "0.0080"  , "0.0091"  , "0.0091"  ,

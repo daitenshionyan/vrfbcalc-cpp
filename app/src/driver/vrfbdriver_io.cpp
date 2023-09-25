@@ -123,7 +123,7 @@ void clearBOM(std::istream& is) {
 inline void initColMap(
       std::vector<std::string>& hdrs,
       std::vector<bool>& isKeeps,
-      vrfb::Table::ColMap& colMap) {
+      comutils::Table::ColMap& colMap) {
   hdrs.erase(
       std::remove_if(
           hdrs.begin(), hdrs.end(),
@@ -214,7 +214,7 @@ std::size_t readLine_CSV(std::istream& is, std::vector<std::string>& elems) {
 }
 
 
-vrfb::Table readTable_CSV(const std::filesystem::path& path) {
+comutils::Table readTable_CSV(const std::filesystem::path& path) {
   std::ifstream ifs = openFile_r(path);
   clearBOM(ifs);
 
@@ -246,7 +246,7 @@ vrfb::Table readTable_CSV(const std::filesystem::path& path) {
 }
 
 
-vrfb::Table readTable_XLSX(
+comutils::Table readTable_XLSX(
       const std::filesystem::path& path, const std::string& title) {
   std::ifstream ifs = openFile_r<std::ios_base::binary>(path);
   xlnt::workbook wb;
@@ -293,7 +293,7 @@ vrfb::Table readTable_XLSX(
 }
 
 
-void saveTable_XLSX(const std::filesystem::path& path, const vrfb::Table& t) {
+void saveTable_XLSX(const std::filesystem::path& path, const comutils::Table& t) {
   xlnt::workbook wb;
 
   auto ws = wb.active_sheet();
@@ -328,7 +328,7 @@ void saveTable_XLSX(const std::filesystem::path& path, const vrfb::Table& t) {
 
 void saveData_XLSX(
       const std::filesystem::path& path,
-      const vrfb::Table& t, const DataSet_CE& data) {
+      const comutils::Table& t, const DataSet_CE& data) {
   xlnt::workbook wb;
 
   auto ws = wb.active_sheet();

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <exception>
 #include <memory>
 #include <ostream>
 #include <stdexcept>
@@ -9,6 +10,55 @@
 
 
 namespace comutils { // ==== <comutils> ========================================
+
+
+namespace string { // ==== <comutils::string> ==================================
+
+
+std::string strip(const std::string& str, const std::string& chars = " \t\f\v\n\r");
+
+
+std::vector<std::string> split(const std::string& line, char delim = ',');
+void split(const std::string& line, std::vector<std::string>& vec, char delim = ',');
+
+
+template<typename ... Args>
+std::string format_string(const std::string& format, const Args& ... args) {
+  std::size_t count = std::snprintf(nullptr, 0, format.c_str(), args ...);
+  if (count < 0) {
+    throw std::runtime_error("Error while formatting");
+  }
+  std::unique_ptr<char[]> buf(new char[count+1]);
+  std::snprintf(buf.get(), count+1, format.c_str(), args ...);
+  return std::string(buf.get(), count);
+}
+
+
+} // ---- namespace <comutils::string>
+// namespace <comutils>
+
+
+namespace io { // ==== <comutils::io> ==========================================
+
+
+bool isValidFileName(const std::string&);
+
+
+} // ---- <comutils::io>
+// namespace <comutils>
+
+
+namespace time { // ==== <comutils::time> ======================================
+
+
+double parseTimestamp(const std::string& timeStr, char delim = ':');
+
+
+std::string getftime();
+
+
+} // ---- <comutils::time>
+// namespace <comutils>
 
 
 // :::: [ Table ] ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -71,7 +121,13 @@ class Table {
 
   protected:
     inline const std::vector<std::string>& at(const std::string& h) const {
-      return colMap.at(h);
+      try {
+        return colMap.at(h);
+      } catch (std::out_of_range oor) {
+        throw std::runtime_error(comutils::string::format_string(
+            "Header does not exist '%s'",
+            h.c_str()));
+      }
     }
 
     inline const std::vector<std::string>& at(std::size_t c) const {
@@ -92,6 +148,12 @@ class Table {
     std::vector<std::string> hdrs;
     ColMap colMap;
 };
+
+
+// ~~~~ io operators ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+std::ostream& operator<<(std::ostream&, const Table&);
 
 
 // ~~~~ template definition ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -140,55 +202,6 @@ template<>
 inline double Table::get<double>(std::size_t c, std::size_t r) const {
   return std::stod(at(c, r));
 }
-
-
-namespace string { // ==== <comutils::string> ==================================
-
-
-std::string strip(const std::string& str, const std::string& chars = " \t\f\v\n\r");
-
-
-std::vector<std::string> split(const std::string& line, char delim = ',');
-void split(const std::string& line, std::vector<std::string>& vec, char delim = ',');
-
-
-template<typename ... Args>
-std::string format_string(const std::string& format, const Args& ... args) {
-  std::size_t count = std::snprintf(nullptr, 0, format.c_str(), args ...);
-  if (count < 0) {
-    throw std::runtime_error("Error while formatting");
-  }
-  std::unique_ptr<char[]> buf(new char[count+1]);
-  std::snprintf(buf.get(), count+1, format.c_str(), args ...);
-  return std::string(buf.get(), count);
-}
-
-
-} // ---- namespace <comutils::string>
-// namespace <comutils>
-
-
-namespace io { // ==== <comutils::io> ==========================================
-
-
-bool isValidFileName(const std::string&);
-
-
-} // ---- <comutils::io>
-// namespace <comutils>
-
-
-namespace time { // ==== <comutils::time> ======================================
-
-
-double parseTimestamp(const std::string& timeStr, char delim = ':');
-
-
-std::string getftime();
-
-
-} // ---- <comutils::time>
-// namespace <comutils>
 
 
 } // ---- <comutils>

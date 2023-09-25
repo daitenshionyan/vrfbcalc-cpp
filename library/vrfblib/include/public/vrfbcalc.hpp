@@ -4,7 +4,7 @@
 #include <string>
 #include <unordered_set>
 
-#include "table.hpp"
+#include "utillib/utils.hpp"
 
 
 namespace vrfb { // BEGIN OF NAMESPACE <vrfb> ==================================
@@ -76,8 +76,8 @@ struct Config_CE {
 
 
 struct Data_CE {
-  const Table table;
-  const Config_CE cfg;
+  comutils::Table table;
+  Config_CE cfg;
 };
 
 
@@ -86,7 +86,7 @@ struct Data_CE {
 
   @param datas List of data to process.
 */
-vrfb::Table calcPerf_CE(const double area, const std::vector<Data_CE>& datas);
+comutils::Table calcPerf_CE(const double area, const std::vector<Data_CE>& datas);
 
 
 namespace shuntcur { // BEGIN OF NAMESPACE <vrfb::shuntcur> ====================
@@ -215,7 +215,7 @@ class StackArrGenerator : public ParamGenerator {
 };
 
 
-vrfb::Table calcPerf(const double chgVolt, const ParamGenerator& gen);
+comutils::Table calcPerf(const double chgVolt, const ParamGenerator& gen);
 
 
 } // END OF NAMESPACE <vrfb::shuntcur> -----------------------------------------

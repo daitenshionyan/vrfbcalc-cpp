@@ -26,7 +26,7 @@ class SystemParam {
         std::vector<std::vector<double>>&& sr,
         std::vector<std::vector<double>>&& mr,
         std::vector<double>&& cr);
-    SystemParam(const vrfb::Table&, const ResistConfig&);
+    SystemParam(const comutils::Table&, const ResistConfig&);
 
     SystemParam(const SystemParam&) = default;
     SystemParam(SystemParam&&) = default;
@@ -60,8 +60,8 @@ class SystemParam {
 };
 
 
-vrfb::Table calcPerf(double chgVolt, const SystemParam&);
-vrfb::Table calcPerf(const double chgVolt, const vrfb::Table& table, const ResistConfig& cfg_r);
+comutils::Table calcPerf(double chgVolt, const SystemParam&);
+comutils::Table calcPerf(const double chgVolt, const comutils::Table& table, const ResistConfig& cfg_r);
 
 
 Eigen::MatrixXd formCurrMat(const SystemParam& s);

@@ -141,7 +141,7 @@ SystemParam::SystemParam(
 }
 
 
-SystemParam::SystemParam(const vrfb::Table& table, const ResistConfig& cfg_r)
+SystemParam::SystemParam(const comutils::Table& table, const ResistConfig& cfg_r)
     : shuntResists{std::vector<std::vector<double>>(4, std::vector<double>(table.numRows()))},
       maniResists{std::vector<std::vector<double>>(4, std::vector<double>(table.numRows()))},
       cellResists{std::vector<double>(table.numRows())} {
@@ -342,22 +342,22 @@ Eigen::VectorXd calcCurrLoops(double chgVolt, const SystemParam& s) {
 }
 
 
-vrfb::Table calcPerf(double chgVolt, const SystemParam& s) {
+comutils::Table calcPerf(double chgVolt, const SystemParam& s) {
   auto v = calcCurrLoops(chgVolt, s);
   std::vector<std::string> elems {};
   for (std::size_t i = 0; i < s.numCells(); ++i) {
     addCellStats(v, s, i, elems);
   }
-  return vrfb::Table{kShuntLossTableHdrs, elems};
+  return comutils::Table{kShuntLossTableHdrs, elems};
 }
 
 
-vrfb::Table calcPerf(double chgVolt, const ParamGenerator& gen) {
+comutils::Table calcPerf(double chgVolt, const ParamGenerator& gen) {
   return calcPerf(chgVolt, gen.generate());
 }
 
 
-vrfb::Table calcPerf(const double chgVolt, const vrfb::Table& table, const ResistConfig& cfg_r) {
+comutils::Table calcPerf(const double chgVolt, const comutils::Table& table, const ResistConfig& cfg_r) {
   return calcPerf(chgVolt, {table, cfg_r});
 }
 

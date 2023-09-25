@@ -57,7 +57,7 @@ std::pair<SetMap_CE, std::size_t> toSetMap(
 }
 
 
-vrfb::Table readTable(const DataEntry_CE& entry) {
+comutils::Table readTable(const DataEntry_CE& entry) {
   auto path = std::filesystem::u8path<std::string>(entry.path);
   if (path.extension() == ".csv") {
     return io::readTable_CSV(path);
@@ -106,7 +106,7 @@ int calcCE(const std::string& name, const DataSet_CE& set_d, logger::Logger& log
   }
 
   // process data and generate output table
-  vrfb::Table data_pro;
+  comutils::Table data_pro;
   try {
     data_pro = vrfb::calcPerf_CE(set_d.area, datas);
   } catch (std::exception& ex) {
@@ -186,7 +186,7 @@ std::vector<PerformanceEntry_CE> readPerformance_CE(
 
 
 void calcPerf_SE(const std::string& name, double chgVolt, const vrfb::shuntcur::ParamGenerator& gen, logger::Logger& l) {
-  vrfb::Table table;
+  comutils::Table table;
   try {
     table = vrfb::shuntcur::calcPerf(chgVolt, gen);
   } catch (std::exception& ex) {
