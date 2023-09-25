@@ -4,7 +4,7 @@
 #include <string>
 
 #include "logger.hpp"
-#include "vrfbcalc.hpp"
+#include "vrfblib/vrfblib.hpp"
 
 
 namespace vrfbdriver {

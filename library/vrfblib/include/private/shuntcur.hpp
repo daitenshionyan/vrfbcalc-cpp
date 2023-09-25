@@ -4,7 +4,7 @@
 
 #include <Eigen/Dense>
 
-#include "vrfbcalc.hpp"
+#include "vrfblib/vrfblib.hpp"
 
 
 namespace vrfb {

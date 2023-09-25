@@ -4,7 +4,7 @@
 #include <filesystem>
 
 #include "utillib/utils.hpp"
-#include "vrfbcalc.hpp"
+#include "vrfblib/vrfblib.hpp"
 
 
 CEResultView::CEResultView(QWidget* parent)

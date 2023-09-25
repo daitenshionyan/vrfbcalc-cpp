@@ -15,7 +15,7 @@ set(CMAKE_AUTORCC off)
 find_package(Eigen3 CONFIG REQUIRED)
 
 add_library(vrfblib SHARED
-    include/public/vrfbcalc.hpp
+    include/public/vrfblib/vrfblib.hpp
 
     include/private/celleff.hpp
     include/private/shuntcur.hpp
