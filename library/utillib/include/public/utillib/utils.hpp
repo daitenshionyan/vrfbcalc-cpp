@@ -1,6 +1,9 @@
 #pragma once
 
 #include <exception>
+#include <filesystem>
+#include <fstream>
+#include <istream>
 #include <memory>
 #include <ostream>
 #include <stdexcept>
@@ -72,12 +75,74 @@ std::string format_string(const std::string& format, const Args& ... args) {
 namespace io { // ==== <comutils::io> ==========================================
 
 
+constexpr unsigned char kUtf8BOM[3] = {0xEF, 0xBB, 0xBF};
+
+
 /**
  * Returns `true` if the specified file name is valid and `false` otherwise.
  *
  * @param name The name to validate.
 */
 bool isValidFileName(const std::string& name);
+
+
+/**
+ * Reads pass the UTF8 binary operator mark in the given `std::istream` if
+ * present.
+ *
+ * @param is The `std::istream` to read past UTF8 BOM.
+ * @return The reference to the same `std::istream` after reading pass the BOM.
+*/
+std::istream& clearUTF8BOM(std::istream& is);
+
+
+/**
+ * Opens the file to the specified path for reading.
+ *
+ * @param <Mode> Open mode to open the file. Defaults to `std::ios_base::in`.
+ * @param path The path to the file to read.
+ * @returns The `std::istream` of the opened file.
+ * @throws std::runtime_error if the file cannot be found or if an I/O error
+ *    occurs.
+*/
+template<std::ios_base::openmode Mode = std::ios_base::in>
+std::ifstream openFile_r(const std::filesystem::path& path) {
+  if (!std::filesystem::exists(path)) {
+    throw std::runtime_error(comutils::string::format_string(
+        "Cannot find file '%s'",
+        path.string().c_str()));
+  }
+  std::ifstream ifs {path, Mode};
+  if (!ifs.good()) {
+    throw std::runtime_error(comutils::string::format_string(
+        "Error while reading file '%s' (state = %d)",
+        path.string().c_str(), ifs.exceptions()));
+  }
+  return ifs;
+}
+
+
+/**
+ * Opens the file to the specified path for writing.
+ *
+ * @param <Mode> Open mode to open the file. Defaults to `std::ios_base::out`.
+ * @param path The path to the file to read.
+ * @returns The `std::ostream` of the opened file.
+ * @throws std::runtime_error if an I/O error occurs.
+*/
+template<std::ios_base::openmode Mode = std::ios_base::out>
+std::ofstream openFile_w(const std::filesystem::path& path) {
+  if (path.has_parent_path()) {
+    std::filesystem::create_directories(path.parent_path());
+  }
+  std::ofstream ofs{path, Mode};
+  if (!ofs.good()) {
+    throw std::runtime_error(comutils::string::format_string(
+        "Error while writing file '%s' (state = %d)",
+        path.string().c_str(), ofs.exceptions()));
+  }
+  return ofs;
+}
 
 
 } // ---- <comutils::io>

@@ -68,56 +68,8 @@ namespace io { // BEGINING OF NAMESPACE <vrfbdriver::io> =======================
 
 namespace { // BEGINING OF NAMESPACE <vrfbdriver::io::UNNAMED> =================
 
-
-constexpr unsigned char kUtf8BOM[3] = {0xEF, 0xBB, 0xBF};
-
 constexpr double kCycNumColWidth = 10;
 constexpr double kNormColWidth = 25;
-
-
-template<std::ios_base::openmode Mode = std::ios_base::in>
-std::ifstream openFile_r(const std::filesystem::path& path) {
-  if (!std::filesystem::exists(path)) {
-    throw std::runtime_error(comutils::string::format_string(
-        "Cannot find file `%s`",
-        path.string().c_str()));
-  }
-  std::ifstream ifs{path, Mode};
-  if (!ifs.good()) {
-    throw std::runtime_error(comutils::string::format_string(
-        "Error while reading file '%s' (state = %d)",
-        path.string().c_str(), ifs.exceptions()));
-  }
-  return ifs;
-}
-
-
-template<std::ios_base::openmode Mode = std::ios_base::out>
-std::ofstream openFile_w(const std::filesystem::path& path) {
-  if (path.has_parent_path()) {
-    std::filesystem::create_directories(path.parent_path());
-  }
-  std::ofstream ofs{path, Mode};
-  if (!ofs.good()) {
-    throw std::runtime_error(comutils::string::format_string(
-        "Error while writing file '%s' (state = %d)",
-        path.string().c_str(), ofs.exceptions()));
-  }
-  return ofs;
-}
-
-
-void clearBOM(std::istream& is) {
-  unsigned char bom_bytes[3];
-  auto ini_pos = is.tellg();
-  is.read((char*) bom_bytes, 3);
-  for (int i = 0; i < 3; ++i) {
-    if (bom_bytes[i] != kUtf8BOM[i]) {
-      is.seekg(ini_pos);
-      return;
-    }
-  }
-}
 
 
 inline void initColMap(
@@ -149,7 +101,7 @@ inline void initColMap(
 
 inline vrfb::Config_CE loadConfig_CE(const std::filesystem::path& path) {
   nlohmann::json j;
-  openFile_r(path) >> j;
+  comutils::io::openFile_r(path) >> j;
   return j.get<vrfb::Config_CE>();
 }
 
@@ -215,8 +167,8 @@ std::size_t readLine_CSV(std::istream& is, std::vector<std::string>& elems) {
 
 
 comutils::Table readTable_CSV(const std::filesystem::path& path) {
-  std::ifstream ifs = openFile_r(path);
-  clearBOM(ifs);
+  std::ifstream ifs = comutils::io::openFile_r(path);
+  comutils::io::clearUTF8BOM(ifs);
 
   std::vector<std::string> hdrs {};
   readLine_CSV(ifs, hdrs);
@@ -248,7 +200,7 @@ comutils::Table readTable_CSV(const std::filesystem::path& path) {
 
 comutils::Table readTable_XLSX(
       const std::filesystem::path& path, const std::string& title) {
-  std::ifstream ifs = openFile_r<std::ios_base::binary>(path);
+  std::ifstream ifs = comutils::io::openFile_r<std::ios_base::binary>(path);
   xlnt::workbook wb;
   wb.load(ifs);
 
@@ -316,7 +268,7 @@ void saveTable_XLSX(const std::filesystem::path& path, const comutils::Table& t)
   }
   ws.freeze_panes("B2");
 
-  std::ofstream ofs = openFile_w<std::ios_base::binary>(path);
+  std::ofstream ofs = comutils::io::openFile_w<std::ios_base::binary>(path);
   wb.save(ofs);
   if (!ofs.good()) {
     throw std::runtime_error(comutils::string::format_string(
@@ -357,7 +309,7 @@ void saveData_XLSX(
   ws.cell(1, 1).value("Area (cm2)");
   ws.cell(2, 1).value(data.area);
 
-  std::ofstream ofs = openFile_w<std::ios_base::binary>(path);
+  std::ofstream ofs = comutils::io::openFile_w<std::ios_base::binary>(path);
   wb.save(ofs);
   if (!ofs.good()) {
     throw std::runtime_error(comutils::string::format_string(
