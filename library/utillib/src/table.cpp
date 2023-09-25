@@ -1,20 +1,20 @@
-#include "table.hpp"
+#include "utillib/utils.hpp"
 
 #include <stdexcept>
-#include <exception>
 #include <utility>
 
-#include "strutils.hpp"
+
+namespace comutils {
 
 
-namespace vrfb {
+// ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 Table::Table(const std::vector<std::string>& h, const std::vector<std::string>& elems)
-    : r_size{elems.size()/h.size()},
-      hdrs{} {
+    : r_size{elems.size() / h.size()} {
   if (elems.size() % h.size() != 0) {
-    throw std::runtime_error(strutils::format_string("Incomplete table %d cols for %d elems",
+    throw std::runtime_error(comutils::string::format_string(
+        "Incomplete table %d cols for %d elems",
         h.size(), elems.size()));
   }
 
@@ -31,7 +31,7 @@ Table::Table(const std::vector<std::string>& h, const std::vector<std::string>& 
       continue;
     }
     if (colMap.find(h[colNum]) != colMap.end()) {
-      throw std::invalid_argument("Duplicate headers");
+      throw std::runtime_error("Duplicate headers");
     }
     colMap.emplace(h[colNum], std::vector<std::string>());
     for (std::size_t i = colNum; i < elems.size(); i += h.size()) {
@@ -43,7 +43,7 @@ Table::Table(const std::vector<std::string>& h, const std::vector<std::string>& 
 
 Table::Table(std::vector<std::string>&& h, ColMap&& cm)
     : hdrs{std::move(h)},
-      colMap{std::move(cm)} {
+      colMap(std::move(cm)) {
   if (hdrs.size() != colMap.size()) {
     throw std::runtime_error("Header length not equals number of columns");
   }
@@ -61,14 +61,7 @@ Table::Table(std::vector<std::string>&& h, ColMap&& cm)
 }
 
 
-const std::vector<std::string>& Table::at(const std::string& h) const {
-  try {
-    return colMap.at(h);
-  } catch (std::out_of_range oor) {
-    throw std::out_of_range(strutils::format_string("Header does not exist '%s'",
-        h.c_str()));
-  }
-}
+// ~~~~ io operators ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 std::ostream& operator<<(std::ostream& os, const Table& t) {

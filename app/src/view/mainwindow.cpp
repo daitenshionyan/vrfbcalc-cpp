@@ -8,7 +8,7 @@
 #include <QDesktopServices>
 #include <QFileDialog>
 
-#include "strutils.hpp"
+#include "utillib/utils.hpp"
 #include "vrfbcalccfg.hpp"
 #include "driver/vrfbdriver_io.hpp"
 
@@ -42,7 +42,7 @@ MainWindow::MainWindow(QWidget* parent)
   ui->outputArea->appendHtml(
       QString("<p style=\"color:grey;white-space:pre\">")
       + QString::fromStdString(
-            strutils::format_string(
+            comutils::string::format_string(
                 "%s\n%s\n%s",
                 "================================================================================",
                 vrfbcfg::licence_notice,
@@ -127,14 +127,14 @@ void MainWindow::logMsg(const logger::LogMsg& lm) {
       lvlTxt = "SUCC";
   }
   QString outText = QString::fromStdString(
-      strutils::format_string("[%s] [%s] %s",
-          strutils::getftime().c_str(),
+      comutils::string::format_string("[%s] [%s] %s",
+          comutils::time::getftime().c_str(),
           lvlTxt.c_str(),
           lm.msg.c_str()))
       .toHtmlEscaped();
   ui->outputArea->appendHtml(
       QString::fromStdString(
-          strutils::format_string("<p style=\"color:%s;white-space:pre\">",
+          comutils::string::format_string("<p style=\"color:%s;white-space:pre\">",
               color.c_str()))
       + outText + "</p>");
 }
@@ -159,7 +159,7 @@ void MainWindow::displayPerformanceView(
   try {
     rv->plotGraphs(entries);
   } catch (std::exception& ex) {
-    fail(strutils::format_string("Failed to plot graphs due to - %s",
+    fail(comutils::string::format_string("Failed to plot graphs due to - %s",
         ex.what()));
     delete rv;
     return;

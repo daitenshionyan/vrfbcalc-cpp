@@ -12,7 +12,7 @@
 #include "xlnt/xlnt.hpp"
 #include "nlohmann/json.hpp"
 
-#include "strutils.hpp"
+#include "utillib/utils.hpp"
 
 
 namespace { // BEGINING OF NAMESPACE <GLOBAL::UNNAMED> =========================
@@ -34,8 +34,8 @@ constexpr std::string_view kLblDTypeNames_CE    =    "d_type_names";
 
 NLOHMANN_JSON_NAMESPACE_BEGIN
 template<>
-struct adl_serializer<vrfb::Config_CE> {
-  static void to_json(json& j, const vrfb::Config_CE& cfg) {
+struct adl_serializer<vrfb::celleff::Config> {
+  static void to_json(json& j, const vrfb::celleff::Config& cfg) {
     j = nlohmann::json{
       {kLblTTimeHdr_CE, cfg.t_time_h},
       {kLblTypeHdr_CE, cfg.type_h},
@@ -48,7 +48,7 @@ struct adl_serializer<vrfb::Config_CE> {
     };
   }
 
-  static void from_json(const json& j, vrfb::Config_CE& cfg) {
+  static void from_json(const json& j, vrfb::celleff::Config& cfg) {
     j.at(kLblTTimeHdr_CE).get_to(cfg.t_time_h);
     j.at(kLblTypeHdr_CE).get_to(cfg.type_h);
     j.at(kLblCCapHdr_CE).get_to(cfg.c_capacity_h);
@@ -68,62 +68,14 @@ namespace io { // BEGINING OF NAMESPACE <vrfbdriver::io> =======================
 
 namespace { // BEGINING OF NAMESPACE <vrfbdriver::io::UNNAMED> =================
 
-
-constexpr unsigned char kUtf8BOM[3] = {0xEF, 0xBB, 0xBF};
-
 constexpr double kCycNumColWidth = 10;
 constexpr double kNormColWidth = 25;
-
-
-template<std::ios_base::openmode Mode = std::ios_base::in>
-std::ifstream openFile_r(const std::filesystem::path& path) {
-  if (!std::filesystem::exists(path)) {
-    throw std::runtime_error(strutils::format_string(
-        "Cannot find file `%s`",
-        path.string().c_str()));
-  }
-  std::ifstream ifs{path, Mode};
-  if (!ifs.good()) {
-    throw std::runtime_error(strutils::format_string(
-        "Error while reading file '%s' (state = %d)",
-        path.string().c_str(), ifs.exceptions()));
-  }
-  return ifs;
-}
-
-
-template<std::ios_base::openmode Mode = std::ios_base::out>
-std::ofstream openFile_w(const std::filesystem::path& path) {
-  if (path.has_parent_path()) {
-    std::filesystem::create_directories(path.parent_path());
-  }
-  std::ofstream ofs{path, Mode};
-  if (!ofs.good()) {
-    throw std::runtime_error(strutils::format_string(
-        "Error while writing file '%s' (state = %d)",
-        path.string().c_str(), ofs.exceptions()));
-  }
-  return ofs;
-}
-
-
-void clearBOM(std::istream& is) {
-  unsigned char bom_bytes[3];
-  auto ini_pos = is.tellg();
-  is.read((char*) bom_bytes, 3);
-  for (int i = 0; i < 3; ++i) {
-    if (bom_bytes[i] != kUtf8BOM[i]) {
-      is.seekg(ini_pos);
-      return;
-    }
-  }
-}
 
 
 inline void initColMap(
       std::vector<std::string>& hdrs,
       std::vector<bool>& isKeeps,
-      vrfb::Table::ColMap& colMap) {
+      comutils::Table::ColMap& colMap) {
   hdrs.erase(
       std::remove_if(
           hdrs.begin(), hdrs.end(),
@@ -131,7 +83,7 @@ inline void initColMap(
             isKeeps.push_back(!hdr.empty());
             if (isKeeps.back()) {
               if (colMap.find(hdr) != colMap.end()) {
-                throw std::runtime_error(strutils::format_string(
+                throw std::runtime_error(comutils::string::format_string(
                     "Duplicate headers '%s'",
                     hdr.c_str()));
               }
@@ -147,10 +99,10 @@ inline void initColMap(
 // namespace <vrfbdriver::io>
 
 
-inline vrfb::Config_CE loadConfig_CE(const std::filesystem::path& path) {
+inline vrfb::celleff::Config loadConfig_CE(const std::filesystem::path& path) {
   nlohmann::json j;
-  openFile_r(path) >> j;
-  return j.get<vrfb::Config_CE>();
+  comutils::io::openFile_r(path) >> j;
+  return j.get<vrfb::celleff::Config>();
 }
 
 
@@ -214,9 +166,9 @@ std::size_t readLine_CSV(std::istream& is, std::vector<std::string>& elems) {
 }
 
 
-vrfb::Table readTable_CSV(const std::filesystem::path& path) {
-  std::ifstream ifs = openFile_r(path);
-  clearBOM(ifs);
+comutils::Table readTable_CSV(const std::filesystem::path& path) {
+  std::ifstream ifs = comutils::io::openFile_r(path);
+  comutils::io::clearUTF8BOM(ifs);
 
   std::vector<std::string> hdrs {};
   readLine_CSV(ifs, hdrs);
@@ -246,9 +198,9 @@ vrfb::Table readTable_CSV(const std::filesystem::path& path) {
 }
 
 
-vrfb::Table readTable_XLSX(
+comutils::Table readTable_XLSX(
       const std::filesystem::path& path, const std::string& title) {
-  std::ifstream ifs = openFile_r<std::ios_base::binary>(path);
+  std::ifstream ifs = comutils::io::openFile_r<std::ios_base::binary>(path);
   xlnt::workbook wb;
   wb.load(ifs);
 
@@ -260,7 +212,7 @@ vrfb::Table readTable_XLSX(
     if (wb.contains(title)) {
       ws = wb.sheet_by_title(title);
     } else {
-      throw std::runtime_error(strutils::format_string(
+      throw std::runtime_error(comutils::string::format_string(
           "Cannot find XLSX sheet '%s'",
           title.c_str()));
     }
@@ -293,7 +245,7 @@ vrfb::Table readTable_XLSX(
 }
 
 
-void saveTable_XLSX(const std::filesystem::path& path, const vrfb::Table& t) {
+void saveTable_XLSX(const std::filesystem::path& path, const comutils::Table& t) {
   xlnt::workbook wb;
 
   auto ws = wb.active_sheet();
@@ -316,10 +268,10 @@ void saveTable_XLSX(const std::filesystem::path& path, const vrfb::Table& t) {
   }
   ws.freeze_panes("B2");
 
-  std::ofstream ofs = openFile_w<std::ios_base::binary>(path);
+  std::ofstream ofs = comutils::io::openFile_w<std::ios_base::binary>(path);
   wb.save(ofs);
   if (!ofs.good()) {
-    throw std::runtime_error(strutils::format_string(
+    throw std::runtime_error(comutils::string::format_string(
         "Error occured while writing to '%s' (state = %d)",
         path.string().c_str(), ofs.exceptions()));
   }
@@ -328,7 +280,7 @@ void saveTable_XLSX(const std::filesystem::path& path, const vrfb::Table& t) {
 
 void saveData_XLSX(
       const std::filesystem::path& path,
-      const vrfb::Table& t, const DataSet_CE& data) {
+      const comutils::Table& t, const DataSet_CE& data) {
   xlnt::workbook wb;
 
   auto ws = wb.active_sheet();
@@ -357,10 +309,10 @@ void saveData_XLSX(
   ws.cell(1, 1).value("Area (cm2)");
   ws.cell(2, 1).value(data.area);
 
-  std::ofstream ofs = openFile_w<std::ios_base::binary>(path);
+  std::ofstream ofs = comutils::io::openFile_w<std::ios_base::binary>(path);
   wb.save(ofs);
   if (!ofs.good()) {
-    throw std::runtime_error(strutils::format_string(
+    throw std::runtime_error(comutils::string::format_string(
         "Error occured while writing to '%s' (state = %d)",
         path.string().c_str(), ofs.exceptions()));
   }

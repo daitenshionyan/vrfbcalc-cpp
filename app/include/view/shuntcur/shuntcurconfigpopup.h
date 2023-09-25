@@ -2,7 +2,7 @@
 
 #include <QDialog>
 
-#include "vrfbcalc.hpp"
+#include "vrfblib/vrfblib.hpp"
 
 
 QT_BEGIN_NAMESPACE

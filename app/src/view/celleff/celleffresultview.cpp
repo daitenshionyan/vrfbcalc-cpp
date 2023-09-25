@@ -3,8 +3,8 @@
 
 #include <filesystem>
 
-#include "strutils.hpp"
-#include "vrfbcalc.hpp"
+#include "utillib/utils.hpp"
+#include "vrfblib/vrfblib.hpp"
 
 
 CEResultView::CEResultView(QWidget* parent)
@@ -72,8 +72,8 @@ void CEResultView::plotGraphs(
 
 bool CEResultView::exportImages(logger::Logger& l) {
   std::string prefix = ui->prefixNameField->text().toStdString();
-  if (!strutils::isValidFileName(prefix)) {
-    l.warn(strutils::format_string(
+  if (!comutils::io::isValidFileName(prefix)) {
+    l.warn(comutils::string::format_string(
         "Prefix field may contain illegal file characters '%s'",
         prefix.c_str()));
   }
@@ -83,16 +83,16 @@ bool CEResultView::exportImages(logger::Logger& l) {
   std::filesystem::create_directories("output/images");
   bool is_success = true;
   for (const auto& form : plotForms) {
-    QString strPath = QString::fromStdString(strutils::format_string(
+    QString strPath = QString::fromStdString(comutils::string::format_string(
         "output/images/%s%s_%s.png",
         prefix.c_str(), form.title.c_str(), form.name.c_str()));
     bool is_saved = form.plot->savePng(strPath);
     if (is_saved) {
-      l.info(strutils::format_string("Successfully exported '%s'",
+      l.info(comutils::string::format_string("Successfully exported '%s'",
           form.name.c_str()));
     } else {
       is_success = false;
-      l.fail(strutils::format_string("Failed to export '%s'",
+      l.fail(comutils::string::format_string("Failed to export '%s'",
           form.name.c_str()));
     }
   }

@@ -23,7 +23,7 @@ class CEDataEntryForm : public QFrame {
       public:
         ConfigForm(QWidget* parent) : QWidget(parent) {};
         virtual ~ConfigForm() = default;
-        virtual vrfb::Config_CE getConfig() const = 0;
+        virtual vrfb::celleff::Config getConfig() const = 0;
     };
 
 

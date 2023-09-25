@@ -4,7 +4,7 @@
 #include <string>
 
 #include "logger.hpp"
-#include "vrfbcalc.hpp"
+#include "vrfblib/vrfblib.hpp"
 
 
 namespace vrfbdriver {
@@ -17,7 +17,7 @@ constexpr std::string_view kConfigSheetTitle_CE = "Config";
 struct DataEntry_CE {
   std::string path;
   std::string sheet_title;
-  vrfb::Config_CE cfg;
+  vrfb::celleff::Config cfg;
 };
 
 
@@ -29,7 +29,7 @@ struct DataSet_CE {
 
 struct PerformanceEntry_CE {
   std::string name;
-  vrfb::Table table;
+  comutils::Table table;
 };
 
 

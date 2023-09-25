@@ -13,8 +13,12 @@ set(CMAKE_AUTORCC off)
 # ==== LIBRARY CONFIGURATION ================================================= #
 
 add_library(utillib SHARED
-    include/public/strutils.hpp
+    include/public/utillib/utils.hpp
+
+    src/table.cpp
     src/strutils.cpp
+    src/ioutils.cpp
+    src/timeutils.cpp
 )
 
 target_include_directories(utillib PUBLIC include/public)
