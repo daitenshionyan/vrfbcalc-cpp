@@ -90,8 +90,6 @@ void MainWindow::startCalc_SC() {
       &pool,
       [&](QPromise<logger::LogMsg>& p) {
         auto w = PromLogger{p};
-        auto job = popup_se->getJob();
-        vrfbdriver::calcPerf_SE(job.name, job.chgCurr, *job.gen, w);
       }
   ));
 }

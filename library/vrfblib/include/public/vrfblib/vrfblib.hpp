@@ -164,40 +164,7 @@ const std::vector<std::string> kShuntLossTableHdrs {
 };
 
 
-// :::: [ Data structures and classes ] ::::::::::::::::::::::::::::::::::::::::
-
-
-/**
- * Structure contianing electric resistance configuration of a system.
-*/
-struct ResistConfig {
-  std::string asrHdr;
-
-  std::string shuntLengthPosTopHdr;
-  std::string shuntLengthPosBotHdr;
-  std::string shuntLengthNegTopHdr;
-  std::string shuntLengthNegBotHdr;
-  std::string shuntAreaPosTopHdr;
-  std::string shuntAreaPosBotHdr;
-  std::string shuntAreaNegTopHdr;
-  std::string shuntAreaNegBotHdr;
-
-  std::string maniLengthPosTopHdr;
-  std::string maniLengthPosBotHdr;
-  std::string maniLengthNegTopHdr;
-  std::string maniLengthNegBotHdr;
-  std::string maniAreaPosTopHdr;
-  std::string maniAreaPosBotHdr;
-  std::string maniAreaNegTopHdr;
-  std::string maniAreaNegBotHdr;
-
-  double resistivity;                 // Resistivity of electrolyte (Ohms m-1)
-  double area;                        // Active area (m2)
-};
-
-
-/** Class that manages the parameters of a cell stack system. */
-class SystemParam;
+// :::: [ Data structures ] ::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 
 /**
@@ -215,64 +182,60 @@ struct StackParam {
 };
 
 
-/**
- * A generator to generate `SystemParam` for shunt current calculations.
-*/
-class ParamGenerator {
-  public:
-    ParamGenerator(StackParam param_s)
-        : stackParam{param_s} {}
+// :::: [ ShuntCalc ] ::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-    virtual ~ParamGenerator() = default;
 
+class ShuntCalc {
+  public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
+    ShuntCalc(const StackParam& s) : stack{s} {}
+
+    ShuntCalc(const ShuntCalc&) = default;
+    ShuntCalc(ShuntCalc&&) = default;
+
+    ShuntCalc& operator=(const ShuntCalc&) = default;
+    ShuntCalc& operator=(ShuntCalc&&) = default;
+
+    virtual ~ShuntCalc() = default;
+
+  public: // ~~~~ functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     /**
-     * Generate a `SystemParam`.
+     * Calculates shunt current performance of the specified system.
+     *
+     * @param chgVolt The charging voltage (V). Negative value for constant
+     *    voltage discharging.
     */
-    virtual SystemParam generate() const = 0;
+    virtual comutils::Table calculate(double chgVolt) = 0;
 
 
-  protected:
-    StackParam stackParam;
+  protected: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    StackParam stack;
 };
 
 
-/**
- * Implementation of `ParamGenerator` to generate `SystemParam` for systems
- * with electrolyte flow to stacks connected in a stack arrangement.
-*/
-class StackArrGenerator : public ParamGenerator {
+// :::: [ CommonLineFrontCalc ] ::::::::::::::::::::::::::::::::::::::::::::::::
+
+
+class CommonLineFrontCalc : public ShuntCalc {
   public:
-    StackArrGenerator(
-        StackParam param_s,
-        std::size_t num_s, double cl, double ca)
-        : ParamGenerator{param_s},
-          numStack{num_s}, conLen{cl}, conArea{ca} {}
+    CommonLineFrontCalc(const StackParam& s,
+        std::size_t num_s,
+        double csl, double csa,
+        double cml, double cma)
+        : ShuntCalc{s},
+          numStacks{num_s},
+          conShuntLen{csl}, conShuntArea{csa},
+          conManiLen{cml}, conManiArea{cma} {}
 
-    ~StackArrGenerator() override = default;
-
-    SystemParam generate() const override;
+    comutils::Table calculate(double chgVolt) override;
 
 
   private:
-    std::size_t numStack;
-    double conLen;
-    double conArea;
+    std::size_t numStacks;
+    double conShuntLen;
+    double conShuntArea;
+    double conManiLen;
+    double conManiArea;
 };
-
-
-// :::: [ Functions ] ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-
-
-/**
- * Calculates the shunt current performance of a system.
- *
- * @param chgVolt The charging voltage (V).
- * @param gen The generator to generate `SystemParam`
- * @returns The calculated performance of the system as a `comutils::Table`.
- *    Its headers are in the order given by
- *    `vrfb::shuntcur::kShuntLossTableHdrs`.
-*/
-comutils::Table calcPerf(const double chgVolt, const ParamGenerator& gen);
 
 
 } // ---- namespace <vrfb::shuntcur>
