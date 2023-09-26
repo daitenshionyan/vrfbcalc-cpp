@@ -1,3 +1,7 @@
+#include <cmath>
+#include <string>
+#include <strstream>
+
 #include <gtest/gtest.h>
 
 #include <Eigen/Dense>
@@ -119,7 +123,7 @@ const Eigen::Matrix<double, 81, 81> kExCurMat_Sys {
   {   1   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 1   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 1   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 1   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , -2  , 8   , -2  , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0    },   // 67     -     NEGATIVE BOTTOM
   {   1   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 1   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , -2  , 8   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0    },   // 68     -     NEGATIVE BOTTOM
   {   1   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 1   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 1   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 1   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 8   , -2  , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0    },   // 69     -     NEGATIVE BOTTOM
-  {   1   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 1   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 1   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 1   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , -2  , 8   , -2  , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0    },   // 70     -     NEGATIVE BOTTOM
+  {   1   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 1   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 1   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 1   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , -2  , 8   , -2  , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0    },   // 70     -     NEGATIVE BOTTOM
   {   1   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 1   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 1   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 1   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , -2  , 8   , -2  , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0    },   // 71     -     NEGATIVE BOTTOM
   {   1   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 1   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , -2  , 8   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0    },   // 72     -     NEGATIVE BOTTOM
   {   1   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 1   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 1   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 1   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 8   , -2  , 0   , 0   , 0   , 0   , 0   , 0    },   // 73     -     NEGATIVE BOTTOM
@@ -133,48 +137,44 @@ const Eigen::Matrix<double, 81, 81> kExCurMat_Sys {
 };
 
 
+
+void checkMatrix(const Eigen::MatrixXd& expected, const Eigen::MatrixXd& actual) {
+  bool is_same_dim = (expected.rows() == actual.rows()) && (expected.cols() == actual.cols());
+  ASSERT_TRUE(is_same_dim) << "Wrong dimensions"
+      << " - Expected dimentions: " << expected.rows() << " x " << expected.cols()
+      << " | Actual dimentions: " << actual.rows() << " x " << actual.cols();
+
+  bool is_same = true;
+  std::stringstream ss {};
+  for (std::size_t r = 0; r < expected.rows(); ++r) {
+    for (std::size_t c = 0; c < expected.cols(); ++c) {
+      if (std::abs(actual(r, c) - expected(r, c)) > 0.001) {
+        is_same = false;
+        ss << "At (" << r << ", " << c << ")"
+          << " - Expected: " << expected(r, c)
+          << " | Actual: " << actual(r, c) << "\n";
+      }
+    }
+  }
+  ASSERT_TRUE(is_same)
+      << "Expected matrix:\n" << expected
+      << "\nActual matrix:\n" << actual
+      << "\nDifference:\n" << ss.str();
+}
+
+
 }
 
 
 TEST(ShuntCurrent, StackMatrixForation01) {
   Eigen::MatrixXd actual = Eigen::Matrix<double, 17, 17>::Zero();
   vrfb::shuntcur::fillMatrixStack(actual, param, 1);
-
-  bool is_same = true;
-  for (int r = 0; r < kExCurMat_Stack.rows(); ++r) {
-    for (int c = 0; c < kExCurMat_Stack.cols(); ++c) {
-      bool is_elem_same = actual(r, c) - kExCurMat_Stack(r, c) < 0.001;
-      EXPECT_TRUE(is_elem_same)
-          << "At (" << r << ", " << c << ")"
-          << " - Expected: " << kExCurMat_Stack(r, c)
-          << " | Actual: " << actual(r, c);
-      if (!is_elem_same) {
-        is_same = false;
-      }
-    }
-  }
-
-  EXPECT_TRUE(is_same) << "Expected matrix:\n" << kExCurMat_Stack << "\nActual matrix:\n" << actual;
+  checkMatrix(kExCurMat_Stack, actual);
 }
 
 
 TEST(ShuntCurrent, StackMatrixForation02) {
   Eigen::MatrixXd actual = Eigen::Matrix<double, 81, 81>::Zero();
   vrfb::shuntcur::fillMatrixStack(actual, param, 5);
-
-  bool is_same = true;
-  for (int r = 0; r < kExCurMat_Sys.rows(); ++r) {
-    for (int c = 0; c < kExCurMat_Sys.cols(); ++c) {
-      bool is_elem_same = actual(r, c) - kExCurMat_Sys(r, c) < 0.001;
-      EXPECT_TRUE(is_elem_same)
-          << "At (" << r << ", " << c << ")"
-          << " - Expected: " << kExCurMat_Sys(r, c)
-          << " | Actual: " << actual(r, c);
-      if (!is_elem_same) {
-        is_same = false;
-      }
-    }
-  }
-
-  EXPECT_TRUE(is_same) << "Expected matrix:\n" << kExCurMat_Sys << "\nActual matrix:\n" << actual;
+  checkMatrix(kExCurMat_Sys, actual);
 }

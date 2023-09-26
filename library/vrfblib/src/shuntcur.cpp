@@ -35,85 +35,89 @@ StackParam::StackParam(
 
 
 void fillMatrixStack(Eigen::MatrixXd& m, const StackParam& s, std::size_t num_s) {
-  for (std::size_t i = 0; i < s.numCells*num_s; ++i) {
-    // main loop
-    m(0, 0) += s.cellResist;
+  std::size_t totalCells = s.numCells * num_s;
 
-    Eigen::Index pti = i + 1;                 // Positive top index
-    Eigen::Index pbi = i + s.numCells;        // Positive bottom index
-    Eigen::Index nti = i + 2*s.numCells - 2;  // Negative top index
-    Eigen::Index nbi = i + 3*s.numCells - 3;  // Negative bottom index
-
-    if (i+1 < s.numCells) {
+  for (std::size_t si = 0; si < num_s; ++si) {
+    for (std::size_t ci = 0; ci < s.numCells; ++ci) {
       // main loop
-      m(0, pti) = s.cellResist;
-      m(0, pbi) = s.cellResist;
+      m(0, 0) += s.cellResist;
 
-      // main loop contribution
-      m(pti, 0) = s.cellResist;
-      m(pbi, 0) = s.cellResist;
+      Eigen::Index pti = ci +  si            * (s.numCells - 1) + 1;      // Positive top index
+      Eigen::Index pbi = ci + (si +   num_s) * (s.numCells - 1) + 1;      // Positive bottom index
+      Eigen::Index nti = ci + (si + 2*num_s) * (s.numCells - 1);          // Negative top index
+      Eigen::Index nbi = ci + (si + 3*num_s) * (s.numCells - 1);          // Negative bottom index
 
-      if (i > 0) {
-        // previous loop contribution
-        m(pti, pti-1) = -s.shuntResist;
-        m(pbi, pbi-1) = -s.shuntResist;
+      if (ci+1 < s.numCells) {
+        // main loop
+        m(0, pti) = s.cellResist;
+        m(0, pbi) = s.cellResist;
 
-        // contribution from negative loops
-        m(pti, nti) = s.cellResist;
-        m(pti, nbi) = s.cellResist;
-        m(pbi, nti) = s.cellResist;
-        m(pbi, nbi) = s.cellResist;
+        // main loop contribution
+        m(pti, 0) = s.cellResist;
+        m(pbi, 0) = s.cellResist;
+
+        if (ci > 0) {
+          // previous loop contribution
+          m(pti, pti-1) = -s.shuntResist;
+          m(pbi, pbi-1) = -s.shuntResist;
+
+          // contribution from negative loops
+          m(pti, nti) = s.cellResist;
+          m(pti, nbi) = s.cellResist;
+          m(pbi, nti) = s.cellResist;
+          m(pbi, nbi) = s.cellResist;
+        }
+
+        // current loop contribution
+        m(pti, pti) = s.cellResist + 2*s.shuntResist + s.maniResist;
+        m(pbi, pbi) = s.cellResist + 2*s.shuntResist + s.maniResist;
+
+        if (ci+2 < s.numCells) {
+          // next loop contribution
+          m(pti, pti+1) = -s.shuntResist;
+          m(pbi, pbi+1) = -s.shuntResist;
+        }
+
+        // contribution from other side positive loop
+        m(pti, pbi) = s.cellResist;
+        m(pbi, pti) = s.cellResist;
       }
 
-      // current loop contribution
-      m(pti, pti) = s.cellResist + 2*s.shuntResist + s.maniResist;
-      m(pbi, pbi) = s.cellResist + 2*s.shuntResist + s.maniResist;
+      if (ci > 0) {
+        // main loop
+        m(0, nti) = s.cellResist;
+        m(0, nbi) = s.cellResist;
 
-      if (i+2 < s.numCells) {
-        // next loop contribution
-        m(pti, pti+1) = -s.shuntResist;
-        m(pbi, pbi+1) = -s.shuntResist;
+        // main loop contribution
+        m(nti, 0) = s.cellResist;
+        m(nbi, 0) = s.cellResist;
+
+        if (ci > 1) {
+          // previous loop contribution
+          m(nti, nti-1) = -s.shuntResist;
+          m(nbi, nbi-1) = -s.shuntResist;
+        }
+
+        // current loop contribution
+        m(nti, nti) = s.cellResist + 2*s.shuntResist + s.maniResist;
+        m(nbi, nbi) = s.cellResist + 2*s.shuntResist + s.maniResist;
+
+        if (ci+1 < s.numCells) {
+          // next loop contribution
+          m(nti, nti+1) = -s.shuntResist;
+          m(nbi, nbi+1) = -s.shuntResist;
+
+          // contribution from positive loops
+          m(nti, pti) = s.cellResist;
+          m(nti, pbi) = s.cellResist;
+          m(nbi, pti) = s.cellResist;
+          m(nbi, pbi) = s.cellResist;
+        }
+
+        // contribution from other side negative loops
+        m(nti, nbi) = s.cellResist;
+        m(nbi, nti) = s.cellResist;
       }
-
-      // contribution from other side positive loop
-      m(pti, pbi) = s.cellResist;
-      m(pbi, pti) = s.cellResist;
-    }
-
-    if (i > 0) {
-      // main loop
-      m(0, nti) = s.cellResist;
-      m(0, nbi) = s.cellResist;
-
-      // main loop contribution
-      m(nti, 0) = s.cellResist;
-      m(nbi, 0) = s.cellResist;
-
-      if (i > 1) {
-        // previous loop contribution
-        m(nti, nti-1) = -s.shuntResist;
-        m(nbi, nbi-1) = -s.shuntResist;
-      }
-
-      // current loop contribution
-      m(nti, nti) = s.cellResist + 2*s.shuntResist + s.maniResist;
-      m(nbi, nbi) = s.cellResist + 2*s.shuntResist + s.maniResist;
-
-      if (i+1 < s.numCells) {
-        // next loop contribution
-        m(nti, nti+1) = -s.shuntResist;
-        m(nbi, nbi+1) = -s.shuntResist;
-
-        // contribution from positive loops
-        m(nti, pti) = s.cellResist;
-        m(nti, pbi) = s.cellResist;
-        m(nbi, pti) = s.cellResist;
-        m(nbi, pbi) = s.cellResist;
-      }
-
-      // contribution from other side negative loops
-      m(nti, nbi) = s.cellResist;
-      m(nbi, nti) = s.cellResist;
     }
   }
 }
