@@ -171,14 +171,27 @@ const std::vector<std::string> kShuntLossTableHdrs {
  * Structure contianing the parameters of the stacks in a system.
 */
 struct StackParam {
+  /**
+   * Constructs a `StackParam`.
+   *
+   * @param num_c Number of cells.
+   * @param rho Reistivity of electrolyte (Ohm / m)
+   * @param asr ASR of cells (m2 Ohm)
+   * @param sl Shunt length (m)
+   * @param sa Shunt area (m2)
+   * @param ml Manifold length (m)
+   * @param ma Manifold area (m)
+  */
+  StackParam(
+      std::size_t num_c, double rho,
+      double asr, double ca,
+      double sl, double sa,
+      double ml, double ma);
+
   std::size_t numCells;
-  double asr;             // ASR (m2 Ohm)
-  double cellArea;        // Active area (m2)
-  double shuntLen;        // Shunt length (m)
-  double shuntArea;       // Shunt area (m2)
-  double maniLen;         // Manifold length (m)
-  double maniArea;        // Manifold area (m2)
-  double resistivity;     // Electrolyte resistivity (Ohm m-1)
+  double cellResist;      // Cell resistance (Ohm)
+  double shuntResist;     // Shunt resistance (Ohm)
+  double maniResist;      // Manifold resistance (Ohm)
 };
 
 

@@ -21,6 +21,7 @@ add_library(vrfblib SHARED
     include/private/shuntcur.hpp
 
     src/celleff.cpp
+    src/shuntcur.cpp
 )
 
 target_link_libraries(vrfblib PRIVATE Eigen3::Eigen)
