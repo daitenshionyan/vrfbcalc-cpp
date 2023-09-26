@@ -168,13 +168,13 @@ void checkMatrix(const Eigen::MatrixXd& expected, const Eigen::MatrixXd& actual)
 
 TEST(ShuntCurrent, StackMatrixForation01) {
   Eigen::MatrixXd actual = Eigen::Matrix<double, 17, 17>::Zero();
-  vrfb::shuntcur::fillMatrixStack(actual, param, 1);
+  vrfb::shuntcur::addStackLoops(actual, param, 1);
   checkMatrix(kExCurMat_Stack, actual);
 }
 
 
 TEST(ShuntCurrent, StackMatrixForation02) {
   Eigen::MatrixXd actual = Eigen::Matrix<double, 81, 81>::Zero();
-  vrfb::shuntcur::fillMatrixStack(actual, param, 5);
+  vrfb::shuntcur::addStackLoops(actual, param, 5);
   checkMatrix(kExCurMat_Sys, actual);
 }

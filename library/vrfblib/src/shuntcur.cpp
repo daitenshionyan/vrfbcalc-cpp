@@ -19,6 +19,37 @@ inline double calcChannelResist(double rho, double l, double a) {
 }
 
 
+// :::: [ Matrix Indexing Functions ] ::::::::::::::::::::::::::::::::::::::::::
+
+
+inline Eigen::Index indexSPT(
+      std::size_t si, std::size_t ci,
+      std::size_t num_s, std::size_t num_c) {
+  return ci +  si * (num_c - 1) + 1;
+}
+
+
+inline Eigen::Index indexSPB(
+      std::size_t si, std::size_t ci,
+      std::size_t num_s, std::size_t num_c) {
+  return ci + (si + num_s) * (num_c - 1) + 1;
+}
+
+
+inline Eigen::Index indexSNT(
+      std::size_t si, std::size_t ci,
+      std::size_t num_s, std::size_t num_c) {
+  return ci + (si + 2*num_s) * (num_c - 1);
+}
+
+
+inline Eigen::Index indexSNB(
+      std::size_t si, std::size_t ci,
+      std::size_t num_s, std::size_t num_c) {
+  return ci + (si + 3*num_s) * (num_c - 1);
+}
+
+
 }
 
 
@@ -34,7 +65,7 @@ StackParam::StackParam(
 }
 
 
-void fillMatrixStack(Eigen::MatrixXd& m, const StackParam& s, std::size_t num_s) {
+void addStackLoops(Eigen::MatrixXd& m, const StackParam& s, std::size_t num_s) {
   std::size_t totalCells = s.numCells * num_s;
 
   for (std::size_t si = 0; si < num_s; ++si) {
@@ -42,10 +73,10 @@ void fillMatrixStack(Eigen::MatrixXd& m, const StackParam& s, std::size_t num_s)
       // main loop
       m(0, 0) += s.cellResist;
 
-      Eigen::Index pti = ci +  si            * (s.numCells - 1) + 1;      // Positive top index
-      Eigen::Index pbi = ci + (si +   num_s) * (s.numCells - 1) + 1;      // Positive bottom index
-      Eigen::Index nti = ci + (si + 2*num_s) * (s.numCells - 1);          // Negative top index
-      Eigen::Index nbi = ci + (si + 3*num_s) * (s.numCells - 1);          // Negative bottom index
+      Eigen::Index pti = indexSPT(si, ci, num_s, s.numCells);
+      Eigen::Index pbi = indexSPB(si, ci, num_s, s.numCells);
+      Eigen::Index nti = indexSNT(si, ci, num_s, s.numCells);
+      Eigen::Index nbi = indexSNB(si, ci, num_s, s.numCells);
 
       if (ci+1 < s.numCells) {
         // main loop
@@ -119,31 +150,6 @@ void fillMatrixStack(Eigen::MatrixXd& m, const StackParam& s, std::size_t num_s)
         m(nbi, nti) = s.cellResist;
       }
     }
-  }
-}
-
-
-
-void fillMatrixConn_PF(Eigen::MatrixXd& m, const StackParam& s, std::size_t num_s, double csr, double cmr) {
-  for (std::size_t i = 0; i+1 < num_s; ++i) {
-    Eigen::Index sli = i + 4*s.numCells - 3;    // stack loop index in matrix
-
-    // main loop
-    m(0, sli) = s.cellResist*s.numCells;
-
-    // contribution to cell loops
-    Eigen::Index cellOff = i * 4*(s.numCells - 1) + 1;
-    for (std::size_t j = 0; j < 4*(s.numCells - 1); ++j) {
-      m(cellOff+j, sli) = s.cellResist;
-    }
-
-    if (i > 0) {
-      m(sli, sli-1) = -csr;
-    }
-
-    m(sli, sli) = s.numCells*s.cellResist + 2*csr + cmr;
-
-    m(sli, sli+1) = -csr;
   }
 }
 

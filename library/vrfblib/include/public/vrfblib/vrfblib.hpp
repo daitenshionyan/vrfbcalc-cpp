@@ -167,6 +167,15 @@ const std::vector<std::string> kShuntLossTableHdrs {
 // :::: [ Data structures ] ::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 
+/** Enum representing stack connection type. */
+enum class ConnType {
+  /** Common line front stack connection. */
+  ctComLineFront,
+  /** Common line back stack connection. */
+  ctComLineBack
+};
+
+
 /**
  * Structure contianing the parameters of the stacks in a system.
 */
@@ -192,6 +201,37 @@ struct StackParam {
   double cellResist;      // Cell resistance (Ohm)
   double shuntResist;     // Shunt resistance (Ohm)
   double maniResist;      // Manifold resistance (Ohm)
+};
+
+
+/**
+ * Structure containing the parameters of the stack connectors in a system.
+*/
+struct ConnParam {
+  /**
+   * Constructs a `ConnParam`.
+   *
+   * @param pt Positive top connector type.
+   * @param pb Positive bottom connector type.
+   * @param nt Negative top connector type.
+   * @param nb Negative botton connector type.
+   * @param sl Shunt length (m)
+   * @param sa Shunt area (m2)
+   * @param ml Manifold length (m)
+   * @param ma Manifold area (m2)
+  */
+  ConnParam(
+    ConnType pt, ConnType pb, ConnType nt, ConnType nb,
+    double sl, double sa,
+    double ml, double ma);
+
+  ConnType ptType;
+  ConnType pbType;
+  ConnType ntType;
+  ConnType nbType;
+
+  double shuntResist;   // Shunt resistance (Ohm)
+  double maniResist;    // Manifold resistance (Ohm)
 };
 
 
