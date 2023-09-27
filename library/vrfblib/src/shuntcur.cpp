@@ -65,6 +65,15 @@ StackParam::StackParam(
 }
 
 
+ConnParam::ConnParam(
+      double rho,
+      double sl, double sa,
+      double ml, double ma) {
+  shuntResist = calcChannelResist(rho, sl, sa);
+  maniResist = calcChannelResist(rho, ml, ma);
+}
+
+
 void addStackLoops(Eigen::MatrixXd& m, const StackParam& s, std::size_t num_s) {
   std::size_t totalCells = s.numCells * num_s;
 
@@ -148,6 +157,85 @@ void addStackLoops(Eigen::MatrixXd& m, const StackParam& s, std::size_t num_s) {
         // contribution from other side negative loops
         m(nti, nbi) = s.cellResist;
         m(nbi, nti) = s.cellResist;
+      }
+    }
+  }
+}
+
+
+
+void addConnLoops(Eigen::MatrixXd& m, const StackParam& s, const ConnParam& c, std::size_t num_s) {
+  for (std::size_t si = 0; si < num_s; ++si) {
+    Eigen::Index cpti = si                 + 4*num_s*(s.numCells - 1);
+    Eigen::Index cpbi = si +   (num_s - 1) + 4*num_s*(s.numCells - 1) + 1;
+    Eigen::Index cnti = si + 2*(num_s - 1) + 4*num_s*(s.numCells - 1);
+    Eigen::Index cnbi = si + 3*(num_s - 1) + 4*num_s*(s.numCells - 1) + 1;
+
+    if (si+1 < num_s) {
+      // contribution to main loop
+      m(0, cpbi) = s.numCells * s.cellResist;
+      m(0, cnbi) = s.numCells * s.cellResist;
+
+      // contribution to stack loops from shunts
+      m(indexSPB(si, 0, num_s, s.numCells), cpbi) += s.shuntResist;
+      m(indexSPB(si+1, 0, num_s, s.numCells), cpbi) += -s.shuntResist;
+      m(indexSNB(si, 1, num_s, s.numCells), cnbi) += s.shuntResist;
+      m(indexSNB(si+1, 1, num_s, s.numCells), cnbi) += -s.shuntResist;
+
+      // contribution to stack loops from cells
+      for (std::size_t ci = 0; ci+1 < s.numCells; ++ci) {
+        m(indexSPB(si, ci, num_s, s.numCells), cpbi) += s.cellResist;
+        m(indexSNB(si, ci, num_s, s.numCells), cnbi) += s.cellResist;
+      }
+
+      if (si > 0) {
+        // previous loop contribution
+        m(cpbi, cpbi-1) = -s.shuntResist - c.shuntResist;
+        m(cnbi, cnbi-1) = -s.shuntResist - c.shuntResist;
+      }
+
+      // current loop
+      m(cpbi, cpbi) = s.cellResist*s.numCells + 2*s.shuntResist + 2*c.shuntResist + c.maniResist;
+      m(cnbi, cnbi) = s.cellResist*s.numCells + 2*s.shuntResist + 2*c.shuntResist + c.maniResist;
+
+      if (si+2 < num_s) {
+        // next loop contribution
+        m(cpbi, cpbi+1) = -s.shuntResist - c.shuntResist;
+        m(cnbi, cnbi+1) = -s.shuntResist - c.shuntResist;
+      }
+    }
+
+    if (si > 0) {
+      // contribution to main loop
+      m(0, cpti) = s.numCells * s.cellResist;
+      m(0, cnti) = s.numCells * s.cellResist;
+
+      // contribution to stack loop ends
+      m(indexSPT(si, 0, num_s, s.numCells), cpti) += -s.shuntResist;
+      m(indexSPT(si+1, 0, num_s, s.numCells), cpti) += s.shuntResist;
+      m(indexSNT(si, 1, num_s, s.numCells), cnti) += -s.shuntResist;
+      m(indexSNT(si+1, 1, num_s, s.numCells), cnti) += s.shuntResist;
+
+      // contribution to stack loops from cells
+      for (std::size_t ci = 1; ci < s.numCells; ++ci) {
+        m(indexSPT(si, ci, num_s, s.numCells), cpti) += s.cellResist;
+        m(indexSNT(si, ci, num_s, s.numCells), cnti) += s.cellResist;
+      }
+
+      if (si > 1) {
+        // previous loop contribution
+        m(cpti, cpti-1) = -s.shuntResist - c.shuntResist;
+        m(cnti, cnti-1) = -s.shuntResist - c.shuntResist;
+      }
+
+      // current loop
+      m(cpti, cpti) = s.cellResist*s.numCells + 2*s.shuntResist + 2*c.shuntResist + c.maniResist;
+      m(cnti, cnti) = s.cellResist*s.numCells + 2*s.shuntResist + 2*c.shuntResist + c.maniResist;
+
+      if (si+1 < num_s) {
+        // next loop contribution
+        m(cpti, cpti+1) = -s.shuntResist - c.shuntResist;
+        m(cnti, cnti+1) = -s.shuntResist - c.shuntResist;
       }
     }
   }

@@ -211,24 +211,16 @@ struct ConnParam {
   /**
    * Constructs a `ConnParam`.
    *
-   * @param pt Positive top connector type.
-   * @param pb Positive bottom connector type.
-   * @param nt Negative top connector type.
-   * @param nb Negative botton connector type.
+   * @param rho Reistivity of electrolyte (Ohm / m)
    * @param sl Shunt length (m)
    * @param sa Shunt area (m2)
    * @param ml Manifold length (m)
    * @param ma Manifold area (m2)
   */
   ConnParam(
-    ConnType pt, ConnType pb, ConnType nt, ConnType nb,
+    double rho,
     double sl, double sa,
     double ml, double ma);
-
-  ConnType ptType;
-  ConnType pbType;
-  ConnType ntType;
-  ConnType nbType;
 
   double shuntResist;   // Shunt resistance (Ohm)
   double maniResist;    // Manifold resistance (Ohm)
