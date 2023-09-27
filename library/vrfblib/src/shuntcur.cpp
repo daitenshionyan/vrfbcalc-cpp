@@ -237,6 +237,25 @@ void addConnLoops(Eigen::MatrixXd& m, const StackParam& s, const ConnParam& c, s
         m(cpti, cpti+1) = -s.shuntResist - c.shuntResist;
         m(cnti, cnti+1) = -s.shuntResist - c.shuntResist;
       }
+
+      // ~~~~ [ POSITIVE TOP CONTRIBUTION ] ~~~~
+      // to positive bottom
+      m(cpbi-1, cpti) = s.cellResist;
+      if (si > 1) {
+        m(cpbi-1, cpti-1) = (s.numCells-1) * s.cellResist;
+      }
+
+      // to negative bottom
+      m(cnbi-1, cpti) = 2 * s.cellResist;
+      if (si > 1) {
+        m(cnbi-1, cpti-1) = (s.numCells-2) * s.cellResist;
+      }
+
+      // to negative top
+      m(cnti, cpti) = (s.numCells-1) * s.cellResist;
+      if (si+1 < num_s) {
+        m(cnti, cpti+1) = s.cellResist;
+      }
     }
   }
 }
