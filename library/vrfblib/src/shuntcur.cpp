@@ -9,6 +9,9 @@ namespace shuntcur {
 namespace {
 
 
+constexpr double kAvrOCV = 1.38;
+
+
 inline double calcCellResist(double asr, double area) {
   return asr / area;
 }
@@ -47,6 +50,30 @@ inline Eigen::Index indexSNB(
       std::size_t si, std::size_t ci,
       std::size_t num_s, std::size_t num_c) {
   return ci + (si + 3*num_s) * (num_c - 1);
+}
+
+
+inline Eigen::Index indexCPT(std::size_t si,
+      std::size_t num_s, std::size_t num_c) {
+  return si + 4*num_s*(num_c - 1);
+}
+
+
+inline Eigen::Index indexCPB(std::size_t si,
+      std::size_t num_s, std::size_t num_c) {
+  return si + (num_s - 1) + 4*num_s*(num_c - 1) + 1;
+}
+
+
+inline Eigen::Index indexCNT(std::size_t si,
+      std::size_t num_s, std::size_t num_c) {
+  return si + 2*(num_s - 1) + 4*num_s*(num_c - 1);
+}
+
+
+inline Eigen::Index indexCNB(std::size_t si,
+      std::size_t num_s, std::size_t num_c) {
+  return si + 3*(num_s - 1) + 4*num_s*(num_c - 1) + 1;
 }
 
 
@@ -166,10 +193,10 @@ void addStackLoops(Eigen::MatrixXd& m, const StackParam& s, std::size_t num_s) {
 
 void addConnLoops(Eigen::MatrixXd& m, const StackParam& s, const ConnParam& c, std::size_t num_s) {
   for (std::size_t si = 0; si < num_s; ++si) {
-    Eigen::Index cpti = si                 + 4*num_s*(s.numCells - 1);
-    Eigen::Index cpbi = si +   (num_s - 1) + 4*num_s*(s.numCells - 1) + 1;
-    Eigen::Index cnti = si + 2*(num_s - 1) + 4*num_s*(s.numCells - 1);
-    Eigen::Index cnbi = si + 3*(num_s - 1) + 4*num_s*(s.numCells - 1) + 1;
+    Eigen::Index cpti = indexCPT(si, num_s, s.numCells);
+    Eigen::Index cpbi = indexCPB(si, num_s, s.numCells);
+    Eigen::Index cnti = indexCNT(si, num_s, s.numCells);
+    Eigen::Index cnbi = indexCNB(si, num_s, s.numCells);
 
     if (si > 0) {
       // :::: [ POSITIVE TOP CONN ] ::::
@@ -414,6 +441,40 @@ void addConnLoops(Eigen::MatrixXd& m, const StackParam& s, const ConnParam& c, s
             m(cnbi, snbi+1) -= s.shuntResist;
           }
         }
+      }
+    }
+  }
+}
+
+
+
+
+
+
+void addSysVolt(Eigen::VectorXd& v, const StackParam&s, std::size_t num_s, double chgVolt) {
+  v(0) += chgVolt;
+  for (std::size_t si = 0; si < num_s; ++si) {
+    if (si > 0) {
+      v(indexCPT(si, num_s, s.numCells)) -= s.numCells * kAvrOCV;
+      v(indexCNT(si, num_s, s.numCells)) -= s.numCells * kAvrOCV;
+    }
+
+    if (si+1 < num_s) {
+      v(indexCPB(si, num_s, s.numCells)) -= s.numCells * kAvrOCV;
+      v(indexCNB(si, num_s, s.numCells)) -= s.numCells * kAvrOCV;
+    }
+
+    for (std::size_t ci = 0; ci < s.numCells; ++ci) {
+      v(0) -= kAvrOCV;
+
+      if (ci+1 < s.numCells) {
+        v(indexSPT(si, ci, num_s, s.numCells)) -= kAvrOCV;
+        v(indexSPB(si, ci, num_s, s.numCells)) -= kAvrOCV;
+      }
+
+      if (ci > 0) {
+        v(indexSNT(si, ci, num_s, s.numCells)) -= kAvrOCV;
+        v(indexSNB(si, ci, num_s, s.numCells)) -= kAvrOCV;
       }
     }
   }

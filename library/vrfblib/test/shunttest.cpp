@@ -13,25 +13,27 @@
 namespace {
 
 
-constexpr double kExCellResist = 1;
-constexpr double kExShuntResist = 2;
-constexpr double kExManiResist = 3;
-constexpr double kExConShuntResist = 4;
-constexpr double kExConManiResist = 5;
+constexpr double kTestChgVolt = 35;
+
+constexpr double kTestCellResist = 1;
+constexpr double kTestShuntResist = 2;
+constexpr double kTestManiResist = 3;
+constexpr double kTestConShuntResist = 4;
+constexpr double kTestConManiResist = 5;
 
 
 const vrfb::shuntcur::StackParam param {
   5, 1,
-  kExCellResist, 1,
-  kExShuntResist, 1,
-  kExManiResist, 1
+  kTestCellResist, 1,
+  kTestShuntResist, 1,
+  kTestManiResist, 1
 };
 
 
 const vrfb::shuntcur::ConnParam paramCon {
   1,
-  kExConShuntResist, 1,
-  kExConManiResist, 1
+  kTestConShuntResist, 1,
+  kTestConManiResist, 1
 };
 
 
@@ -253,6 +255,18 @@ const Eigen::Matrix<double, 97, 97> kExCurMat_5S_Sys {
 };
 
 
+const Eigen::Vector<double, 97> kExVoltVec_5S_Sys {
+  kTestChgVolt-34.5,
+  -1.38, -1.38, -1.38, -1.38, -1.38, -1.38, -1.38, -1.38, -1.38, -1.38, -1.38, -1.38, -1.38, -1.38, -1.38, -1.38, -1.38, -1.38, -1.38, -1.38,
+  -1.38, -1.38, -1.38, -1.38, -1.38, -1.38, -1.38, -1.38, -1.38, -1.38, -1.38, -1.38, -1.38, -1.38, -1.38, -1.38, -1.38, -1.38, -1.38, -1.38,
+  -1.38, -1.38, -1.38, -1.38, -1.38, -1.38, -1.38, -1.38, -1.38, -1.38, -1.38, -1.38, -1.38, -1.38, -1.38, -1.38, -1.38, -1.38, -1.38, -1.38,
+  -1.38, -1.38, -1.38, -1.38, -1.38, -1.38, -1.38, -1.38, -1.38, -1.38, -1.38, -1.38, -1.38, -1.38, -1.38, -1.38, -1.38, -1.38, -1.38, -1.38,
+  -6.9, -6.9, -6.9, -6.9,
+  -6.9, -6.9, -6.9, -6.9,
+  -6.9, -6.9, -6.9, -6.9,
+  -6.9, -6.9, -6.9, -6.9
+};
+
 
 void checkMatrix(const Eigen::MatrixXd& expected, const Eigen::MatrixXd& actual) {
   bool is_same_dim = (expected.rows() == actual.rows()) && (expected.cols() == actual.cols());
@@ -301,4 +315,11 @@ TEST(ShuntCurrent, StackMatrixFormation03) {
   vrfb::shuntcur::addStackLoops(actual, param, 5);
   vrfb::shuntcur::addConnLoops(actual, param, paramCon, 5);
   checkMatrix(kExCurMat_5S_Sys, actual);
+}
+
+
+TEST(ShuntCurrent, VoltVecFormation) {
+  Eigen::VectorXd actual = Eigen::Vector<double, 97>::Zero();
+  vrfb::shuntcur::addSysVolt(actual, param, 5, kTestChgVolt);
+  checkMatrix(kExVoltVec_5S_Sys, actual);
 }
