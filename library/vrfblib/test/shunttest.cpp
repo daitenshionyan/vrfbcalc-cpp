@@ -9,6 +9,8 @@
 #include "vrfblib/vrfblib.hpp"
 #include "shuntcur.hpp"
 
+#include <iostream>
+
 
 namespace {
 
@@ -268,6 +270,35 @@ const Eigen::Vector<double, 97> kExVoltVec_5S_Sys {
 };
 
 
+const std::vector<double> kExCellCurr_5S_Sys {
+  4.102282966,
+  1.669684845,
+  1.225735371,
+  1.216611385,
+  1.610378933,
+  1.103789883,
+  0.245124676,
+  0.101702666,
+  0.171546818,
+  0.699111662,
+  0.619726983,
+  0.020276904,
+  -0.071946185,
+  0.020276904,
+  0.619726983,
+  0.699111662,
+  0.171546818,
+  0.101702666,
+  0.245124676,
+  1.103789883,
+  1.610378933,
+  1.216611385,
+  1.225735371,
+  1.669684845,
+  4.102282966
+};
+
+
 void checkMatrix(const Eigen::MatrixXd& expected, const Eigen::MatrixXd& actual) {
   bool is_same_dim = (expected.rows() == actual.rows()) && (expected.cols() == actual.cols());
   ASSERT_TRUE(is_same_dim) << "Wrong dimensions"
@@ -322,4 +353,16 @@ TEST(ShuntCurrent, VoltVecFormation) {
   Eigen::VectorXd actual = Eigen::Vector<double, 97>::Zero();
   vrfb::shuntcur::addSysVolt(actual, param, 5, kTestChgVolt);
   checkMatrix(kExVoltVec_5S_Sys, actual);
+}
+
+
+TEST(ShuntCurrent, ShuntCalcFF) {
+  vrfb::shuntcur::CommonLineFrontCalc calc {param, 5, paramCon};
+  auto result = calc.calculate(kTestChgVolt);
+  for (std::size_t i = 0; i < kExCellCurr_5S_Sys.size(); ++i) {
+    bool is_same = std::abs(result.cellCurr(i) - kExCellCurr_5S_Sys[i]) < 0.001;
+    EXPECT_TRUE(is_same) << "At (" << i << ")"
+        << " - Expected: " <<  kExCellCurr_5S_Sys[i]
+        << " | Actual: " << result.cellCurr(i);
+  }
 }

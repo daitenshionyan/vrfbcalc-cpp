@@ -116,52 +116,8 @@ namespace shuntcur { // ==== namespace <vrfb::shuntcur> ========================
 
 
 constexpr std::string_view kCellNumHdr         = "Cell No.";
-
 constexpr std::string_view kCellCurHdr         = "Cell Current (A)";
-constexpr std::string_view kShuntPosTopCurHdr  = "SPT Current (A)";
-constexpr std::string_view kShuntPosBotCurHdr  = "SPB Current (A)";
-constexpr std::string_view kShuntNegTopCurHdr  = "SNT Current (A)";
-constexpr std::string_view kShuntNegBotCurHdr  = "SNB Current (A)";
-constexpr std::string_view kManiPosTopCurHdr   = "MPT Current (A)";
-constexpr std::string_view kManiPosBotCurHdr   = "MPB Current (A)";
-constexpr std::string_view kManiNegTopCurHdr   = "MNT Current (A)";
-constexpr std::string_view kManiNegBotCurHdr   = "MNB Current (A)";
-
 constexpr std::string_view kCellPowHdr         = "Cell Power (W)";
-constexpr std::string_view kShuntPosTopPowHdr  = "SPT Power (W)";
-constexpr std::string_view kShuntPosBotPowHdr  = "SPB Power (W)";
-constexpr std::string_view kShuntNegTopPowHdr  = "SNT Power (W)";
-constexpr std::string_view kShuntNegBotPowHdr  = "SNB Power (W)";
-constexpr std::string_view kManiPosTopPowHdr   = "MPT Power (W)";
-constexpr std::string_view kManiPosBotPowHdr   = "MPB Power (W)";
-constexpr std::string_view kManiNegTopPowHdr   = "MNT Power (W)";
-constexpr std::string_view kManiNegBotPowHdr   = "MNB Power (W)";
-
-
-/** Output shunt current calculation headers. */
-const std::vector<std::string> kShuntLossTableHdrs {
-  std::string(kCellNumHdr),
-
-  std::string(kCellCurHdr),
-  std::string(kShuntPosTopCurHdr),
-  std::string(kShuntPosBotCurHdr),
-  std::string(kShuntNegTopCurHdr),
-  std::string(kShuntNegBotCurHdr),
-  std::string(kManiPosTopCurHdr),
-  std::string(kManiPosBotCurHdr),
-  std::string(kManiNegTopCurHdr),
-  std::string(kManiNegBotCurHdr),
-
-  std::string(kCellPowHdr),
-  std::string(kShuntPosTopPowHdr),
-  std::string(kShuntPosBotPowHdr),
-  std::string(kShuntNegTopPowHdr),
-  std::string(kShuntNegBotPowHdr),
-  std::string(kManiPosTopPowHdr),
-  std::string(kManiPosBotPowHdr),
-  std::string(kManiNegTopPowHdr),
-  std::string(kManiNegBotPowHdr)
-};
 
 
 // :::: [ Data structures ] ::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -227,6 +183,44 @@ struct ConnParam {
 };
 
 
+// :::: [ ShuntPerf ] ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+
+class ShuntPerf {
+  public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
+    ShuntPerf(double cc, double cv, const std::vector<double>& clist);
+    ShuntPerf(double cc, double cv, std::vector<double>&& clist);
+
+    ShuntPerf(const ShuntPerf&) = default;
+    ShuntPerf(ShuntPerf&&) = default;
+
+    ShuntPerf& operator=(ShuntPerf&) = default;
+    ShuntPerf& operator=(ShuntPerf&&) = default;
+
+    ~ShuntPerf() = default;
+
+
+  public: // ~~~~ accessors ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    inline double chargingCurr() const {return chgCurr;}
+    inline double chargingVolt() const {return chgVolt;}
+    inline double chargingPowr() const {return chgCurr*chgVolt;}
+
+    inline std::size_t numCells() const {return currs.size();}
+
+    inline double cellCurr(std::size_t i) const {return currs.at(i);}
+    inline double cellPowr(std::size_t i) const {return currs.at(i);}
+    inline double totalPowr() const {return totPowr;}
+
+
+  private: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    double chgCurr;
+    double chgVolt;
+    double totPowr;
+    std::vector<double> currs;
+    std::vector<double> powrs;
+};
+
+
 // :::: [ ShuntCalc ] ::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 
@@ -249,7 +243,7 @@ class ShuntCalc {
      * @param chgVolt The charging voltage (V). Negative value for constant
      *    voltage discharging.
     */
-    virtual comutils::Table calculate(double chgVolt) = 0;
+    virtual ShuntPerf calculate(double chgVolt) const = 0;
 
 
   protected: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -263,23 +257,17 @@ class ShuntCalc {
 class CommonLineFrontCalc : public ShuntCalc {
   public:
     CommonLineFrontCalc(const StackParam& s,
-        std::size_t num_s,
-        double csl, double csa,
-        double cml, double cma)
+        std::size_t num_s, ConnParam c)
         : ShuntCalc{s},
           numStacks{num_s},
-          conShuntLen{csl}, conShuntArea{csa},
-          conManiLen{cml}, conManiArea{cma} {}
+          conn{c} {}
 
-    comutils::Table calculate(double chgVolt) override;
+    ShuntPerf calculate(double chgVolt) const override;
 
 
   private:
     std::size_t numStacks;
-    double conShuntLen;
-    double conShuntArea;
-    double conManiLen;
-    double conManiArea;
+    ConnParam conn;
 };
 
 

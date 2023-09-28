@@ -1,6 +1,8 @@
 #include "vrfblib/vrfblib.hpp"
 #include "shuntcur.hpp"
 
+#include <utility>
+#include <iostream>
 
 namespace vrfb {
 namespace shuntcur {
@@ -22,7 +24,13 @@ inline double calcChannelResist(double rho, double l, double a) {
 }
 
 
-// :::: [ Matrix Indexing Functions ] ::::::::::::::::::::::::::::::::::::::::::
+/*
+********************************************************************************
+**
+**    Indexing functions
+**
+********************************************************************************
+*/
 
 
 inline Eigen::Index indexSPT(
@@ -80,6 +88,15 @@ inline Eigen::Index indexCNB(std::size_t si,
 }
 
 
+/*
+********************************************************************************
+**
+**    Data Structure Definition
+**
+********************************************************************************
+*/
+
+
 StackParam::StackParam(
       std::size_t num_c, double rho,
       double asr, double ca,
@@ -99,6 +116,104 @@ ConnParam::ConnParam(
   shuntResist = calcChannelResist(rho, sl, sa);
   maniResist = calcChannelResist(rho, ml, ma);
 }
+
+
+/*
+********************************************************************************
+**
+**    ShuntPerf Definition
+**
+********************************************************************************
+*/
+
+
+ShuntPerf::ShuntPerf(double cc, double cv, const std::vector<double>& clist)
+    : chgCurr{cc}, chgVolt{cv}, currs{clist} {
+  for (double c : currs) {
+    powrs.push_back(c*kAvrOCV);
+    totPowr += c*kAvrOCV;
+  }
+}
+
+
+ShuntPerf::ShuntPerf(double cc, double cv, std::vector<double>&& clist)
+    : chgCurr{cc}, chgVolt{cv}, currs{std::move(clist)} {
+  for (double c : currs) {
+    powrs.push_back(c*kAvrOCV);
+    totPowr += c*kAvrOCV;
+  }
+}
+
+
+/*
+********************************************************************************
+**
+**    CommonLineFrontCalc Definition
+**
+********************************************************************************
+*/
+
+
+ShuntPerf CommonLineFrontCalc::calculate(double chgVolt) const {
+  std::size_t size = 1 + 4*numStacks*(stack.numCells - 1) + 4*(numStacks - 1);
+  Eigen::MatrixXd m = Eigen::MatrixXd::Zero(size, size);
+  addStackLoops(m, stack, numStacks);
+  addConnLoops(m, stack, conn, numStacks);
+  Eigen::VectorXd voltVec = Eigen::VectorXd::Zero(size);
+  addSysVolt(voltVec, stack, numStacks, chgVolt);
+  Eigen::VectorXd curVec = m.colPivHouseholderQr().solve(voltVec);
+
+  std::vector<double> clist {};
+  for (std::size_t si = 0; si < numStacks; ++si) {
+    for (std::size_t ci = 0; ci < stack.numCells; ++ci) {
+      double cpt = 0;
+      if (si > 0 && ci+1 < stack.numCells) {
+        cpt = curVec(indexCPT(si, numStacks, stack.numCells));
+      } else if (si+1 < numStacks && ci+1 == stack.numCells) {
+        cpt = curVec(indexCPT(si, numStacks, stack.numCells) + 1);
+      }
+
+      double cpb = 0;
+      if (si+1 < numStacks) {
+        cpb = curVec(indexCPB(si, numStacks, stack.numCells));
+      }
+
+      double cnt = 0;
+      if (si > 0) {
+        cnt = curVec(indexCNT(si, numStacks, stack.numCells));
+      }
+
+      double cnb = 0;
+      if (si > 0 && ci == 0) {
+        cnb = curVec(indexCNB(si, numStacks, stack.numCells) - 1);
+      } else if (si+1 < numStacks && ci > 0) {
+        cnb = curVec(indexCNB(si, numStacks, stack.numCells));
+      }
+
+      double spt = (ci+1 < stack.numCells)
+          ? curVec(indexSPT(si, ci, numStacks, stack.numCells)) : 0;
+      double spb = (ci+1 < stack.numCells)
+          ? curVec(indexSPB(si, ci, numStacks, stack.numCells)) : 0;
+      double snt = (ci > 0)
+          ? curVec(indexSNT(si, ci, numStacks, stack.numCells)) : 0;
+      double snb = (ci > 0)
+          ? curVec(indexSNB(si, ci, numStacks, stack.numCells)) : 0;
+
+      clist.push_back(curVec(0) + spt + spb + snt + snb + cpt + cpb + cnt + cnb);
+    }
+  }
+
+  return {curVec(0), chgVolt, clist};
+}
+
+
+/*
+********************************************************************************
+**
+**    addStackLoops Definition
+**
+********************************************************************************
+*/
 
 
 void addStackLoops(Eigen::MatrixXd& m, const StackParam& s, std::size_t num_s) {
@@ -188,6 +303,15 @@ void addStackLoops(Eigen::MatrixXd& m, const StackParam& s, std::size_t num_s) {
     }
   }
 }
+
+
+/*
+********************************************************************************
+**
+**    addConnLoops Definition
+**
+********************************************************************************
+*/
 
 
 
@@ -447,8 +571,13 @@ void addConnLoops(Eigen::MatrixXd& m, const StackParam& s, const ConnParam& c, s
 }
 
 
-
-
+/*
+********************************************************************************
+**
+**    addSysVolt Definition
+**
+********************************************************************************
+*/
 
 
 void addSysVolt(Eigen::VectorXd& v, const StackParam&s, std::size_t num_s, double chgVolt) {
