@@ -344,7 +344,7 @@ TEST(ShuntCurrent, StackMatrixForation02) {
 TEST(ShuntCurrent, StackMatrixFormation03) {
   Eigen::MatrixXd actual = Eigen::Matrix<double, 97, 97>::Zero();
   vrfb::shuntcur::addStackLoops(actual, param, 5);
-  vrfb::shuntcur::addConnLoops(actual, param, paramCon, 5);
+  vrfb::shuntcur::addConnLoops_FF(actual, param, paramCon, 5);
   checkMatrix(kExCurMat_5S_Sys, actual);
 }
 

@@ -61,27 +61,51 @@ inline Eigen::Index indexSNB(
 }
 
 
-inline Eigen::Index indexCPT(std::size_t si,
+inline Eigen::Index indexCPT_F(std::size_t si,
       std::size_t num_s, std::size_t num_c) {
   return si + 4*num_s*(num_c - 1);
 }
 
 
-inline Eigen::Index indexCPB(std::size_t si,
+inline Eigen::Index indexCPB_F(std::size_t si,
       std::size_t num_s, std::size_t num_c) {
   return si + (num_s - 1) + 4*num_s*(num_c - 1) + 1;
 }
 
 
-inline Eigen::Index indexCNT(std::size_t si,
+inline Eigen::Index indexCNT_F(std::size_t si,
       std::size_t num_s, std::size_t num_c) {
   return si + 2*(num_s - 1) + 4*num_s*(num_c - 1);
 }
 
 
-inline Eigen::Index indexCNB(std::size_t si,
+inline Eigen::Index indexCNB_F(std::size_t si,
       std::size_t num_s, std::size_t num_c) {
   return si + 3*(num_s - 1) + 4*num_s*(num_c - 1) + 1;
+}
+
+
+inline Eigen::Index indexCPT_B(std::size_t si,
+      std::size_t num_s, std::size_t num_c) {
+  return si + 4*num_s*(num_c - 1) + 1;
+}
+
+
+inline Eigen::Index indexCPB_B(std::size_t si,
+      std::size_t num_s, std::size_t num_c) {
+  return si + (num_s - 1) + 4*num_s*(num_c - 1);
+}
+
+
+inline Eigen::Index indexCNT_B(std::size_t si,
+      std::size_t num_s, std::size_t num_c) {
+  return si + 2*(num_s - 1) + 4*num_s*(num_c - 1) + 1;
+}
+
+
+inline Eigen::Index indexCNB_B(std::size_t si,
+      std::size_t num_s, std::size_t num_c) {
+  return si + 3*(num_s - 1) + 4*num_s*(num_c - 1);
 }
 
 
@@ -158,7 +182,7 @@ ShuntPerf CommonLineFrontCalc::calculate(double chgVolt) const {
   std::size_t size = 1 + 4*numStacks*(stack.numCells - 1) + 4*(numStacks - 1);
   Eigen::MatrixXd m = Eigen::MatrixXd::Zero(size, size);
   addStackLoops(m, stack, numStacks);
-  addConnLoops(m, stack, conn, numStacks);
+  addConnLoops_FF(m, stack, conn, numStacks);
   Eigen::VectorXd voltVec = Eigen::VectorXd::Zero(size);
   addSysVolt(voltVec, stack, numStacks, chgVolt);
   Eigen::VectorXd curVec = m.colPivHouseholderQr().solve(voltVec);
@@ -168,26 +192,26 @@ ShuntPerf CommonLineFrontCalc::calculate(double chgVolt) const {
     for (std::size_t ci = 0; ci < stack.numCells; ++ci) {
       double cpt = 0;
       if (si > 0 && ci+1 < stack.numCells) {
-        cpt = curVec(indexCPT(si, numStacks, stack.numCells));
+        cpt = curVec(indexCPT_F(si, numStacks, stack.numCells));
       } else if (si+1 < numStacks && ci+1 == stack.numCells) {
-        cpt = curVec(indexCPT(si, numStacks, stack.numCells) + 1);
+        cpt = curVec(indexCPT_F(si, numStacks, stack.numCells) + 1);
       }
 
       double cpb = 0;
       if (si+1 < numStacks) {
-        cpb = curVec(indexCPB(si, numStacks, stack.numCells));
+        cpb = curVec(indexCPB_F(si, numStacks, stack.numCells));
       }
 
       double cnt = 0;
       if (si > 0) {
-        cnt = curVec(indexCNT(si, numStacks, stack.numCells));
+        cnt = curVec(indexCNT_F(si, numStacks, stack.numCells));
       }
 
       double cnb = 0;
       if (si > 0 && ci == 0) {
-        cnb = curVec(indexCNB(si, numStacks, stack.numCells) - 1);
+        cnb = curVec(indexCNB_F(si, numStacks, stack.numCells) - 1);
       } else if (si+1 < numStacks && ci > 0) {
-        cnb = curVec(indexCNB(si, numStacks, stack.numCells));
+        cnb = curVec(indexCNB_F(si, numStacks, stack.numCells));
       }
 
       double spt = (ci+1 < stack.numCells)
@@ -308,19 +332,19 @@ void addStackLoops(Eigen::MatrixXd& m, const StackParam& s, std::size_t num_s) {
 /*
 ********************************************************************************
 **
-**    addConnLoops Definition
+**    addConnLoops_FF Definition
 **
 ********************************************************************************
 */
 
 
 
-void addConnLoops(Eigen::MatrixXd& m, const StackParam& s, const ConnParam& c, std::size_t num_s) {
+void addConnLoops_FF(Eigen::MatrixXd& m, const StackParam& s, const ConnParam& c, std::size_t num_s) {
   for (std::size_t si = 0; si < num_s; ++si) {
-    Eigen::Index cpti = indexCPT(si, num_s, s.numCells);
-    Eigen::Index cpbi = indexCPB(si, num_s, s.numCells);
-    Eigen::Index cnti = indexCNT(si, num_s, s.numCells);
-    Eigen::Index cnbi = indexCNB(si, num_s, s.numCells);
+    Eigen::Index cpti = indexCPT_F(si, num_s, s.numCells);
+    Eigen::Index cpbi = indexCPB_F(si, num_s, s.numCells);
+    Eigen::Index cnti = indexCNT_F(si, num_s, s.numCells);
+    Eigen::Index cnbi = indexCNB_F(si, num_s, s.numCells);
 
     if (si > 0) {
       // :::: [ POSITIVE TOP CONN ] ::::
@@ -584,13 +608,13 @@ void addSysVolt(Eigen::VectorXd& v, const StackParam&s, std::size_t num_s, doubl
   v(0) += chgVolt;
   for (std::size_t si = 0; si < num_s; ++si) {
     if (si > 0) {
-      v(indexCPT(si, num_s, s.numCells)) -= s.numCells * kAvrOCV;
-      v(indexCNT(si, num_s, s.numCells)) -= s.numCells * kAvrOCV;
+      v(indexCPT_F(si, num_s, s.numCells)) -= s.numCells * kAvrOCV;
+      v(indexCNT_F(si, num_s, s.numCells)) -= s.numCells * kAvrOCV;
     }
 
     if (si+1 < num_s) {
-      v(indexCPB(si, num_s, s.numCells)) -= s.numCells * kAvrOCV;
-      v(indexCNB(si, num_s, s.numCells)) -= s.numCells * kAvrOCV;
+      v(indexCPB_F(si, num_s, s.numCells)) -= s.numCells * kAvrOCV;
+      v(indexCNB_F(si, num_s, s.numCells)) -= s.numCells * kAvrOCV;
     }
 
     for (std::size_t ci = 0; ci < s.numCells; ++ci) {
