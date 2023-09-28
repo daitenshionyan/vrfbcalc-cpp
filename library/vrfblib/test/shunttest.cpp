@@ -13,7 +13,7 @@
 namespace {
 
 
-constexpr double kTestChgVolt = 35;
+constexpr double kTestChgVolt = 60;
 
 constexpr double kTestCellResist = 1;
 constexpr double kTestShuntResist = 2;
