@@ -488,17 +488,13 @@ void addConnLoops_FF(Eigen::MatrixXd& m, const StackParam& s, const ConnParam& c
       Eigen::Index snbi = indexSNB(si, ci, num_s, s.numCells);
 
       if (si > 0) {
+        // :::: [ POSITIVE STACK LOOPS ] ::::
         if (ci+1 < s.numCells) {
+          // >>> POSITIVE TOP CONN
           m(spti, cpti) += s.cellResist;
           m(cpti, spti) += s.cellResist;
           m(spbi, cpti) += s.cellResist;
           m(cpti, spbi) += s.cellResist;
-
-          m(spti, cnti) += s.cellResist;
-          m(cnti, spti) += s.cellResist;
-          m(spbi, cnti) += s.cellResist;
-          m(cnti, spbi) += s.cellResist;
-
           if (ci == 0) {
             m(spti-1, cpti) -= s.shuntResist;
             m(cpti, spti-1) -= s.shuntResist;
@@ -507,31 +503,31 @@ void addConnLoops_FF(Eigen::MatrixXd& m, const StackParam& s, const ConnParam& c
             m(spti, cpti) += s.shuntResist;
             m(cpti, spti) += s.shuntResist;
           }
+
+          // >>> NEGATIVE TOP CONN
+          m(spti, cnti) += s.cellResist;
+          m(cnti, spti) += s.cellResist;
+          m(spbi, cnti) += s.cellResist;
+          m(cnti, spbi) += s.cellResist;
         }
 
+        // :::: [ NEGATIVE STACK LOOPS ] ::::
         if (ci > 0) {
-          if (ci+1 < s.numCells) {
-            m(snti, cpti) += s.cellResist;
-            m(cpti, snti) += s.cellResist;
-            m(snbi, cpti) += s.cellResist;
-            m(cpti, snbi) += s.cellResist;
-          }
+          // POSITIVE TOP CONN
+          m(snti-1, cpti) += s.cellResist;
+          m(cpti, snti-1) += s.cellResist;
+          m(snbi-1, cpti) += s.cellResist;
+          m(cpti, snbi-1) += s.cellResist;
 
+          // NEGATIVE TOP CONN
           m(snti, cnti) += s.cellResist;
           m(cnti, snti) += s.cellResist;
           m(snbi, cnti) += s.cellResist;
           m(cnti, snbi) += s.cellResist;
-
           if (ci == 1) {
-            m(snti-1, cpti) += s.cellResist;
-            m(cpti, snti-1) += s.cellResist;
-            m(snbi-1, cpti) += s.cellResist;
-            m(cpti, snbi-1) += s.cellResist;
-
             m(snti-1, cnti) -= s.shuntResist;
             m(cnti, snti-1) -= s.shuntResist;
           }
-
           if (ci+1 == num_s) {
             m(snti, cnti) += s.shuntResist;
             m(cnti, snti) += s.shuntResist;
@@ -540,45 +536,42 @@ void addConnLoops_FF(Eigen::MatrixXd& m, const StackParam& s, const ConnParam& c
       }
 
       if (si+1 < num_s) {
+        // :::: [ POSITIVE STACK LOOPS ] ::::
         if (ci+1 < s.numCells) {
+          // >>> POSITIVE BOT CONN
           m(spti, cpbi) += s.cellResist;
           m(cpbi, spti) += s.cellResist;
           m(spbi, cpbi) += s.cellResist;
           m(cpbi, spbi) += s.cellResist;
-
-          if (ci > 0) {
-            m(spti, cnbi) += s.cellResist;
-            m(cnbi, spti) += s.cellResist;
-            m(spbi, cnbi) += s.cellResist;
-            m(cnbi, spbi) += s.cellResist;
-          }
-
           if (ci == 0) {
             m(spbi, cpbi) += s.shuntResist;
             m(cpbi, spbi) += s.shuntResist;
           }
           if (ci+2 == s.numCells) {
-            m(spti+1, cnbi) += s.cellResist;
-            m(cnbi, spti+1) += s.cellResist;
-            m(spbi+1, cnbi) += s.cellResist;
-            m(cnbi, spbi+1) += s.cellResist;
-
             m(spbi+1, cpbi) -= s.shuntResist;
             m(cpbi, spbi+1) -= s.shuntResist;
           }
+
+          // NEGATIVE BOT CONN
+          m(spti+1, cnbi) += s.cellResist;
+          m(cnbi, spti+1) += s.cellResist;
+          m(spbi+1, cnbi) += s.cellResist;
+          m(cnbi, spbi+1) += s.cellResist;
         }
 
+        // :::: [ NEGATIVE STACK LOOPS ] ::::
         if (ci > 0) {
+          // >>> POSITIVE BOT CONN
           m(snti, cpbi) += s.cellResist;
           m(cpbi, snti) += s.cellResist;
           m(snbi, cpbi) += s.cellResist;
           m(cpbi, snbi) += s.cellResist;
 
+          // >>> NEGATIVE BOT CONN
           m(snti, cnbi) += s.cellResist;
           m(cnbi, snti) += s.cellResist;
           m(snbi, cnbi) += s.cellResist;
           m(cnbi, snbi) += s.cellResist;
-
           if (ci == 1) {
             m(snbi, cnbi) += s.shuntResist;
             m(cnbi, snbi) += s.shuntResist;
@@ -608,8 +601,8 @@ void addConnLoops_FB(Eigen::MatrixXd& m, const StackParam& s, const ConnParam& c
   for (std::size_t si = 0; si < num_s; ++si) {
     Eigen::Index cpti = indexCPT_F(si, num_s, s.numCells);
     Eigen::Index cpbi = indexCPB_F(si, num_s, s.numCells);
-    Eigen::Index cnti = indexCNT_F(si, num_s, s.numCells);
-    Eigen::Index cnbi = indexCNB_F(si, num_s, s.numCells);
+    Eigen::Index cnti = indexCNT_B(si, num_s, s.numCells);
+    Eigen::Index cnbi = indexCNB_B(si, num_s, s.numCells);
 
     if (si > 0) {
       // :::: [ POSITIVE TOP CONN ] ::::
@@ -633,50 +626,49 @@ void addConnLoops_FB(Eigen::MatrixXd& m, const StackParam& s, const ConnParam& c
       }
 
       // >>> NEGATIVE TOP CONN
-      m(cpti, cnti) += (s.numCells-1) * s.cellResist;
-      if (si > 1) {
-        m(cpti, cnti-1) += s.cellResist;
+      m(cpti, cnti-1) += 2*s.cellResist;
+      if (si+1 < num_s) {
+        m(cpti, cnti) += (s.numCells-2) * s.cellResist;
       }
 
       // >>> NEGATIVE BOT CONN
-      m(cpti, cnbi-1) = 2*s.cellResist;
-      if (si+1 < num_s) {
-        m(cpti, cnbi) += (s.numCells-2) * s.cellResist;
+      m(cpti, cnbi) = (s.numCells-1) * s.cellResist;
+      if (si > 1) {
+        m(cpti, cnbi-1) += s.cellResist;
       }
 
 
       // :::: [ NEGATIVE BOT CONN ] ::::
       // >>> MAIN LOOP
-      m(cnti, 0) += s.numCells * s.cellResist;
-      m(0, cnti) += s.numCells * s.cellResist;
+      m(cnbi, 0) += s.numCells * s.cellResist;
+      m(0, cnbi) += s.numCells * s.cellResist;
 
       // >>> POSITIVE TOP CONN
-      m(cnti, cpti) += (s.numCells-1) * s.cellResist;
+      m(cnbi, cpti) += (s.numCells-1) * s.cellResist;
       if (si+1 < num_s) {
-        m(cnti, cpti+1) += s.cellResist;
+        m(cnbi, cpti+1) += s.cellResist;
       }
 
       // >>> POSITIVE BOT CONN
       if (si+1 < num_s) {
-        m(cnti, cpbi) += s.numCells * s.cellResist;
+        m(cnbi, cpbi) += s.numCells * s.cellResist;
       }
 
       // >>> NEGATIVE TOP CONN
-      m(cnti, cnti) += 2*s.shuntResist + 2*c.shuntResist + s.numCells*s.cellResist + c.maniResist;
-      if (si > 1) {
-        m(cnti, cnti-1) -= s.shuntResist + c.shuntResist;
-      }
+      m(cnbi, cnti-1) += s.cellResist;
       if (si+1 < num_s) {
-        m(cnti, cnti+1) -= s.shuntResist + c.shuntResist;
+        m(cnbi, cnti) += (s.numCells-1) * s.cellResist;
       }
 
-      // >> NEGATIVE BOT CONN
-      m(cnti, cnbi-1) += s.cellResist;
+      // >>> NEGATIVE BOT CONN
+      m(cnbi, cnbi) += 2*s.shuntResist + 2*c.shuntResist + s.numCells*s.cellResist + c.maniResist;
+      if (si > 1) {
+        m(cnbi, cnbi-1) -= s.shuntResist + c.shuntResist;
+      }
       if (si+1 < num_s) {
-        m(cnti, cnbi) += (s.numCells-1) * s.cellResist;
+        m(cnbi, cnbi+1) -= s.shuntResist + c.shuntResist;
       }
     }
-
 
 
     if (si+1 < num_s) {
@@ -701,47 +693,47 @@ void addConnLoops_FB(Eigen::MatrixXd& m, const StackParam& s, const ConnParam& c
       }
 
       // >>> NEGATIVE TOP CONN
+      m(cpbi, cnti) += (s.numCells-1) * s.cellResist;
       if (si > 0) {
-        m(cpbi, cnti) += s.numCells * s.cellResist;
+        m(cpbi, cnti-1) += s.cellResist;
       }
 
       // >>> NEGATIVE BOT CONN
-      m(cpbi, cnbi) += (s.numCells-1) * s.cellResist;
       if (si > 0) {
-        m(cpbi, cnbi-1) += s.cellResist;
+        m(cpbi, cnbi) += s.numCells * s.cellResist;
       }
 
 
-      // :::: [ NEGATIVE BOT CONN ] ::::
+      // :::: [ NEGATIVE TOP CONN ] ::::
       // >>> MAIN LOOP
-      m(cnbi, 0) += s.numCells * s.cellResist;
-      m(0, cnbi) += s.numCells * s.cellResist;
+      m(cnti, 0) += s.numCells * s.cellResist;
+      m(0, cnti) += s.numCells * s.cellResist;
 
       // >>> POSITIVE TOP CONN
-      m(cnbi, cpti+1) += 2*s.cellResist;
+      m(cnti, cpti+1) += 2*s.cellResist;
       if (si > 0) {
-        m(cnbi, cpti) += (s.numCells-2) * s.cellResist;
+        m(cnti, cpti) += (s.numCells-2) * s.cellResist;
       }
 
       // >>> POSITIVE BOT CONN
-      m(cnbi, cpbi) += (s.numCells-1) * s.cellResist;
+      m(cnti, cpbi) += (s.numCells-1) * s.cellResist;
       if (si+2 < num_s) {
-        m(cnbi, cpbi+1) += s.cellResist;
+        m(cnti, cpbi+1) += s.cellResist;
       }
 
       // >>> NEGATIVE TOP CONN
-      m(cnbi, cnti+1) += s.cellResist;
+      m(cnti, cnti) += 2*s.shuntResist + 2*c.shuntResist + s.numCells*s.cellResist + c.maniResist;
       if (si > 0) {
-        m(cnbi, cnti) += (s.numCells-1) * s.cellResist;
+        m(cnti, cnti-1) -= s.shuntResist + c.shuntResist;
+      }
+      if (si+2 < num_s) {
+        m(cnti, cnti+1) -= s.shuntResist + c.shuntResist;
       }
 
       // >>> NEGATIVE BOT CONN
-      m(cnbi, cnbi) += 2*s.shuntResist + 2*c.shuntResist + s.numCells*s.cellResist + c.maniResist;
+      m(cnti, cnbi+1) += s.cellResist;
       if (si > 0) {
-        m(cnbi, cnbi-1) -= s.shuntResist + c.shuntResist;
-      }
-      if (si+2 < num_s) {
-        m(cnbi, cnbi+1) -= s.shuntResist + c.shuntResist;
+        m(cnti, cnbi) += (s.numCells-1) * s.cellResist;
       }
     }
 
@@ -754,17 +746,13 @@ void addConnLoops_FB(Eigen::MatrixXd& m, const StackParam& s, const ConnParam& c
       Eigen::Index snbi = indexSNB(si, ci, num_s, s.numCells);
 
       if (si > 0) {
+        // :::: [ POSITIVE STACK LOOPS ] ::::
         if (ci+1 < s.numCells) {
+          // >>> POSITIVE TOP CONN
           m(spti, cpti) += s.cellResist;
           m(cpti, spti) += s.cellResist;
           m(spbi, cpti) += s.cellResist;
           m(cpti, spbi) += s.cellResist;
-
-          m(spti, cnti) += s.cellResist;
-          m(cnti, spti) += s.cellResist;
-          m(spbi, cnti) += s.cellResist;
-          m(cnti, spbi) += s.cellResist;
-
           if (ci == 0) {
             m(spti-1, cpti) -= s.shuntResist;
             m(cpti, spti-1) -= s.shuntResist;
@@ -773,85 +761,83 @@ void addConnLoops_FB(Eigen::MatrixXd& m, const StackParam& s, const ConnParam& c
             m(spti, cpti) += s.shuntResist;
             m(cpti, spti) += s.shuntResist;
           }
+
+          // >>> NEGATIVE BOT CONN
+          m(spbi, cnbi) += s.cellResist;
+          m(cnbi, spbi) += s.cellResist;
+          m(spti, cnbi) += s.cellResist;
+          m(cnbi, spti) += s.cellResist;
         }
 
+        // :::: [ NEGATIVE STACK LOOPS ] ::::
         if (ci > 0) {
-          if (ci+1 < s.numCells) {
-            m(snti, cpti) += s.cellResist;
-            m(cpti, snti) += s.cellResist;
-            m(snbi, cpti) += s.cellResist;
-            m(cpti, snbi) += s.cellResist;
-          }
+          // >>> POSITIVE TOP CONN
+          m(snti-1, cpti) += s.cellResist;
+          m(cpti, snti-1) += s.cellResist;
+          m(snbi-1, cpti) += s.cellResist;
+          m(cpti, snbi-1) += s.cellResist;
 
-          m(snti, cnti) += s.cellResist;
-          m(cnti, snti) += s.cellResist;
-          m(snbi, cnti) += s.cellResist;
-          m(cnti, snbi) += s.cellResist;
-
+          // >>> NEGATIVE BOT CONN
+          m(snti, cnbi) += s.cellResist;
+          m(cnbi, snti) += s.cellResist;
+          m(snbi, cnbi) += s.cellResist;
+          m(cnbi, snbi) += s.cellResist;
           if (ci == 1) {
-            m(snti-1, cpti) += s.cellResist;
-            m(cpti, snti-1) += s.cellResist;
-            m(snbi-1, cpti) += s.cellResist;
-            m(cpti, snbi-1) += s.cellResist;
-
-            m(snti-1, cnti) -= s.shuntResist;
-            m(cnti, snti-1) -= s.shuntResist;
+            m(snbi-1, cnbi) -= s.shuntResist;
+            m(cnbi, snbi-1) -= s.shuntResist;
           }
-
-          if (ci+1 == num_s) {
-            m(snti, cnti) += s.shuntResist;
-            m(cnti, snti) += s.shuntResist;
+          if (ci+1 == s.numCells) {
+            m(snbi, cnbi) += s.shuntResist;
+            m(cnbi, snbi) += s.shuntResist;
           }
         }
       }
 
+
       if (si+1 < num_s) {
+        // :::: [ POSITIVE STACK LOOPS ] ::::
         if (ci+1 < s.numCells) {
+          // >>> POSITIVE BOT CONN
           m(spti, cpbi) += s.cellResist;
           m(cpbi, spti) += s.cellResist;
           m(spbi, cpbi) += s.cellResist;
           m(cpbi, spbi) += s.cellResist;
 
-          if (ci > 0) {
-            m(spti, cnbi) += s.cellResist;
-            m(cnbi, spti) += s.cellResist;
-            m(spbi, cnbi) += s.cellResist;
-            m(cnbi, spbi) += s.cellResist;
-          }
-
-          if (ci == 0) {
+          // >>> NEGATTIVE TOP CONN
+          m(spti+1, cnti) += s.cellResist;
+          m(cnti, spti+1) += s.cellResist;
+          m(spbi+1, cnti) += s.cellResist;
+          m(cnti, spbi+1) += s.cellResist;
+          if(ci == 0) {
             m(spbi, cpbi) += s.shuntResist;
             m(cpbi, spbi) += s.shuntResist;
           }
-          if (ci+2 == s.numCells) {
-            m(spti+1, cnbi) += s.cellResist;
-            m(cnbi, spti+1) += s.cellResist;
-            m(spbi+1, cnbi) += s.cellResist;
-            m(cnbi, spbi+1) += s.cellResist;
-
+          if (ci+2 == num_s) {
             m(spbi+1, cpbi) -= s.shuntResist;
             m(cpbi, spbi+1) -= s.shuntResist;
           }
         }
 
+        // :::: [ NEGATIVE STACK LOOPS ] ::::
         if (ci > 0) {
+          // >>> POSITIVE BOT CONN
           m(snti, cpbi) += s.cellResist;
           m(cpbi, snti) += s.cellResist;
           m(snbi, cpbi) += s.cellResist;
           m(cpbi, snbi) += s.cellResist;
 
-          m(snti, cnbi) += s.cellResist;
-          m(cnbi, snti) += s.cellResist;
-          m(snbi, cnbi) += s.cellResist;
-          m(cnbi, snbi) += s.cellResist;
-
+          // >>> NEGATIVE TOP CONN
+          m(snti, cnti) += s.cellResist;
+          m(cnti, snti) += s.cellResist;
+          m(snbi, cnti) += s.cellResist;
+          m(cnti, snbi) += s.cellResist;
           if (ci == 1) {
-            m(snbi, cnbi) += s.shuntResist;
-            m(cnbi, snbi) += s.shuntResist;
+            m(snti, cnti) += s.shuntResist;
+            m(cnti, snti) += s.shuntResist;
           }
           if (ci+1 == num_s) {
-            m(snbi+1, cnbi) -= s.shuntResist;
-            m(cnbi, snbi+1) -= s.shuntResist;
+            m(snti+1, cnti) -= s.shuntResist;
+            m(cnti, snti+1) -= s.shuntResist;
           }
         }
       }
