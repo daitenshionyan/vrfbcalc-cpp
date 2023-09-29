@@ -61,24 +61,32 @@ TEST(ShuntCurrent, StackMatrixFormation03) {
   Eigen::MatrixXd actual = Eigen::Matrix<double, 97, 97>::Zero();
   vrfb::shuntcur::addStackLoops(actual, shunttest::kTestStackParam, 5);
   vrfb::shuntcur::addConnLoops_FF(actual, shunttest::kTestStackParam, shunttest::kTestConnParam, 5);
-  checkMatrix(shunttest::kExCurMat_5S_Sys, actual);
+  checkMatrix(shunttest::kExCurMat_5S_Sys_FF, actual);
+}
+
+
+TEST(ShuntCurrent, StackMatrixFormation04) {
+  Eigen::MatrixXd actual = Eigen::Matrix<double, 97, 97>::Zero();
+  vrfb::shuntcur::addStackLoops(actual, shunttest::kTestStackParam, 5);
+  vrfb::shuntcur::addConnLoops_FB(actual, shunttest::kTestStackParam, shunttest::kTestConnParam, 5);
+  checkMatrix(shunttest::kExCurMat_5S_Sys_FB, actual);
 }
 
 
 TEST(ShuntCurrent, VoltVecFormation) {
   Eigen::VectorXd actual = Eigen::Vector<double, 97>::Zero();
   vrfb::shuntcur::addSysVolt(actual, shunttest::kTestStackParam, 5, shunttest::kTestChgVolt);
-  checkMatrix(shunttest::kExVoltVec_5S_Sys, actual);
+  checkMatrix(shunttest::kExVoltVec_5S_Sys_FF, actual);
 }
 
 
 TEST(ShuntCurrent, ShuntCalcFF) {
   vrfb::shuntcur::CommonLineFrontCalc calc {shunttest::kTestStackParam, 5, shunttest::kTestConnParam};
   auto result = calc.calculate(shunttest::kTestChgVolt);
-  for (std::size_t i = 0; i < shunttest::kExCellCurr_5S_Sys.size(); ++i) {
-    bool is_same = std::abs(result.cellCurr(i) - shunttest::kExCellCurr_5S_Sys[i]) < 0.001;
+  for (std::size_t i = 0; i < shunttest::kExCellCurr_5S_Sys_FF.size(); ++i) {
+    bool is_same = std::abs(result.cellCurr(i) - shunttest::kExCellCurr_5S_Sys_FF[i]) < 0.001;
     EXPECT_TRUE(is_same) << "At (" << i << ")"
-        << " - Expected: " <<  shunttest::kExCellCurr_5S_Sys[i]
+        << " - Expected: " <<  shunttest::kExCellCurr_5S_Sys_FF[i]
         << " | Actual: " << result.cellCurr(i);
   }
 }
