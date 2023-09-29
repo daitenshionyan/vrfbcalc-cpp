@@ -2,7 +2,6 @@
 #include "shuntcur.hpp"
 
 #include <utility>
-#include <iostream>
 
 namespace vrfb {
 namespace shuntcur {
