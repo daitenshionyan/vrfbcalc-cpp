@@ -10,6 +10,9 @@
 namespace shunttest {
 
 
+constexpr std::size_t kTestNumCells = 5;
+constexpr std::size_t kTestNumStacks = 5;
+
 constexpr double kTestChgVolt = 60;
 
 constexpr double kTestCellResist = 1;
@@ -20,7 +23,7 @@ constexpr double kTestConManiResist = 5;
 
 
 const vrfb::shuntcur::StackParam kTestStackParam {
-  5, 1,
+  kTestNumCells, 1,
   kTestCellResist, 1,
   kTestShuntResist, 1,
   kTestManiResist, 1

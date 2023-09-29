@@ -12,11 +12,12 @@
 #include "shuntcur.hpp"
 
 
-namespace {
+namespace { // ==== namespace <UNNAMED> ========================================
 
 
 void checkMatrix(const Eigen::MatrixXd& expected, const Eigen::MatrixXd& actual) {
-  bool is_same_dim = (expected.rows() == actual.rows()) && (expected.cols() == actual.cols());
+  bool is_same_dim = (expected.rows() == actual.rows())
+      && (expected.cols() == actual.cols());
   ASSERT_TRUE(is_same_dim) << "Wrong dimensions"
       << " - Expected dimentions: " << expected.rows() << " x " << expected.cols()
       << " | Actual dimentions: " << actual.rows() << " x " << actual.cols();
@@ -40,53 +41,77 @@ void checkMatrix(const Eigen::MatrixXd& expected, const Eigen::MatrixXd& actual)
 }
 
 
-}
+} // ---- namespace <UNNAMED>
+// namespace <GLOBAL>
 
 
-TEST(ShuntCurrent, StackMatrixForation01) {
+TEST(vrfbSC, addStackLoops5C1S) {
   Eigen::MatrixXd actual = Eigen::Matrix<double, 17, 17>::Zero();
   vrfb::shuntcur::addStackLoops(actual, shunttest::kTestStackParam, 1);
   checkMatrix(shunttest::kExCurMat_1S, actual);
 }
 
 
-TEST(ShuntCurrent, StackMatrixForation02) {
+TEST(vrfbSC, addStackLoops5C5S) {
   Eigen::MatrixXd actual = Eigen::Matrix<double, 81, 81>::Zero();
-  vrfb::shuntcur::addStackLoops(actual, shunttest::kTestStackParam, 5);
+  vrfb::shuntcur::addStackLoops(actual,
+      shunttest::kTestStackParam,
+      shunttest::kTestNumStacks);
   checkMatrix(shunttest::kExCurMat_5S, actual);
 }
 
 
-TEST(ShuntCurrent, StackMatrixFormation03) {
+TEST(vrfbSC, addConnLoops5C5SFF) {
   Eigen::MatrixXd actual = Eigen::Matrix<double, 97, 97>::Zero();
-  vrfb::shuntcur::addStackLoops(actual, shunttest::kTestStackParam, 5);
-  vrfb::shuntcur::addConnLoops_FF(actual, shunttest::kTestStackParam, shunttest::kTestConnParam, 5);
+  vrfb::shuntcur::addStackLoops(actual,
+      shunttest::kTestStackParam,
+      shunttest::kTestNumStacks);
+  vrfb::shuntcur::addConnLoops_FF(actual,
+      shunttest::kTestStackParam,
+      shunttest::kTestConnParam,
+      shunttest::kTestNumStacks);
   checkMatrix(shunttest::kExCurMat_5S_Sys_FF, actual);
 }
 
 
-TEST(ShuntCurrent, StackMatrixFormation04) {
+TEST(vrfbSC, addConnLoops5C5SFB) {
   Eigen::MatrixXd actual = Eigen::Matrix<double, 97, 97>::Zero();
-  vrfb::shuntcur::addStackLoops(actual, shunttest::kTestStackParam, 5);
-  vrfb::shuntcur::addConnLoops_FB(actual, shunttest::kTestStackParam, shunttest::kTestConnParam, 5);
+  vrfb::shuntcur::addStackLoops(actual,
+      shunttest::kTestStackParam,
+      shunttest::kTestNumStacks);
+  vrfb::shuntcur::addConnLoops_FB(actual,
+      shunttest::kTestStackParam,
+      shunttest::kTestConnParam,
+      shunttest::kTestNumStacks);
   checkMatrix(shunttest::kExCurMat_5S_Sys_FB, actual);
 }
 
 
-TEST(ShuntCurrent, VoltVecFormation) {
+TEST(vrfbSC, addSysVolt) {
   Eigen::VectorXd actual = Eigen::Vector<double, 97>::Zero();
-  vrfb::shuntcur::addSysVolt(actual, shunttest::kTestStackParam, 5, shunttest::kTestChgVolt);
+  vrfb::shuntcur::addSysVolt(actual,
+      shunttest::kTestStackParam,
+      shunttest::kTestNumStacks,
+      shunttest::kTestChgVolt);
   checkMatrix(shunttest::kExVoltVec_5S_Sys_FF, actual);
 }
 
 
-TEST(ShuntCurrent, ShuntCalcFF) {
-  vrfb::shuntcur::CommonLineFrontCalc calc {shunttest::kTestStackParam, 5, shunttest::kTestConnParam};
+TEST(vrfbSC, calculateFF) {
+  vrfb::shuntcur::CommonLineFrontCalc calc {
+      shunttest::kTestStackParam,
+      shunttest::kTestNumStacks,
+      shunttest::kTestConnParam};
   auto result = calc.calculate(shunttest::kTestChgVolt);
+  bool is_same = true;
+  std::stringstream ss {};
   for (std::size_t i = 0; i < shunttest::kExCellCurr_5S_Sys_FF.size(); ++i) {
-    bool is_same = std::abs(result.cellCurr(i) - shunttest::kExCellCurr_5S_Sys_FF[i]) < 0.001;
-    EXPECT_TRUE(is_same) << "At (" << i << ")"
+    if (std::abs(result.cellCurr(i) - shunttest::kExCellCurr_5S_Sys_FF[i]) > 0.001) {
+      is_same = false;
+      ss << "At (" << i << ")"
         << " - Expected: " <<  shunttest::kExCellCurr_5S_Sys_FF[i]
-        << " | Actual: " << result.cellCurr(i);
+        << " | Actual: " << result.cellCurr(i) << "\n";
+    }
   }
+  ASSERT_TRUE(is_same) << "Difference:\n" << ss.str();
 }
