@@ -108,6 +108,63 @@ inline Eigen::Index indexCNB_B(std::size_t si,
 }
 
 
+/*
+********************************************************************************
+**
+**    Current calculation functions
+**
+********************************************************************************
+*/
+
+
+double calcStackContri(const Eigen::VectorXd& cv,
+      std::size_t si, std::size_t ci,
+      std::size_t num_s, std::size_t num_c) {
+  double result = 0;
+  if (ci+1 < num_c) {
+    result += cv(indexSPT(si, ci, num_s, num_c))
+        + cv(indexSPB(si, ci, num_s, num_c));
+  }
+  if (ci > 0) {
+    result += cv(indexSNT(si, ci, num_s, num_c))
+        + cv(indexSNB(si, ci, num_s, num_c));
+  }
+  return result;
+}
+
+
+double calcLoopContri_PF(const Eigen::VectorXd& cv,
+      std::size_t si, std::size_t ci,
+      std::size_t num_s, std::size_t num_c) {
+  double result = 0;
+  if (si > 0 && ci+1 < num_c) {
+    result += cv(indexCPT_F(si, num_s, num_c));
+  } else if (si+1 < num_s && ci+1 == num_c) {
+    result += cv(indexCPT_F(si, num_s, num_c) + 1);
+  }
+  if (si+1 < num_s) {
+    result += cv(indexCPB_F(si, num_s, num_c));
+  }
+  return result;
+}
+
+
+double calcLoopContri_NF(const Eigen::VectorXd& cv,
+      std::size_t si, std::size_t ci,
+      std::size_t num_s, std::size_t num_c) {
+  double result = 0;
+  if (si > 0) {
+    result += cv(indexCNT_F(si, num_s, num_c));
+  }
+  if (si > 0 && ci == 0) {
+    result += cv(indexCNB_F(si, num_s, num_c) - 1);
+  } else if (si+1 < num_s && ci > 0) {
+    result += cv(indexCNB_F(si, num_s, num_c));
+  }
+  return result;
+}
+
+
 }
 
 
@@ -189,40 +246,10 @@ ShuntPerf CommonLineFrontCalc::calculate(double chgVolt) const {
   std::vector<double> clist {};
   for (std::size_t si = 0; si < numStacks; ++si) {
     for (std::size_t ci = 0; ci < stack.numCells; ++ci) {
-      double cpt = 0;
-      if (si > 0 && ci+1 < stack.numCells) {
-        cpt = curVec(indexCPT_F(si, numStacks, stack.numCells));
-      } else if (si+1 < numStacks && ci+1 == stack.numCells) {
-        cpt = curVec(indexCPT_F(si, numStacks, stack.numCells) + 1);
-      }
-
-      double cpb = 0;
-      if (si+1 < numStacks) {
-        cpb = curVec(indexCPB_F(si, numStacks, stack.numCells));
-      }
-
-      double cnt = 0;
-      if (si > 0) {
-        cnt = curVec(indexCNT_F(si, numStacks, stack.numCells));
-      }
-
-      double cnb = 0;
-      if (si > 0 && ci == 0) {
-        cnb = curVec(indexCNB_F(si, numStacks, stack.numCells) - 1);
-      } else if (si+1 < numStacks && ci > 0) {
-        cnb = curVec(indexCNB_F(si, numStacks, stack.numCells));
-      }
-
-      double spt = (ci+1 < stack.numCells)
-          ? curVec(indexSPT(si, ci, numStacks, stack.numCells)) : 0;
-      double spb = (ci+1 < stack.numCells)
-          ? curVec(indexSPB(si, ci, numStacks, stack.numCells)) : 0;
-      double snt = (ci > 0)
-          ? curVec(indexSNT(si, ci, numStacks, stack.numCells)) : 0;
-      double snb = (ci > 0)
-          ? curVec(indexSNB(si, ci, numStacks, stack.numCells)) : 0;
-
-      clist.push_back(curVec(0) + spt + spb + snt + snb + cpt + cpb + cnt + cnb);
+      clist.push_back(curVec(0)
+          + calcStackContri(curVec, si, ci, numStacks, stack.numCells)
+          + calcLoopContri_PF(curVec, si, ci, numStacks, stack.numCells)
+          + calcLoopContri_NF(curVec, si, ci, numStacks, stack.numCells));
     }
   }
 
