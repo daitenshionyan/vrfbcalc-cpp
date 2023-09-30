@@ -41,6 +41,26 @@ void checkMatrix(const Eigen::MatrixXd& expected, const Eigen::MatrixXd& actual)
 }
 
 
+void checkShuntPerf(const vrfb::shuntcur::ShuntPerf& expected, const vrfb::shuntcur::ShuntPerf& actual) {
+  bool is_same_size = expected.numCells() == actual.numCells();
+  ASSERT_TRUE(is_same_size) << "Wrong size"
+      << " - Expected size: " << expected.numCells()
+      << " | Actual size: " << actual.numCells();
+
+  bool is_same = true;
+  std::stringstream ss {};
+  for (std::size_t i = 0; i < expected.numCells(); ++i) {
+    if (std::abs(actual.cellCurr(i) - expected.cellCurr(i)) > 0.001) {
+      is_same = false;
+      ss << "At (" << i << ")"
+        << " - Expected: " <<  expected.cellCurr(i)
+        << " | Actual: " << actual.cellCurr(i) << "\n";
+    }
+  }
+  ASSERT_TRUE(is_same) << "Difference:\n" << ss.str();
+}
+
+
 } // ---- namespace <UNNAMED>
 // namespace <GLOBAL>
 
@@ -102,16 +122,6 @@ TEST(vrfbSC, calculateFF) {
       shunttest::kTestStackParam,
       shunttest::kTestNumStacks,
       shunttest::kTestConnParam};
-  auto result = calc.calculate(shunttest::kTestChgVolt);
-  bool is_same = true;
-  std::stringstream ss {};
-  for (std::size_t i = 0; i < shunttest::kExCellCurr_5S_Sys_FF.size(); ++i) {
-    if (std::abs(result.cellCurr(i) - shunttest::kExCellCurr_5S_Sys_FF[i]) > 0.001) {
-      is_same = false;
-      ss << "At (" << i << ")"
-        << " - Expected: " <<  shunttest::kExCellCurr_5S_Sys_FF[i]
-        << " | Actual: " << result.cellCurr(i) << "\n";
-    }
-  }
-  ASSERT_TRUE(is_same) << "Difference:\n" << ss.str();
+  auto actual = calc.calculate(shunttest::kTestChgVolt);
+  checkShuntPerf(shunttest::kExShuntPerf_5S_FF, actual);
 }

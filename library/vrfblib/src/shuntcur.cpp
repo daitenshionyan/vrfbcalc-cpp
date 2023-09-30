@@ -10,6 +10,15 @@ namespace shuntcur {
 namespace {
 
 
+/*
+********************************************************************************
+**
+**    Constants and equations
+**
+********************************************************************************
+*/
+
+
 constexpr double kAvrOCV = 1.38;
 
 
@@ -20,6 +29,11 @@ inline double calcCellResist(double asr, double area) {
 
 inline double calcChannelResist(double rho, double l, double a) {
   return (rho * l) / a;
+}
+
+
+inline std::size_t matSize(std::size_t num_s, std::size_t num_c) {
+  return 1 + 4*num_s*(num_c - 1) + 4*(num_s - 1);
 }
 
 
@@ -235,25 +249,7 @@ ShuntPerf::ShuntPerf(double cc, double cv, std::vector<double>&& clist)
 
 
 ShuntPerf CommonLineFrontCalc::calculate(double chgVolt) const {
-  std::size_t size = 1 + 4*numStacks*(stack.numCells - 1) + 4*(numStacks - 1);
-  Eigen::MatrixXd m = Eigen::MatrixXd::Zero(size, size);
-  addStackLoops(m, stack, numStacks);
-  addConnLoops_FF(m, stack, conn, numStacks);
-  Eigen::VectorXd voltVec = Eigen::VectorXd::Zero(size);
-  addSysVolt(voltVec, stack, numStacks, chgVolt);
-  Eigen::VectorXd curVec = m.colPivHouseholderQr().solve(voltVec);
-
-  std::vector<double> clist {};
-  for (std::size_t si = 0; si < numStacks; ++si) {
-    for (std::size_t ci = 0; ci < stack.numCells; ++ci) {
-      clist.push_back(curVec(0)
-          + calcStackContri(curVec, si, ci, numStacks, stack.numCells)
-          + calcLoopContri_PF(curVec, si, ci, numStacks, stack.numCells)
-          + calcLoopContri_NF(curVec, si, ci, numStacks, stack.numCells));
-    }
-  }
-
-  return {curVec(0), chgVolt, clist};
+  return calculate_FF(stack, conn, numStacks, chgVolt);
 }
 
 
@@ -909,6 +905,38 @@ void addSysVolt(Eigen::VectorXd& v, const StackParam&s, std::size_t num_s, doubl
       }
     }
   }
+}
+
+
+/*
+********************************************************************************
+**
+**    calculate_XX Definitions
+**
+********************************************************************************
+*/
+
+
+ShuntPerf calculate_FF(const StackParam& s, const ConnParam& c, std::size_t num_s, double chgVolt) {
+  std::size_t size = matSize(num_s, s.numCells);
+  Eigen::MatrixXd cm = Eigen::MatrixXd::Zero(size, size);   // current matrix
+  addStackLoops(cm, s, num_s);
+  addConnLoops_FF(cm, s, c, num_s);
+  Eigen::VectorXd vv = Eigen::VectorXd::Zero(size);         // volt vector
+  addSysVolt(vv, s, num_s, chgVolt);
+  Eigen::VectorXd cv = cm.colPivHouseholderQr().solve(vv);  // current vector
+
+  std::vector<double> clist {};
+  for (std::size_t si = 0; si < num_s; ++si) {
+    for (std::size_t ci = 0; ci < s.numCells; ++ci) {
+      clist.push_back(cv(0)
+          + calcStackContri(cv, si, ci, num_s, s.numCells)
+          + calcLoopContri_PF(cv, si, ci, num_s, s.numCells)
+          + calcLoopContri_NF(cv, si, ci, num_s, s.numCells));
+    }
+  }
+
+  return {cv(0), chgVolt, clist};
 }
 
 
