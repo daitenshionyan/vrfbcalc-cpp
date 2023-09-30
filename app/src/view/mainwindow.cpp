@@ -90,6 +90,7 @@ void MainWindow::startCalc_SC() {
       &pool,
       [&](QPromise<logger::LogMsg>& p) {
         auto w = PromLogger{p};
+        vrfbdriver::calcShuntPerf(popup_se->getJob(), w);
       }
   ));
 }

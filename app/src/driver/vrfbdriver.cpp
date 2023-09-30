@@ -4,6 +4,7 @@
 #include <filesystem>
 #include <stdexcept>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include "utillib/utils.hpp"
@@ -143,6 +144,15 @@ int calcCE(const std::string& name, const DataSet_CE& set_d, logger::Logger& log
 // namespace <vrfbdriver>
 
 
+/*
+********************************************************************************
+**
+**    Cell performance
+**
+********************************************************************************
+*/
+
+
 void calcCellEff(const SetSupplierVec_CE& ssv, logger::Logger& logger) {
   auto cfgGenRpt = toSetMap(ssv, logger);
   std::size_t num_err = cfgGenRpt.second;
@@ -182,6 +192,77 @@ std::vector<PerformanceEntry_CE> readPerformance_CE(
     }
   }
   return perfs;
+}
+
+
+/*
+********************************************************************************
+**
+**    Shunt current
+**
+********************************************************************************
+*/
+
+
+// ==== [ ShuntCalc Definition ] ===============================================
+
+
+ShuntJob::ShuntJob(const std::string& n, const vrfb::shuntcur::ShuntCalc& sc, double cv)
+    : name{n}, calc{sc.copy()}, chgVolt{cv} {}
+
+
+ShuntJob::ShuntJob(const std::string& n, vrfb::shuntcur::ShuntCalc* scp, double cv)
+    : name{n}, calc{scp}, chgVolt{cv} {}
+
+
+ShuntJob::ShuntJob(const ShuntJob& o)
+    : name{o.name}, calc{o.calc->copy()}, chgVolt{o.chgVolt} {}
+
+
+ShuntJob::ShuntJob(ShuntJob&& o)
+    : name{std::move(o.name)}, calc{o.calc}, chgVolt{o.chgVolt} {
+  o.calc = nullptr;
+}
+
+
+ShuntJob& ShuntJob::operator=(const ShuntJob& o) {
+  name = o.name;
+  delete calc;
+  calc = o.calc->copy();
+  chgVolt = o.chgVolt;
+  return *this;
+}
+
+
+ShuntJob& ShuntJob::operator=(ShuntJob&& o) {
+  name = std::move(o.name);
+  calc = o.calc;
+  o.calc = nullptr;
+  chgVolt = o.chgVolt;
+  return *this;
+}
+
+
+// ==== [ calcShuntPerf Definition ] ===========================================
+
+
+void calcShuntPerf(const ShuntJob& j, logger::Logger& l) {
+  auto beg = std::chrono::high_resolution_clock::now();
+  vrfb::shuntcur::ShuntPerf perf_c = j.calc->calculate(j.chgVolt);
+  auto dur1 = std::chrono::duration_cast<std::chrono::microseconds>(
+            std::chrono::high_resolution_clock::now() - beg);
+  l.info(comutils::string::format_string("Calculated charging performance in %.3fms",
+      dur1.count() / 1000.));
+  vrfb::shuntcur::ShuntPerf perf_d = j.calc->calculate(0);
+  auto dur2 = std::chrono::duration_cast<std::chrono::microseconds>(
+            std::chrono::high_resolution_clock::now() - beg);
+  l.info(comutils::string::format_string("Calculated discharging performance in %.3fms",
+      (dur2.count() - dur1.count()) / 1000.));
+  io::saveData_XLSX(std::filesystem::u8path<std::string>("output/" + j.name + ".xlsx"), perf_c, perf_d);
+  auto dur3 = std::chrono::duration_cast<std::chrono::microseconds>(
+            std::chrono::high_resolution_clock::now() - beg);
+  l.succ(comutils::string::format_string("Shunt performance calculation completed in %.3fms",
+      dur3.count() / 1000.));
 }
 
 

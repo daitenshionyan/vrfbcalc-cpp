@@ -39,4 +39,25 @@ void calcCellEff(const SetSupplierVec_CE&, logger::Logger&);
 std::vector<PerformanceEntry_CE> readPerformance_CE(const std::vector<std::string>&, logger::Logger&);
 
 
+struct ShuntJob {
+  ShuntJob(const std::string&, const vrfb::shuntcur::ShuntCalc&, double);
+  ShuntJob(const std::string&, vrfb::shuntcur::ShuntCalc*, double);
+
+  ShuntJob(const ShuntJob&);
+  ShuntJob(ShuntJob&&);
+
+  ShuntJob& operator=(const ShuntJob&);
+  ShuntJob& operator=(ShuntJob&&);
+
+  ~ShuntJob() {delete calc;}
+
+  std::string name;
+  vrfb::shuntcur::ShuntCalc* calc;
+  double chgVolt;
+};
+
+
+void calcShuntPerf(const ShuntJob&, logger::Logger&);
+
+
 }

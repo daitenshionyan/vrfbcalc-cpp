@@ -95,6 +95,19 @@ inline void initColMap(
 }
 
 
+void writeShuntPerf(xlnt::worksheet& ws, const vrfb::shuntcur::ShuntPerf& p) {
+  ws.cell(1, 1).value("Cell No.");
+  ws.cell(2, 1).value("Cell Current (A)");
+  ws.cell(3, 1).value("Cell Power (W)");
+
+  for (std::size_t i = 0; i < p.numCells(); ++i) {
+    ws.cell(1, i+2).value(i+1);
+    ws.cell(2, i+2).value(p.cellCurr(i));
+    ws.cell(3, i+2).value(p.cellPowr(i));
+  }
+}
+
+
 } // END OF NAMESPACE <vrfbdriver::io::UNNAMED> --------------------------------
 // namespace <vrfbdriver::io>
 
@@ -315,6 +328,42 @@ void saveData_XLSX(
     throw std::runtime_error(comutils::string::format_string(
         "Error occured while writing to '%s' (state = %d)",
         path.string().c_str(), ofs.exceptions()));
+  }
+}
+
+
+void saveData_XLSX(const std::filesystem::path& p,
+    const vrfb::shuntcur::ShuntPerf& perf_c,
+    const vrfb::shuntcur::ShuntPerf& perf_d) {
+  xlnt::workbook wb;
+
+  auto ws = wb.active_sheet();
+  ws.title("Summary");
+  ws.cell(1, 1).value("Charging voltage (V)");
+  ws.cell(2, 1).value(perf_c.chargingVolt());
+  ws.cell(1, 2).value("Charging current (A)");
+  ws.cell(2, 2).value(perf_c.chargingCurr());
+  ws.cell(1, 3).value("Charging power (W)");
+  ws.cell(2, 3).value(perf_c.chargingPowr());
+  ws.cell(1, 4).value("Total Cell Power (W)");
+  ws.cell(2, 4).value(perf_c.totalPowr());
+  ws.cell(1, 5).value("Energy efficiency (%)");
+  ws.cell(2, 5).value(perf_c.totalPowr()/perf_c.chargingPowr());
+
+  ws = wb.create_sheet();
+  ws.title("Charging");
+  writeShuntPerf(ws, perf_c);
+
+  ws = wb.create_sheet();
+  ws.title("Self Discharge");
+  writeShuntPerf(ws, perf_d);
+
+  std::ofstream ofs = comutils::io::openFile_w<std::ios_base::binary>(p);
+  wb.save(ofs);
+  if (!ofs.good()) {
+    throw std::runtime_error(comutils::string::format_string(
+        "Error occured while writing to '%s' (state = %d)",
+        p.string().c_str(), ofs.exceptions()));
   }
 }
 

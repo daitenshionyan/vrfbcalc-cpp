@@ -2,7 +2,7 @@
 
 #include <QDialog>
 
-#include "vrfblib/vrfblib.hpp"
+#include "driver/vrfbdriver.hpp"
 
 
 QT_BEGIN_NAMESPACE
@@ -19,6 +19,8 @@ class SCConfigPopup : public QDialog {
   public:
     SCConfigPopup(QWidget* parent);
     ~SCConfigPopup();
+
+    vrfbdriver::ShuntJob getJob();
 
 
   private:

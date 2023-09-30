@@ -199,14 +199,14 @@ class ShuntPerf {
     inline std::size_t numCells() const {return currs.size();}
 
     inline double cellCurr(std::size_t i) const {return currs.at(i);}
-    inline double cellPowr(std::size_t i) const {return currs.at(i);}
+    inline double cellPowr(std::size_t i) const {return powrs.at(i);}
     inline double totalPowr() const {return totPowr;}
 
 
   private: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     double chgCurr;
     double chgVolt;
-    double totPowr;
+    double totPowr = 0;
     std::vector<double> currs;
     std::vector<double> powrs;
 };
@@ -236,6 +236,11 @@ class ShuntCalc {
     */
     virtual ShuntPerf calculate(double chgVolt) const = 0;
 
+    /**
+     * Copies this instance of `ShuntCalc`.
+    */
+    virtual ShuntCalc* copy() const = 0;
+
 
   protected: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     StackParam stack;
@@ -256,7 +261,7 @@ class CommLineCalc : public ShuntCalc {
     };
 
 
-  public:
+  public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
     CommLineCalc(const StackParam& s,
         std::size_t num_s, ConnParam c,
         ConnType ct = ConnType::ctFB)
@@ -265,7 +270,19 @@ class CommLineCalc : public ShuntCalc {
           connType{ct},
           conn{c} {}
 
+    CommLineCalc(const CommLineCalc&) = default;
+    CommLineCalc(CommLineCalc&&) = default;
+
+    CommLineCalc& operator=(const CommLineCalc&) = default;
+    CommLineCalc& operator=(CommLineCalc&&) = default;
+
+    ~CommLineCalc() override = default;
+
+
+  public: // ~~~~ functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     ShuntPerf calculate(double chgVolt) const override;
+
+    CommLineCalc* copy() const override {return new CommLineCalc(*this);}
 
 
   private:
