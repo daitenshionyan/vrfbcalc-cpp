@@ -19,6 +19,7 @@ void addConnLoops_FB(Eigen::MatrixXd& m, const StackParam& s, const ConnParam& c
 void addSysVolt(Eigen::VectorXd& v, const StackParam&s, std::size_t num_s, double chgVolt);
 
 ShuntPerf calculate_FF(const StackParam& s, const ConnParam& c, std::size_t num_s, double chgVolt);
+ShuntPerf calculate_FB(const StackParam& s, const ConnParam& c, std::size_t num_s, double chgVolt);
 
 
 }

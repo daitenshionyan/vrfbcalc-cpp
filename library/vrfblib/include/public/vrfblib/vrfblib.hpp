@@ -123,15 +123,6 @@ constexpr std::string_view kCellPowHdr         = "Cell Power (W)";
 // :::: [ Data structures ] ::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 
-/** Enum representing stack connection type. */
-enum class ConnType {
-  /** Common line front stack connection. */
-  ctComLineFront,
-  /** Common line back stack connection. */
-  ctComLineBack
-};
-
-
 /**
  * Structure contianing the parameters of the stacks in a system.
 */
@@ -251,15 +242,27 @@ class ShuntCalc {
 };
 
 
-// :::: [ CommonLineFrontCalc ] ::::::::::::::::::::::::::::::::::::::::::::::::
+// :::: [ CommLineCalc ] ::::::::::::::::::::::::::::::::::::::::::::::::
 
 
-class CommonLineFrontCalc : public ShuntCalc {
+class CommLineCalc : public ShuntCalc {
   public:
-    CommonLineFrontCalc(const StackParam& s,
-        std::size_t num_s, ConnParam c)
+    /** Enum representing stack connection type. */
+    enum class ConnType {
+      /** Positive front, negative front. */
+      ctFF,
+      /** Positive front, negative back. */
+      ctFB
+    };
+
+
+  public:
+    CommLineCalc(const StackParam& s,
+        std::size_t num_s, ConnParam c,
+        ConnType ct = ConnType::ctFB)
         : ShuntCalc{s},
           numStacks{num_s},
+          connType{ct},
           conn{c} {}
 
     ShuntPerf calculate(double chgVolt) const override;
@@ -267,6 +270,7 @@ class CommonLineFrontCalc : public ShuntCalc {
 
   private:
     std::size_t numStacks;
+    ConnType connType;
     ConnParam conn;
 };
 
