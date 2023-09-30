@@ -11,63 +11,15 @@ namespace vrfb {
 namespace shuntcur {
 
 
-enum class Position {
-  kPosTop, kPosBot, kNegTop, kNegBot
-};
+void addStackLoops(Eigen::MatrixXd& m, const StackParam&, std::size_t num_s);
 
+void addConnLoops_FF(Eigen::MatrixXd& m, const StackParam& s, const ConnParam& c, std::size_t num_s);
+void addConnLoops_FB(Eigen::MatrixXd& m, const StackParam& s, const ConnParam& c, std::size_t num_s);
 
-class SystemParam {
-  public:
-    SystemParam(
-        const std::vector<std::vector<double>>& sr,
-        const std::vector<std::vector<double>>& mr,
-        const std::vector<double>& cr);
-    SystemParam(
-        std::vector<std::vector<double>>&& sr,
-        std::vector<std::vector<double>>&& mr,
-        std::vector<double>&& cr);
-    SystemParam(const comutils::Table&, const ResistConfig&);
+void addSysVolt(Eigen::VectorXd& v, const StackParam&s, std::size_t num_s, double chgVolt);
 
-    SystemParam(const SystemParam&) = default;
-    SystemParam(SystemParam&&) = default;
-
-    SystemParam& operator=(const SystemParam&) = default;
-    SystemParam& operator=(SystemParam&&) = default;
-
-    ~SystemParam() = default;
-
-    inline double getShuntResist(Position p, std::size_t i) const {
-      return shuntResists.at(static_cast<int>(p)).at(i);
-    }
-
-    inline double getManiResist(Position p, std::size_t i) const {
-      return maniResists.at(static_cast<int>(p)).at(i);
-    }
-
-    inline double getCellResist(std::size_t i) const {
-      return cellResists.at(i);
-    }
-
-    inline std::size_t numCells() const {
-      return cellResists.size();
-    }
-
-
-  private:
-    std::vector<std::vector<double>> shuntResists;
-    std::vector<std::vector<double>> maniResists;
-    std::vector<double> cellResists;
-};
-
-
-comutils::Table calcPerf(double chgVolt, const SystemParam&);
-comutils::Table calcPerf(const double chgVolt, const comutils::Table& table, const ResistConfig& cfg_r);
-
-
-Eigen::MatrixXd formCurrMat(const SystemParam& s);
-Eigen::VectorXd formVoltVec(double chgVolt, std::size_t numCells);
-
-Eigen::VectorXd calcCurrLoops(double chgVolt, const SystemParam& s);
+ShuntPerf calculate_FF(const StackParam& s, const ConnParam& c, std::size_t num_s, double chgVolt);
+ShuntPerf calculate_FB(const StackParam& s, const ConnParam& c, std::size_t num_s, double chgVolt);
 
 
 }

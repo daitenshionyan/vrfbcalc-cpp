@@ -116,163 +116,163 @@ namespace shuntcur { // ==== namespace <vrfb::shuntcur> ========================
 
 
 constexpr std::string_view kCellNumHdr         = "Cell No.";
-
 constexpr std::string_view kCellCurHdr         = "Cell Current (A)";
-constexpr std::string_view kShuntPosTopCurHdr  = "SPT Current (A)";
-constexpr std::string_view kShuntPosBotCurHdr  = "SPB Current (A)";
-constexpr std::string_view kShuntNegTopCurHdr  = "SNT Current (A)";
-constexpr std::string_view kShuntNegBotCurHdr  = "SNB Current (A)";
-constexpr std::string_view kManiPosTopCurHdr   = "MPT Current (A)";
-constexpr std::string_view kManiPosBotCurHdr   = "MPB Current (A)";
-constexpr std::string_view kManiNegTopCurHdr   = "MNT Current (A)";
-constexpr std::string_view kManiNegBotCurHdr   = "MNB Current (A)";
-
 constexpr std::string_view kCellPowHdr         = "Cell Power (W)";
-constexpr std::string_view kShuntPosTopPowHdr  = "SPT Power (W)";
-constexpr std::string_view kShuntPosBotPowHdr  = "SPB Power (W)";
-constexpr std::string_view kShuntNegTopPowHdr  = "SNT Power (W)";
-constexpr std::string_view kShuntNegBotPowHdr  = "SNB Power (W)";
-constexpr std::string_view kManiPosTopPowHdr   = "MPT Power (W)";
-constexpr std::string_view kManiPosBotPowHdr   = "MPB Power (W)";
-constexpr std::string_view kManiNegTopPowHdr   = "MNT Power (W)";
-constexpr std::string_view kManiNegBotPowHdr   = "MNB Power (W)";
 
 
-/** Output shunt current calculation headers. */
-const std::vector<std::string> kShuntLossTableHdrs {
-  std::string(kCellNumHdr),
-
-  std::string(kCellCurHdr),
-  std::string(kShuntPosTopCurHdr),
-  std::string(kShuntPosBotCurHdr),
-  std::string(kShuntNegTopCurHdr),
-  std::string(kShuntNegBotCurHdr),
-  std::string(kManiPosTopCurHdr),
-  std::string(kManiPosBotCurHdr),
-  std::string(kManiNegTopCurHdr),
-  std::string(kManiNegBotCurHdr),
-
-  std::string(kCellPowHdr),
-  std::string(kShuntPosTopPowHdr),
-  std::string(kShuntPosBotPowHdr),
-  std::string(kShuntNegTopPowHdr),
-  std::string(kShuntNegBotPowHdr),
-  std::string(kManiPosTopPowHdr),
-  std::string(kManiPosBotPowHdr),
-  std::string(kManiNegTopPowHdr),
-  std::string(kManiNegBotPowHdr)
-};
-
-
-// :::: [ Data structures and classes ] ::::::::::::::::::::::::::::::::::::::::
-
-
-/**
- * Structure contianing electric resistance configuration of a system.
-*/
-struct ResistConfig {
-  std::string asrHdr;
-
-  std::string shuntLengthPosTopHdr;
-  std::string shuntLengthPosBotHdr;
-  std::string shuntLengthNegTopHdr;
-  std::string shuntLengthNegBotHdr;
-  std::string shuntAreaPosTopHdr;
-  std::string shuntAreaPosBotHdr;
-  std::string shuntAreaNegTopHdr;
-  std::string shuntAreaNegBotHdr;
-
-  std::string maniLengthPosTopHdr;
-  std::string maniLengthPosBotHdr;
-  std::string maniLengthNegTopHdr;
-  std::string maniLengthNegBotHdr;
-  std::string maniAreaPosTopHdr;
-  std::string maniAreaPosBotHdr;
-  std::string maniAreaNegTopHdr;
-  std::string maniAreaNegBotHdr;
-
-  double resistivity;                 // Resistivity of electrolyte (Ohms m-1)
-  double area;                        // Active area (m2)
-};
-
-
-/** Class that manages the parameters of a cell stack system. */
-class SystemParam;
+// :::: [ Data structures ] ::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 
 /**
  * Structure contianing the parameters of the stacks in a system.
 */
 struct StackParam {
+  /**
+   * Constructs a `StackParam`.
+   *
+   * @param num_c Number of cells.
+   * @param rho Reistivity of electrolyte (Ohm / m)
+   * @param asr ASR of cells (m2 Ohm)
+   * @param sl Shunt length (m)
+   * @param sa Shunt area (m2)
+   * @param ml Manifold length (m)
+   * @param ma Manifold area (m)
+  */
+  StackParam(
+      std::size_t num_c, double rho,
+      double asr, double ca,
+      double sl, double sa,
+      double ml, double ma);
+
   std::size_t numCells;
-  double asr;             // ASR (m2 Ohm)
-  double cellArea;        // Active area (m2)
-  double shuntLen;        // Shunt length (m)
-  double shuntArea;       // Shunt area (m2)
-  double maniLen;         // Manifold length (m)
-  double maniArea;        // Manifold area (m2)
-  double resistivity;     // Electrolyte resistivity (Ohm m-1)
+  double cellResist;      // Cell resistance (Ohm)
+  double shuntResist;     // Shunt resistance (Ohm)
+  double maniResist;      // Manifold resistance (Ohm)
 };
 
 
 /**
- * A generator to generate `SystemParam` for shunt current calculations.
+ * Structure containing the parameters of the stack connectors in a system.
 */
-class ParamGenerator {
-  public:
-    ParamGenerator(StackParam param_s)
-        : stackParam{param_s} {}
+struct ConnParam {
+  /**
+   * Constructs a `ConnParam`.
+   *
+   * @param rho Reistivity of electrolyte (Ohm / m)
+   * @param sl Shunt length (m)
+   * @param sa Shunt area (m2)
+   * @param ml Manifold length (m)
+   * @param ma Manifold area (m2)
+  */
+  ConnParam(
+    double rho,
+    double sl, double sa,
+    double ml, double ma);
 
-    virtual ~ParamGenerator() = default;
+  double shuntResist;   // Shunt resistance (Ohm)
+  double maniResist;    // Manifold resistance (Ohm)
+};
 
+
+// :::: [ ShuntPerf ] ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+
+class ShuntPerf {
+  public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
+    ShuntPerf(double cc, double cv, const std::vector<double>& clist);
+    ShuntPerf(double cc, double cv, std::vector<double>&& clist);
+
+    ShuntPerf(const ShuntPerf&) = default;
+    ShuntPerf(ShuntPerf&&) = default;
+
+    ShuntPerf& operator=(ShuntPerf&) = default;
+    ShuntPerf& operator=(ShuntPerf&&) = default;
+
+    ~ShuntPerf() = default;
+
+
+  public: // ~~~~ accessors ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    inline double chargingCurr() const {return chgCurr;}
+    inline double chargingVolt() const {return chgVolt;}
+    inline double chargingPowr() const {return chgCurr*chgVolt;}
+
+    inline std::size_t numCells() const {return currs.size();}
+
+    inline double cellCurr(std::size_t i) const {return currs.at(i);}
+    inline double cellPowr(std::size_t i) const {return currs.at(i);}
+    inline double totalPowr() const {return totPowr;}
+
+
+  private: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    double chgCurr;
+    double chgVolt;
+    double totPowr;
+    std::vector<double> currs;
+    std::vector<double> powrs;
+};
+
+
+// :::: [ ShuntCalc ] ::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+
+class ShuntCalc {
+  public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
+    ShuntCalc(const StackParam& s) : stack{s} {}
+
+    ShuntCalc(const ShuntCalc&) = default;
+    ShuntCalc(ShuntCalc&&) = default;
+
+    ShuntCalc& operator=(const ShuntCalc&) = default;
+    ShuntCalc& operator=(ShuntCalc&&) = default;
+
+    virtual ~ShuntCalc() = default;
+
+  public: // ~~~~ functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     /**
-     * Generate a `SystemParam`.
+     * Calculates shunt current performance of the specified system.
+     *
+     * @param chgVolt The charging voltage (V). Negative value for constant
+     *    voltage discharging.
     */
-    virtual SystemParam generate() const = 0;
+    virtual ShuntPerf calculate(double chgVolt) const = 0;
 
 
-  protected:
-    StackParam stackParam;
+  protected: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    StackParam stack;
 };
 
 
-/**
- * Implementation of `ParamGenerator` to generate `SystemParam` for systems
- * with electrolyte flow to stacks connected in a stack arrangement.
-*/
-class StackArrGenerator : public ParamGenerator {
+// :::: [ CommLineCalc ] ::::::::::::::::::::::::::::::::::::::::::::::::
+
+
+class CommLineCalc : public ShuntCalc {
   public:
-    StackArrGenerator(
-        StackParam param_s,
-        std::size_t num_s, double cl, double ca)
-        : ParamGenerator{param_s},
-          numStack{num_s}, conLen{cl}, conArea{ca} {}
+    /** Enum representing stack connection type. */
+    enum class ConnType {
+      /** Positive front, negative front. */
+      ctFF,
+      /** Positive front, negative back. */
+      ctFB
+    };
 
-    ~StackArrGenerator() override = default;
 
-    SystemParam generate() const override;
+  public:
+    CommLineCalc(const StackParam& s,
+        std::size_t num_s, ConnParam c,
+        ConnType ct = ConnType::ctFB)
+        : ShuntCalc{s},
+          numStacks{num_s},
+          connType{ct},
+          conn{c} {}
+
+    ShuntPerf calculate(double chgVolt) const override;
 
 
   private:
-    std::size_t numStack;
-    double conLen;
-    double conArea;
+    std::size_t numStacks;
+    ConnType connType;
+    ConnParam conn;
 };
-
-
-// :::: [ Functions ] ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-
-
-/**
- * Calculates the shunt current performance of a system.
- *
- * @param chgVolt The charging voltage (V).
- * @param gen The generator to generate `SystemParam`
- * @returns The calculated performance of the system as a `comutils::Table`.
- *    Its headers are in the order given by
- *    `vrfb::shuntcur::kShuntLossTableHdrs`.
-*/
-comutils::Table calcPerf(const double chgVolt, const ParamGenerator& gen);
 
 
 } // ---- namespace <vrfb::shuntcur>

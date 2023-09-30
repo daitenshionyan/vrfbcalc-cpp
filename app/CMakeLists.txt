@@ -72,10 +72,6 @@ add_executable(vrfbcalc-cpp WIN32
     src/view/shuntcur/shuntcurconfigpopup.ui
     src/view/shuntcur/shuntcurconfigpopup.cpp
 
-    include/view/shuntcur/shuntcurconfigformstack.h
-    src/view/shuntcur/shuntcurconfigformstack.ui
-    src/view/shuntcur/shuntcurconfigformstack.cpp
-
     include/view/graphplotform.h
     src/view/graphplotform.ui
     src/view/graphplotform.cpp

@@ -5,16 +5,23 @@
 #include <utility>
 
 
-namespace vrfb { // BEGIN OF NAMESPACE <vrfb> ==================================
-namespace shuntcur { // BEGIN OF NAMESPACE <vrfb::shuntcur> ====================
+namespace vrfb {
+namespace shuntcur {
 
 
-namespace { // BEGIN OF NAMESPACE <vrfb::shuntcur::UNNAMED> ====================
+namespace {
 
 
-inline double calcChanResist(double rho, double l, double a) {
-  return (rho * l) / a;
-}
+/*
+********************************************************************************
+**
+**    Constants and equations
+**
+********************************************************************************
+*/
+
+
+constexpr double kAvrOCV = 1.38;
 
 
 inline double calcCellResist(double asr, double area) {
@@ -22,345 +29,964 @@ inline double calcCellResist(double asr, double area) {
 }
 
 
-void addCellStats(const Eigen::VectorXd& v, const SystemParam& s, Eigen::Index i, std::vector<std::string>& elems) {
-  Eigen::Index numCells = (v.rows()+3) / 4;
+inline double calcChannelResist(double rho, double l, double a) {
+  return (rho * l) / a;
+}
 
-  double mainLoopCur = v(0);
 
-  double posTopPrevLoopCur = 0;
-  double posBotPrevLoopCur = 0;
-  double negTopPrevLoopCur = 0;
-  double negBotPrevLoopCur = 0;
+inline std::size_t matSize(std::size_t num_s, std::size_t num_c) {
+  return 1 + 4*num_s*(num_c - 1) + 4*(num_s - 1);
+}
 
-  double posTopLoopCur = 0;
-  double posBotLoopCur = 0;
-  double negTopLoopCur = 0;
-  double negBotLoopCur = 0;
 
-  Eigen::Index curPosTop = i + 1;
-  Eigen::Index curPosBot = i + numCells;
-  Eigen::Index curNegTop = i + 2*numCells - 1;
-  Eigen::Index curNegBot = i + 3*numCells - 2;
+/*
+********************************************************************************
+**
+**    Indexing functions
+**
+********************************************************************************
+*/
 
-  if (i+1 < numCells) {
-    posTopLoopCur = v(curPosTop);
-    posBotLoopCur = v(curPosBot);
-    negTopLoopCur = v(curNegTop);
-    negBotLoopCur = v(curNegBot);
+
+inline Eigen::Index indexSPT(
+      std::size_t si, std::size_t ci,
+      std::size_t num_s, std::size_t num_c) {
+  return ci +  si * (num_c - 1) + 1;
+}
+
+
+inline Eigen::Index indexSPB(
+      std::size_t si, std::size_t ci,
+      std::size_t num_s, std::size_t num_c) {
+  return ci + (si + num_s) * (num_c - 1) + 1;
+}
+
+
+inline Eigen::Index indexSNT(
+      std::size_t si, std::size_t ci,
+      std::size_t num_s, std::size_t num_c) {
+  return ci + (si + 2*num_s) * (num_c - 1);
+}
+
+
+inline Eigen::Index indexSNB(
+      std::size_t si, std::size_t ci,
+      std::size_t num_s, std::size_t num_c) {
+  return ci + (si + 3*num_s) * (num_c - 1);
+}
+
+
+inline Eigen::Index indexCPT_F(std::size_t si,
+      std::size_t num_s, std::size_t num_c) {
+  return si + 4*num_s*(num_c - 1);
+}
+
+
+inline Eigen::Index indexCPB_F(std::size_t si,
+      std::size_t num_s, std::size_t num_c) {
+  return si + (num_s - 1) + 4*num_s*(num_c - 1) + 1;
+}
+
+
+inline Eigen::Index indexCNT_F(std::size_t si,
+      std::size_t num_s, std::size_t num_c) {
+  return si + 2*(num_s - 1) + 4*num_s*(num_c - 1);
+}
+
+
+inline Eigen::Index indexCNB_F(std::size_t si,
+      std::size_t num_s, std::size_t num_c) {
+  return si + 3*(num_s - 1) + 4*num_s*(num_c - 1) + 1;
+}
+
+
+inline Eigen::Index indexCPT_B(std::size_t si,
+      std::size_t num_s, std::size_t num_c) {
+  return si + 4*num_s*(num_c - 1) + 1;
+}
+
+
+inline Eigen::Index indexCPB_B(std::size_t si,
+      std::size_t num_s, std::size_t num_c) {
+  return si + (num_s - 1) + 4*num_s*(num_c - 1);
+}
+
+
+inline Eigen::Index indexCNT_B(std::size_t si,
+      std::size_t num_s, std::size_t num_c) {
+  return si + 2*(num_s - 1) + 4*num_s*(num_c - 1) + 1;
+}
+
+
+inline Eigen::Index indexCNB_B(std::size_t si,
+      std::size_t num_s, std::size_t num_c) {
+  return si + 3*(num_s - 1) + 4*num_s*(num_c - 1);
+}
+
+
+/*
+********************************************************************************
+**
+**    Current calculation functions
+**
+********************************************************************************
+*/
+
+
+double calcStackContri(const Eigen::VectorXd& cv,
+      std::size_t si, std::size_t ci,
+      std::size_t num_s, std::size_t num_c) {
+  double result = 0;
+  if (ci+1 < num_c) {
+    result += cv(indexSPT(si, ci, num_s, num_c))
+        + cv(indexSPB(si, ci, num_s, num_c));
   }
-
-  if (i > 0) {
-    posTopPrevLoopCur = v(curPosTop-1);
-    posBotPrevLoopCur = v(curPosBot-1);
-    negTopPrevLoopCur = v(curNegTop-1);
-    negBotPrevLoopCur = v(curNegBot-1);
+  if (ci > 0) {
+    result += cv(indexSNT(si, ci, num_s, num_c))
+        + cv(indexSNB(si, ci, num_s, num_c));
   }
+  return result;
+}
 
-  double cellCur = mainLoopCur + posTopLoopCur + posBotLoopCur + negTopPrevLoopCur + negBotPrevLoopCur;
-  double shuntPosTopCur = posTopLoopCur - posTopPrevLoopCur;
-  double shuntPosBotCur = posBotLoopCur - posBotPrevLoopCur;
-  double shuntNegTopCur = negTopLoopCur - negTopPrevLoopCur;
-  double shuntNegBotCur = negBotLoopCur - negBotPrevLoopCur;
 
-  // addition to elements
-  elems.push_back(std::to_string(i+1));
+double calcLoopContri_PF(const Eigen::VectorXd& cv,
+      std::size_t si, std::size_t ci,
+      std::size_t num_s, std::size_t num_c) {
+  double result = 0;
+  if (si > 0 && ci+1 < num_c) {
+    result += cv(indexCPT_F(si, num_s, num_c));
+  } else if (si+1 < num_s && ci+1 == num_c) {
+    result += cv(indexCPT_F(si, num_s, num_c) + 1);
+  }
+  if (si+1 < num_s) {
+    result += cv(indexCPB_F(si, num_s, num_c));
+  }
+  return result;
+}
 
-  elems.push_back(std::to_string(cellCur));
-  elems.push_back(std::to_string(shuntPosTopCur));
-  elems.push_back(std::to_string(shuntPosBotCur));
-  elems.push_back(std::to_string(shuntNegTopCur));
-  elems.push_back(std::to_string(shuntNegBotCur));
-  elems.push_back(std::to_string(posTopLoopCur));
-  elems.push_back(std::to_string(posBotLoopCur));
-  elems.push_back(std::to_string(negTopLoopCur));
-  elems.push_back(std::to_string(negBotLoopCur));
 
-  elems.push_back(std::to_string(std::pow(cellCur, 2) * s.getCellResist(i)));
-  elems.push_back(std::to_string(std::pow(shuntPosTopCur, 2) * s.getShuntResist(Position::kPosTop, i)));
-  elems.push_back(std::to_string(std::pow(shuntPosBotCur, 2) * s.getShuntResist(Position::kPosBot, i)));
-  elems.push_back(std::to_string(std::pow(shuntNegTopCur, 2) * s.getShuntResist(Position::kNegTop, i)));
-  elems.push_back(std::to_string(std::pow(shuntNegBotCur, 2) * s.getShuntResist(Position::kNegBot, i)));
+double calcLoopContri_NF(const Eigen::VectorXd& cv,
+      std::size_t si, std::size_t ci,
+      std::size_t num_s, std::size_t num_c) {
+  double result = 0;
+  if (si > 0) {
+    result += cv(indexCNT_F(si, num_s, num_c));
+  }
+  if (si > 0 && ci == 0) {
+    result += cv(indexCNB_F(si, num_s, num_c) - 1);
+  } else if (si+1 < num_s && ci > 0) {
+    result += cv(indexCNB_F(si, num_s, num_c));
+  }
+  return result;
+}
 
-  if (i+1 < numCells) {
-    elems.push_back(std::to_string(std::pow(posTopLoopCur, 2) * s.getManiResist(Position::kPosTop, i)));
-    elems.push_back(std::to_string(std::pow(posBotLoopCur, 2) * s.getManiResist(Position::kPosBot, i)));
-    elems.push_back(std::to_string(std::pow(negTopLoopCur, 2) * s.getManiResist(Position::kNegTop, i)));
-    elems.push_back(std::to_string(std::pow(negBotLoopCur, 2) * s.getManiResist(Position::kNegBot, i)));
-  } else {
-    elems.push_back(std::to_string(0));
-    elems.push_back(std::to_string(0));
-    elems.push_back(std::to_string(0));
-    elems.push_back(std::to_string(0));
+
+double calcLoopContri_NB(const Eigen::VectorXd& cv,
+      std::size_t si, std::size_t ci,
+      std::size_t num_s, std::size_t num_c) {
+  double result = 0;
+  if (si > 0 && ci == 0) {
+    result += cv(indexCNT_B(si, num_s, num_c) - 1);
+  } else if (si+1 < num_s && ci > 0) {
+    result += cv(indexCNT_B(si, num_s, num_c));
+  }
+  if (si > 0) {
+    result += cv(indexCNB_B(si, num_s, num_c));
+  }
+  return result;
+}
+
+
+}
+
+
+/*
+********************************************************************************
+**
+**    Data Structure Definition
+**
+********************************************************************************
+*/
+
+
+StackParam::StackParam(
+      std::size_t num_c, double rho,
+      double asr, double ca,
+      double sl, double sa,
+      double ml, double ma)
+      : numCells{num_c} {
+  cellResist = calcCellResist(asr, ca);
+  shuntResist = calcChannelResist(rho, sl, sa);
+  maniResist = calcChannelResist(rho, ml, ma);
+}
+
+
+ConnParam::ConnParam(
+      double rho,
+      double sl, double sa,
+      double ml, double ma) {
+  shuntResist = calcChannelResist(rho, sl, sa);
+  maniResist = calcChannelResist(rho, ml, ma);
+}
+
+
+/*
+********************************************************************************
+**
+**    ShuntPerf Definition
+**
+********************************************************************************
+*/
+
+
+ShuntPerf::ShuntPerf(double cc, double cv, const std::vector<double>& clist)
+    : chgCurr{cc}, chgVolt{cv}, currs{clist} {
+  for (double c : currs) {
+    powrs.push_back(c*kAvrOCV);
+    totPowr += c*kAvrOCV;
   }
 }
 
 
-} // END OF NAMESPACE <vrfb::shuntcur::UNNAMED> --------------------------------
-// namespace <vrfb::shuntcur>
-
-
-SystemParam::SystemParam(
-    const std::vector<std::vector<double>>& sr,
-    const std::vector<std::vector<double>>& mr,
-    const std::vector<double>& cr)
-    : shuntResists{sr}, maniResists{mr}, cellResists{cr} {
-  if (shuntResists.size() != 4 && maniResists.size() != 4) {
-    throw std::runtime_error("Shunt or Manifold resistance vector size not equals 4");
-  }
-  for (const auto& r : shuntResists) {
-    if (r.size() != cellResists.size()) {
-      throw std::runtime_error("Size of a side of shunt resist not equals to size of cell resist");
-    }
-  }
-  for (const auto& r : maniResists) {
-    if (r.size() != cellResists.size() && r.size()+1 != cellResists.size()) {
-      throw std::runtime_error("Size of a side of manifiold resist not equals to plus minus 1 size of cell resist");
-    }
+ShuntPerf::ShuntPerf(double cc, double cv, std::vector<double>&& clist)
+    : chgCurr{cc}, chgVolt{cv}, currs{std::move(clist)} {
+  for (double c : currs) {
+    powrs.push_back(c*kAvrOCV);
+    totPowr += c*kAvrOCV;
   }
 }
 
 
-SystemParam::SystemParam(
-    std::vector<std::vector<double>>&& sr,
-    std::vector<std::vector<double>>&& mr,
-    std::vector<double>&& cr)
-    : shuntResists{std::move(sr)}, maniResists{std::move(mr)}, cellResists{std::move(cr)} {
-  if (shuntResists.size() != 4 && maniResists.size() != 4) {
-    throw std::runtime_error("Shunt or Manifold resistance vector size not equals 4");
-  }
-  for (const auto& r : shuntResists) {
-    if (r.size() != cellResists.size()) {
-      throw std::runtime_error("Size of a side of shunt resist not equals to size of cell resist");
-    }
-  }
-  for (const auto& r : maniResists) {
-    if (r.size() != cellResists.size() && r.size()+1 != cellResists.size()) {
-      throw std::runtime_error("Size of a side of manifiold resist not equals to plus minus 1 size of cell resist");
-    }
-  }
-}
+/*
+********************************************************************************
+**
+**    CommLineCalc Definition
+**
+********************************************************************************
+*/
 
 
-SystemParam::SystemParam(const comutils::Table& table, const ResistConfig& cfg_r)
-    : shuntResists{std::vector<std::vector<double>>(4, std::vector<double>(table.numRows()))},
-      maniResists{std::vector<std::vector<double>>(4, std::vector<double>(table.numRows()))},
-      cellResists{std::vector<double>(table.numRows())} {
-  for (std::size_t i = 0; i < table.numRows(); ++i) {
-    // shunt resistance calculation
-    shuntResists[static_cast<int>(Position::kPosTop)][i] = calcChanResist(
-        cfg_r.resistivity,
-        table.get<double>(cfg_r.shuntLengthPosTopHdr, i),
-        table.get<double>(cfg_r.shuntAreaPosTopHdr, i));
-    shuntResists[static_cast<int>(Position::kPosBot)][i] = calcChanResist(
-        cfg_r.resistivity,
-        table.get<double>(cfg_r.shuntLengthPosBotHdr, i),
-        table.get<double>(cfg_r.shuntAreaPosBotHdr, i));
-    shuntResists[static_cast<int>(Position::kNegTop)][i] = calcChanResist(
-        cfg_r.resistivity,
-        table.get<double>(cfg_r.shuntLengthNegTopHdr, i),
-        table.get<double>(cfg_r.shuntAreaNegTopHdr, i));
-    shuntResists[static_cast<int>(Position::kNegBot)][i] = calcChanResist(
-        cfg_r.resistivity,
-        table.get<double>(cfg_r.shuntLengthNegBotHdr, i),
-        table.get<double>(cfg_r.shuntAreaNegBotHdr, i));
-    // manifold resistance calculation
-    maniResists[static_cast<int>(Position::kPosTop)][i] = calcChanResist(
-        cfg_r.resistivity,
-        table.get<double>(cfg_r.maniLengthPosTopHdr, i),
-        table.get<double>(cfg_r.maniAreaPosTopHdr, i));
-    maniResists[static_cast<int>(Position::kPosBot)][i] = calcChanResist(
-        cfg_r.resistivity,
-        table.get<double>(cfg_r.maniLengthPosBotHdr, i),
-        table.get<double>(cfg_r.maniAreaPosBotHdr, i));
-    maniResists[static_cast<int>(Position::kNegTop)][i] = calcChanResist(
-        cfg_r.resistivity,
-        table.get<double>(cfg_r.maniLengthNegTopHdr, i),
-        table.get<double>(cfg_r.maniAreaNegTopHdr, i));
-    maniResists[static_cast<int>(Position::kNegBot)][i] = calcChanResist(
-        cfg_r.resistivity,
-        table.get<double>(cfg_r.maniLengthNegBotHdr, i),
-        table.get<double>(cfg_r.maniAreaNegBotHdr, i));
-    // cell resistance calculation
-    cellResists[i] = calcCellResist(
-        table.get<double>(cfg_r.asrHdr, i),
-        cfg_r.area);
+ShuntPerf CommLineCalc::calculate(double chgVolt) const {
+  switch (connType) {
+    case ConnType::ctFF:
+      return calculate_FF(stack, conn, numStacks, chgVolt);
+    case ConnType::ctFB:
+      return calculate_FB(stack, conn, numStacks, chgVolt);
+    default:
+      throw std::runtime_error("Unknown connection type");
   }
 }
 
 
-SystemParam StackArrGenerator::generate() const {
-  std::size_t totalCells = stackParam.numCells * numStack;
-
-  double shuntResist = calcChanResist(
-      stackParam.resistivity,
-      stackParam.shuntLen,
-      stackParam.shuntArea);
-  auto sr = std::vector<std::vector<double>>(4, std::vector<double>(
-      totalCells, shuntResist));
-
-  double maniResist = calcChanResist(
-    stackParam.resistivity,
-    stackParam.maniLen,
-    stackParam.maniArea);
-  double conResist = calcChanResist(
-    stackParam.resistivity,
-    conLen,
-    conArea);
-  auto mr = std::vector<std::vector<double>>(4, std::vector<double>(
-      totalCells - 1,
-      maniResist));
-  for (std::size_t i = stackParam.numCells-1; i < totalCells-1; i += stackParam.numCells) {
-    for (auto& r : mr) {
-      r[i] = conResist;
-    }
-  }
-
-  double cellResist = calcCellResist(stackParam.asr, stackParam.cellArea);
-  auto cr = std::vector<double>(totalCells, cellResist);
-
-  return {std::move(sr), std::move(mr), std::move(cr)};
-}
+/*
+********************************************************************************
+**
+**    addStackLoops Definition
+**
+********************************************************************************
+*/
 
 
-Eigen::MatrixXd formCurrMat(const SystemParam& s) {
-  Eigen::MatrixXd m = Eigen::MatrixXd::Zero(4*s.numCells() - 3, 4*s.numCells() - 3);
+void addStackLoops(Eigen::MatrixXd& m, const StackParam& s, std::size_t num_s) {
+  std::size_t totalCells = s.numCells * num_s;
 
-  for (std::size_t i = 0; i < s.numCells(); ++i) {
-    // main loop
-    m(0, 0) += s.getCellResist(i);
-
-    Eigen::Index curPosTop = i + 1;
-    Eigen::Index curPosBot = i + s.numCells();
-    Eigen::Index curNegTop = i + 2*s.numCells() - 2;
-    Eigen::Index curNegBot = i + 3*s.numCells() - 3;
-
-    // positive loops
-    if (i+1 < s.numCells()) {
+  for (std::size_t si = 0; si < num_s; ++si) {
+    for (std::size_t ci = 0; ci < s.numCells; ++ci) {
       // main loop
-      m(0, curPosTop) = s.getCellResist(i);
-      m(0, curPosBot) = s.getCellResist(i);
+      m(0, 0) += s.cellResist;
 
-      // main loop contribution
-      m(curPosTop, 0) = s.getCellResist(i);
-      m(curPosBot, 0) = s.getCellResist(i);
+      Eigen::Index pti = indexSPT(si, ci, num_s, s.numCells);
+      Eigen::Index pbi = indexSPB(si, ci, num_s, s.numCells);
+      Eigen::Index nti = indexSNT(si, ci, num_s, s.numCells);
+      Eigen::Index nbi = indexSNB(si, ci, num_s, s.numCells);
 
-      // previous loop contribution
-      if (i > 0) {
-        m(curPosTop, curPosTop-1) = -s.getShuntResist(Position::kPosTop, i);
-        m(curPosBot, curPosBot-1) = -s.getShuntResist(Position::kPosBot, i);
+      if (ci+1 < s.numCells) {
+        // main loop
+        m(0, pti) = s.cellResist;
+        m(0, pbi) = s.cellResist;
 
-        // contribution from negative loops
-        m(curPosTop, curNegTop) = s.getCellResist(i);
-        m(curPosTop, curNegBot) = s.getCellResist(i);
-        m(curPosBot, curNegTop) = s.getCellResist(i);
-        m(curPosBot, curNegBot) = s.getCellResist(i);
+        // main loop contribution
+        m(pti, 0) = s.cellResist;
+        m(pbi, 0) = s.cellResist;
+
+        if (ci > 0) {
+          // previous loop contribution
+          m(pti, pti-1) = -s.shuntResist;
+          m(pbi, pbi-1) = -s.shuntResist;
+
+          // contribution from negative loops
+          m(pti, nti) = s.cellResist;
+          m(pti, nbi) = s.cellResist;
+          m(pbi, nti) = s.cellResist;
+          m(pbi, nbi) = s.cellResist;
+        }
+
+        // current loop contribution
+        m(pti, pti) = s.cellResist + 2*s.shuntResist + s.maniResist;
+        m(pbi, pbi) = s.cellResist + 2*s.shuntResist + s.maniResist;
+
+        if (ci+2 < s.numCells) {
+          // next loop contribution
+          m(pti, pti+1) = -s.shuntResist;
+          m(pbi, pbi+1) = -s.shuntResist;
+        }
+
+        // contribution from other side positive loop
+        m(pti, pbi) = s.cellResist;
+        m(pbi, pti) = s.cellResist;
       }
 
-      // contribution from other side positive loop
-      m(curPosTop, curPosBot) = s.getCellResist(i);
-      m(curPosBot, curPosTop) = s.getCellResist(i);
+      if (ci > 0) {
+        // main loop
+        m(0, nti) = s.cellResist;
+        m(0, nbi) = s.cellResist;
 
-      // current loop contribution
-      m(curPosTop, curPosTop) =
-            s.getCellResist(i)
-          + s.getManiResist(Position::kPosTop, i)
-          + s.getShuntResist(Position::kPosTop, i)
-          + s.getShuntResist(Position::kPosTop, i+1);
-      m(curPosBot, curPosBot) =
-            s.getCellResist(i)
-          + s.getManiResist(Position::kPosBot, i)
-          + s.getShuntResist(Position::kPosBot, i)
-          + s.getShuntResist(Position::kPosBot, i+1);
+        // main loop contribution
+        m(nti, 0) = s.cellResist;
+        m(nbi, 0) = s.cellResist;
 
-      // next loop contribution
-      if (i+2 < s.numCells()) {
-        m(curPosTop, curPosTop+1) = -s.getShuntResist(Position::kPosTop, i+1);
-        m(curPosBot, curPosBot+1) = -s.getShuntResist(Position::kPosBot, i+1);
+        if (ci > 1) {
+          // previous loop contribution
+          m(nti, nti-1) = -s.shuntResist;
+          m(nbi, nbi-1) = -s.shuntResist;
+        }
+
+        // current loop contribution
+        m(nti, nti) = s.cellResist + 2*s.shuntResist + s.maniResist;
+        m(nbi, nbi) = s.cellResist + 2*s.shuntResist + s.maniResist;
+
+        if (ci+1 < s.numCells) {
+          // next loop contribution
+          m(nti, nti+1) = -s.shuntResist;
+          m(nbi, nbi+1) = -s.shuntResist;
+
+          // contribution from positive loops
+          m(nti, pti) = s.cellResist;
+          m(nti, pbi) = s.cellResist;
+          m(nbi, pti) = s.cellResist;
+          m(nbi, pbi) = s.cellResist;
+        }
+
+        // contribution from other side negative loops
+        m(nti, nbi) = s.cellResist;
+        m(nbi, nti) = s.cellResist;
+      }
+    }
+  }
+}
+
+
+/*
+********************************************************************************
+**
+**    addConnLoops_FF Definition
+**
+********************************************************************************
+*/
+
+
+
+void addConnLoops_FF(Eigen::MatrixXd& m, const StackParam& s, const ConnParam& c, std::size_t num_s) {
+  for (std::size_t si = 0; si < num_s; ++si) {
+    Eigen::Index cpti = indexCPT_F(si, num_s, s.numCells);
+    Eigen::Index cpbi = indexCPB_F(si, num_s, s.numCells);
+    Eigen::Index cnti = indexCNT_F(si, num_s, s.numCells);
+    Eigen::Index cnbi = indexCNB_F(si, num_s, s.numCells);
+
+    if (si > 0) {
+      // :::: [ POSITIVE TOP CONN ] ::::
+      // >>> MAIN LOOP
+      m(cpti, 0) += s.numCells * s.cellResist;
+      m(0, cpti) += s.numCells * s.cellResist;
+
+      // >>> POSITIVE TOP CONN
+      m(cpti, cpti) += 2*s.shuntResist + 2*c.shuntResist + s.numCells*s.cellResist + c.maniResist;
+      if (si > 1) {
+        m(cpti, cpti-1) -= s.shuntResist + c.shuntResist;
+      }
+      if (si+1 < num_s) {
+        m(cpti, cpti+1) -= s.shuntResist + c.shuntResist;
+      }
+
+      // >>> POSITIVE BOT CONN
+      m(cpti, cpbi-1) += s.cellResist;
+      if (si+1 < num_s) {
+        m(cpti, cpbi) += (s.numCells-1) * s.cellResist;
+      }
+
+      // >>> NEGATIVE TOP CONN
+      m(cpti, cnti) += (s.numCells-1) * s.cellResist;
+      if (si > 1) {
+        m(cpti, cnti-1) += s.cellResist;
+      }
+
+      // >>> NEGATIVE BOT CONN
+      m(cpti, cnbi-1) = 2*s.cellResist;
+      if (si+1 < num_s) {
+        m(cpti, cnbi) += (s.numCells-2) * s.cellResist;
+      }
+
+
+      // :::: [ NEGATIVE BOT CONN ] ::::
+      // >>> MAIN LOOP
+      m(cnti, 0) += s.numCells * s.cellResist;
+      m(0, cnti) += s.numCells * s.cellResist;
+
+      // >>> POSITIVE TOP CONN
+      m(cnti, cpti) += (s.numCells-1) * s.cellResist;
+      if (si+1 < num_s) {
+        m(cnti, cpti+1) += s.cellResist;
+      }
+
+      // >>> POSITIVE BOT CONN
+      if (si+1 < num_s) {
+        m(cnti, cpbi) += s.numCells * s.cellResist;
+      }
+
+      // >>> NEGATIVE TOP CONN
+      m(cnti, cnti) += 2*s.shuntResist + 2*c.shuntResist + s.numCells*s.cellResist + c.maniResist;
+      if (si > 1) {
+        m(cnti, cnti-1) -= s.shuntResist + c.shuntResist;
+      }
+      if (si+1 < num_s) {
+        m(cnti, cnti+1) -= s.shuntResist + c.shuntResist;
+      }
+
+      // >> NEGATIVE BOT CONN
+      m(cnti, cnbi-1) += s.cellResist;
+      if (si+1 < num_s) {
+        m(cnti, cnbi) += (s.numCells-1) * s.cellResist;
       }
     }
 
-    // negative loops
-    if (i > 0) {
-      // main loop
-      m(0, curNegTop) = s.getCellResist(i);
-      m(0, curNegBot) = s.getCellResist(i);
 
-      // main loop contribution
-      m(curNegTop, 0) = s.getCellResist(i);
-      m(curNegBot, 0) = s.getCellResist(i);
 
-      // previous loop contribution
-      if (i > 1) {
-        m(curNegTop, curNegTop-1) = -s.getShuntResist(Position::kNegTop, i-1);
-        m(curNegBot, curNegBot-1) = -s.getShuntResist(Position::kNegBot, i-1);
+    if (si+1 < num_s) {
+      // :::: [ POSITIVE BOT CONN ] ::::
+      // >>> MAIN LOOP
+      m(cpbi, 0) += s.numCells * s.cellResist;
+      m(0, cpbi) += s.numCells * s.cellResist;
+
+      // >>> POSITIVE TOP CONN
+      m(cpbi, cpti+1) += s.cellResist;
+      if (si > 0) {
+        m(cpbi, cpti) += (s.numCells-1) * s.cellResist;
       }
 
-      // current loop contribution
-      m(curNegTop, curNegTop) =
-            s.getCellResist(i)
-          + s.getManiResist(Position::kNegTop, i-1)
-          + s.getShuntResist(Position::kNegTop, i-1)
-          + s.getShuntResist(Position::kNegTop, i);
-      m(curNegBot, curNegBot) =
-            s.getCellResist(i)
-          + s.getManiResist(Position::kNegBot, i-1)
-          + s.getShuntResist(Position::kNegBot, i-1)
-          + s.getShuntResist(Position::kNegBot, i);
-
-      // next loop contribution
-      if (i+1 < s.numCells()) {
-        m(curNegTop, curNegTop+1) = -s.getShuntResist(Position::kPosTop, i);
-        m(curNegBot, curNegBot+1) = -s.getShuntResist(Position::kPosBot, i);
-
-        // contribution from positive loops
-        m(curNegTop, curPosTop) = s.getCellResist(i);
-        m(curNegTop, curPosBot) = s.getCellResist(i);
-        m(curNegBot, curPosTop) = s.getCellResist(i);
-        m(curNegBot, curPosBot) = s.getCellResist(i);
+      // >>> POSITIVE BOT CONN
+      m(cpbi, cpbi) += 2*s.shuntResist + 2*c.shuntResist + s.numCells*s.cellResist + c.maniResist;
+      if (si > 0) {
+        m(cpbi, cpbi-1) -= s.shuntResist + c.shuntResist;
+      }
+      if (si+2 < num_s) {
+        m(cpbi, cpbi+1) -= s.shuntResist + c.shuntResist;
       }
 
-      // contribution from other side negative loop
-      m(curNegTop, curNegBot) = s.getCellResist(i);
-      m(curNegBot, curNegTop) = s.getCellResist(i);
+      // >>> NEGATIVE TOP CONN
+      if (si > 0) {
+        m(cpbi, cnti) += s.numCells * s.cellResist;
+      }
+
+      // >>> NEGATIVE BOT CONN
+      m(cpbi, cnbi) += (s.numCells-1) * s.cellResist;
+      if (si > 0) {
+        m(cpbi, cnbi-1) += s.cellResist;
+      }
+
+
+      // :::: [ NEGATIVE BOT CONN ] ::::
+      // >>> MAIN LOOP
+      m(cnbi, 0) += s.numCells * s.cellResist;
+      m(0, cnbi) += s.numCells * s.cellResist;
+
+      // >>> POSITIVE TOP CONN
+      m(cnbi, cpti+1) += 2*s.cellResist;
+      if (si > 0) {
+        m(cnbi, cpti) += (s.numCells-2) * s.cellResist;
+      }
+
+      // >>> POSITIVE BOT CONN
+      m(cnbi, cpbi) += (s.numCells-1) * s.cellResist;
+      if (si+2 < num_s) {
+        m(cnbi, cpbi+1) += s.cellResist;
+      }
+
+      // >>> NEGATIVE TOP CONN
+      m(cnbi, cnti+1) += s.cellResist;
+      if (si > 0) {
+        m(cnbi, cnti) += (s.numCells-1) * s.cellResist;
+      }
+
+      // >>> NEGATIVE BOT CONN
+      m(cnbi, cnbi) += 2*s.shuntResist + 2*c.shuntResist + s.numCells*s.cellResist + c.maniResist;
+      if (si > 0) {
+        m(cnbi, cnbi-1) -= s.shuntResist + c.shuntResist;
+      }
+      if (si+2 < num_s) {
+        m(cnbi, cnbi+1) -= s.shuntResist + c.shuntResist;
+      }
+    }
+
+
+
+    for (std::size_t ci = 0; ci < s.numCells; ++ci) {
+      Eigen::Index spti = indexSPT(si, ci, num_s, s.numCells);
+      Eigen::Index spbi = indexSPB(si, ci, num_s, s.numCells);
+      Eigen::Index snti = indexSNT(si, ci, num_s, s.numCells);
+      Eigen::Index snbi = indexSNB(si, ci, num_s, s.numCells);
+
+      if (si > 0) {
+        // :::: [ POSITIVE STACK LOOPS ] ::::
+        if (ci+1 < s.numCells) {
+          // >>> POSITIVE TOP CONN
+          m(spti, cpti) += s.cellResist;
+          m(cpti, spti) += s.cellResist;
+          m(spbi, cpti) += s.cellResist;
+          m(cpti, spbi) += s.cellResist;
+          if (ci == 0) {
+            m(spti-1, cpti) -= s.shuntResist;
+            m(cpti, spti-1) -= s.shuntResist;
+          }
+          if (ci+2 == s.numCells) {
+            m(spti, cpti) += s.shuntResist;
+            m(cpti, spti) += s.shuntResist;
+          }
+
+          // >>> NEGATIVE TOP CONN
+          m(spti, cnti) += s.cellResist;
+          m(cnti, spti) += s.cellResist;
+          m(spbi, cnti) += s.cellResist;
+          m(cnti, spbi) += s.cellResist;
+        }
+
+        // :::: [ NEGATIVE STACK LOOPS ] ::::
+        if (ci > 0) {
+          // POSITIVE TOP CONN
+          m(snti-1, cpti) += s.cellResist;
+          m(cpti, snti-1) += s.cellResist;
+          m(snbi-1, cpti) += s.cellResist;
+          m(cpti, snbi-1) += s.cellResist;
+
+          // NEGATIVE TOP CONN
+          m(snti, cnti) += s.cellResist;
+          m(cnti, snti) += s.cellResist;
+          m(snbi, cnti) += s.cellResist;
+          m(cnti, snbi) += s.cellResist;
+          if (ci == 1) {
+            m(snti-1, cnti) -= s.shuntResist;
+            m(cnti, snti-1) -= s.shuntResist;
+          }
+          if (ci+1 == num_s) {
+            m(snti, cnti) += s.shuntResist;
+            m(cnti, snti) += s.shuntResist;
+          }
+        }
+      }
+
+      if (si+1 < num_s) {
+        // :::: [ POSITIVE STACK LOOPS ] ::::
+        if (ci+1 < s.numCells) {
+          // >>> POSITIVE BOT CONN
+          m(spti, cpbi) += s.cellResist;
+          m(cpbi, spti) += s.cellResist;
+          m(spbi, cpbi) += s.cellResist;
+          m(cpbi, spbi) += s.cellResist;
+          if (ci == 0) {
+            m(spbi, cpbi) += s.shuntResist;
+            m(cpbi, spbi) += s.shuntResist;
+          }
+          if (ci+2 == s.numCells) {
+            m(spbi+1, cpbi) -= s.shuntResist;
+            m(cpbi, spbi+1) -= s.shuntResist;
+          }
+
+          // NEGATIVE BOT CONN
+          m(spti+1, cnbi) += s.cellResist;
+          m(cnbi, spti+1) += s.cellResist;
+          m(spbi+1, cnbi) += s.cellResist;
+          m(cnbi, spbi+1) += s.cellResist;
+        }
+
+        // :::: [ NEGATIVE STACK LOOPS ] ::::
+        if (ci > 0) {
+          // >>> POSITIVE BOT CONN
+          m(snti, cpbi) += s.cellResist;
+          m(cpbi, snti) += s.cellResist;
+          m(snbi, cpbi) += s.cellResist;
+          m(cpbi, snbi) += s.cellResist;
+
+          // >>> NEGATIVE BOT CONN
+          m(snti, cnbi) += s.cellResist;
+          m(cnbi, snti) += s.cellResist;
+          m(snbi, cnbi) += s.cellResist;
+          m(cnbi, snbi) += s.cellResist;
+          if (ci == 1) {
+            m(snbi, cnbi) += s.shuntResist;
+            m(cnbi, snbi) += s.shuntResist;
+          }
+          if (ci+1 == num_s) {
+            m(snbi+1, cnbi) -= s.shuntResist;
+            m(cnbi, snbi+1) -= s.shuntResist;
+          }
+        }
+      }
+    }
+  }
+}
+
+
+/*
+********************************************************************************
+**
+**    addConnLoops_FB Definition
+**
+********************************************************************************
+*/
+
+
+
+void addConnLoops_FB(Eigen::MatrixXd& m, const StackParam& s, const ConnParam& c, std::size_t num_s) {
+  for (std::size_t si = 0; si < num_s; ++si) {
+    Eigen::Index cpti = indexCPT_F(si, num_s, s.numCells);
+    Eigen::Index cpbi = indexCPB_F(si, num_s, s.numCells);
+    Eigen::Index cnti = indexCNT_B(si, num_s, s.numCells);
+    Eigen::Index cnbi = indexCNB_B(si, num_s, s.numCells);
+
+    if (si > 0) {
+      // :::: [ POSITIVE TOP CONN ] ::::
+      // >>> MAIN LOOP
+      m(cpti, 0) += s.numCells * s.cellResist;
+      m(0, cpti) += s.numCells * s.cellResist;
+
+      // >>> POSITIVE TOP CONN
+      m(cpti, cpti) += 2*s.shuntResist + 2*c.shuntResist + s.numCells*s.cellResist + c.maniResist;
+      if (si > 1) {
+        m(cpti, cpti-1) -= s.shuntResist + c.shuntResist;
+      }
+      if (si+1 < num_s) {
+        m(cpti, cpti+1) -= s.shuntResist + c.shuntResist;
+      }
+
+      // >>> POSITIVE BOT CONN
+      m(cpti, cpbi-1) += s.cellResist;
+      if (si+1 < num_s) {
+        m(cpti, cpbi) += (s.numCells-1) * s.cellResist;
+      }
+
+      // >>> NEGATIVE TOP CONN
+      m(cpti, cnti-1) += 2*s.cellResist;
+      if (si+1 < num_s) {
+        m(cpti, cnti) += (s.numCells-2) * s.cellResist;
+      }
+
+      // >>> NEGATIVE BOT CONN
+      m(cpti, cnbi) = (s.numCells-1) * s.cellResist;
+      if (si > 1) {
+        m(cpti, cnbi-1) += s.cellResist;
+      }
+
+
+      // :::: [ NEGATIVE BOT CONN ] ::::
+      // >>> MAIN LOOP
+      m(cnbi, 0) += s.numCells * s.cellResist;
+      m(0, cnbi) += s.numCells * s.cellResist;
+
+      // >>> POSITIVE TOP CONN
+      m(cnbi, cpti) += (s.numCells-1) * s.cellResist;
+      if (si+1 < num_s) {
+        m(cnbi, cpti+1) += s.cellResist;
+      }
+
+      // >>> POSITIVE BOT CONN
+      if (si+1 < num_s) {
+        m(cnbi, cpbi) += s.numCells * s.cellResist;
+      }
+
+      // >>> NEGATIVE TOP CONN
+      m(cnbi, cnti-1) += s.cellResist;
+      if (si+1 < num_s) {
+        m(cnbi, cnti) += (s.numCells-1) * s.cellResist;
+      }
+
+      // >>> NEGATIVE BOT CONN
+      m(cnbi, cnbi) += 2*s.shuntResist + 2*c.shuntResist + s.numCells*s.cellResist + c.maniResist;
+      if (si > 1) {
+        m(cnbi, cnbi-1) -= s.shuntResist + c.shuntResist;
+      }
+      if (si+1 < num_s) {
+        m(cnbi, cnbi+1) -= s.shuntResist + c.shuntResist;
+      }
+    }
+
+
+    if (si+1 < num_s) {
+      // :::: [ POSITIVE BOT CONN ] ::::
+      // >>> MAIN LOOP
+      m(cpbi, 0) += s.numCells * s.cellResist;
+      m(0, cpbi) += s.numCells * s.cellResist;
+
+      // >>> POSITIVE TOP CONN
+      m(cpbi, cpti+1) += s.cellResist;
+      if (si > 0) {
+        m(cpbi, cpti) += (s.numCells-1) * s.cellResist;
+      }
+
+      // >>> POSITIVE BOT CONN
+      m(cpbi, cpbi) += 2*s.shuntResist + 2*c.shuntResist + s.numCells*s.cellResist + c.maniResist;
+      if (si > 0) {
+        m(cpbi, cpbi-1) -= s.shuntResist + c.shuntResist;
+      }
+      if (si+2 < num_s) {
+        m(cpbi, cpbi+1) -= s.shuntResist + c.shuntResist;
+      }
+
+      // >>> NEGATIVE TOP CONN
+      m(cpbi, cnti) += (s.numCells-1) * s.cellResist;
+      if (si > 0) {
+        m(cpbi, cnti-1) += s.cellResist;
+      }
+
+      // >>> NEGATIVE BOT CONN
+      if (si > 0) {
+        m(cpbi, cnbi) += s.numCells * s.cellResist;
+      }
+
+
+      // :::: [ NEGATIVE TOP CONN ] ::::
+      // >>> MAIN LOOP
+      m(cnti, 0) += s.numCells * s.cellResist;
+      m(0, cnti) += s.numCells * s.cellResist;
+
+      // >>> POSITIVE TOP CONN
+      m(cnti, cpti+1) += 2*s.cellResist;
+      if (si > 0) {
+        m(cnti, cpti) += (s.numCells-2) * s.cellResist;
+      }
+
+      // >>> POSITIVE BOT CONN
+      m(cnti, cpbi) += (s.numCells-1) * s.cellResist;
+      if (si+2 < num_s) {
+        m(cnti, cpbi+1) += s.cellResist;
+      }
+
+      // >>> NEGATIVE TOP CONN
+      m(cnti, cnti) += 2*s.shuntResist + 2*c.shuntResist + s.numCells*s.cellResist + c.maniResist;
+      if (si > 0) {
+        m(cnti, cnti-1) -= s.shuntResist + c.shuntResist;
+      }
+      if (si+2 < num_s) {
+        m(cnti, cnti+1) -= s.shuntResist + c.shuntResist;
+      }
+
+      // >>> NEGATIVE BOT CONN
+      m(cnti, cnbi+1) += s.cellResist;
+      if (si > 0) {
+        m(cnti, cnbi) += (s.numCells-1) * s.cellResist;
+      }
+    }
+
+
+
+    for (std::size_t ci = 0; ci < s.numCells; ++ci) {
+      Eigen::Index spti = indexSPT(si, ci, num_s, s.numCells);
+      Eigen::Index spbi = indexSPB(si, ci, num_s, s.numCells);
+      Eigen::Index snti = indexSNT(si, ci, num_s, s.numCells);
+      Eigen::Index snbi = indexSNB(si, ci, num_s, s.numCells);
+
+      if (si > 0) {
+        // :::: [ POSITIVE STACK LOOPS ] ::::
+        if (ci+1 < s.numCells) {
+          // >>> POSITIVE TOP CONN
+          m(spti, cpti) += s.cellResist;
+          m(cpti, spti) += s.cellResist;
+          m(spbi, cpti) += s.cellResist;
+          m(cpti, spbi) += s.cellResist;
+          if (ci == 0) {
+            m(spti-1, cpti) -= s.shuntResist;
+            m(cpti, spti-1) -= s.shuntResist;
+          }
+          if (ci+2 == s.numCells) {
+            m(spti, cpti) += s.shuntResist;
+            m(cpti, spti) += s.shuntResist;
+          }
+
+          // >>> NEGATIVE BOT CONN
+          m(spbi, cnbi) += s.cellResist;
+          m(cnbi, spbi) += s.cellResist;
+          m(spti, cnbi) += s.cellResist;
+          m(cnbi, spti) += s.cellResist;
+        }
+
+        // :::: [ NEGATIVE STACK LOOPS ] ::::
+        if (ci > 0) {
+          // >>> POSITIVE TOP CONN
+          m(snti-1, cpti) += s.cellResist;
+          m(cpti, snti-1) += s.cellResist;
+          m(snbi-1, cpti) += s.cellResist;
+          m(cpti, snbi-1) += s.cellResist;
+
+          // >>> NEGATIVE BOT CONN
+          m(snti, cnbi) += s.cellResist;
+          m(cnbi, snti) += s.cellResist;
+          m(snbi, cnbi) += s.cellResist;
+          m(cnbi, snbi) += s.cellResist;
+          if (ci == 1) {
+            m(snbi-1, cnbi) -= s.shuntResist;
+            m(cnbi, snbi-1) -= s.shuntResist;
+          }
+          if (ci+1 == s.numCells) {
+            m(snbi, cnbi) += s.shuntResist;
+            m(cnbi, snbi) += s.shuntResist;
+          }
+        }
+      }
+
+
+      if (si+1 < num_s) {
+        // :::: [ POSITIVE STACK LOOPS ] ::::
+        if (ci+1 < s.numCells) {
+          // >>> POSITIVE BOT CONN
+          m(spti, cpbi) += s.cellResist;
+          m(cpbi, spti) += s.cellResist;
+          m(spbi, cpbi) += s.cellResist;
+          m(cpbi, spbi) += s.cellResist;
+
+          // >>> NEGATTIVE TOP CONN
+          m(spti+1, cnti) += s.cellResist;
+          m(cnti, spti+1) += s.cellResist;
+          m(spbi+1, cnti) += s.cellResist;
+          m(cnti, spbi+1) += s.cellResist;
+          if(ci == 0) {
+            m(spbi, cpbi) += s.shuntResist;
+            m(cpbi, spbi) += s.shuntResist;
+          }
+          if (ci+2 == num_s) {
+            m(spbi+1, cpbi) -= s.shuntResist;
+            m(cpbi, spbi+1) -= s.shuntResist;
+          }
+        }
+
+        // :::: [ NEGATIVE STACK LOOPS ] ::::
+        if (ci > 0) {
+          // >>> POSITIVE BOT CONN
+          m(snti, cpbi) += s.cellResist;
+          m(cpbi, snti) += s.cellResist;
+          m(snbi, cpbi) += s.cellResist;
+          m(cpbi, snbi) += s.cellResist;
+
+          // >>> NEGATIVE TOP CONN
+          m(snti, cnti) += s.cellResist;
+          m(cnti, snti) += s.cellResist;
+          m(snbi, cnti) += s.cellResist;
+          m(cnti, snbi) += s.cellResist;
+          if (ci == 1) {
+            m(snti, cnti) += s.shuntResist;
+            m(cnti, snti) += s.shuntResist;
+          }
+          if (ci+1 == num_s) {
+            m(snti+1, cnti) -= s.shuntResist;
+            m(cnti, snti+1) -= s.shuntResist;
+          }
+        }
+      }
+    }
+  }
+}
+
+
+/*
+********************************************************************************
+**
+**    addSysVolt Definition
+**
+********************************************************************************
+*/
+
+
+void addSysVolt(Eigen::VectorXd& v, const StackParam&s, std::size_t num_s, double chgVolt) {
+  v(0) += chgVolt;
+  for (std::size_t si = 0; si < num_s; ++si) {
+    if (si > 0) {
+      v(indexCPT_F(si, num_s, s.numCells)) -= s.numCells * kAvrOCV;
+      v(indexCNT_F(si, num_s, s.numCells)) -= s.numCells * kAvrOCV;
+    }
+
+    if (si+1 < num_s) {
+      v(indexCPB_F(si, num_s, s.numCells)) -= s.numCells * kAvrOCV;
+      v(indexCNB_F(si, num_s, s.numCells)) -= s.numCells * kAvrOCV;
+    }
+
+    for (std::size_t ci = 0; ci < s.numCells; ++ci) {
+      v(0) -= kAvrOCV;
+
+      if (ci+1 < s.numCells) {
+        v(indexSPT(si, ci, num_s, s.numCells)) -= kAvrOCV;
+        v(indexSPB(si, ci, num_s, s.numCells)) -= kAvrOCV;
+      }
+
+      if (ci > 0) {
+        v(indexSNT(si, ci, num_s, s.numCells)) -= kAvrOCV;
+        v(indexSNB(si, ci, num_s, s.numCells)) -= kAvrOCV;
+      }
+    }
+  }
+}
+
+
+/*
+********************************************************************************
+**
+**    calculate_XX Definitions
+**
+********************************************************************************
+*/
+
+
+ShuntPerf calculate_FF(const StackParam& s, const ConnParam& c, std::size_t num_s, double chgVolt) {
+  std::size_t size = matSize(num_s, s.numCells);
+  Eigen::MatrixXd cm = Eigen::MatrixXd::Zero(size, size);   // current matrix
+  addStackLoops(cm, s, num_s);
+  addConnLoops_FF(cm, s, c, num_s);
+  Eigen::VectorXd vv = Eigen::VectorXd::Zero(size);         // volt vector
+  addSysVolt(vv, s, num_s, chgVolt);
+  Eigen::VectorXd cv = cm.colPivHouseholderQr().solve(vv);  // current vector
+
+  std::vector<double> clist {};
+  for (std::size_t si = 0; si < num_s; ++si) {
+    for (std::size_t ci = 0; ci < s.numCells; ++ci) {
+      clist.push_back(cv(0)
+          + calcStackContri(cv, si, ci, num_s, s.numCells)
+          + calcLoopContri_PF(cv, si, ci, num_s, s.numCells)
+          + calcLoopContri_NF(cv, si, ci, num_s, s.numCells));
     }
   }
 
-  return m;
+  return {cv(0), chgVolt, clist};
 }
 
 
-Eigen::VectorXd formVoltVec(double chgVolt, std::size_t numCells) {
-  Eigen::VectorXd v = Eigen::VectorXd::Constant(4*numCells -3, -1.38);
-  v(0) = chgVolt - 1.38*numCells;
-  return v;
-}
+ShuntPerf calculate_FB(const StackParam& s, const ConnParam& c, std::size_t num_s, double chgVolt) {
+  std::size_t size = matSize(num_s, s.numCells);
+  Eigen::MatrixXd cm = Eigen::MatrixXd::Zero(size, size);   // current matrix
+  addStackLoops(cm, s, num_s);
+  addConnLoops_FB(cm, s, c, num_s);
+  Eigen::VectorXd vv = Eigen::VectorXd::Zero(size);         // volt vector
+  addSysVolt(vv, s, num_s, chgVolt);
+  Eigen::VectorXd cv = cm.colPivHouseholderQr().solve(vv);  // current vector
 
-Eigen::VectorXd calcCurrLoops(double chgVolt, const SystemParam& s) {
-  auto currMat = formCurrMat(s);
-  auto voltVec = formVoltVec(chgVolt, s.numCells());
-  return currMat.colPivHouseholderQr().solve(voltVec);
-}
-
-
-comutils::Table calcPerf(double chgVolt, const SystemParam& s) {
-  auto v = calcCurrLoops(chgVolt, s);
-  std::vector<std::string> elems {};
-  for (std::size_t i = 0; i < s.numCells(); ++i) {
-    addCellStats(v, s, i, elems);
+  std::vector<double> clist {};
+  for (std::size_t si = 0; si < num_s; ++si) {
+    for (std::size_t ci = 0; ci < s.numCells; ++ci) {
+      clist.push_back(cv(0)
+          + calcStackContri(cv, si, ci, num_s, s.numCells)
+          + calcLoopContri_PF(cv, si, ci, num_s, s.numCells)
+          + calcLoopContri_NB(cv, si, ci, num_s, s.numCells));
+    }
   }
-  return comutils::Table{kShuntLossTableHdrs, elems};
+
+  return {cv(0), chgVolt, clist};
 }
 
 
-comutils::Table calcPerf(double chgVolt, const ParamGenerator& gen) {
-  return calcPerf(chgVolt, gen.generate());
 }
-
-
-comutils::Table calcPerf(const double chgVolt, const comutils::Table& table, const ResistConfig& cfg_r) {
-  return calcPerf(chgVolt, {table, cfg_r});
 }
-
-
-} // END OF NAMESPACE <vrfb::shuntcur> -----------------------------------------
-} // END OF NAMESPACE <vrfb> ---------------------------------------------------

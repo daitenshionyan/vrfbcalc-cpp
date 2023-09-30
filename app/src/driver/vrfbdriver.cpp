@@ -185,25 +185,4 @@ std::vector<PerformanceEntry_CE> readPerformance_CE(
 }
 
 
-void calcPerf_SE(const std::string& name, double chgVolt, const vrfb::shuntcur::ParamGenerator& gen, logger::Logger& l) {
-  comutils::Table table;
-  try {
-    table = vrfb::shuntcur::calcPerf(chgVolt, gen);
-  } catch (std::exception& ex) {
-    l.fail(comutils::string::format_string("Failed to calculate performance - %s", ex.what()));
-    return;
-  }
-
-  try {
-    auto path = std::filesystem::u8path<std::string>("output/" + name + ".xlsx");
-    io::saveTable_XLSX(path, table);
-  } catch (std::exception& ex) {
-    l.fail(comutils::string::format_string("Failed to save data - %s", ex.what()));
-    return;
-  }
-
-  l.succ("Successfully calculated shunt efficiency");
-}
-
-
 } // END OF NAMESPACE <vrfbdriver> ---------------------------------------------

@@ -42,7 +42,10 @@ FetchContent_MakeAvailable(googletest)
 
 enable_testing()
 
-add_executable(shunttest test/shunttest.cpp)
+add_executable(shunttest
+    test/shunttestconst.hpp
+    test/shunttest.cpp
+)
 
 target_link_libraries(shunttest PRIVATE GTest::gtest_main)
 target_link_libraries(shunttest PRIVATE Eigen3::Eigen)
