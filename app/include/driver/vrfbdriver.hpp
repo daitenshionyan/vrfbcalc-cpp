@@ -57,7 +57,7 @@ struct ShuntJob {
 };
 
 
-void calcShuntPerf(const ShuntJob&, logger::Logger&);
+vrfb::shuntcur::ShuntPerf calcShuntPerf(const ShuntJob&, logger::Logger&);
 
 
 }

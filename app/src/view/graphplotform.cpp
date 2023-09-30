@@ -347,6 +347,44 @@ void GraphPlotForm::setupPlot(
 }
 
 
+void GraphPlotForm::setupPlot(
+      const std::vector<double>& series_x,
+      const std::vector<double>& series_y,
+      const std::string& name_x, const std::string& name_y) {
+  ui->plotWidthField->setValue(ui->plot->width());
+  ui->plotHeightField->setValue(ui->plot->height());
+
+  double min_x = std::numeric_limits<double>::max();
+  double max_x = -std::numeric_limits<double>::max();
+  double min_y = std::numeric_limits<double>::max();
+  double max_y = -std::numeric_limits<double>::max();
+
+  auto graph = ui->plot->addGraph();
+  for (std::size_t i = 0; i < series_x.size() && i < series_y.size(); ++i) {
+    double x = series_x[i];
+    double y = series_y[i];
+    graph->addData(x, y);
+    min_x = (min_x < x) ? min_x : x;
+    max_x = (max_x < x) ? x : max_x;
+    min_y = (min_y < y) ? min_y : y;
+    max_y = (max_y < y) ? y : max_y;
+  }
+
+  // set up fields
+  setupXFields(min_x, max_x);
+  setupYFields(min_y, max_y);
+
+  // set initial range
+  ui->plot->xAxis->setRange(min_x, max_x);
+  ui->plot->yAxis->setRange(min_y, max_y);
+  adjustAxisRange(ui->plot->xAxis);
+  adjustAxisRange(ui->plot->yAxis);
+  ui->plot->xAxis->setLabel(QString::fromStdString(name_x));
+  ui->plot->yAxis->setLabel(QString::fromStdString(name_y));
+  ui->plot->replot();
+}
+
+
 void GraphPlotForm::setupXFields(double min, double max) {
   int decimals = getFieldDecimals(min, max);
   handler->setXDiffThreshold(std::pow(10, -decimals));

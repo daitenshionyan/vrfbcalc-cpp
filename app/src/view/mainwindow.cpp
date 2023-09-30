@@ -11,6 +11,7 @@
 #include "utillib/utils.hpp"
 #include "vrfbcalccfg.hpp"
 #include "driver/vrfbdriver_io.hpp"
+#include "view/shuntcur/shuntcurresultview.h"
 
 
 namespace {
@@ -65,6 +66,9 @@ MainWindow::MainWindow(QWidget* parent)
   connect(this, &MainWindow::completedPerformanceReading,
       this, &MainWindow::displayPerformanceView,
       Qt::ConnectionType::QueuedConnection);
+  connect(this, &MainWindow::completedSCCalc,
+      this, &MainWindow::displayPerformanceView_SC,
+      Qt::ConnectionType::QueuedConnection);
 }
 
 
@@ -90,7 +94,8 @@ void MainWindow::startCalc_SC() {
       &pool,
       [&](QPromise<logger::LogMsg>& p) {
         auto w = PromLogger{p};
-        vrfbdriver::calcShuntPerf(popup_se->getJob(), w);
+        auto perf = vrfbdriver::calcShuntPerf(popup_se->getJob(), w);
+        emit completedSCCalc(perf);
       }
   ));
 }
@@ -165,6 +170,20 @@ void MainWindow::displayPerformanceView(
   }
   connect(rv, &CEResultView::exportRequested,
       this, &MainWindow::exportCEPerformance);
+  rv->open();
+}
+
+
+void MainWindow::displayPerformanceView_SC(const vrfb::shuntcur::ShuntPerf& p) {
+  SCResultView* rv = new SCResultView(this);
+  try {
+    rv->plotGraphs(p);
+  } catch (std::exception& ex) {
+    fail(comutils::string::format_string("Failed to plot graphs due to - %s",
+        ex.what()));
+    delete rv;
+    return;
+  }
   rv->open();
 }
 
