@@ -179,8 +179,14 @@ struct ConnParam {
 
 class ShuntPerf {
   public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
-    ShuntPerf(double cc, double cv, const std::vector<double>& clist);
-    ShuntPerf(double cc, double cv, std::vector<double>&& clist);
+    ShuntPerf(double cc, double cv, const StackParam& s, const ConnParam& c,
+        const std::vector<double>& clist,
+        const std::vector<double>& sptlist, const std::vector<double>& spblist,
+        const std::vector<double>& sntlist, const std::vector<double>& snblist);
+    ShuntPerf(double cc, double cv, const StackParam& s, const ConnParam& c,
+        std::vector<double>&& clist,
+        std::vector<double>&& sptlist, std::vector<double>&& spblist,
+        std::vector<double>&& sntlist, std::vector<double>&& snblist);
 
     ShuntPerf(const ShuntPerf&) = default;
     ShuntPerf(ShuntPerf&&) = default;
@@ -202,13 +208,36 @@ class ShuntPerf {
     inline double cellPowr(std::size_t i) const {return powrs.at(i);}
     inline double totalPowr() const {return totPowr;}
 
+    inline double sptCurr(std::size_t i) const {return spt_currs.at(i);}
+    inline double spbCurr(std::size_t i) const {return spb_currs.at(i);}
+    inline double sntCurr(std::size_t i) const {return snt_currs.at(i);}
+    inline double snbCurr(std::size_t i) const {return snb_currs.at(i);}
+
+    inline double sptPowr(std::size_t i) const {return spt_powrs.at(i);}
+    inline double spbPowr(std::size_t i) const {return spb_powrs.at(i);}
+    inline double sntPowr(std::size_t i) const {return snt_powrs.at(i);}
+    inline double snbPowr(std::size_t i) const {return snb_powrs.at(i);}
+
+    inline const StackParam& stackParam() const {return stack;}
+    inline const ConnParam& connParam() const {return conn;}
+
 
   private: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     double chgCurr;
     double chgVolt;
     double totPowr = 0;
+    StackParam stack;
+    ConnParam conn;
     std::vector<double> currs;
     std::vector<double> powrs;
+    std::vector<double> spt_currs;
+    std::vector<double> spb_currs;
+    std::vector<double> snt_currs;
+    std::vector<double> snb_currs;
+    std::vector<double> spt_powrs;
+    std::vector<double> spb_powrs;
+    std::vector<double> snt_powrs;
+    std::vector<double> snb_powrs;
 };
 
 

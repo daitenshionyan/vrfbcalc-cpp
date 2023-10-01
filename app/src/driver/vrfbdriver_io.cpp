@@ -99,11 +99,27 @@ void writeShuntPerf(xlnt::worksheet& ws, const vrfb::shuntcur::ShuntPerf& p) {
   ws.cell(1, 1).value("Cell No.");
   ws.cell(2, 1).value("Cell Current (A)");
   ws.cell(3, 1).value("Cell Power (W)");
+  ws.cell(4, 1).value("SPT Current (A)");
+  ws.cell(5, 1).value("SPT Power (W)");
+  ws.cell(6, 1).value("SPB Current (A)");
+  ws.cell(7, 1).value("SPB Power (W)");
+  ws.cell(8, 1).value("SNT Current (A)");
+  ws.cell(9, 1).value("SNT Power (W)");
+  ws.cell(10, 1).value("SNB Current (A)");
+  ws.cell(11, 1).value("SNB Power (W)");
 
   for (std::size_t i = 0; i < p.numCells(); ++i) {
     ws.cell(1, i+2).value(i+1);
     ws.cell(2, i+2).value(p.cellCurr(i));
     ws.cell(3, i+2).value(p.cellPowr(i));
+    ws.cell(4, i+2).value(p.sptCurr(i));
+    ws.cell(5, i+2).value(p.sptPowr(i));
+    ws.cell(6, i+2).value(p.spbCurr(i));
+    ws.cell(7, i+2).value(p.spbPowr(i));
+    ws.cell(8, i+2).value(p.sntCurr(i));
+    ws.cell(9, i+2).value(p.sntPowr(i));
+    ws.cell(10, i+2).value(p.snbCurr(i));
+    ws.cell(11, i+2).value(p.snbPowr(i));
   }
 }
 

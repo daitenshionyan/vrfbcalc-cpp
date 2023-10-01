@@ -48,16 +48,49 @@ void checkShuntPerf(const vrfb::shuntcur::ShuntPerf& expected, const vrfb::shunt
       << " | Actual size: " << actual.numCells();
 
   bool is_same = true;
-  std::stringstream ss {};
+  std::stringstream celldiff {};
+  std::stringstream sptdiff {};
+  std::stringstream spbdiff {};
+  std::stringstream sntdiff {};
+  std::stringstream snbdiff {};
   for (std::size_t i = 0; i < expected.numCells(); ++i) {
     if (std::abs(actual.cellCurr(i) - expected.cellCurr(i)) > 0.001) {
       is_same = false;
-      ss << "At (" << i << ")"
+      celldiff << "At (" << i << ")"
         << " - Expected: " <<  expected.cellCurr(i)
         << " | Actual: " << actual.cellCurr(i) << "\n";
     }
+    if (std::abs(actual.sptCurr(i) - expected.sptCurr(i)) > 0.001) {
+      is_same = false;
+      sptdiff << "At (" << i << ")"
+        << " - Expected: " <<  expected.sptCurr(i)
+        << " | Actual: " << actual.sptCurr(i) << "\n";
+    }
+    if (std::abs(actual.spbCurr(i) - expected.spbCurr(i)) > 0.001) {
+      is_same = false;
+      spbdiff << "At (" << i << ")"
+        << " - Expected: " <<  expected.spbCurr(i)
+        << " | Actual: " << actual.spbCurr(i) << "\n";
+    }
+    if (std::abs(actual.sntCurr(i) - expected.sntCurr(i)) > 0.001) {
+      is_same = false;
+      sntdiff << "At (" << i << ")"
+        << " - Expected: " <<  expected.sntCurr(i)
+        << " | Actual: " << actual.sntCurr(i) << "\n";
+    }
+    if (std::abs(actual.snbCurr(i) - expected.snbCurr(i)) > 0.001) {
+      is_same = false;
+      snbdiff << "At (" << i << ")"
+        << " - Expected: " <<  expected.snbCurr(i)
+        << " | Actual: " << actual.snbCurr(i) << "\n";
+    }
   }
-  ASSERT_TRUE(is_same) << "Difference:\n" << ss.str();
+  ASSERT_TRUE(is_same)
+      << "Cell Difference:\n" << celldiff.str()
+      << "SPT Difference\n" << sptdiff.str()
+      << "SPB Difference\n" << spbdiff.str()
+      << "SNT Difference\n" << sntdiff.str()
+      << "SNB Difference\n" << snbdiff.str();
 }
 
 

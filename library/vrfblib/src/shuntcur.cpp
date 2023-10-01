@@ -1,6 +1,7 @@
 #include "vrfblib/vrfblib.hpp"
 #include "shuntcur.hpp"
 
+#include <cmath>
 #include <stdexcept>
 #include <utility>
 
@@ -127,13 +128,13 @@ inline Eigen::Index indexCNB_B(std::size_t si,
 /*
 ********************************************************************************
 **
-**    Current calculation functions
+**    Current calculation functions for CELL
 **
 ********************************************************************************
 */
 
 
-double calcStackContri(const Eigen::VectorXd& cv,
+double calcStackContri_C(const Eigen::VectorXd& cv,
       std::size_t si, std::size_t ci,
       std::size_t num_s, std::size_t num_c) {
   double result = 0;
@@ -149,7 +150,7 @@ double calcStackContri(const Eigen::VectorXd& cv,
 }
 
 
-double calcLoopContri_PF(const Eigen::VectorXd& cv,
+double calcConnContri_C_PF(const Eigen::VectorXd& cv,
       std::size_t si, std::size_t ci,
       std::size_t num_s, std::size_t num_c) {
   double result = 0;
@@ -165,7 +166,7 @@ double calcLoopContri_PF(const Eigen::VectorXd& cv,
 }
 
 
-double calcLoopContri_NF(const Eigen::VectorXd& cv,
+double calcConnContri_C_NF(const Eigen::VectorXd& cv,
       std::size_t si, std::size_t ci,
       std::size_t num_s, std::size_t num_c) {
   double result = 0;
@@ -181,7 +182,7 @@ double calcLoopContri_NF(const Eigen::VectorXd& cv,
 }
 
 
-double calcLoopContri_NB(const Eigen::VectorXd& cv,
+double calcConnContri_C_NB(const Eigen::VectorXd& cv,
       std::size_t si, std::size_t ci,
       std::size_t num_s, std::size_t num_c) {
   double result = 0;
@@ -192,6 +193,147 @@ double calcLoopContri_NB(const Eigen::VectorXd& cv,
   }
   if (si > 0) {
     result += cv(indexCNB_B(si, num_s, num_c));
+  }
+  return result;
+}
+
+
+/*
+********************************************************************************
+**
+**    Current calculation functions for STACK SHUNT
+**
+********************************************************************************
+*/
+
+
+double calcCurr_SPT_PF(const Eigen::VectorXd& cv,
+      std::size_t si, std::size_t ci,
+      std::size_t num_s, std::size_t num_c) {
+  double result = 0;
+  if (ci+1 < num_c) {
+    result += cv(indexSPT(si, ci, num_s, num_c));
+  }
+  if (ci > 0) {
+    result -= cv(indexSPT(si, ci, num_s, num_c) - 1);
+  }
+  if (ci+1 == num_c) {
+    if (si > 0) {
+      result -= cv(indexCPT_F(si, num_s, num_c));
+    }
+    if (si+1 < num_s) {
+      result += cv(indexCPT_F(si, num_s, num_c) + 1);
+    }
+  }
+  return result;
+}
+
+
+double calcCurr_SPB_PF(const Eigen::VectorXd& cv,
+      std::size_t si, std::size_t ci,
+      std::size_t num_s, std::size_t num_c) {
+  double result = 0;
+  if (ci+1 < num_c) {
+    result += cv(indexSPB(si, ci, num_s, num_c));
+  }
+  if (ci > 0) {
+    result -= cv(indexSPB(si, ci, num_s, num_c) - 1);
+  }
+  if (ci == 0) {
+    if (si > 0) {
+      result -= cv(indexCPB_F(si, num_s, num_c) - 1);
+    }
+    if (si+1 < num_s) {
+      result += cv(indexCPB_F(si, num_s, num_c));
+    }
+  }
+  return result;
+}
+
+
+double calcCurr_SNT_NF(const Eigen::VectorXd& cv,
+      std::size_t si, std::size_t ci,
+      std::size_t num_s, std::size_t num_c) {
+  double result = 0;
+  if (ci+1 < num_c) {
+    result += cv(indexSNT(si, ci, num_s, num_c) + 1);
+  }
+  if (ci > 0) {
+    result -= cv(indexSNT(si, ci, num_s, num_c));
+  }
+  if (ci+1 == num_c) {
+    if (si > 0) {
+      result -= cv(indexCNT_F(si, num_s, num_c));
+    }
+    if (si+1 < num_s) {
+      result += cv(indexCNT_F(si, num_s, num_c) + 1);
+    }
+  }
+  return result;
+}
+
+
+double calcCurr_SNB_NF(const Eigen::VectorXd& cv,
+      std::size_t si, std::size_t ci,
+      std::size_t num_s, std::size_t num_c) {
+  double result = 0;
+  if (ci+1 < num_c) {
+    result += cv(indexSNB(si, ci, num_s, num_c) + 1);
+  }
+  if (ci > 0) {
+    result -= cv(indexSNB(si, ci, num_s, num_c));
+  }
+  if (ci == 0) {
+    if (si > 0) {
+      result -= cv(indexCNB_F(si, num_s, num_c) - 1);
+    }
+    if (si+1 < num_s) {
+      result += cv(indexCNB_F(si, num_s, num_c));
+    }
+  }
+  return result;
+}
+
+
+double calcCurr_SNT_NB(const Eigen::VectorXd& cv,
+      std::size_t si, std::size_t ci,
+      std::size_t num_s, std::size_t num_c) {
+  double result = 0;
+  if (ci+1 < num_c) {
+    result += cv(indexSNT(si, ci, num_s, num_c) + 1);
+  }
+  if (ci > 0) {
+    result -= cv(indexSNT(si, ci, num_s, num_c));
+  }
+  if (ci == 0) {
+    if (si > 0) {
+      result -= cv(indexCNT_B(si, num_s, num_c) - 1);
+    }
+    if (si+1 < num_s) {
+      result += cv(indexCNT_B(si, num_s, num_c));
+    }
+  }
+  return result;
+}
+
+
+double calcCurr_SNB_NB(const Eigen::VectorXd& cv,
+      std::size_t si, std::size_t ci,
+      std::size_t num_s, std::size_t num_c) {
+  double result = 0;
+  if (ci+1 < num_c) {
+    result += cv(indexSNB(si, ci, num_s, num_c) + 1);
+  }
+  if (ci > 0) {
+    result -= cv(indexSNB(si, ci, num_s, num_c));
+  }
+  if (ci+1 == num_c) {
+    if (si > 0) {
+      result -= cv(indexCNB_B(si, num_s, num_c));
+    }
+    if (si+1 < num_s) {
+      result += cv(indexCNB_B(si, num_s, num_c) + 1);
+    }
   }
   return result;
 }
@@ -239,20 +381,40 @@ ConnParam::ConnParam(
 */
 
 
-ShuntPerf::ShuntPerf(double cc, double cv, const std::vector<double>& clist)
-    : chgCurr{cc}, chgVolt{cv}, currs{clist} {
-  for (double c : currs) {
-    powrs.push_back(c*kAvrOCV);
-    totPowr += c*kAvrOCV;
+ShuntPerf::ShuntPerf(double cc, double cv, const StackParam& s, const ConnParam& c,
+        const std::vector<double>& clist,
+        const std::vector<double>& sptlist, const std::vector<double>& spblist,
+        const std::vector<double>& sntlist, const std::vector<double>& snblist)
+    : chgCurr{cc}, chgVolt{cv}, stack{s}, conn{c},
+      currs{clist},
+      spt_currs{sptlist}, spb_currs{spblist},
+      snt_currs{sntlist}, snb_currs{snblist} {
+  for (std::size_t i = 0; i < clist.size(); ++i) {
+    powrs.push_back(currs[i]*kAvrOCV);
+    totPowr += currs[i]*kAvrOCV;
+    spt_powrs.push_back(std::pow(spt_currs[i], 2) * stack.shuntResist);
+    spb_powrs.push_back(std::pow(spb_currs[i], 2) * stack.shuntResist);
+    snt_powrs.push_back(std::pow(snt_currs[i], 2) * stack.shuntResist);
+    snb_powrs.push_back(std::pow(snb_currs[i], 2) * stack.shuntResist);
   }
 }
 
 
-ShuntPerf::ShuntPerf(double cc, double cv, std::vector<double>&& clist)
-    : chgCurr{cc}, chgVolt{cv}, currs{std::move(clist)} {
-  for (double c : currs) {
-    powrs.push_back(c*kAvrOCV);
-    totPowr += c*kAvrOCV;
+ShuntPerf::ShuntPerf(double cc, double cv, const StackParam& s, const ConnParam& c,
+        std::vector<double>&& clist,
+        std::vector<double>&& sptlist, std::vector<double>&& spblist,
+        std::vector<double>&& sntlist, std::vector<double>&& snblist)
+    : chgCurr{cc}, chgVolt{cv}, stack{s}, conn{c},
+      currs{std::move(clist)},
+      spt_currs{std::move(sptlist)}, spb_currs{std::move(spblist)},
+      snt_currs{std::move(sntlist)}, snb_currs{std::move(snblist)} {
+  for (std::size_t i = 0; i < clist.size(); ++i) {
+    powrs.push_back(currs[i]*kAvrOCV);
+    totPowr += currs[i]*kAvrOCV;
+    spt_powrs.push_back(std::pow(spt_currs[i], 2) * stack.shuntResist);
+    spb_powrs.push_back(std::pow(spb_currs[i], 2) * stack.shuntResist);
+    snt_powrs.push_back(std::pow(snt_currs[i], 2) * stack.shuntResist);
+    snb_powrs.push_back(std::pow(snb_currs[i], 2) * stack.shuntResist);
   }
 }
 
@@ -952,16 +1114,24 @@ ShuntPerf calculate_FF(const StackParam& s, const ConnParam& c, std::size_t num_
   Eigen::VectorXd cv = cm.colPivHouseholderQr().solve(vv);  // current vector
 
   std::vector<double> clist {};
+  std::vector<double> sptlist {};
+  std::vector<double> spblist {};
+  std::vector<double> sntlist {};
+  std::vector<double> snblist {};
   for (std::size_t si = 0; si < num_s; ++si) {
     for (std::size_t ci = 0; ci < s.numCells; ++ci) {
       clist.push_back(cv(0)
-          + calcStackContri(cv, si, ci, num_s, s.numCells)
-          + calcLoopContri_PF(cv, si, ci, num_s, s.numCells)
-          + calcLoopContri_NF(cv, si, ci, num_s, s.numCells));
+          + calcStackContri_C(cv, si, ci, num_s, s.numCells)
+          + calcConnContri_C_PF(cv, si, ci, num_s, s.numCells)
+          + calcConnContri_C_NF(cv, si, ci, num_s, s.numCells));
+      sptlist.push_back(calcCurr_SPT_PF(cv, si, ci, num_s, s.numCells));
+      spblist.push_back(calcCurr_SPB_PF(cv, si, ci, num_s, s.numCells));
+      sntlist.push_back(calcCurr_SNT_NF(cv, si, ci, num_s, s.numCells));
+      snblist.push_back(calcCurr_SNB_NF(cv, si, ci, num_s, s.numCells));
     }
   }
 
-  return {cv(0), chgVolt, clist};
+  return {cv(0), chgVolt, s, c, clist, sptlist, spblist, sntlist, snblist};
 }
 
 
@@ -975,16 +1145,24 @@ ShuntPerf calculate_FB(const StackParam& s, const ConnParam& c, std::size_t num_
   Eigen::VectorXd cv = cm.colPivHouseholderQr().solve(vv);  // current vector
 
   std::vector<double> clist {};
+  std::vector<double> sptlist {};
+  std::vector<double> spblist {};
+  std::vector<double> sntlist {};
+  std::vector<double> snblist {};
   for (std::size_t si = 0; si < num_s; ++si) {
     for (std::size_t ci = 0; ci < s.numCells; ++ci) {
       clist.push_back(cv(0)
-          + calcStackContri(cv, si, ci, num_s, s.numCells)
-          + calcLoopContri_PF(cv, si, ci, num_s, s.numCells)
-          + calcLoopContri_NB(cv, si, ci, num_s, s.numCells));
+          + calcStackContri_C(cv, si, ci, num_s, s.numCells)
+          + calcConnContri_C_PF(cv, si, ci, num_s, s.numCells)
+          + calcConnContri_C_NB(cv, si, ci, num_s, s.numCells));
+      sptlist.push_back(calcCurr_SPT_PF(cv, si, ci, num_s, s.numCells));
+      spblist.push_back(calcCurr_SPB_PF(cv, si, ci, num_s, s.numCells));
+      sntlist.push_back(calcCurr_SNT_NB(cv, si, ci, num_s, s.numCells));
+      snblist.push_back(calcCurr_SNB_NB(cv, si, ci, num_s, s.numCells));
     }
   }
 
-  return {cv(0), chgVolt, clist};
+  return {cv(0), chgVolt, s, c, clist, sptlist, spblist, sntlist, snblist};
 }
 
 

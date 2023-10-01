@@ -417,7 +417,11 @@
                  <number>0</number>
                 </property>
                 <item>
-                 <widget class="QDoubleSpinBox" name="maniLenField"/>
+                 <widget class="QDoubleSpinBox" name="maniLenField">
+                  <property name="maximum">
+                   <double>9999999999.000000000000000</double>
+                  </property>
+                 </widget>
                 </item>
                 <item>
                  <widget class="QLabel" name="maniLenUnitLabel">
@@ -467,7 +471,11 @@
                  <number>0</number>
                 </property>
                 <item>
-                 <widget class="QDoubleSpinBox" name="maniAreaField"/>
+                 <widget class="QDoubleSpinBox" name="maniAreaField">
+                  <property name="maximum">
+                   <double>9999999999.000000000000000</double>
+                  </property>
+                 </widget>
                 </item>
                 <item>
                  <widget class="QLabel" name="maniAreaUnitLabel">
@@ -517,7 +525,11 @@
                  <number>0</number>
                 </property>
                 <item>
-                 <widget class="QDoubleSpinBox" name="connShuntLenField"/>
+                 <widget class="QDoubleSpinBox" name="connShuntLenField">
+                  <property name="maximum">
+                   <double>9999999999.000000000000000</double>
+                  </property>
+                 </widget>
                 </item>
                 <item>
                  <widget class="QLabel" name="connShuntLenUnitLabel">
@@ -567,7 +579,11 @@
                  <number>0</number>
                 </property>
                 <item>
-                 <widget class="QDoubleSpinBox" name="connShuntAreaField"/>
+                 <widget class="QDoubleSpinBox" name="connShuntAreaField">
+                  <property name="maximum">
+                   <double>9999999999.000000000000000</double>
+                  </property>
+                 </widget>
                 </item>
                 <item>
                  <widget class="QLabel" name="connShuntAreaUnitLabel">
@@ -617,7 +633,11 @@
                  <number>0</number>
                 </property>
                 <item>
-                 <widget class="QDoubleSpinBox" name="connManiLenField"/>
+                 <widget class="QDoubleSpinBox" name="connManiLenField">
+                  <property name="maximum">
+                   <double>9999999999.000000000000000</double>
+                  </property>
+                 </widget>
                 </item>
                 <item>
                  <widget class="QLabel" name="connManiLenUnitLabel">
@@ -667,7 +687,11 @@
                  <number>0</number>
                 </property>
                 <item>
-                 <widget class="QDoubleSpinBox" name="connManiAreaField"/>
+                 <widget class="QDoubleSpinBox" name="connManiAreaField">
+                  <property name="maximum">
+                   <double>9999999999.000000000000000</double>
+                  </property>
+                 </widget>
                 </item>
                 <item>
                  <widget class="QLabel" name="conManiAreaUnitLabel">
@@ -717,7 +741,11 @@
                  <number>0</number>
                 </property>
                 <item>
-                 <widget class="QDoubleSpinBox" name="asrField"/>
+                 <widget class="QDoubleSpinBox" name="asrField">
+                  <property name="maximum">
+                   <double>9999999999.000000000000000</double>
+                  </property>
+                 </widget>
                 </item>
                 <item>
                  <widget class="QLabel" name="asrUnitLabel">
