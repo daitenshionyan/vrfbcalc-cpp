@@ -94,8 +94,14 @@ void MainWindow::startCalc_SC() {
       &pool,
       [&](QPromise<logger::LogMsg>& p) {
         auto w = PromLogger{p};
-        auto perf = vrfbdriver::calcShuntPerf(popup_se->getJob(), w);
-        emit completedSCCalc(perf);
+        try {
+          auto perf = vrfbdriver::calcShuntPerf(popup_se->getJob(), w);
+          emit completedSCCalc(perf);
+        } catch (std::exception& ex) {
+          w.fail(comutils::string::format_string("Error while calculating shunt performance: %s",
+              ex.what()));
+          return;
+        }
       }
   ));
 }

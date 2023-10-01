@@ -1,6 +1,8 @@
 #include "view/shuntcur/shuntcurconfigpopup.h"
 #include "./ui_shuntcurconfigpopup.h"
 
+#include <stdexcept>
+
 
 SCConfigPopup::SCConfigPopup(QWidget* parent)
     : QDialog(parent), ui(new Ui::SCConfigPopup) {
@@ -14,6 +16,15 @@ SCConfigPopup::~SCConfigPopup() {
 
 
 vrfbdriver::ShuntJob SCConfigPopup::getJob() {
+  if (ui->nameField->text().isEmpty()) {
+    throw std::runtime_error("Blank name");
+  }
+  if (ui->numStackField->value() <= 0) {
+    throw std::runtime_error("Negative or 0 number of stacks");
+  }
+  if (ui->numCellField->value() <= 0) {
+    throw std::runtime_error("Negative or 0 number of cells");
+  }
   vrfb::shuntcur::CommLineCalc* calc = new vrfb::shuntcur::CommLineCalc(
     {
       (std::size_t) ui->numCellField->value(),
