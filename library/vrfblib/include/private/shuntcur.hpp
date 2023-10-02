@@ -14,6 +14,18 @@ namespace shuntcur {
 constexpr double kAvrOCV = 1.38;
 
 
+/**
+ * Enumberation representing the connection side of electrolyte inlet to the
+ * stack relative to the positive terminal of the stack.
+*/
+enum class ConnSide {
+  /** Inlet connection on the same side as the positive terminal. */
+  csFront,
+  /** inlet connection on the opposite end of the positive terminal. */
+  csBack
+};
+
+
 void addStackLoops(Eigen::MatrixXd& m, const StackParam&, std::size_t num_s);
 
 template<ConnSide PS, ConnSide NS>

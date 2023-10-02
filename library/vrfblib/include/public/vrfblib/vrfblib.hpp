@@ -123,12 +123,6 @@ constexpr std::string_view kCellPowHdr         = "Cell Power (W)";
 // :::: [ Data structures ] ::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 
-enum class ConnSide {
-  csFront,
-  csBack
-};
-
-
 /**
  * Structure contianing the parameters of the stacks in a system.
 */
