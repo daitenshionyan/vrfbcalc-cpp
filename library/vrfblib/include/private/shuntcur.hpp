@@ -7,11 +7,19 @@
 #include "vrfblib/vrfblib.hpp"
 
 
+/*
+================================================================================
+================================================================================
+==
+==    DECLARATION
+==
+================================================================================
+================================================================================
+*/
+
+
 namespace vrfb {
 namespace shuntcur {
-
-
-constexpr double kAvrOCV = 1.38;
 
 
 /**
@@ -26,15 +34,64 @@ enum class ConnSide {
 };
 
 
+/**
+ * Add inner stack loop contributions coefficients to the given matrix. The
+ * size of the given matrix will have to be at least an N by N matrix where
+ * N = 1 + 4S(C - 1).
+ *
+ * @param m Matrix to add inner stack loop contribution coefficients to.
+ * @param s Stack parameter of system.
+ * @param num_s Number of stacks in system.
+*/
 void addStackLoops(Eigen::MatrixXd& m, const StackParam&, std::size_t num_s);
 
+/**
+ * Adds stack connector loop contributions coefficients to the given matrix. The
+ * size of the given matrix will have to be at least an N by N matrix where
+ * N = 1 + 4S(C - 1) + 4(S - 1).
+ *
+ * @param <PS> Positive side connection side.
+ * @param <NS> Negative side connection side.
+ * @param m Matrix to add connector contribution coefficients to.
+ * @param s Stack parameter of system.
+ * @param c Connection parameter of system.
+ * @param num_s Number of stacks in system.
+*/
 template<ConnSide PS, ConnSide NS>
-void addConnLoops(Eigen::MatrixXd& m, const StackParam& s, const ConnParam& c, std::size_t num_s);
+void addConnLoops(Eigen::MatrixXd& m,
+    const StackParam& s, const ConnParam& c,
+    std::size_t num_s);
 
-void addSysVolt(Eigen::VectorXd& v, const StackParam&s, std::size_t num_s, double chgVolt);
+/**
+ * Adds the voltage of the system within all loops to the given vector. The
+ * vector will have to have a size of at least N = 1 + 4S(C - 1) + 4(S - 1).
+ *
+ * @param v Vector to add voltage to.
+ * @param s Stack parameter of system.
+ * @param num_s Number of stacks in system.
+ * @param chgVolt Charging voltage (V).
+*/
+void addSysVolt(Eigen::VectorXd& v,
+    const StackParam&s, std::size_t num_s,
+    double chgVolt);
 
+/**
+ * Calculates the shunt performance for a common line type of electrolyte
+ * connection within stacks.
+ *
+ * Number of stacks and number of cells will have to be at least 1.
+ *
+ * @param <PS> Positive side connection side.
+ * @param <NS> Negative side connection side.
+ * @param s Stack parameter of system.
+ * @param c Connection parameter of system.
+ * @param num_s Number of stacks in system.
+ * @param chgVolt Charging voltage (V).
+*/
 template<ConnSide PS, ConnSide NS>
-ShuntPerf commLineCalc(const StackParam& s, const ConnParam& c, std::size_t num_s, double chgVolt);
+ShuntPerf commLineCalc(
+    const StackParam& s, const ConnParam& c,
+    std::size_t num_s, double chgVolt);
 
 
 }
@@ -65,6 +122,11 @@ namespace shuntcur {
 
 
 namespace {
+
+
+inline std::size_t matSize(std::size_t num_s, std::size_t num_c) {
+  return 1 + 4*num_s*(num_c - 1) + 4*(num_s - 1);
+}
 
 
 /*
@@ -456,7 +518,7 @@ double getCurrSNB<ConnSide::csBack>(const Eigen::VectorXd& cv,
 }
 
 
-}
+} // NAMESPACE vrfb::shuntcur::UNNAMED
 
 
 /*

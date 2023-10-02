@@ -10,6 +10,9 @@
 namespace vrfb { // ==== namespace <vrfb> ======================================
 
 
+constexpr double kAvrOCV = 1.38;
+
+
 namespace celleff { // ==== namespace <vrfb::celleff> ==========================
 
 

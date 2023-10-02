@@ -32,11 +32,6 @@ inline double calcChannelResist(double rho, double l, double a) {
 }
 
 
-inline std::size_t matSize(std::size_t num_s, std::size_t num_c) {
-  return 1 + 4*num_s*(num_c - 1) + 4*(num_s - 1);
-}
-
-
 }
 
 
