@@ -119,10 +119,12 @@ TEST(vrfbSC, addConnLoops5C5SFF) {
   vrfb::shuntcur::addStackLoops(actual,
       shunttest::kTestStackParam,
       shunttest::kTestNumStacks);
-  vrfb::shuntcur::addConnLoops_FF(actual,
-      shunttest::kTestStackParam,
-      shunttest::kTestConnParam,
-      shunttest::kTestNumStacks);
+  vrfb::shuntcur::addConnLoops
+      <vrfb::shuntcur::ConnSide::csFront, vrfb::shuntcur::ConnSide::csFront>(
+          actual,
+          shunttest::kTestStackParam,
+          shunttest::kTestConnParam,
+          shunttest::kTestNumStacks);
   checkMatrix(shunttest::kExCurMat_5S_Sys_FF, actual);
 }
 
@@ -132,10 +134,12 @@ TEST(vrfbSC, addConnLoops5C5SFB) {
   vrfb::shuntcur::addStackLoops(actual,
       shunttest::kTestStackParam,
       shunttest::kTestNumStacks);
-  vrfb::shuntcur::addConnLoops_FB(actual,
-      shunttest::kTestStackParam,
-      shunttest::kTestConnParam,
-      shunttest::kTestNumStacks);
+  vrfb::shuntcur::addConnLoops
+      <vrfb::shuntcur::ConnSide::csFront, vrfb::shuntcur::ConnSide::csBack>(
+          actual,
+          shunttest::kTestStackParam,
+          shunttest::kTestConnParam,
+          shunttest::kTestNumStacks);
   checkMatrix(shunttest::kExCurMat_5S_Sys_FB, actual);
 }
 
