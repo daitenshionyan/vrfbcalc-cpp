@@ -23,9 +23,9 @@
       <property name="geometry">
        <rect>
         <x>0</x>
-        <y>0</y>
-        <width>660</width>
-        <height>630</height>
+        <y>-24</y>
+        <width>643</width>
+        <height>654</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -441,7 +441,7 @@
         <widget class="GraphPlotForm" name="snbCurrPlot" native="true"/>
        </item>
        <item>
-        <widget class="QLabel" name="powerTitleLabel">
+        <widget class="QLabel" name="mptCurrTitleLabel">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
            <horstretch>0</horstretch>
@@ -455,7 +455,7 @@
           </font>
          </property>
          <property name="text">
-          <string>Cell Power</string>
+          <string>MPT Current</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
@@ -463,7 +463,82 @@
         </widget>
        </item>
        <item>
-        <widget class="GraphPlotForm" name="powerPlot" native="true"/>
+        <widget class="GraphPlotForm" name="mptCurrPlot" native="true"/>
+       </item>
+       <item>
+        <widget class="QLabel" name="mpbCurrTitleLabel">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>16</pointsize>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>MPB Current</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="GraphPlotForm" name="mpbCurrPlot" native="true"/>
+       </item>
+       <item>
+        <widget class="QLabel" name="mntCurrTitleLabel">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>16</pointsize>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>MNT Current</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="GraphPlotForm" name="mntCurrPlot" native="true"/>
+       </item>
+       <item>
+        <widget class="QLabel" name="mnbCurrTitleLabel">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>16</pointsize>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>MNB Current</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="GraphPlotForm" name="mnbCurrPlot" native="true"/>
        </item>
       </layout>
      </widget>

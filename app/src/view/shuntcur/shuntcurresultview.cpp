@@ -28,7 +28,10 @@ void SCResultView::plotGraphs(const vrfb::shuntcur::ShuntPerf& p) {
   ui->spbCurrPlot->setupPlot(series_x, p.spbCurrs(), "Cell No.", "Current (A)");
   ui->sntCurrPlot->setupPlot(series_x, p.sntCurrs(), "Cell No.", "Current (A)");
   ui->snbCurrPlot->setupPlot(series_x, p.snbCurrs(), "Cell No.", "Current (A)");
-  ui->powerPlot->setupPlot(series_x, p.cellPowrs(), "Cell No.", "Power (W)");
+  ui->mptCurrPlot->setupPlot(series_x, p.mptCurrs(), "Cell No.", "Current (A)");
+  ui->mpbCurrPlot->setupPlot(series_x, p.mpbCurrs(), "Cell No.", "Current (A)");
+  ui->mntCurrPlot->setupPlot(series_x, p.mntCurrs(), "Cell No.", "Current (A)");
+  ui->mnbCurrPlot->setupPlot(series_x, p.mnbCurrs(), "Cell No.", "Current (A)");
 
   ui->chgVoltField->setText(QString::fromStdString(std::to_string(p.chargingVolt())));
   ui->chgCurrField->setText(QString::fromStdString(std::to_string(p.chargingCurr())));
