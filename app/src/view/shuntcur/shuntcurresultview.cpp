@@ -18,17 +18,17 @@ SCResultView::~SCResultView() {
 
 void SCResultView::plotGraphs(const vrfb::shuntcur::ShuntPerf& p) {
   std::vector<double> series_x {};
-  std::vector<double> series_curr {};
-  std::vector<double> series_powr {};
 
   for (std::size_t i = 0; i < p.totCells(); ++i) {
     series_x.push_back(i+1);
-    series_curr.push_back(p.cellCurr(i));
-    series_powr.push_back(p.cellPowr(i));
   }
 
-  ui->currentPlot->setupPlot(series_x, series_curr, "Cell No.", "Current (A)");
-  ui->powerPlot->setupPlot(series_x, series_powr, "Cell No.", "Power (W)");
+  ui->currentPlot->setupPlot(series_x, p.cellCurrs(), "Cell No.", "Current (A)");
+  ui->sptCurrPlot->setupPlot(series_x, p.sptCurrs(), "Cell No.", "Current (A)");
+  ui->spbCurrPlot->setupPlot(series_x, p.spbCurrs(), "Cell No.", "Current (A)");
+  ui->sntCurrPlot->setupPlot(series_x, p.sntCurrs(), "Cell No.", "Current (A)");
+  ui->snbCurrPlot->setupPlot(series_x, p.snbCurrs(), "Cell No.", "Current (A)");
+  ui->powerPlot->setupPlot(series_x, p.cellPowrs(), "Cell No.", "Power (W)");
 
   ui->chgVoltField->setText(QString::fromStdString(std::to_string(p.chargingVolt())));
   ui->chgCurrField->setText(QString::fromStdString(std::to_string(p.chargingCurr())));

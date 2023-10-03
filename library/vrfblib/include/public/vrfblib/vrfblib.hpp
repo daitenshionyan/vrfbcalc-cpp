@@ -239,10 +239,12 @@ class ShuntPerf {
 
     inline std::size_t numCells() const {return sys.numCells();}
     inline std::size_t numStacks() const {return sys.numStacks();}
-    inline std::size_t totCells() const {return currs.size();}
+    inline std::size_t totCells() const {return cell_currs.size();}
 
-    inline double cellCurr(std::size_t i) const {return currs.at(i);}
-    inline double cellPowr(std::size_t i) const {return powrs.at(i);}
+    inline const std::vector<double> cellCurrs() const {return cell_currs;}
+    inline const std::vector<double> cellPowrs() const {return cell_powrs;}
+    inline double cellCurr(std::size_t i) const {return cell_currs.at(i);}
+    inline double cellPowr(std::size_t i) const {return cell_powrs.at(i);}
     inline double totalPowr() const {return totPowr;}
     inline double powrEff() const {return totalPowr()/chargingPowr();}
 
@@ -258,8 +260,17 @@ class ShuntPerf {
     inline double connManiLen() const {return sys.connManiLen();}
     inline double connManiArea() const {return sys.connManiArea();}
 
+    inline const std::vector<double> cirPowrs() const {return cir_powrs;}
     inline double cirPowr(std::size_t i) const {return cir_powrs.at(i);}
 
+    inline const std::vector<double> sptCurrs() const {return spt_currs;}
+    inline const std::vector<double> spbCurrs() const {return spb_currs;}
+    inline const std::vector<double> sntCurrs() const {return snt_currs;}
+    inline const std::vector<double> snbCurrs() const {return snb_currs;}
+    inline const std::vector<double> sptPowrs() const {return spt_powrs;}
+    inline const std::vector<double> spbPowrs() const {return spb_powrs;}
+    inline const std::vector<double> sntPowrs() const {return snt_powrs;}
+    inline const std::vector<double> snbPowrs() const {return snb_powrs;}
     inline double sptCurr(std::size_t i) const {return spt_currs.at(i);}
     inline double spbCurr(std::size_t i) const {return spb_currs.at(i);}
     inline double sntCurr(std::size_t i) const {return snt_currs.at(i);}
@@ -285,8 +296,8 @@ class ShuntPerf {
     double totPowr = 0;
     SysParam sys;
 
-    std::vector<double> currs;
-    std::vector<double> powrs;
+    std::vector<double> cell_currs;
+    std::vector<double> cell_powrs;
     std::vector<double> cir_powrs;      // cell internal resistance power
 
     std::vector<double> spt_currs;

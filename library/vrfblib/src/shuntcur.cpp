@@ -17,16 +17,16 @@ ShuntPerf::ShuntPerf(double cc, double cv, const SysParam& s,
         const std::vector<double>& mptlist, const std::vector<double>& mpblist,
         const std::vector<double>& mntlist, const std::vector<double>& mnblist)
     : chgCurr{cc}, chgVolt{cv}, sys{s},
-      currs{clist},
+      cell_currs{clist},
       spt_currs{sptlist}, spb_currs{spblist},
       snt_currs{sntlist}, snb_currs{snblist},
       mpt_currs{mptlist}, mpb_currs{mpblist},
       mnt_currs{mntlist}, mnb_currs{mnblist} {
   for (std::size_t i = 0; i < clist.size(); ++i) {
-    powrs.push_back(currs[i]*kAvrOCV);
-    totPowr += currs[i]*kAvrOCV;
+    cell_powrs.push_back(cell_currs[i]*kAvrOCV);
+    totPowr += cell_currs[i]*kAvrOCV;
 
-    cir_powrs.push_back(std::pow(currs[i], 2) * sys.cellR());
+    cir_powrs.push_back(std::pow(cell_currs[i], 2) * sys.cellR());
 
     spt_powrs.push_back(std::pow(spt_currs[i], 2) * sys.stackShuntR());
     spb_powrs.push_back(std::pow(spb_currs[i], 2) * sys.stackShuntR());
@@ -48,16 +48,16 @@ ShuntPerf::ShuntPerf(double cc, double cv, const SysParam& s,
         std::vector<double>&& mptlist, std::vector<double>&& mpblist,
         std::vector<double>&& mntlist, std::vector<double>&& mnblist)
     : chgCurr{cc}, chgVolt{cv}, sys{s},
-      currs{std::move(clist)},
+      cell_currs{std::move(clist)},
       spt_currs{std::move(sptlist)}, spb_currs{std::move(spblist)},
       snt_currs{std::move(sntlist)}, snb_currs{std::move(snblist)},
       mpt_currs{std::move(mptlist)}, mpb_currs{std::move(mpblist)},
       mnt_currs{std::move(mntlist)}, mnb_currs{std::move(mnblist)} {
   for (std::size_t i = 0; i < clist.size(); ++i) {
-    powrs.push_back(currs[i]*kAvrOCV);
-    totPowr += currs[i]*kAvrOCV;
+    cell_powrs.push_back(cell_currs[i]*kAvrOCV);
+    totPowr += cell_currs[i]*kAvrOCV;
 
-    cir_powrs.push_back(std::pow(currs[i], 2) * sys.cellR());
+    cir_powrs.push_back(std::pow(cell_currs[i], 2) * sys.cellR());
 
     spt_powrs.push_back(std::pow(spt_currs[i], 2) * sys.stackShuntR());
     spb_powrs.push_back(std::pow(spb_currs[i], 2) * sys.stackShuntR());
