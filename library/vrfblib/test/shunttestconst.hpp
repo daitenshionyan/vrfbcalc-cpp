@@ -23,7 +23,6 @@ constexpr double kTestConManiResist = 5;
 
 
 const vrfb::shuntcur::StackParam kTestStackParam {
-  kTestNumCells, 1,
   kTestCellResist, 1,
   kTestShuntResist, 1,
   kTestManiResist, 1
@@ -31,31 +30,14 @@ const vrfb::shuntcur::StackParam kTestStackParam {
 
 
 const vrfb::shuntcur::ConnParam kTestConnParam {
-  1,
   kTestConShuntResist, 1,
   kTestConManiResist, 1
 };
 
 
-const Eigen::Matrix<double, 17, 17> kExCurMat_1S {
-  /*    |                       |                       |                       |                      */
-  { 5   , 1   , 1   , 1   , 1   , 1   , 1   , 1   , 1   , 1   , 1   , 1   , 1   , 1   , 1   , 1   , 1   },
-  { 1   , 8   , -2  , 0   , 0   , 1   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   },
-  { 1   , -2  , 8   , -2  , 0   , 0   , 1   , 0   , 0   , 1   , 0   , 0   , 0   , 1   , 0   , 0   , 0   },
-  { 1   , 0   , -2  , 8   , -2  , 0   , 0   , 1   , 0   , 0   , 1   , 0   , 0   , 0   , 1   , 0   , 0   },
-  { 1   , 0   , 0   , -2  , 8   , 0   , 0   , 0   , 1   , 0   , 0   , 1   , 0   , 0   , 0   , 1   , 0   },
-  { 1   , 1   , 0   , 0   , 0   , 8   , -2  , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   },
-  { 1   , 0   , 1   , 0   , 0   , -2  , 8   , -2  , 0   , 1   , 0   , 0   , 0   , 1   , 0   , 0   , 0   },
-  { 1   , 0   , 0   , 1   , 0   , 0   , -2  , 8   , -2  , 0   , 1   , 0   , 0   , 0   , 1   , 0   , 0   },
-  { 1   , 0   , 0   , 0   , 1   , 0   , 0   , -2  , 8   , 0   , 0   , 1   , 0   , 0   , 0   , 1   , 0   },
-  { 1   , 0   , 1   , 0   , 0   , 0   , 1   , 0   , 0   , 8   , -2  , 0   , 0   , 1   , 0   , 0   , 0   },
-  { 1   , 0   , 0   , 1   , 0   , 0   , 0   , 1   , 0   , -2  ,  8  , -2  , 0   , 0   , 1   , 0   , 0   },
-  { 1   , 0   , 0   , 0   , 1   , 0   , 0   , 0   , 1   , 0   , -2  , 8   , -2  , 0   , 0   , 1   , 0   },
-  { 1   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , -2  , 8   , 0   , 0   , 0   , 1   },
-  { 1   , 0   , 1   , 0   , 0   , 0   , 1   , 0   , 0   , 1   , 0   , 0   , 0   , 8   , -2  , 0   , 0   },
-  { 1   , 0   , 0   , 1   , 0   , 0   , 0   , 1   , 0   , 0   , 1   , 0   , 0   , -2  , 8   , -2  , 0   },
-  { 1   , 0   , 0   , 0   , 1   , 0   , 0   , 0   , 1   , 0   , 0   , 1   , 0   , 0   , -2  , 8   , -2  },
-  { 1   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 1   , 0   , 0   , -2  , 8   }
+const vrfb::shuntcur::SysParam kTestSysParam {
+  kTestNumStacks, kTestNumCells, 1,
+  kTestStackParam, kTestConnParam
 };
 
 
@@ -378,8 +360,7 @@ const Eigen::Vector<double, 97> kExVoltVec_5S_Sys_FF {
 const vrfb::shuntcur::ShuntPerf kExShuntPerf_5S_FF {
   4.102282966,
   kTestChgVolt,
-  kTestStackParam,
-  kTestConnParam,
+  kTestSysParam,
   {
     4.102282966,
     1.669684845,
@@ -521,8 +502,7 @@ const vrfb::shuntcur::ShuntPerf kExShuntPerf_5S_FF {
 const vrfb::shuntcur::ShuntPerf kExShuntPerf_5S_FB {
   4.102282966,
   kTestChgVolt,
-  kTestStackParam,
-  kTestConnParam,
+  kTestSysParam,
   {
     4.102282966,
     1.669684845,

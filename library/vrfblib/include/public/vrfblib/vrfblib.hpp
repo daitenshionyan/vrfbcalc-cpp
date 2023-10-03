@@ -129,31 +129,17 @@ namespace shuntcur {
 */
 
 
+
 /**
  * Structure contianing the parameters of the stacks in a system.
 */
 struct StackParam {
-  /**
-   * Constructs a `StackParam`.
-   *
-   * @param num_c Number of cells.
-   * @param rho Reistivity of electrolyte (Ohm / m)
-   * @param asr ASR of cells (m2 Ohm)
-   * @param sl Shunt length (m)
-   * @param sa Shunt area (m2)
-   * @param ml Manifold length (m)
-   * @param ma Manifold area (m)
-  */
-  StackParam(
-      std::size_t num_c, double rho,
-      double asr, double ca,
-      double sl, double sa,
-      double ml, double ma);
-
-  std::size_t numCells;
-  double cellResist;      // Cell resistance (Ohm)
-  double shuntResist;     // Shunt resistance (Ohm)
-  double maniResist;      // Manifold resistance (Ohm)
+  double asr;     // ASR of cell (m2 Ohm)
+  double ca;      // Cell area (m2)
+  double sl;      // Shunt length (m)
+  double sa;      // Shunt cross sectional area (m2)
+  double ml;      // Manifold length (m)
+  double ma;      // Manifold cross sectional area (m2)
 };
 
 
@@ -161,22 +147,49 @@ struct StackParam {
  * Structure containing the parameters of the stack connectors in a system.
 */
 struct ConnParam {
-  /**
-   * Constructs a `ConnParam`.
-   *
-   * @param rho Reistivity of electrolyte (Ohm / m)
-   * @param sl Shunt length (m)
-   * @param sa Shunt area (m2)
-   * @param ml Manifold length (m)
-   * @param ma Manifold area (m2)
-  */
-  ConnParam(
-    double rho,
-    double sl, double sa,
-    double ml, double ma);
+  double sl;      // Shunt length (m)
+  double sa;      // Shunt cross sectional area (m2)
+  double ml;      // Manifold length (m)
+  double ma;      // Manifold cross sectional area (m2)
+};
 
-  double shuntResist;   // Shunt resistance (Ohm)
-  double maniResist;    // Manifold resistance (Ohm)
+
+class SysParam {
+  public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
+    SysParam(std::size_t num_s, std::size_t num_c, double rho,
+        const StackParam& stack, const ConnParam& conn)
+        : ns{num_s}, nc{num_c}, r{rho},
+          s{stack}, c{conn} {}
+
+    SysParam(const SysParam&) = default;
+    SysParam(SysParam&&) = default;
+
+    SysParam& operator=(const SysParam&) = default;
+    SysParam& operator=(SysParam&&) = default;
+
+    ~SysParam() = default;
+
+
+  public: // ~~~~ accessors ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    inline std::size_t numStacks() const {return ns;}
+    inline std::size_t numCells() const {return nc;}
+    inline double resistivity() const {return r;}
+
+    inline double cellR() const {return s.asr / s.ca;}
+    inline double stackShuntR() const {return r * s.sl / s.sa;}
+    inline double stackManiR() const {return r * s.ml / s.ma;}
+
+    inline double connShuntR() const {return r * c.sl / c.sa;}
+    inline double connManiR() const {return r * c.ml / c.ma;}
+
+
+  private: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    std::size_t ns;             // number of stacks
+    std::size_t nc;             // number of cells per stack
+    double r;                   // resistivity (Ohm m)
+
+    StackParam s;
+    ConnParam c;
 };
 
 
@@ -185,11 +198,11 @@ struct ConnParam {
 */
 class ShuntPerf {
   public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
-    ShuntPerf(double cc, double cv, const StackParam& s, const ConnParam& c,
+    ShuntPerf(double cc, double cv, const SysParam& s,
         const std::vector<double>& clist,
         const std::vector<double>& sptlist, const std::vector<double>& spblist,
         const std::vector<double>& sntlist, const std::vector<double>& snblist);
-    ShuntPerf(double cc, double cv, const StackParam& s, const ConnParam& c,
+    ShuntPerf(double cc, double cv, const SysParam& s,
         std::vector<double>&& clist,
         std::vector<double>&& sptlist, std::vector<double>&& spblist,
         std::vector<double>&& sntlist, std::vector<double>&& snblist);
@@ -224,16 +237,12 @@ class ShuntPerf {
     inline double sntPowr(std::size_t i) const {return snt_powrs.at(i);}
     inline double snbPowr(std::size_t i) const {return snb_powrs.at(i);}
 
-    inline const StackParam& stackParam() const {return stack;}
-    inline const ConnParam& connParam() const {return conn;}
-
 
   private: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     double chgCurr;
     double chgVolt;
     double totPowr = 0;
-    StackParam stack;
-    ConnParam conn;
+    SysParam sys;
     std::vector<double> currs;
     std::vector<double> powrs;
     std::vector<double> spt_currs;
@@ -258,7 +267,7 @@ class ShuntPerf {
 
 class ShuntCalc {
   public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
-    ShuntCalc(const StackParam& s) : stack{s} {}
+    ShuntCalc() = default;
 
     ShuntCalc(const ShuntCalc&) = default;
     ShuntCalc(ShuntCalc&&) = default;
@@ -281,10 +290,6 @@ class ShuntCalc {
      * Copies this instance of `ShuntCalc`.
     */
     virtual ShuntCalc* copy() const = 0;
-
-
-  protected: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    StackParam stack;
 };
 
 
@@ -303,13 +308,10 @@ class CommLineCalc : public ShuntCalc {
 
 
   public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
-    CommLineCalc(const StackParam& s,
-        std::size_t num_s, ConnParam c,
+    CommLineCalc(const SysParam& s,
         ConnType ct = ConnType::ctFB)
-        : ShuntCalc{s},
-          numStacks{num_s},
-          connType{ct},
-          conn{c} {}
+        : sys{s},
+          connType{ct} {}
 
     CommLineCalc(const CommLineCalc&) = default;
     CommLineCalc(CommLineCalc&&) = default;
@@ -327,9 +329,8 @@ class CommLineCalc : public ShuntCalc {
 
 
   private:
-    std::size_t numStacks;
+    SysParam sys;
     ConnType connType;
-    ConnParam conn;
 };
 
 
