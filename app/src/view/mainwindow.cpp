@@ -11,7 +11,6 @@
 #include "utillib/utils.hpp"
 #include "vrfbcalccfg.hpp"
 #include "driver/vrfbdriver_io.hpp"
-#include "view/shuntcur/shuntcurresultview.h"
 
 
 namespace {
@@ -95,8 +94,8 @@ void MainWindow::startCalc_SC() {
       [&](QPromise<logger::LogMsg>& p) {
         auto w = PromLogger{p};
         try {
-          auto perf = vrfbdriver::calcShuntPerf(popup_se->getJob(), w);
-          emit completedSCCalc(perf);
+          auto res = vrfbdriver::calcShuntPerf(popup_se->getJob(), w);
+          emit completedSCCalc(res);
         } catch (std::exception& ex) {
           w.fail(comutils::string::format_string("Error while calculating shunt performance: %s",
               ex.what()));
@@ -180,21 +179,44 @@ void MainWindow::displayPerformanceView(
 }
 
 
-void MainWindow::displayPerformanceView_SC(const vrfb::shuntcur::ShuntPerf& p) {
-  SCResultView* rv = new SCResultView(this);
+void MainWindow::displayPerformanceView_SC(const vrfbdriver::ShuntRes& r) {
+  SCResultView* rv = new SCResultView(this, r.name);
   try {
-    rv->plotGraphs(p);
+    rv->plotGraphs(r.perf_c);
   } catch (std::exception& ex) {
     fail(comutils::string::format_string("Failed to plot graphs due to - %s",
         ex.what()));
     delete rv;
     return;
   }
+  connect(rv, &SCResultView::exportRequested,
+      this, &MainWindow::exportSEPerformance);
   rv->open();
 }
 
 
 void MainWindow::exportCEPerformance(CEResultView* rv) {
+  if (watcher.isRunning()) {
+    warn("Cannot export as another process is already running");
+    return;
+  }
+  rv->hide();
+  watcher.setFuture(QtConcurrent::run(
+      &pool,
+      [&, rv](QPromise<logger::LogMsg>& p) {
+        auto l = PromLogger{p};
+        bool is_success = rv->exportImages(l);
+        if (is_success) {
+          rv->done(QDialog::Accepted);
+        } else {
+          rv->show();
+        }
+      }
+  ));
+}
+
+
+void MainWindow::exportSEPerformance(SCResultView* rv) {
   if (watcher.isRunning()) {
     warn("Cannot export as another process is already running");
     return;

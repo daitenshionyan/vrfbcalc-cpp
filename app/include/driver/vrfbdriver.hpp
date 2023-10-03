@@ -57,7 +57,14 @@ struct ShuntJob {
 };
 
 
-vrfb::shuntcur::ShuntPerf calcShuntPerf(const ShuntJob&, logger::Logger&);
+struct ShuntRes {
+  std::string name;
+  vrfb::shuntcur::ShuntPerf perf_c;
+  vrfb::shuntcur::ShuntPerf perf_d;
+};
+
+
+ShuntRes calcShuntPerf(const ShuntJob&, logger::Logger&);
 
 
 }

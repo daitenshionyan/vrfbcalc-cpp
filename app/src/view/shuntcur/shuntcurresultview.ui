@@ -23,7 +23,7 @@
       <property name="geometry">
        <rect>
         <x>0</x>
-        <y>-24</y>
+        <y>0</y>
         <width>643</width>
         <height>654</height>
        </rect>
@@ -542,6 +542,13 @@
        </item>
       </layout>
      </widget>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="exportBtn">
+     <property name="text">
+      <string>Export</string>
+     </property>
     </widget>
    </item>
   </layout>

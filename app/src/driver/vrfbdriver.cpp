@@ -246,7 +246,7 @@ ShuntJob& ShuntJob::operator=(ShuntJob&& o) {
 // ==== [ calcShuntPerf Definition ] ===========================================
 
 
-vrfb::shuntcur::ShuntPerf calcShuntPerf(const ShuntJob& j, logger::Logger& l) {
+ShuntRes calcShuntPerf(const ShuntJob& j, logger::Logger& l) {
   auto beg = std::chrono::high_resolution_clock::now();
   vrfb::shuntcur::ShuntPerf perf_c = j.calc->calculate(j.chgVolt);
   auto dur1 = std::chrono::duration_cast<std::chrono::microseconds>(
@@ -263,7 +263,7 @@ vrfb::shuntcur::ShuntPerf calcShuntPerf(const ShuntJob& j, logger::Logger& l) {
             std::chrono::high_resolution_clock::now() - beg);
   l.succ(comutils::string::format_string("Shunt performance calculation completed in %.3fms",
       dur3.count() / 1000.));
-  return perf_c;
+  return {j.name, perf_c, perf_d};
 }
 
 
