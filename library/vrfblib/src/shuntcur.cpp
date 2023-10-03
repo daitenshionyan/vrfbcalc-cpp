@@ -26,6 +26,8 @@ ShuntPerf::ShuntPerf(double cc, double cv, const SysParam& s,
     powrs.push_back(currs[i]*kAvrOCV);
     totPowr += currs[i]*kAvrOCV;
 
+    cir_powrs.push_back(std::pow(currs[i], 2) * sys.cellR());
+
     spt_powrs.push_back(std::pow(spt_currs[i], 2) * sys.stackShuntR());
     spb_powrs.push_back(std::pow(spb_currs[i], 2) * sys.stackShuntR());
     snt_powrs.push_back(std::pow(snt_currs[i], 2) * sys.stackShuntR());
@@ -54,6 +56,8 @@ ShuntPerf::ShuntPerf(double cc, double cv, const SysParam& s,
   for (std::size_t i = 0; i < clist.size(); ++i) {
     powrs.push_back(currs[i]*kAvrOCV);
     totPowr += currs[i]*kAvrOCV;
+
+    cir_powrs.push_back(std::pow(currs[i], 2) * sys.cellR());
 
     spt_powrs.push_back(std::pow(spt_currs[i], 2) * sys.stackShuntR());
     spb_powrs.push_back(std::pow(spb_currs[i], 2) * sys.stackShuntR());

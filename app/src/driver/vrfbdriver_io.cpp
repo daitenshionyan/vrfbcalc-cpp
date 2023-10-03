@@ -144,50 +144,54 @@ void writeShuntPerf(xlnt::worksheet& ws, const vrfb::shuntcur::ShuntPerf& p) {
   ws.cell(2, 1).value("Cell Current (A)");
   ws.cell(3, 1).value("Cell Power (W)");
 
-  ws.cell(4, 1).value("SPT Current (A)");
-  ws.cell(5, 1).value("SPT Power (W)");
-  ws.cell(6, 1).value("SPB Current (A)");
-  ws.cell(7, 1).value("SPB Power (W)");
-  ws.cell(8, 1).value("SNT Current (A)");
-  ws.cell(9, 1).value("SNT Power (W)");
-  ws.cell(10, 1).value("SNB Current (A)");
-  ws.cell(11, 1).value("SNB Power (W)");
+  ws.cell(4, 1).value("Cell IR Power (W)");
 
-  ws.cell(12, 1).value("MPT Current (A)");
-  ws.cell(13, 1).value("MPT Power (W)");
-  ws.cell(14, 1).value("MPB Current (A)");
-  ws.cell(15, 1).value("MPB Power (W)");
-  ws.cell(16, 1).value("MNT Current (A)");
-  ws.cell(17, 1).value("MNT Power (W)");
-  ws.cell(18, 1).value("MNB Current (A)");
-  ws.cell(19, 1).value("MNB Power (W)");
+  ws.cell(5, 1).value("SPT Current (A)");
+  ws.cell(6, 1).value("SPT Power (W)");
+  ws.cell(7, 1).value("SPB Current (A)");
+  ws.cell(8, 1).value("SPB Power (W)");
+  ws.cell(9, 1).value("SNT Current (A)");
+  ws.cell(10, 1).value("SNT Power (W)");
+  ws.cell(11, 1).value("SNB Current (A)");
+  ws.cell(12, 1).value("SNB Power (W)");
+
+  ws.cell(13, 1).value("MPT Current (A)");
+  ws.cell(14, 1).value("MPT Power (W)");
+  ws.cell(15, 1).value("MPB Current (A)");
+  ws.cell(16, 1).value("MPB Power (W)");
+  ws.cell(17, 1).value("MNT Current (A)");
+  ws.cell(18, 1).value("MNT Power (W)");
+  ws.cell(19, 1).value("MNB Current (A)");
+  ws.cell(20, 1).value("MNB Power (W)");
 
   for (std::size_t i = 0; i < p.totCells(); ++i) {
     ws.cell(1, i+2).value(i+1);
     ws.cell(2, i+2).value(p.cellCurr(i));
     ws.cell(3, i+2).value(p.cellPowr(i));
 
-    ws.cell(4, i+2).value(p.sptCurr(i));
-    ws.cell(5, i+2).value(p.sptPowr(i));
-    ws.cell(6, i+2).value(p.spbCurr(i));
-    ws.cell(7, i+2).value(p.spbPowr(i));
-    ws.cell(8, i+2).value(p.sntCurr(i));
-    ws.cell(9, i+2).value(p.sntPowr(i));
-    ws.cell(10, i+2).value(p.snbCurr(i));
-    ws.cell(11, i+2).value(p.snbPowr(i));
+    ws.cell(4, i+2).value(p.cirPowr(i));
 
-    ws.cell(12, i+2).value(p.mptCurr(i));
-    ws.cell(13, i+2).value(p.mptPowr(i));
-    ws.cell(14, i+2).value(p.mpbCurr(i));
-    ws.cell(15, i+2).value(p.mpbPowr(i));
-    ws.cell(16, i+2).value(p.mntCurr(i));
-    ws.cell(17, i+2).value(p.mntPowr(i));
-    ws.cell(18, i+2).value(p.mnbCurr(i));
-    ws.cell(19, i+2).value(p.mnbPowr(i));
+    ws.cell(5, i+2).value(p.sptCurr(i));
+    ws.cell(6, i+2).value(p.sptPowr(i));
+    ws.cell(7, i+2).value(p.spbCurr(i));
+    ws.cell(8, i+2).value(p.spbPowr(i));
+    ws.cell(9, i+2).value(p.sntCurr(i));
+    ws.cell(10, i+2).value(p.sntPowr(i));
+    ws.cell(11, i+2).value(p.snbCurr(i));
+    ws.cell(12, i+2).value(p.snbPowr(i));
+
+    ws.cell(13, i+2).value(p.mptCurr(i));
+    ws.cell(14, i+2).value(p.mptPowr(i));
+    ws.cell(15, i+2).value(p.mpbCurr(i));
+    ws.cell(16, i+2).value(p.mpbPowr(i));
+    ws.cell(17, i+2).value(p.mntCurr(i));
+    ws.cell(18, i+2).value(p.mntPowr(i));
+    ws.cell(19, i+2).value(p.mnbCurr(i));
+    ws.cell(20, i+2).value(p.mnbPowr(i));
   }
 
   // magic termination number from number of columns
-  for (int i = 0; i < 19; ++i) {
+  for (int i = 0; i < 20; ++i) {
     ws.column_properties(i+1).width = 20;
   }
   ws.freeze_panes("B2");

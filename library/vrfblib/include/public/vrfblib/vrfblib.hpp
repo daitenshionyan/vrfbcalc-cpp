@@ -258,6 +258,8 @@ class ShuntPerf {
     inline double connManiLen() const {return sys.connManiLen();}
     inline double connManiArea() const {return sys.connManiArea();}
 
+    inline double cirPowr(std::size_t i) const {return cir_powrs.at(i);}
+
     inline double sptCurr(std::size_t i) const {return spt_currs.at(i);}
     inline double spbCurr(std::size_t i) const {return spb_currs.at(i);}
     inline double sntCurr(std::size_t i) const {return snt_currs.at(i);}
@@ -282,8 +284,10 @@ class ShuntPerf {
     double chgVolt;
     double totPowr = 0;
     SysParam sys;
+
     std::vector<double> currs;
     std::vector<double> powrs;
+    std::vector<double> cir_powrs;      // cell internal resistance power
 
     std::vector<double> spt_currs;
     std::vector<double> spb_currs;
