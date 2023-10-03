@@ -506,6 +506,41 @@ double getCurrSNB<ConnSide::csBack>(const Eigen::VectorXd& cv,
 }
 
 
+/*
+********************************************************************************
+**    Current calculation functions for STACK MANIFOLD
+********************************************************************************
+*/
+
+
+double getCurrMPT(const Eigen::VectorXd& cv,
+      std::size_t si, std::size_t ci,
+      std::size_t num_s, std::size_t num_c) {
+  return (ci+1 < num_c) ? -cv(indexSPT(si, ci, num_s, num_c)) : 0;
+}
+
+
+double getCurrMPB(const Eigen::VectorXd& cv,
+      std::size_t si, std::size_t ci,
+      std::size_t num_s, std::size_t num_c) {
+  return (ci+1 < num_c) ? -cv(indexSPB(si, ci, num_s, num_c)) : 0;
+}
+
+
+double getCurrMNT(const Eigen::VectorXd& cv,
+      std::size_t si, std::size_t ci,
+      std::size_t num_s, std::size_t num_c) {
+  return (ci+1 < num_c) ? -cv(indexSNT(si, ci, num_s, num_c) + 1) : 0;
+}
+
+
+double getCurrMNB(const Eigen::VectorXd& cv,
+      std::size_t si, std::size_t ci,
+      std::size_t num_s, std::size_t num_c) {
+  return (ci+1 < num_c) ? -cv(indexSNB(si, ci, num_s, num_c) + 1) : 0;
+}
+
+
 } // NAMESPACE vrfb::shuntcur::UNNAMED
 
 
@@ -1125,6 +1160,10 @@ inline ShuntPerf commLineCalc(const SysParam& s, double chgVolt) {
   std::vector<double> spblist {};
   std::vector<double> sntlist {};
   std::vector<double> snblist {};
+  std::vector<double> mptlist {};
+  std::vector<double> mpblist {};
+  std::vector<double> mntlist {};
+  std::vector<double> mnblist {};
   for (std::size_t si = 0; si < s.numStacks(); ++si) {
     for (std::size_t ci = 0; ci < s.numCells(); ++ci) {
       clist.push_back(cv(0)
@@ -1135,10 +1174,18 @@ inline ShuntPerf commLineCalc(const SysParam& s, double chgVolt) {
       spblist.push_back(getCurrSPB<PS>(cv, si, ci, s.numStacks(), s.numCells()));
       sntlist.push_back(getCurrSNT<NS>(cv, si, ci, s.numStacks(), s.numCells()));
       snblist.push_back(getCurrSNB<NS>(cv, si, ci, s.numStacks(), s.numCells()));
+
+      mptlist.push_back(getCurrMPT(cv, si, ci, s.numStacks(), s.numCells()));
+      mpblist.push_back(getCurrMPB(cv, si, ci, s.numStacks(), s.numCells()));
+      mntlist.push_back(getCurrMNT(cv, si, ci, s.numStacks(), s.numCells()));
+      mnblist.push_back(getCurrMNB(cv, si, ci, s.numStacks(), s.numCells()));
     }
   }
 
-  return {cv(0), chgVolt, s, clist, sptlist, spblist, sntlist, snblist};
+  return {cv(0), chgVolt, s,
+      clist,
+      sptlist, spblist, sntlist, snblist,
+      mptlist, mpblist, mntlist, mnblist};
 }
 
 

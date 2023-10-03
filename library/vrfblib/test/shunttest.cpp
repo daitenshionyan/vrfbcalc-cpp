@@ -56,6 +56,10 @@ void checkShuntPerf(const vrfb::shuntcur::ShuntPerf& expected, const vrfb::shunt
   std::stringstream spbdiff {};
   std::stringstream sntdiff {};
   std::stringstream snbdiff {};
+  std::stringstream mptdiff {};
+  std::stringstream mpbdiff {};
+  std::stringstream mntdiff {};
+  std::stringstream mnbdiff {};
   for (std::size_t i = 0; i < expected.totCells(); ++i) {
     if (std::abs(actual.cellCurr(i) - expected.cellCurr(i)) > threshold) {
       is_same = false;
@@ -63,6 +67,7 @@ void checkShuntPerf(const vrfb::shuntcur::ShuntPerf& expected, const vrfb::shunt
         << " - Expected: " <<  expected.cellCurr(i)
         << " | Actual: " << actual.cellCurr(i) << "\n";
     }
+
     if (std::abs(actual.sptCurr(i) - expected.sptCurr(i)) > threshold) {
       is_same = false;
       sptdiff << "At (" << i << ")"
@@ -87,13 +92,42 @@ void checkShuntPerf(const vrfb::shuntcur::ShuntPerf& expected, const vrfb::shunt
         << " - Expected: " <<  expected.snbCurr(i)
         << " | Actual: " << actual.snbCurr(i) << "\n";
     }
+
+    if (std::abs(actual.mptCurr(i) - expected.mptCurr(i)) > threshold) {
+      is_same = false;
+      mptdiff << "At (" << i << ")"
+        << " - Expected: " <<  expected.mptCurr(i)
+        << " | Actual: " << actual.mptCurr(i) << "\n";
+    }
+    if (std::abs(actual.mpbCurr(i) - expected.mpbCurr(i)) > threshold) {
+      is_same = false;
+      mpbdiff << "At (" << i << ")"
+        << " - Expected: " <<  expected.mpbCurr(i)
+        << " | Actual: " << actual.mpbCurr(i) << "\n";
+    }
+    if (std::abs(actual.mntCurr(i) - expected.mntCurr(i)) > threshold) {
+      is_same = false;
+      mntdiff << "At (" << i << ")"
+        << " - Expected: " <<  expected.mntCurr(i)
+        << " | Actual: " << actual.mntCurr(i) << "\n";
+    }
+    if (std::abs(actual.mnbCurr(i) - expected.mnbCurr(i)) > threshold) {
+      is_same = false;
+      mnbdiff << "At (" << i << ")"
+        << " - Expected: " <<  expected.mnbCurr(i)
+        << " | Actual: " << actual.mnbCurr(i) << "\n";
+    }
   }
   ASSERT_TRUE(is_same)
       << "Cell Difference:\n" << celldiff.str()
       << "SPT Difference\n" << sptdiff.str()
       << "SPB Difference\n" << spbdiff.str()
       << "SNT Difference\n" << sntdiff.str()
-      << "SNB Difference\n" << snbdiff.str();
+      << "SNB Difference\n" << snbdiff.str()
+      << "MPT Difference\n" << mptdiff.str()
+      << "MPB Difference\n" << mpbdiff.str()
+      << "MNT Difference\n" << mntdiff.str()
+      << "MNB Difference\n" << mnbdiff.str();
 }
 
 

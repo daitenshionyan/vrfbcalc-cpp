@@ -213,11 +213,15 @@ class ShuntPerf {
     ShuntPerf(double cc, double cv, const SysParam& s,
         const std::vector<double>& clist,
         const std::vector<double>& sptlist, const std::vector<double>& spblist,
-        const std::vector<double>& sntlist, const std::vector<double>& snblist);
+        const std::vector<double>& sntlist, const std::vector<double>& snblist,
+        const std::vector<double>& mptlist, const std::vector<double>& mpblist,
+        const std::vector<double>& mntlist, const std::vector<double>& mnblist);
     ShuntPerf(double cc, double cv, const SysParam& s,
         std::vector<double>&& clist,
         std::vector<double>&& sptlist, std::vector<double>&& spblist,
-        std::vector<double>&& sntlist, std::vector<double>&& snblist);
+        std::vector<double>&& sntlist, std::vector<double>&& snblist,
+        std::vector<double>&& mptlist, std::vector<double>&& mpblist,
+        std::vector<double>&& mntlist, std::vector<double>&& mnblist);
 
     ShuntPerf(const ShuntPerf&) = default;
     ShuntPerf(ShuntPerf&&) = default;
@@ -258,11 +262,19 @@ class ShuntPerf {
     inline double spbCurr(std::size_t i) const {return spb_currs.at(i);}
     inline double sntCurr(std::size_t i) const {return snt_currs.at(i);}
     inline double snbCurr(std::size_t i) const {return snb_currs.at(i);}
-
     inline double sptPowr(std::size_t i) const {return spt_powrs.at(i);}
     inline double spbPowr(std::size_t i) const {return spb_powrs.at(i);}
     inline double sntPowr(std::size_t i) const {return snt_powrs.at(i);}
     inline double snbPowr(std::size_t i) const {return snb_powrs.at(i);}
+
+    inline double mptCurr(std::size_t i) const {return mpt_currs.at(i);}
+    inline double mpbCurr(std::size_t i) const {return mpb_currs.at(i);}
+    inline double mntCurr(std::size_t i) const {return mnt_currs.at(i);}
+    inline double mnbCurr(std::size_t i) const {return mnb_currs.at(i);}
+    inline double mptPowr(std::size_t i) const {return mpt_powrs.at(i);}
+    inline double mpbPowr(std::size_t i) const {return mpb_powrs.at(i);}
+    inline double mntPowr(std::size_t i) const {return mnt_powrs.at(i);}
+    inline double mnbPowr(std::size_t i) const {return mnb_powrs.at(i);}
 
 
   private: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -272,6 +284,7 @@ class ShuntPerf {
     SysParam sys;
     std::vector<double> currs;
     std::vector<double> powrs;
+
     std::vector<double> spt_currs;
     std::vector<double> spb_currs;
     std::vector<double> snt_currs;
@@ -280,6 +293,15 @@ class ShuntPerf {
     std::vector<double> spb_powrs;
     std::vector<double> snt_powrs;
     std::vector<double> snb_powrs;
+
+    std::vector<double> mpt_currs;
+    std::vector<double> mpb_currs;
+    std::vector<double> mnt_currs;
+    std::vector<double> mnb_currs;
+    std::vector<double> mpt_powrs;
+    std::vector<double> mpb_powrs;
+    std::vector<double> mnt_powrs;
+    std::vector<double> mnb_powrs;
 };
 
 /*
