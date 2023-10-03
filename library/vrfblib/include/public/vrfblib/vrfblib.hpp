@@ -175,6 +175,18 @@ class SysParam {
     inline std::size_t numCells() const {return nc;}
     inline double resistivity() const {return r;}
 
+    inline double asr() const {return s.asr;}
+    inline double cellArea() const {return s.ca;}
+    inline double stackShuntLen() const {return s.sl;}
+    inline double stackShuntArea() const {return s.sa;}
+    inline double stackManiLen() const {return s.ml;}
+    inline double stackManiArea() const {return s.ma;}
+
+    inline double connShuntLen() const {return c.sl;}
+    inline double connShuntArea() const {return c.sa;}
+    inline double connManiLen() const {return c.ml;}
+    inline double connManiArea() const {return c.ma;}
+
     inline double cellR() const {return s.asr / s.ca;}
     inline double stackShuntR() const {return r * s.sl / s.sa;}
     inline double stackManiR() const {return r * s.ml / s.ma;}
@@ -221,11 +233,26 @@ class ShuntPerf {
     inline double chargingVolt() const {return chgVolt;}
     inline double chargingPowr() const {return chgCurr*chgVolt;}
 
-    inline std::size_t numCells() const {return currs.size();}
+    inline std::size_t numCells() const {return sys.numCells();}
+    inline std::size_t numStacks() const {return sys.numStacks();}
+    inline std::size_t totCells() const {return currs.size();}
 
     inline double cellCurr(std::size_t i) const {return currs.at(i);}
     inline double cellPowr(std::size_t i) const {return powrs.at(i);}
     inline double totalPowr() const {return totPowr;}
+    inline double powrEff() const {return totalPowr()/chargingPowr();}
+
+    inline double asr() const {return sys.asr();}
+    inline double cellArea() const {return sys.cellArea();}
+    inline double stackShuntLen() const {return sys.stackShuntLen();}
+    inline double stackShuntArea() const {return sys.stackShuntArea();}
+    inline double stackManiLen() const {return sys.stackManiLen();}
+    inline double stackManiArea() const {return sys.stackManiArea();}
+
+    inline double connShuntLen() const {return sys.connShuntLen();}
+    inline double connShuntArea() const {return sys.connShuntArea();}
+    inline double connManiLen() const {return sys.connManiLen();}
+    inline double connManiArea() const {return sys.connManiArea();}
 
     inline double sptCurr(std::size_t i) const {return spt_currs.at(i);}
     inline double spbCurr(std::size_t i) const {return spb_currs.at(i);}

@@ -95,6 +95,50 @@ inline void initColMap(
 }
 
 
+void writeShuntSummary(xlnt::worksheet& ws, const vrfb::shuntcur::ShuntPerf& p) {
+  ws.column_properties(1).width = 30;
+  ws.column_properties(2).width = 15;
+
+  ws.cell(1, 1).value("Number of stacks");
+  ws.cell(2, 1).value(p.numStacks());
+  ws.cell(1, 2).value("Cells per stack");
+  ws.cell(2, 2).value(p.numCells());
+
+  ws.cell(1, 3).value("ASR (cm2 Ohm)");
+  ws.cell(2, 3).value(p.asr() * 10000);
+  ws.cell(1, 4).value("Cell Area (cm2)");
+  ws.cell(2, 4).value(p.cellArea() * 10000);
+  ws.cell(1, 5).value("Shunt length (cm)");
+  ws.cell(2, 5).value(p.stackShuntLen() * 100);
+  ws.cell(1, 6).value("Shunt area (cm2)");
+  ws.cell(2, 6).value(p.stackShuntArea() * 10000);
+  ws.cell(1, 7).value("Manifold length (cm)");
+  ws.cell(2, 7).value(p.stackManiLen() * 100);
+  ws.cell(1, 8).value("Manifold area (cm2)");
+  ws.cell(2, 8).value(p.stackManiArea() * 10000);
+
+  ws.cell(1, 9).value("Connector shunt length (cm)");
+  ws.cell(2, 9).value(p.connShuntLen() * 100);
+  ws.cell(1, 10).value("Connector shunt area (cm2)");
+  ws.cell(2, 10).value(p.connShuntArea() * 10000);
+  ws.cell(1, 11).value("Connector manifold length (cm)");
+  ws.cell(2, 11).value(p.connManiLen() * 100);
+  ws.cell(1, 12).value("Connector manifold area (cm2)");
+  ws.cell(2, 12).value(p.connManiArea() * 10000);
+
+  ws.cell(1, 13).value("Charging voltage (V)");
+  ws.cell(2, 13).value(p.chargingVolt());
+  ws.cell(1, 14).value("Charging current (A)");
+  ws.cell(2, 14).value(p.chargingCurr());
+  ws.cell(1, 15).value("Charging power (W)");
+  ws.cell(2, 15).value(p.chargingPowr());
+  ws.cell(1, 16).value("Stored power (W)");
+  ws.cell(2, 16).value(p.totalPowr());
+  ws.cell(1, 17).value("Power efficiency (%)");
+  ws.cell(2, 17).value(p.powrEff() * 100);
+}
+
+
 void writeShuntPerf(xlnt::worksheet& ws, const vrfb::shuntcur::ShuntPerf& p) {
   ws.cell(1, 1).value("Cell No.");
   ws.cell(2, 1).value("Cell Current (A)");
@@ -108,7 +152,7 @@ void writeShuntPerf(xlnt::worksheet& ws, const vrfb::shuntcur::ShuntPerf& p) {
   ws.cell(10, 1).value("SNB Current (A)");
   ws.cell(11, 1).value("SNB Power (W)");
 
-  for (std::size_t i = 0; i < p.numCells(); ++i) {
+  for (std::size_t i = 0; i < p.totCells(); ++i) {
     ws.cell(1, i+2).value(i+1);
     ws.cell(2, i+2).value(p.cellCurr(i));
     ws.cell(3, i+2).value(p.cellPowr(i));
@@ -355,16 +399,7 @@ void saveData_XLSX(const std::filesystem::path& p,
 
   auto ws = wb.active_sheet();
   ws.title("Summary");
-  ws.cell(1, 1).value("Charging voltage (V)");
-  ws.cell(2, 1).value(perf_c.chargingVolt());
-  ws.cell(1, 2).value("Charging current (A)");
-  ws.cell(2, 2).value(perf_c.chargingCurr());
-  ws.cell(1, 3).value("Charging power (W)");
-  ws.cell(2, 3).value(perf_c.chargingPowr());
-  ws.cell(1, 4).value("Total Cell Power (W)");
-  ws.cell(2, 4).value(perf_c.totalPowr());
-  ws.cell(1, 5).value("Energy efficiency (%)");
-  ws.cell(2, 5).value(perf_c.totalPowr()/perf_c.chargingPowr());
+  writeShuntSummary(ws, perf_c);
 
   ws = wb.create_sheet();
   ws.title("Charging");
@@ -384,5 +419,5 @@ void saveData_XLSX(const std::filesystem::path& p,
 }
 
 
-} // END OF NAMESPACE <vrfbdriver::io> -----------------------------------------
-} // END OF NAMESPACE <vrfbdriver> ---------------------------------------------
+} // END OF NAMESPACE <vrfbdriver::io>
+} // END OF NAMESPACE <vrfbdriver>

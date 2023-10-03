@@ -21,7 +21,7 @@ void SCResultView::plotGraphs(const vrfb::shuntcur::ShuntPerf& p) {
   std::vector<double> series_curr {};
   std::vector<double> series_powr {};
 
-  for (std::size_t i = 0; i < p.numCells(); ++i) {
+  for (std::size_t i = 0; i < p.totCells(); ++i) {
     series_x.push_back(i+1);
     series_curr.push_back(p.cellCurr(i));
     series_powr.push_back(p.cellPowr(i));

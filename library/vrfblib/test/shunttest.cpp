@@ -45,10 +45,10 @@ void checkMatrix(const Eigen::MatrixXd& expected, const Eigen::MatrixXd& actual)
 
 
 void checkShuntPerf(const vrfb::shuntcur::ShuntPerf& expected, const vrfb::shuntcur::ShuntPerf& actual) {
-  bool is_same_size = expected.numCells() == actual.numCells();
+  bool is_same_size = expected.totCells() == actual.totCells();
   ASSERT_TRUE(is_same_size) << "Wrong size"
-      << " - Expected size: " << expected.numCells()
-      << " | Actual size: " << actual.numCells();
+      << " - Expected size: " << expected.totCells()
+      << " | Actual size: " << actual.totCells();
 
   bool is_same = true;
   std::stringstream celldiff {};
@@ -56,7 +56,7 @@ void checkShuntPerf(const vrfb::shuntcur::ShuntPerf& expected, const vrfb::shunt
   std::stringstream spbdiff {};
   std::stringstream sntdiff {};
   std::stringstream snbdiff {};
-  for (std::size_t i = 0; i < expected.numCells(); ++i) {
+  for (std::size_t i = 0; i < expected.totCells(); ++i) {
     if (std::abs(actual.cellCurr(i) - expected.cellCurr(i)) > threshold) {
       is_same = false;
       celldiff << "At (" << i << ")"
