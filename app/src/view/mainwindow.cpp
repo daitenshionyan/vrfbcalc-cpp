@@ -182,7 +182,7 @@ void MainWindow::displayPerformanceView(
 void MainWindow::displayPerformanceView_SC(const vrfbdriver::ShuntRes& r) {
   SCResultView* rv = new SCResultView(this, r.name);
   try {
-    rv->plotGraphs(r.perf_c);
+    rv->plotGraphs(r.perf);
   } catch (std::exception& ex) {
     fail(comutils::string::format_string("Failed to plot graphs due to - %s",
         ex.what()));

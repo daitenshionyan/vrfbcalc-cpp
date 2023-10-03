@@ -1182,10 +1182,13 @@ inline ShuntPerf commLineCalc(const SysParam& s, double chgVolt) {
     }
   }
 
+  double error = ((cm*cv) - vv).norm();
+
   return {cv(0), chgVolt, s,
       clist,
       sptlist, spblist, sntlist, snblist,
-      mptlist, mpblist, mntlist, mnblist};
+      mptlist, mpblist, mntlist, mnblist,
+      error};
 }
 
 

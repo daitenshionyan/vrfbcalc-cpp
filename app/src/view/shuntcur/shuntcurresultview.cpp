@@ -63,6 +63,7 @@ void SCResultView::plotGraphs(const vrfb::shuntcur::ShuntPerf& p) {
   ui->chgPowrField->setText(QString::fromStdString(std::to_string(p.chargingPowr())));
   ui->inputPowrField->setText(QString::fromStdString(std::to_string(p.totalPowr())));
   ui->energyEffField->setText(QString::fromStdString(std::to_string(p.totalPowr() / p.chargingPowr() * 100)));
+  ui->errorField->setText(QString::fromStdString(std::to_string(p.err())));
 }
 
 

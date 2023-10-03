@@ -215,13 +215,15 @@ class ShuntPerf {
         const std::vector<double>& sptlist, const std::vector<double>& spblist,
         const std::vector<double>& sntlist, const std::vector<double>& snblist,
         const std::vector<double>& mptlist, const std::vector<double>& mpblist,
-        const std::vector<double>& mntlist, const std::vector<double>& mnblist);
+        const std::vector<double>& mntlist, const std::vector<double>& mnblist,
+        double err = 0);
     ShuntPerf(double cc, double cv, const SysParam& s,
         std::vector<double>&& clist,
         std::vector<double>&& sptlist, std::vector<double>&& spblist,
         std::vector<double>&& sntlist, std::vector<double>&& snblist,
         std::vector<double>&& mptlist, std::vector<double>&& mpblist,
-        std::vector<double>&& mntlist, std::vector<double>&& mnblist);
+        std::vector<double>&& mntlist, std::vector<double>&& mnblist,
+        double err = 0);
 
     ShuntPerf(const ShuntPerf&) = default;
     ShuntPerf(ShuntPerf&&) = default;
@@ -233,6 +235,8 @@ class ShuntPerf {
 
 
   public: // ~~~~ accessors ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    inline double err() const {return error;}
+
     inline double chargingCurr() const {return chgCurr;}
     inline double chargingVolt() const {return chgVolt;}
     inline double chargingPowr() const {return chgCurr*chgVolt;}
@@ -299,6 +303,8 @@ class ShuntPerf {
 
 
   private: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    double error;
+
     double chgCurr;
     double chgVolt;
     double totPowr = 0;

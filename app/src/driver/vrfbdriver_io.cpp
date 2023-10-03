@@ -136,6 +136,9 @@ void writeShuntSummary(xlnt::worksheet& ws, const vrfb::shuntcur::ShuntPerf& p) 
   ws.cell(2, 16).value(p.totalPowr());
   ws.cell(1, 17).value("Power efficiency (%)");
   ws.cell(2, 17).value(p.powrEff() * 100);
+
+  ws.cell(1, 18).value("Norm error");
+  ws.cell(2, 18).value(p.err());
 }
 
 
@@ -423,8 +426,7 @@ void saveData_XLSX(
 
 
 void saveData_XLSX(const std::filesystem::path& p,
-    const vrfb::shuntcur::ShuntPerf& perf_c,
-    const vrfb::shuntcur::ShuntPerf& perf_d) {
+    const vrfb::shuntcur::ShuntPerf& perf_c) {
   xlnt::workbook wb;
 
   auto ws = wb.active_sheet();
@@ -434,10 +436,6 @@ void saveData_XLSX(const std::filesystem::path& p,
   ws = wb.create_sheet();
   ws.title("Charging");
   writeShuntPerf(ws, perf_c);
-
-  ws = wb.create_sheet();
-  ws.title("Self Discharge");
-  writeShuntPerf(ws, perf_d);
 
   std::ofstream ofs = comutils::io::openFile_w<std::ios_base::binary>(p);
   wb.save(ofs);

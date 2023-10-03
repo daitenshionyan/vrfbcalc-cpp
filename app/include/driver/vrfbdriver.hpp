@@ -59,8 +59,7 @@ struct ShuntJob {
 
 struct ShuntRes {
   std::string name;
-  vrfb::shuntcur::ShuntPerf perf_c;
-  vrfb::shuntcur::ShuntPerf perf_d;
+  vrfb::shuntcur::ShuntPerf perf;
 };
 
 

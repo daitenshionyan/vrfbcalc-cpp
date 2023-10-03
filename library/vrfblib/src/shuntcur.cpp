@@ -15,8 +15,9 @@ ShuntPerf::ShuntPerf(double cc, double cv, const SysParam& s,
         const std::vector<double>& sptlist, const std::vector<double>& spblist,
         const std::vector<double>& sntlist, const std::vector<double>& snblist,
         const std::vector<double>& mptlist, const std::vector<double>& mpblist,
-        const std::vector<double>& mntlist, const std::vector<double>& mnblist)
-    : chgCurr{cc}, chgVolt{cv}, sys{s},
+        const std::vector<double>& mntlist, const std::vector<double>& mnblist,
+        double err)
+    : error{err}, chgCurr{cc}, chgVolt{cv}, sys{s},
       cell_currs{clist},
       spt_currs{sptlist}, spb_currs{spblist},
       snt_currs{sntlist}, snb_currs{snblist},
@@ -46,8 +47,9 @@ ShuntPerf::ShuntPerf(double cc, double cv, const SysParam& s,
         std::vector<double>&& sptlist, std::vector<double>&& spblist,
         std::vector<double>&& sntlist, std::vector<double>&& snblist,
         std::vector<double>&& mptlist, std::vector<double>&& mpblist,
-        std::vector<double>&& mntlist, std::vector<double>&& mnblist)
-    : chgCurr{cc}, chgVolt{cv}, sys{s},
+        std::vector<double>&& mntlist, std::vector<double>&& mnblist,
+        double err)
+    : error{err}, chgCurr{cc}, chgVolt{cv}, sys{s},
       cell_currs{std::move(clist)},
       spt_currs{std::move(sptlist)}, spb_currs{std::move(spblist)},
       snt_currs{std::move(sntlist)}, snb_currs{std::move(snblist)},
