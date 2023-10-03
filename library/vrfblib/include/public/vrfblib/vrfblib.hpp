@@ -7,10 +7,18 @@
 #include "utillib/utils.hpp"
 
 
-namespace vrfb { // ==== namespace <vrfb> ======================================
+namespace vrfb {
 
 
-namespace celleff { // ==== namespace <vrfb::celleff> ==========================
+constexpr double kAvrOCV = 1.38;
+
+
+namespace celleff {
+/*
+================================================================================
+==    Celleff
+================================================================================
+*/
 
 
 // :::: [ Output table headers ] :::::::::::::::::::::::::::::::::::::::::::::::
@@ -105,22 +113,20 @@ struct Data {
 comutils::Table calcPerf(const double area, const std::vector<Data>& datas);
 
 
-} // ---- namepsace <vrfb::celleff>
+} // namepsace <vrfb::celleff>
 // namespace <vrfb>
 
 
-namespace shuntcur { // ==== namespace <vrfb::shuntcur> ========================
 
 
-// :::: [ Output table headers ] :::::::::::::::::::::::::::::::::::::::::::::::
 
 
-constexpr std::string_view kCellNumHdr         = "Cell No.";
-constexpr std::string_view kCellCurHdr         = "Cell Current (A)";
-constexpr std::string_view kCellPowHdr         = "Cell Power (W)";
-
-
-// :::: [ Data structures ] ::::::::::::::::::::::::::::::::::::::::::::::::::::
+namespace shuntcur {
+/*
+================================================================================
+==    Shunt current
+================================================================================
+*/
 
 
 /**
@@ -174,9 +180,9 @@ struct ConnParam {
 };
 
 
-// :::: [ ShuntPerf ] ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-
-
+/**
+ * Class containing calculated shunter performance data.
+*/
 class ShuntPerf {
   public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
     ShuntPerf(double cc, double cv, const StackParam& s, const ConnParam& c,
@@ -240,8 +246,14 @@ class ShuntPerf {
     std::vector<double> snb_powrs;
 };
 
+/*
+********************************************************************************
+**    Calculator
+********************************************************************************
+*/
 
-// :::: [ ShuntCalc ] ::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+// :::: [ Base class ] :::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 
 class ShuntCalc {
@@ -276,7 +288,7 @@ class ShuntCalc {
 };
 
 
-// :::: [ CommLineCalc ] ::::::::::::::::::::::::::::::::::::::::::::::::
+// :::: [ CommLineCalc ] :::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 
 class CommLineCalc : public ShuntCalc {
@@ -321,5 +333,5 @@ class CommLineCalc : public ShuntCalc {
 };
 
 
-} // ---- namespace <vrfb::shuntcur>
-} // ---- namespace <vrfb>
+} // namespace <vrfb::shuntcur>
+} // namespace <vrfb>
