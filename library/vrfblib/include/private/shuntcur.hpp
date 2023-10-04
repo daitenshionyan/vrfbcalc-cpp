@@ -1,5 +1,6 @@
 #pragma once
 
+#include <utility>
 #include <vector>
 
 #include <Eigen/Dense>
@@ -1441,11 +1442,11 @@ inline ShuntPerf commLineCalc(const SysParam& s, double chgVolt) {
   double error = ((cm*cv) - vv).norm();
 
   return {cv(0), chgVolt, s,
-      clist,
-      sptlist, spblist, sntlist, snblist,
-      mptlist, mpblist, mntlist, mnblist,
-      csptlist, cspblist, csntlist, csnblist,
-      cmptlist, cmpblist, cmntlist, cmnblist,
+      std::move(clist),
+      std::move(sptlist), std::move(spblist), std::move(sntlist), std::move(snblist),
+      std::move(mptlist), std::move(mpblist), std::move(mntlist), std::move(mnblist),
+      std::move(csptlist), std::move(cspblist), std::move(csntlist), std::move(csnblist),
+      std::move(cmptlist), std::move(cmpblist), std::move(cmntlist), std::move(cmnblist),
       error};
 }
 
