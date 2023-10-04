@@ -541,6 +541,246 @@ double getCurrMNB(const Eigen::VectorXd& cv,
 }
 
 
+/*
+********************************************************************************
+**    Current calculation functions for CONNECTOR SHUNT
+********************************************************************************
+*/
+
+
+// :::: [ POSITIVE TOP ] :::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+
+template<ConnSide Side>
+double getCurrCSPT(const Eigen::VectorXd& cv,
+      std::size_t si,
+      std::size_t num_s, std::size_t num_c);
+
+
+template<>
+double getCurrCSPT<ConnSide::csFront>(const Eigen::VectorXd& cv,
+      std::size_t si,
+      std::size_t num_s, std::size_t num_c) {
+  double result = 0;
+  if (si+1 < num_s) {
+    result += cv(indexCPT<ConnSide::csFront>(si, num_s, num_c) + 1);
+  }
+  if (si > 0) {
+    result -= cv(indexCPT<ConnSide::csFront>(si, num_s, num_c));
+  }
+  return result;
+}
+
+
+// :::: [ POSITIVE BOT ] :::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+
+template<ConnSide Side>
+double getCurrCSPB(const Eigen::VectorXd& cv,
+      std::size_t si,
+      std::size_t num_s, std::size_t num_c);
+
+
+template<>
+double getCurrCSPB<ConnSide::csFront>(const Eigen::VectorXd& cv,
+      std::size_t si,
+      std::size_t num_s, std::size_t num_c) {
+  double result = 0;
+  if (si+1 < num_s) {
+    result += cv(indexCPB<ConnSide::csFront>(si, num_s, num_c));
+  }
+  if (si > 0) {
+    result -= cv(indexCPB<ConnSide::csFront>(si, num_s, num_c) - 1);
+  }
+  return result;
+}
+
+
+// :::: [ NEGATIVE TOP ] :::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+
+template<ConnSide Side>
+double getCurrCSNT(const Eigen::VectorXd& cv,
+      std::size_t si,
+      std::size_t num_s, std::size_t num_c);
+
+
+template<>
+double getCurrCSNT<ConnSide::csFront>(const Eigen::VectorXd& cv,
+      std::size_t si,
+      std::size_t num_s, std::size_t num_c) {
+  double result = 0;
+  if (si+1 < num_s) {
+    result += cv(indexCNT<ConnSide::csFront>(si, num_s, num_c) + 1);
+  }
+  if (si > 0) {
+    result -= cv(indexCNT<ConnSide::csFront>(si, num_s, num_c));
+  }
+  return result;
+}
+
+
+template<>
+double getCurrCSNT<ConnSide::csBack>(const Eigen::VectorXd& cv,
+      std::size_t si,
+      std::size_t num_s, std::size_t num_c) {
+  double result = 0;
+  if (si+1 < num_s) {
+    result += cv(indexCNT<ConnSide::csBack>(si, num_s, num_c));
+  }
+  if (si > 0) {
+    result -= cv(indexCNT<ConnSide::csBack>(si, num_s, num_c) - 1);
+  }
+  return result;
+}
+
+
+// :::: [ NEGATIVE BOT ] :::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+
+template<ConnSide Side>
+double getCurrCSNB(const Eigen::VectorXd& cv,
+      std::size_t si,
+      std::size_t num_s, std::size_t num_c);
+
+
+template<>
+double getCurrCSNB<ConnSide::csFront>(const Eigen::VectorXd& cv,
+      std::size_t si,
+      std::size_t num_s, std::size_t num_c) {
+  double result = 0;
+  if (si+1 < num_s) {
+    result += cv(indexCNB<ConnSide::csFront>(si, num_s, num_c));
+  }
+  if (si > 0) {
+    result -= cv(indexCNB<ConnSide::csFront>(si, num_s, num_c) - 1);
+  }
+  return result;
+}
+
+
+template<>
+double getCurrCSNB<ConnSide::csBack>(const Eigen::VectorXd& cv,
+      std::size_t si,
+      std::size_t num_s, std::size_t num_c) {
+  double result = 0;
+  if (si+1 < num_s) {
+    result += cv(indexCNB<ConnSide::csBack>(si, num_s, num_c) + 1);
+  }
+  if (si > 0) {
+    result -= cv(indexCNB<ConnSide::csBack>(si, num_s, num_c));
+  }
+  return result;
+}
+
+
+/*
+********************************************************************************
+**    Current calculation functions for CONNECTOR MANIFOLD
+********************************************************************************
+*/
+
+
+// :::: [ POSITIVE TOP ] :::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+
+template<ConnSide Side>
+double getCurrCMPT(const Eigen::VectorXd& cv,
+      std::size_t si,
+      std::size_t num_s, std::size_t num_c);
+
+
+template<>
+double getCurrCMPT<ConnSide::csFront>(const Eigen::VectorXd& cv,
+      std::size_t si,
+      std::size_t num_s, std::size_t num_c) {
+  return (si+1 < num_s) ? -cv(indexCPT<ConnSide::csFront>(si, num_s, num_c) + 1) : 0;
+}
+
+
+template<>
+double getCurrCMPT<ConnSide::csBack>(const Eigen::VectorXd& cv,
+      std::size_t si,
+      std::size_t num_s, std::size_t num_c) {
+  return (si+1 < num_s) ? -cv(indexCPT<ConnSide::csBack>(si, num_s, num_c)) : 0;
+}
+
+
+// :::: [ POSITIVE BOT ] :::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+
+template<ConnSide Side>
+double getCurrCMPB(const Eigen::VectorXd& cv,
+      std::size_t si,
+      std::size_t num_s, std::size_t num_c);
+
+
+template<>
+double getCurrCMPB<ConnSide::csFront>(const Eigen::VectorXd& cv,
+      std::size_t si,
+      std::size_t num_s, std::size_t num_c) {
+  return (si+1 < num_s) ? -cv(indexCPB<ConnSide::csFront>(si, num_s, num_c)) : 0;
+}
+
+
+template<>
+double getCurrCMPB<ConnSide::csBack>(const Eigen::VectorXd& cv,
+      std::size_t si,
+      std::size_t num_s, std::size_t num_c) {
+  return (si+1 < num_s) ? -cv(indexCPB<ConnSide::csBack>(si, num_s, num_c) + 1) : 0;
+}
+
+
+// :::: [ POSITIVE TOP ] :::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+
+template<ConnSide Side>
+double getCurrCMNT(const Eigen::VectorXd& cv,
+      std::size_t si,
+      std::size_t num_s, std::size_t num_c);
+
+
+template<>
+double getCurrCMNT<ConnSide::csFront>(const Eigen::VectorXd& cv,
+      std::size_t si,
+      std::size_t num_s, std::size_t num_c) {
+  return (si+1 < num_s) ? -cv(indexCNT<ConnSide::csFront>(si, num_s, num_c) + 1) : 0;
+}
+
+
+template<>
+double getCurrCMNT<ConnSide::csBack>(const Eigen::VectorXd& cv,
+      std::size_t si,
+      std::size_t num_s, std::size_t num_c) {
+  return (si+1 < num_s) ? -cv(indexCNT<ConnSide::csBack>(si, num_s, num_c)) : 0;
+}
+
+
+// :::: [ POSITIVE BOT ] :::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+
+template<ConnSide Side>
+double getCurrCMNB(const Eigen::VectorXd& cv,
+      std::size_t si,
+      std::size_t num_s, std::size_t num_c);
+
+
+template<>
+double getCurrCMNB<ConnSide::csFront>(const Eigen::VectorXd& cv,
+      std::size_t si,
+      std::size_t num_s, std::size_t num_c) {
+  return (si+1 < num_s) ? -cv(indexCNB<ConnSide::csFront>(si, num_s, num_c)) : 0;
+}
+
+
+template<>
+double getCurrCMNB<ConnSide::csBack>(const Eigen::VectorXd& cv,
+      std::size_t si,
+      std::size_t num_s, std::size_t num_c) {
+  return (si+1 < num_s) ? -cv(indexCNB<ConnSide::csBack>(si, num_s, num_c) + 1) : 0;
+}
+
+
 } // NAMESPACE vrfb::shuntcur::UNNAMED
 
 
@@ -1164,6 +1404,14 @@ inline ShuntPerf commLineCalc(const SysParam& s, double chgVolt) {
   std::vector<double> mpblist {};
   std::vector<double> mntlist {};
   std::vector<double> mnblist {};
+  std::vector<double> csptlist {};
+  std::vector<double> cspblist {};
+  std::vector<double> csntlist {};
+  std::vector<double> csnblist {};
+  std::vector<double> cmptlist {};
+  std::vector<double> cmpblist {};
+  std::vector<double> cmntlist {};
+  std::vector<double> cmnblist {};
   for (std::size_t si = 0; si < s.numStacks(); ++si) {
     for (std::size_t ci = 0; ci < s.numCells(); ++ci) {
       clist.push_back(cv(0)
@@ -1174,12 +1422,20 @@ inline ShuntPerf commLineCalc(const SysParam& s, double chgVolt) {
       spblist.push_back(getCurrSPB<PS>(cv, si, ci, s.numStacks(), s.numCells()));
       sntlist.push_back(getCurrSNT<NS>(cv, si, ci, s.numStacks(), s.numCells()));
       snblist.push_back(getCurrSNB<NS>(cv, si, ci, s.numStacks(), s.numCells()));
-
       mptlist.push_back(getCurrMPT(cv, si, ci, s.numStacks(), s.numCells()));
       mpblist.push_back(getCurrMPB(cv, si, ci, s.numStacks(), s.numCells()));
       mntlist.push_back(getCurrMNT(cv, si, ci, s.numStacks(), s.numCells()));
       mnblist.push_back(getCurrMNB(cv, si, ci, s.numStacks(), s.numCells()));
     }
+
+    csptlist.push_back(getCurrCSPT<PS>(cv, si, s.numStacks(), s.numCells()));
+    cspblist.push_back(getCurrCSPB<PS>(cv, si, s.numStacks(), s.numCells()));
+    csntlist.push_back(getCurrCSNT<NS>(cv, si, s.numStacks(), s.numCells()));
+    csnblist.push_back(getCurrCSNB<NS>(cv, si, s.numStacks(), s.numCells()));
+    cmptlist.push_back(getCurrCMPT<PS>(cv, si, s.numStacks(), s.numCells()));
+    cmpblist.push_back(getCurrCMPB<PS>(cv, si, s.numStacks(), s.numCells()));
+    cmntlist.push_back(getCurrCMNT<NS>(cv, si, s.numStacks(), s.numCells()));
+    cmnblist.push_back(getCurrCMNB<NS>(cv, si, s.numStacks(), s.numCells()));
   }
 
   double error = ((cm*cv) - vv).norm();
@@ -1188,6 +1444,8 @@ inline ShuntPerf commLineCalc(const SysParam& s, double chgVolt) {
       clist,
       sptlist, spblist, sntlist, snblist,
       mptlist, mpblist, mntlist, mnblist,
+      csptlist, cspblist, csntlist, csnblist,
+      cmptlist, cmpblist, cmntlist, cmnblist,
       error};
 }
 

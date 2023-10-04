@@ -20,8 +20,13 @@ QT_END_NAMESPACE
 class SCResultView : public QDialog {
   Q_OBJECT
 
+  enum class IndexingType {
+    itStack, itConn
+  };
+
   struct PlotFormData {
     std::string name;
+    IndexingType it;
     const std::vector<double>& (vrfb::shuntcur::ShuntPerf::* yseriesGetter)() const;
     GraphPlotForm* plot;
   };

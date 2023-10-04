@@ -216,6 +216,10 @@ class ShuntPerf {
         const std::vector<double>& sntlist, const std::vector<double>& snblist,
         const std::vector<double>& mptlist, const std::vector<double>& mpblist,
         const std::vector<double>& mntlist, const std::vector<double>& mnblist,
+        const std::vector<double>& csptlist, const std::vector<double>& cspblist,
+        const std::vector<double>& csntlist, const std::vector<double>& csnblist,
+        const std::vector<double>& cmptlist, const std::vector<double>& cmpblist,
+        const std::vector<double>& cmntlist, const std::vector<double>& cmnblist,
         double err = 0);
     ShuntPerf(double cc, double cv, const SysParam& s,
         std::vector<double>&& clist,
@@ -223,6 +227,10 @@ class ShuntPerf {
         std::vector<double>&& sntlist, std::vector<double>&& snblist,
         std::vector<double>&& mptlist, std::vector<double>&& mpblist,
         std::vector<double>&& mntlist, std::vector<double>&& mnblist,
+        std::vector<double>&& csptlist, std::vector<double>&& cspblist,
+        std::vector<double>&& csntlist, std::vector<double>&& csnblist,
+        std::vector<double>&& cmptlist, std::vector<double>&& cmpblist,
+        std::vector<double>&& cmntlist, std::vector<double>&& cmnblist,
         double err = 0);
 
     ShuntPerf(const ShuntPerf&) = default;
@@ -301,6 +309,40 @@ class ShuntPerf {
     inline double mntPowr(std::size_t i) const {return mnt_powrs.at(i);}
     inline double mnbPowr(std::size_t i) const {return mnb_powrs.at(i);}
 
+    inline const std::vector<double>& csptCurrs() const {return cspt_currs;}
+    inline const std::vector<double>& cspbCurrs() const {return cspb_currs;}
+    inline const std::vector<double>& csntCurrs() const {return csnt_currs;}
+    inline const std::vector<double>& csnbCurrs() const {return csnb_currs;}
+    inline const std::vector<double>& csptPowrs() const {return cspt_powrs;}
+    inline const std::vector<double>& cspbPowrs() const {return cspb_powrs;}
+    inline const std::vector<double>& csntPowrs() const {return csnt_powrs;}
+    inline const std::vector<double>& csnbPowrs() const {return csnb_powrs;}
+    inline double csptCurr(std::size_t i) const {return cspt_currs.at(i);}
+    inline double cspbCurr(std::size_t i) const {return cspb_currs.at(i);}
+    inline double csntCurr(std::size_t i) const {return csnt_currs.at(i);}
+    inline double csnbCurr(std::size_t i) const {return csnb_currs.at(i);}
+    inline double csptPowr(std::size_t i) const {return cspt_powrs.at(i);}
+    inline double cspbPowr(std::size_t i) const {return cspb_powrs.at(i);}
+    inline double csntPowr(std::size_t i) const {return csnt_powrs.at(i);}
+    inline double csnbPowr(std::size_t i) const {return csnb_powrs.at(i);}
+
+    inline const std::vector<double>& cmptCurrs() const {return cmpt_currs;}
+    inline const std::vector<double>& cmpbCurrs() const {return cmpb_currs;}
+    inline const std::vector<double>& cmntCurrs() const {return cmnt_currs;}
+    inline const std::vector<double>& cmnbCurrs() const {return cmnb_currs;}
+    inline const std::vector<double>& cmptPowrs() const {return cmpt_powrs;}
+    inline const std::vector<double>& cmpbPowrs() const {return cmpb_powrs;}
+    inline const std::vector<double>& cmntPowrs() const {return cmnt_powrs;}
+    inline const std::vector<double>& cmnbPowrs() const {return cmnb_powrs;}
+    inline double cmptCurr(std::size_t i) const {return cmpt_currs.at(i);}
+    inline double cmpbCurr(std::size_t i) const {return cmpb_currs.at(i);}
+    inline double cmntCurr(std::size_t i) const {return cmnt_currs.at(i);}
+    inline double cmnbCurr(std::size_t i) const {return cmnb_currs.at(i);}
+    inline double cmptPowr(std::size_t i) const {return cmpt_powrs.at(i);}
+    inline double cmpbPowr(std::size_t i) const {return cmpb_powrs.at(i);}
+    inline double cmntPowr(std::size_t i) const {return cmnt_powrs.at(i);}
+    inline double cmnbPowr(std::size_t i) const {return cmnb_powrs.at(i);}
+
 
   private: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     double error;
@@ -312,25 +354,48 @@ class ShuntPerf {
 
     std::vector<double> cell_currs;
     std::vector<double> cell_powrs;
-    std::vector<double> cir_powrs;      // cell internal resistance power
 
-    std::vector<double> spt_currs;
-    std::vector<double> spb_currs;
-    std::vector<double> snt_currs;
-    std::vector<double> snb_currs;
-    std::vector<double> spt_powrs;
-    std::vector<double> spb_powrs;
-    std::vector<double> snt_powrs;
-    std::vector<double> snb_powrs;
+    // :::: [ STACK ] ::::
 
-    std::vector<double> mpt_currs;
-    std::vector<double> mpb_currs;
-    std::vector<double> mnt_currs;
-    std::vector<double> mnb_currs;
-    std::vector<double> mpt_powrs;
-    std::vector<double> mpb_powrs;
-    std::vector<double> mnt_powrs;
-    std::vector<double> mnb_powrs;
+    std::vector<double> cir_powrs;      // Cell internal resistance power
+
+    std::vector<double> spt_currs;      // Stack shunt positive top currents
+    std::vector<double> spb_currs;      // Stack shunt positive bottom currents
+    std::vector<double> snt_currs;      // Stack shunt negative top currents
+    std::vector<double> snb_currs;      // Stack shunt negative bottom currents
+    std::vector<double> spt_powrs;      // Stack shunt positive top powers
+    std::vector<double> spb_powrs;      // Stack shunt positive bottom powers
+    std::vector<double> snt_powrs;      // Stack shunt negative top powers
+    std::vector<double> snb_powrs;      // Stack shunt negative bottom powers
+
+    std::vector<double> mpt_currs;      // Stack manifold positive top currents
+    std::vector<double> mpb_currs;      // Stack manifold positive bottom currents
+    std::vector<double> mnt_currs;      // Stack manifold negative top currents
+    std::vector<double> mnb_currs;      // Stack manifold negative bottom currents
+    std::vector<double> mpt_powrs;      // Stack manifold positive top powers
+    std::vector<double> mpb_powrs;      // Stack manifold positive bottom powers
+    std::vector<double> mnt_powrs;      // Stack manifold negative top powers
+    std::vector<double> mnb_powrs;      // Stack manifold negative bottom powers
+
+    // :::: [ CONNECTOR ] ::::
+
+    std::vector<double> cspt_currs;     // Connector shunt positive top currents
+    std::vector<double> cspb_currs;     // Connector shunt positive bottom currents
+    std::vector<double> csnt_currs;     // Connector shunt negative top currents
+    std::vector<double> csnb_currs;     // Connector shunt negative bottom currents
+    std::vector<double> cspt_powrs;     // Connector shunt positive top powers
+    std::vector<double> cspb_powrs;     // Connector shunt positive bottom powers
+    std::vector<double> csnt_powrs;     // Connector shunt negative top powers
+    std::vector<double> csnb_powrs;     // Connector shunt negative bottom powers
+
+    std::vector<double> cmpt_currs;     // Connector manifold positive top currents
+    std::vector<double> cmpb_currs;     // Connector manifold positive bottom currents
+    std::vector<double> cmnt_currs;     // Connector manifold negative top currents
+    std::vector<double> cmnb_currs;     // Connector manifold negative bottom currents
+    std::vector<double> cmpt_powrs;     // Connector manifold positive top powers
+    std::vector<double> cmpb_powrs;     // Connector manifold positive bottom powers
+    std::vector<double> cmnt_powrs;     // Connector manifold negative top powers
+    std::vector<double> cmnb_powrs;     // Connector manifold negative bottom powers
 };
 
 /*

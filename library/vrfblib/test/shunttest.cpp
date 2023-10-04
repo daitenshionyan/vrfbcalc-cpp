@@ -60,7 +60,16 @@ void checkShuntPerf(const vrfb::shuntcur::ShuntPerf& expected, const vrfb::shunt
   std::stringstream mpbdiff {};
   std::stringstream mntdiff {};
   std::stringstream mnbdiff {};
+  std::stringstream csptdiff {};
+  std::stringstream cspbdiff {};
+  std::stringstream csntdiff {};
+  std::stringstream csnbdiff {};
+  std::stringstream cmptdiff {};
+  std::stringstream cmpbdiff {};
+  std::stringstream cmntdiff {};
+  std::stringstream cmnbdiff {};
   for (std::size_t i = 0; i < expected.totCells(); ++i) {
+    // STACK :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
     if (std::abs(actual.cellCurr(i) - expected.cellCurr(i)) > threshold) {
       is_same = false;
       celldiff << "At (" << i << ")"
@@ -118,6 +127,60 @@ void checkShuntPerf(const vrfb::shuntcur::ShuntPerf& expected, const vrfb::shunt
         << " | Actual: " << actual.mnbCurr(i) << "\n";
     }
   }
+
+  for (std::size_t i = 0; i < expected.numStacks(); ++i) {
+// CONNECTOR :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+    if (std::abs(actual.csptCurr(i) - expected.csptCurr(i)) > threshold) {
+      is_same = false;
+      csptdiff << "At (" << i << ")"
+        << " - Expected: " <<  expected.csptCurr(i)
+        << " | Actual: " << actual.csptCurr(i) << "\n";
+    }
+    if (std::abs(actual.cspbCurr(i) - expected.cspbCurr(i)) > threshold) {
+      is_same = false;
+      cspbdiff << "At (" << i << ")"
+        << " - Expected: " <<  expected.cspbCurr(i)
+        << " | Actual: " << actual.cspbCurr(i) << "\n";
+    }
+    if (std::abs(actual.csntCurr(i) - expected.csntCurr(i)) > threshold) {
+      is_same = false;
+      csntdiff << "At (" << i << ")"
+        << " - Expected: " <<  expected.csntCurr(i)
+        << " | Actual: " << actual.csntCurr(i) << "\n";
+    }
+    if (std::abs(actual.csnbCurr(i) - expected.csnbCurr(i)) > threshold) {
+      is_same = false;
+      csnbdiff << "At (" << i << ")"
+        << " - Expected: " <<  expected.csnbCurr(i)
+        << " | Actual: " << actual.csnbCurr(i) << "\n";
+    }
+
+    if (std::abs(actual.cmptCurr(i) - expected.cmptCurr(i)) > threshold) {
+      is_same = false;
+      cmptdiff << "At (" << i << ")"
+        << " - Expected: " <<  expected.cmptCurr(i)
+        << " | Actual: " << actual.cmptCurr(i) << "\n";
+    }
+    if (std::abs(actual.cmpbCurr(i) - expected.cmpbCurr(i)) > threshold) {
+      is_same = false;
+      cmpbdiff << "At (" << i << ")"
+        << " - Expected: " <<  expected.cmpbCurr(i)
+        << " | Actual: " << actual.cmpbCurr(i) << "\n";
+    }
+    if (std::abs(actual.cmntCurr(i) - expected.cmntCurr(i)) > threshold) {
+      is_same = false;
+      cmntdiff << "At (" << i << ")"
+        << " - Expected: " <<  expected.cmntCurr(i)
+        << " | Actual: " << actual.cmntCurr(i) << "\n";
+    }
+    if (std::abs(actual.cmnbCurr(i) - expected.cmnbCurr(i)) > threshold) {
+      is_same = false;
+      cmnbdiff << "At (" << i << ")"
+        << " - Expected: " <<  expected.cmnbCurr(i)
+        << " | Actual: " << actual.cmnbCurr(i) << "\n";
+    }
+  }
   ASSERT_TRUE(is_same)
       << "Cell Difference:\n" << celldiff.str()
       << "SPT Difference\n" << sptdiff.str()
@@ -127,7 +190,15 @@ void checkShuntPerf(const vrfb::shuntcur::ShuntPerf& expected, const vrfb::shunt
       << "MPT Difference\n" << mptdiff.str()
       << "MPB Difference\n" << mpbdiff.str()
       << "MNT Difference\n" << mntdiff.str()
-      << "MNB Difference\n" << mnbdiff.str();
+      << "MNB Difference\n" << mnbdiff.str()
+      << "CSPT Difference\n" << csptdiff.str()
+      << "CSPB Difference\n" << cspbdiff.str()
+      << "CSNT Difference\n" << csntdiff.str()
+      << "CSNB Difference\n" << csnbdiff.str()
+      << "CMPT Difference\n" << cmptdiff.str()
+      << "CMPB Difference\n" << cmpbdiff.str()
+      << "CMNT Difference\n" << cmntdiff.str()
+      << "CMNB Difference\n" << cmnbdiff.str();
 }
 
 
