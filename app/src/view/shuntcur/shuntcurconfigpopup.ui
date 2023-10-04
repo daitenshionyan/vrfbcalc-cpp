@@ -105,6 +105,9 @@
                   <property name="maximum">
                    <double>9999999999.000000000000000</double>
                   </property>
+                  <property name="value">
+                   <double>348.000000000000000</double>
+                  </property>
                  </widget>
                 </item>
                 <item>
@@ -156,8 +159,14 @@
                 </property>
                 <item>
                  <widget class="QDoubleSpinBox" name="resistivityField">
+                  <property name="decimals">
+                   <number>9</number>
+                  </property>
                   <property name="maximum">
                    <double>9999999999.000000000000000</double>
+                  </property>
+                  <property name="value">
+                   <double>0.030000000000000</double>
                   </property>
                  </widget>
                 </item>
@@ -209,7 +218,11 @@
                  <number>0</number>
                 </property>
                 <item>
-                 <widget class="QSpinBox" name="numStackField"/>
+                 <widget class="QSpinBox" name="numStackField">
+                  <property name="value">
+                   <number>6</number>
+                  </property>
+                 </widget>
                 </item>
                 <item>
                  <widget class="QLabel" name="numStackUnitLabel">
@@ -259,7 +272,11 @@
                  <number>0</number>
                 </property>
                 <item>
-                 <widget class="QSpinBox" name="numCellField"/>
+                 <widget class="QSpinBox" name="numCellField">
+                  <property name="value">
+                   <number>37</number>
+                  </property>
+                 </widget>
                 </item>
                 <item>
                  <widget class="QLabel" name="numCellUnitLabel">
@@ -310,8 +327,14 @@
                 </property>
                 <item>
                  <widget class="QDoubleSpinBox" name="shuntLenField">
+                  <property name="decimals">
+                   <number>9</number>
+                  </property>
                   <property name="maximum">
                    <double>9999999.000000000000000</double>
+                  </property>
+                  <property name="value">
+                   <double>130.000000000000000</double>
                   </property>
                  </widget>
                 </item>
@@ -364,8 +387,14 @@
                 </property>
                 <item>
                  <widget class="QDoubleSpinBox" name="shuntAreaField">
+                  <property name="decimals">
+                   <number>9</number>
+                  </property>
                   <property name="maximum">
                    <double>9999999999.000000000000000</double>
+                  </property>
+                  <property name="value">
+                   <double>20.600000000000001</double>
                   </property>
                  </widget>
                 </item>
@@ -418,8 +447,14 @@
                 </property>
                 <item>
                  <widget class="QDoubleSpinBox" name="maniLenField">
+                  <property name="decimals">
+                   <number>9</number>
+                  </property>
                   <property name="maximum">
                    <double>9999999999.000000000000000</double>
+                  </property>
+                  <property name="value">
+                   <double>0.500000000000000</double>
                   </property>
                  </widget>
                 </item>
@@ -472,8 +507,14 @@
                 </property>
                 <item>
                  <widget class="QDoubleSpinBox" name="maniAreaField">
+                  <property name="decimals">
+                   <number>9</number>
+                  </property>
                   <property name="maximum">
                    <double>9999999999.000000000000000</double>
+                  </property>
+                  <property name="value">
+                   <double>12.000000000000000</double>
                   </property>
                  </widget>
                 </item>
@@ -526,8 +567,14 @@
                 </property>
                 <item>
                  <widget class="QDoubleSpinBox" name="connShuntLenField">
+                  <property name="decimals">
+                   <number>9</number>
+                  </property>
                   <property name="maximum">
                    <double>9999999999.000000000000000</double>
+                  </property>
+                  <property name="value">
+                   <double>50.000000000000000</double>
                   </property>
                  </widget>
                 </item>
@@ -580,8 +627,14 @@
                 </property>
                 <item>
                  <widget class="QDoubleSpinBox" name="connShuntAreaField">
+                  <property name="decimals">
+                   <number>9</number>
+                  </property>
                   <property name="maximum">
                    <double>9999999999.000000000000000</double>
+                  </property>
+                  <property name="value">
+                   <double>20.000000000000000</double>
                   </property>
                  </widget>
                 </item>
@@ -634,8 +687,14 @@
                 </property>
                 <item>
                  <widget class="QDoubleSpinBox" name="connManiLenField">
+                  <property name="decimals">
+                   <number>9</number>
+                  </property>
                   <property name="maximum">
                    <double>9999999999.000000000000000</double>
+                  </property>
+                  <property name="value">
+                   <double>100.000000000000000</double>
                   </property>
                  </widget>
                 </item>
@@ -688,8 +747,14 @@
                 </property>
                 <item>
                  <widget class="QDoubleSpinBox" name="connManiAreaField">
+                  <property name="decimals">
+                   <number>9</number>
+                  </property>
                   <property name="maximum">
                    <double>9999999999.000000000000000</double>
+                  </property>
+                  <property name="value">
+                   <double>79.000000000000000</double>
                   </property>
                  </widget>
                 </item>
@@ -742,8 +807,14 @@
                 </property>
                 <item>
                  <widget class="QDoubleSpinBox" name="asrField">
+                  <property name="decimals">
+                   <number>9</number>
+                  </property>
                   <property name="maximum">
                    <double>9999999999.000000000000000</double>
+                  </property>
+                  <property name="value">
+                   <double>1.300000000000000</double>
                   </property>
                  </widget>
                 </item>
@@ -796,8 +867,14 @@
                 </property>
                 <item>
                  <widget class="QDoubleSpinBox" name="cellAreaField">
+                  <property name="decimals">
+                   <number>9</number>
+                  </property>
                   <property name="maximum">
                    <double>9999999999.000000000000000</double>
+                  </property>
+                  <property name="value">
+                   <double>1030.000000000000000</double>
                   </property>
                  </widget>
                 </item>

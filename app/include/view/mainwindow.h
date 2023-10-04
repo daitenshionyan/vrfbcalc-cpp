@@ -8,6 +8,7 @@
 #include "view/celleff/celleffconfigpopup.h"
 #include "view/celleff/celleffresultview.h"
 #include "view/shuntcur/shuntcurconfigpopup.h"
+#include "view/shuntcur/shuntcurresultview.h"
 #include "driver/vrfbdriver.hpp"
 #include "logger.hpp"
 
@@ -32,7 +33,7 @@ class MainWindow : public QMainWindow, private logger::Logger {
   signals:
     void completedPerformanceReading(const std::vector<vrfbdriver::PerformanceEntry_CE>&);
   signals:
-    void completedSCCalc(const vrfb::shuntcur::ShuntPerf&);
+    void completedSCCalc(const vrfbdriver::ShuntRes&);
 
 
   private:
@@ -49,7 +50,8 @@ class MainWindow : public QMainWindow, private logger::Logger {
     void displayPerformanceView(const std::vector<vrfbdriver::PerformanceEntry_CE>&);
     void exportCEPerformance(CEResultView*);
 
-    void displayPerformanceView_SC(const vrfb::shuntcur::ShuntPerf&);
+    void displayPerformanceView_SC(const vrfbdriver::ShuntRes&);
+    void exportSEPerformance(SCResultView*);
 
     Ui::MainWindow* ui;
     CEConfigPopup* popup_ce;

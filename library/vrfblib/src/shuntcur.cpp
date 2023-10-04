@@ -10,98 +10,106 @@ namespace vrfb {
 namespace shuntcur {
 
 
-namespace {
+ShuntPerf::ShuntPerf(double cc, double cv, const SysParam& s,
+      const std::vector<double>& clist,
+      const std::vector<double>& sptlist, const std::vector<double>& spblist,
+      const std::vector<double>& sntlist, const std::vector<double>& snblist,
+      const std::vector<double>& mptlist, const std::vector<double>& mpblist,
+      const std::vector<double>& mntlist, const std::vector<double>& mnblist,
+      const std::vector<double>& csptlist, const std::vector<double>& cspblist,
+      const std::vector<double>& csntlist, const std::vector<double>& csnblist,
+      const std::vector<double>& cmptlist, const std::vector<double>& cmpblist,
+      const std::vector<double>& cmntlist, const std::vector<double>& cmnblist,
+      double err)
+      : error{err}, chgCurr{cc}, chgVolt{cv}, sys{s},
+        cell_currs{clist},
+        spt_currs{sptlist}, spb_currs{spblist},
+        snt_currs{sntlist}, snb_currs{snblist},
+        mpt_currs{mptlist}, mpb_currs{mpblist},
+        mnt_currs{mntlist}, mnb_currs{mnblist},
+        cspt_currs{csptlist}, cspb_currs{cspblist},
+        csnt_currs{csntlist}, csnb_currs{csnblist},
+        cmpt_currs{cmptlist}, cmpb_currs{cmpblist},
+        cmnt_currs{cmntlist}, cmnb_currs{cmnblist} {
+  for (std::size_t i = 0; i < cell_currs.size(); ++i) {
+    cell_powrs.push_back(cell_currs[i]*kAvrOCV);
+    totPowr += cell_currs[i]*kAvrOCV;
 
+    cir_powrs.push_back(std::pow(cell_currs[i], 2) * sys.cellR());
 
-/*
-********************************************************************************
-**    Constants and equations
-********************************************************************************
-*/
+    spt_powrs.push_back(std::pow(spt_currs[i], 2) * sys.stackShuntR());
+    spb_powrs.push_back(std::pow(spb_currs[i], 2) * sys.stackShuntR());
+    snt_powrs.push_back(std::pow(snt_currs[i], 2) * sys.stackShuntR());
+    snb_powrs.push_back(std::pow(snb_currs[i], 2) * sys.stackShuntR());
 
+    mpt_powrs.push_back(std::pow(mpt_currs[i], 2) * sys.stackManiR());
+    mpb_powrs.push_back(std::pow(mpb_currs[i], 2) * sys.stackManiR());
+    mnt_powrs.push_back(std::pow(mnt_currs[i], 2) * sys.stackManiR());
+    mnb_powrs.push_back(std::pow(mnb_currs[i], 2) * sys.stackManiR());
+  }
 
-inline double calcCellResist(double asr, double area) {
-  return asr / area;
-}
+  for (std::size_t i = 0; i < s.numStacks(); ++i) {
+    cspt_powrs.push_back(std::pow(cspt_currs[i], 2) * sys.connShuntR());
+    cspb_powrs.push_back(std::pow(cspb_currs[i], 2) * sys.connShuntR());
+    csnt_powrs.push_back(std::pow(csnt_currs[i], 2) * sys.connShuntR());
+    csnb_powrs.push_back(std::pow(csnb_currs[i], 2) * sys.connShuntR());
 
-
-inline double calcChannelResist(double rho, double l, double a) {
-  return (rho * l) / a;
-}
-
-
-}
-
-
-/*
-********************************************************************************
-**    Data Structure Definition
-********************************************************************************
-*/
-
-
-StackParam::StackParam(
-      std::size_t num_c, double rho,
-      double asr, double ca,
-      double sl, double sa,
-      double ml, double ma)
-      : numCells{num_c} {
-  cellResist = calcCellResist(asr, ca);
-  shuntResist = calcChannelResist(rho, sl, sa);
-  maniResist = calcChannelResist(rho, ml, ma);
-}
-
-
-ConnParam::ConnParam(
-      double rho,
-      double sl, double sa,
-      double ml, double ma) {
-  shuntResist = calcChannelResist(rho, sl, sa);
-  maniResist = calcChannelResist(rho, ml, ma);
-}
-
-
-/*
-********************************************************************************
-**    ShuntPerf Definition
-********************************************************************************
-*/
-
-
-ShuntPerf::ShuntPerf(double cc, double cv, const StackParam& s, const ConnParam& c,
-        const std::vector<double>& clist,
-        const std::vector<double>& sptlist, const std::vector<double>& spblist,
-        const std::vector<double>& sntlist, const std::vector<double>& snblist)
-    : chgCurr{cc}, chgVolt{cv}, stack{s}, conn{c},
-      currs{clist},
-      spt_currs{sptlist}, spb_currs{spblist},
-      snt_currs{sntlist}, snb_currs{snblist} {
-  for (std::size_t i = 0; i < clist.size(); ++i) {
-    powrs.push_back(currs[i]*kAvrOCV);
-    totPowr += currs[i]*kAvrOCV;
-    spt_powrs.push_back(std::pow(spt_currs[i], 2) * stack.shuntResist);
-    spb_powrs.push_back(std::pow(spb_currs[i], 2) * stack.shuntResist);
-    snt_powrs.push_back(std::pow(snt_currs[i], 2) * stack.shuntResist);
-    snb_powrs.push_back(std::pow(snb_currs[i], 2) * stack.shuntResist);
+    cmpt_powrs.push_back(std::pow(cmpt_currs[i], 2) * sys.connManiR());
+    cmpb_powrs.push_back(std::pow(cmpb_currs[i], 2) * sys.connManiR());
+    cmnt_powrs.push_back(std::pow(cmnt_currs[i], 2) * sys.connManiR());
+    cmnb_powrs.push_back(std::pow(cmnb_currs[i], 2) * sys.connManiR());
   }
 }
 
 
-ShuntPerf::ShuntPerf(double cc, double cv, const StackParam& s, const ConnParam& c,
-        std::vector<double>&& clist,
-        std::vector<double>&& sptlist, std::vector<double>&& spblist,
-        std::vector<double>&& sntlist, std::vector<double>&& snblist)
-    : chgCurr{cc}, chgVolt{cv}, stack{s}, conn{c},
-      currs{std::move(clist)},
-      spt_currs{std::move(sptlist)}, spb_currs{std::move(spblist)},
-      snt_currs{std::move(sntlist)}, snb_currs{std::move(snblist)} {
-  for (std::size_t i = 0; i < clist.size(); ++i) {
-    powrs.push_back(currs[i]*kAvrOCV);
-    totPowr += currs[i]*kAvrOCV;
-    spt_powrs.push_back(std::pow(spt_currs[i], 2) * stack.shuntResist);
-    spb_powrs.push_back(std::pow(spb_currs[i], 2) * stack.shuntResist);
-    snt_powrs.push_back(std::pow(snt_currs[i], 2) * stack.shuntResist);
-    snb_powrs.push_back(std::pow(snb_currs[i], 2) * stack.shuntResist);
+ShuntPerf::ShuntPerf(double cc, double cv, const SysParam& s,
+      std::vector<double>&& clist,
+      std::vector<double>&& sptlist, std::vector<double>&& spblist,
+      std::vector<double>&& sntlist, std::vector<double>&& snblist,
+      std::vector<double>&& mptlist, std::vector<double>&& mpblist,
+      std::vector<double>&& mntlist, std::vector<double>&& mnblist,
+      std::vector<double>&& csptlist, std::vector<double>&& cspblist,
+      std::vector<double>&& csntlist, std::vector<double>&& csnblist,
+      std::vector<double>&& cmptlist, std::vector<double>&& cmpblist,
+      std::vector<double>&& cmntlist, std::vector<double>&& cmnblist,
+      double err)
+      : error{err}, chgCurr{cc}, chgVolt{cv}, sys{s},
+        cell_currs{std::move(clist)},
+        spt_currs{std::move(sptlist)}, spb_currs{std::move(spblist)},
+        snt_currs{std::move(sntlist)}, snb_currs{std::move(snblist)},
+        mpt_currs{std::move(mptlist)}, mpb_currs{std::move(mpblist)},
+        mnt_currs{std::move(mntlist)}, mnb_currs{std::move(mnblist)},
+        cspt_currs{std::move(csptlist)}, cspb_currs{std::move(cspblist)},
+        csnt_currs{std::move(csntlist)}, csnb_currs{std::move(csnblist)},
+        cmpt_currs{std::move(cmptlist)}, cmpb_currs{std::move(cmpblist)},
+        cmnt_currs{std::move(cmntlist)}, cmnb_currs{std::move(cmnblist)} {
+  for (std::size_t i = 0; i < cell_currs.size(); ++i) {
+    cell_powrs.push_back(cell_currs[i]*kAvrOCV);
+    totPowr += cell_currs[i]*kAvrOCV;
+
+    cir_powrs.push_back(std::pow(cell_currs[i], 2) * sys.cellR());
+
+    spt_powrs.push_back(std::pow(spt_currs[i], 2) * sys.stackShuntR());
+    spb_powrs.push_back(std::pow(spb_currs[i], 2) * sys.stackShuntR());
+    snt_powrs.push_back(std::pow(snt_currs[i], 2) * sys.stackShuntR());
+    snb_powrs.push_back(std::pow(snb_currs[i], 2) * sys.stackShuntR());
+
+    mpt_powrs.push_back(std::pow(mpt_currs[i], 2) * sys.stackManiR());
+    mpb_powrs.push_back(std::pow(mpb_currs[i], 2) * sys.stackManiR());
+    mnt_powrs.push_back(std::pow(mnt_currs[i], 2) * sys.stackManiR());
+    mnb_powrs.push_back(std::pow(mnb_currs[i], 2) * sys.stackManiR());
+  }
+
+  for (std::size_t i = 0; i < s.numStacks(); ++i) {
+    cspt_powrs.push_back(std::pow(cspt_currs[i], 2) * sys.connShuntR());
+    cspb_powrs.push_back(std::pow(cspb_currs[i], 2) * sys.connShuntR());
+    csnt_powrs.push_back(std::pow(csnt_currs[i], 2) * sys.connShuntR());
+    csnb_powrs.push_back(std::pow(csnb_currs[i], 2) * sys.connShuntR());
+
+    cmpt_powrs.push_back(std::pow(cmpt_currs[i], 2) * sys.connManiR());
+    cmpb_powrs.push_back(std::pow(cmpb_currs[i], 2) * sys.connManiR());
+    cmnt_powrs.push_back(std::pow(cmnt_currs[i], 2) * sys.connManiR());
+    cmnb_powrs.push_back(std::pow(cmnb_currs[i], 2) * sys.connManiR());
   }
 }
 
@@ -116,9 +124,9 @@ ShuntPerf::ShuntPerf(double cc, double cv, const StackParam& s, const ConnParam&
 ShuntPerf CommLineCalc::calculate(double chgVolt) const {
   switch (connType) {
     case ConnType::ctFF:
-      return commLineCalc<ConnSide::csFront, ConnSide::csFront>(stack, conn, numStacks, chgVolt);
+      return commLineCalc<ConnSide::csFront, ConnSide::csFront>(sys, chgVolt);
     case ConnType::ctFB:
-      return commLineCalc<ConnSide::csFront, ConnSide::csBack>(stack, conn, numStacks, chgVolt);
+      return commLineCalc<ConnSide::csFront, ConnSide::csBack>(sys, chgVolt);
     default:
       throw std::runtime_error("Unknown connection type");
   }

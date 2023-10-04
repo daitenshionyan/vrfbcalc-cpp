@@ -339,8 +339,8 @@ void GraphPlotForm::setupPlot(
   // set initial range
   ui->plot->xAxis->setRange(min_x, max_x);
   ui->plot->yAxis->setRange(min_y, max_y);
-  adjustAxisRange(ui->plot->xAxis);
-  adjustAxisRange(ui->plot->yAxis);
+  // adjustAxisRange(ui->plot->xAxis);
+  // adjustAxisRange(ui->plot->yAxis);
   ui->plot->xAxis->setLabel(QString::fromStdString(xHdr));
   ui->plot->yAxis->setLabel(QString::fromStdString(yHdr));
   ui->plot->replot();
@@ -377,8 +377,8 @@ void GraphPlotForm::setupPlot(
   // set initial range
   ui->plot->xAxis->setRange(min_x, max_x);
   ui->plot->yAxis->setRange(min_y, max_y);
-  adjustAxisRange(ui->plot->xAxis);
-  adjustAxisRange(ui->plot->yAxis);
+  // adjustAxisRange(ui->plot->xAxis);
+  // adjustAxisRange(ui->plot->yAxis);
   ui->plot->xAxis->setLabel(QString::fromStdString(name_x));
   ui->plot->yAxis->setLabel(QString::fromStdString(name_y));
   ui->plot->replot();

@@ -246,24 +246,21 @@ ShuntJob& ShuntJob::operator=(ShuntJob&& o) {
 // ==== [ calcShuntPerf Definition ] ===========================================
 
 
-vrfb::shuntcur::ShuntPerf calcShuntPerf(const ShuntJob& j, logger::Logger& l) {
+ShuntRes calcShuntPerf(const ShuntJob& j, logger::Logger& l) {
   auto beg = std::chrono::high_resolution_clock::now();
   vrfb::shuntcur::ShuntPerf perf_c = j.calc->calculate(j.chgVolt);
-  auto dur1 = std::chrono::duration_cast<std::chrono::microseconds>(
+  io::saveData_XLSX(std::filesystem::u8path<std::string>("output/" + j.name + ".xlsx"), perf_c);
+  auto dur = std::chrono::duration_cast<std::chrono::microseconds>(
             std::chrono::high_resolution_clock::now() - beg);
-  l.info(comutils::string::format_string("Calculated charging performance in %.3fms",
-      dur1.count() / 1000.));
-  vrfb::shuntcur::ShuntPerf perf_d = j.calc->calculate(0);
-  auto dur2 = std::chrono::duration_cast<std::chrono::microseconds>(
-            std::chrono::high_resolution_clock::now() - beg);
-  l.info(comutils::string::format_string("Calculated discharging performance in %.3fms",
-      (dur2.count() - dur1.count()) / 1000.));
-  io::saveData_XLSX(std::filesystem::u8path<std::string>("output/" + j.name + ".xlsx"), perf_c, perf_d);
-  auto dur3 = std::chrono::duration_cast<std::chrono::microseconds>(
-            std::chrono::high_resolution_clock::now() - beg);
-  l.succ(comutils::string::format_string("Shunt performance calculation completed in %.3fms",
-      dur3.count() / 1000.));
-  return perf_c;
+  std::string finMsg = comutils::string::format_string(
+      "Shunt performance calculation completed in %.3fms (Error = %.2f)",
+      dur.count() / 1000., perf_c.err());
+  if (perf_c.err() > 0.01) {
+    l.warn(finMsg);
+  } else {
+    l.info(finMsg);
+  }
+  return {j.name, perf_c};
 }
 
 
