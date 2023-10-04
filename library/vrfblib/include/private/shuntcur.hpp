@@ -7,6 +7,8 @@
 
 #include "vrfblib/vrfblib.hpp"
 
+#include <iostream>
+
 
 /*
 ================================================================================
@@ -1058,7 +1060,7 @@ void addConnLoops<ConnSide::csFront, ConnSide::csFront>(Eigen::MatrixXd& m, cons
             m(snti-1, cnti) -= s.stackShuntR();
             m(cnti, snti-1) -= s.stackShuntR();
           }
-          if (ci+1 == s.numStacks()) {
+          if (ci+1 == s.numCells()) {
             m(snti, cnti) += s.stackShuntR();
             m(cnti, snti) += s.stackShuntR();
           }
@@ -1104,7 +1106,7 @@ void addConnLoops<ConnSide::csFront, ConnSide::csFront>(Eigen::MatrixXd& m, cons
             m(snbi, cnbi) += s.stackShuntR();
             m(cnbi, snbi) += s.stackShuntR();
           }
-          if (ci+1 == s.numStacks()) {
+          if (ci+1 == s.numCells()) {
             m(snbi+1, cnbi) -= s.stackShuntR();
             m(cnbi, snbi+1) -= s.stackShuntR();
           }
@@ -1309,7 +1311,7 @@ void addConnLoops<ConnSide::csFront, ConnSide::csBack>(Eigen::MatrixXd& m, const
             m(spbi, cpbi) += s.stackShuntR();
             m(cpbi, spbi) += s.stackShuntR();
           }
-          if (ci+2 == s.numStacks()) {
+          if (ci+2 == s.numCells()) {
             m(spbi+1, cpbi) -= s.stackShuntR();
             m(cpbi, spbi+1) -= s.stackShuntR();
           }
@@ -1331,7 +1333,7 @@ void addConnLoops<ConnSide::csFront, ConnSide::csBack>(Eigen::MatrixXd& m, const
             m(snti, cnti) += s.stackShuntR();
             m(cnti, snti) += s.stackShuntR();
           }
-          if (ci+1 == s.numStacks()) {
+          if (ci+1 == s.numCells()) {
             m(snti+1, cnti) -= s.stackShuntR();
             m(cnti, snti+1) -= s.stackShuntR();
           }
