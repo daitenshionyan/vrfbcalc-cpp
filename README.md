@@ -42,6 +42,13 @@ Additional points to note:
 * All fields are case sensitive.
 * Leading and trailing whitespaces are significant and not ignored. Thus for **Chg Type Name** field, `CC Chg, Chg` will match to `<SPACE>Chg`, where `<SPACE>` is a space character.
 
+## Shunt Current
+
+Calculates the current and power lost during charging for a VRFB system.
+
+1. Navigate `Run` > `SC Calculation` and enter the relavent details.
+2. Output are output into the folder `output/${NAME}.xlsx`. To quickly open output folder, navigate `Files` > `Open output`.
+
 ## Dependencies
 
 * GUI framework: [Qt Framework](https://www.qt.io/)

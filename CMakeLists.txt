@@ -29,17 +29,6 @@ project(vrfbcalc-cpp
     LANGUAGES CXX
 )
 
-# find libraries
-find_package(Xlnt CONFIG REQUIRED)
-find_package(nlohmann_json CONFIG REQUIRED)
-find_package(Qt6 REQUIRED COMPONENTS
-    Concurrent
-    Core
-    Gui
-    Widgets
-    Charts
-)
-
 # add dependency sub directory
 add_subdirectory(dependency/qcustomplot)
 
@@ -47,99 +36,9 @@ add_subdirectory(dependency/qcustomplot)
 add_subdirectory(library/utillib)
 add_subdirectory(library/vrfblib)
 
-# ==== EXECUTABLE ============================================================ #
+# add executable sub directory
+add_subdirectory(app)
 
-set(VRFBCALC-CPP_VERSION "0.2.0")
+# ==== TESTING =============================================================== #
 
-configure_file(include/vrfbcalccfg.hpp.in include/vrfbcalccfg.hpp)
-
-add_executable(vrfbcalc-cpp WIN32
-    ${CMAKE_CURRENT_BINARY_DIR}/include/vrfbcalccfg.hpp
-    src/main.cpp
-
-    include/driver/vrfbdriver.hpp
-    src/driver/vrfbdriver.cpp
-    include/driver/vrfbdriver_io.hpp
-    src/driver/vrfbdriver_io.cpp
-
-    resource/resource.qrc
-
-    include/view/mainwindow.h
-    src/view/mainwindow.ui
-    src/view/mainwindow.cpp
-
-    include/view/celleffconfigpopup.h
-    src/view/celleffconfigpopup.ui
-    src/view/celleffconfigpopup.cpp
-
-    include/view/celleffdatasetform.h
-    src/view/celleffdatasetform.ui
-    src/view/celleffdatasetform.cpp
-
-    include/view/celleffdataentryform.h
-    src/view/celleffdataentryform.ui
-    src/view/celleffdataentryform.cpp
-
-    include/view/celleffloadpresetconfigform.h
-    src/view/celleffloadpresetconfigform.ui
-    src/view/celleffloadpresetconfigform.cpp
-
-    include/view/celleffmanualconfigform.h
-    src/view/celleffmanualconfigform.ui
-    src/view/celleffmanualconfigform.cpp
-
-    include/view/celleffresultview.h
-    src/view/celleffresultview.ui
-    src/view/celleffresultview.cpp
-
-    include/view/graphplotform.h
-    src/view/graphplotform.ui
-    src/view/graphplotform.cpp
-
-    resource/app.o          # executable icon
-)
-
-target_include_directories(vrfbcalc-cpp PRIVATE
-    include
-    ${CMAKE_CURRENT_BINARY_DIR}/include
-)
-
-# cache variable used by package.bat
-set(VRFBCALC_EXECUTABLE_NAME "vrfbcalc_v${VRFBCALC-CPP_VERSION}"
-    CACHE STRING "Output executable name" FORCE)
-set_target_properties(vrfbcalc-cpp PROPERTIES OUTPUT_NAME
-    ${VRFBCALC_EXECUTABLE_NAME}
-)
-
-# link libraries
-target_link_libraries(vrfbcalc-cpp PRIVATE xlnt::xlnt)
-target_link_libraries(vrfbcalc-cpp PRIVATE nlohmann_json::nlohmann_json)
-target_link_libraries(vrfbcalc-cpp PRIVATE
-    Qt6::Concurrent
-    Qt6::Core
-    Qt6::Gui
-    Qt6::Widgets
-    Qt6::Charts)
-target_link_libraries(vrfbcalc-cpp PRIVATE qcustomplot)
-target_link_libraries(vrfbcalc-cpp PRIVATE utillib)
-target_link_libraries(vrfbcalc-cpp PRIVATE vrfblib)
-
-# compile definition for qcustomplot
-target_compile_definitions(vrfbcalc-cpp PRIVATE QCUSTOMPLOT_USE_LIBRARY)
-
-# post build to install required qt dlls
-add_custom_command(TARGET vrfbcalc-cpp POST_BUILD
-    COMMAND ${WINDEPLOYQT_EXECUTABLE}
-        --verbose 1
-        $<IF:$<CONFIG:Debug>,--debug,--release>
-        --no-compiler-runtime
-        --no-network
-        --no-pdf
-        --skip-plugin-types
-            imageformats
-        --no-opengl-sw
-        --no-system-d3d-compiler
-        --no-translations
-        -printsupport                               # for qcustomplot
-        \"$<TARGET_FILE:vrfbcalc-cpp>\"
-)
+enable_testing()

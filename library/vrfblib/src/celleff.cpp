@@ -1,12 +1,6 @@
-#include "vrfbcalc.hpp"
+#include "vrfblib/vrfblib.hpp"
 #include "celleff.hpp"
 
-
-/*
-================================================================================
-        celleff
-================================================================================
-*/
 
 namespace vrfb {
 namespace celleff {
@@ -68,7 +62,7 @@ inline void pushIn(const CellCycle& cyc, std::vector<std::string>& elems) {
 }
 
 
-std::vector<Step> extractSteps(const vrfb::Table& t, const vrfb::Config_CE& cfg) {
+std::vector<Step> extractSteps(const comutils::Table& t, const Config& cfg) {
   std::vector<Step> steps {};
   if (t.numRows() == 0) {
     return steps;
@@ -96,23 +90,9 @@ std::vector<Step> extractSteps(const vrfb::Table& t, const vrfb::Config_CE& cfg)
 }
 
 
-}
-}
-
-
-/*
-================================================================================
-        vrfb
-================================================================================
-*/
-
-
-namespace vrfb {
-
-
-vrfb::Table calcPerf_CE(const double area, const std::vector<Data_CE>& datas) {
+comutils::Table calcPerf(const double area, const std::vector<Data>& datas) {
   std::vector<celleff::Step> steps {};
-  for (const Data_CE& d : datas) {
+  for (const Data& d : datas) {
     for (const celleff::Step& s : celleff::extractSteps(d.table, d.cfg)) {
       steps.push_back(s);
     }
@@ -150,4 +130,5 @@ vrfb::Table calcPerf_CE(const double area, const std::vector<Data_CE>& datas) {
 }
 
 
+}
 }
