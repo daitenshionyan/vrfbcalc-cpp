@@ -32,8 +32,13 @@ ShuntPerf::ShuntPerf(double cc, double cv, const SysParam& s,
         cmpt_currs{cmptlist}, cmpb_currs{cmpblist},
         cmnt_currs{cmntlist}, cmnb_currs{cmnblist} {
   for (std::size_t i = 0; i < cell_currs.size(); ++i) {
-    cell_powrs.push_back(cell_currs[i]*kAvrOCV);
-    totPowr += cell_currs[i]*kAvrOCV;
+    double cellInPowr = cell_currs[i]*kAvrOCV;
+    if (s.cellArea()*s.maxChgDen() < cell_currs[i]) {
+      cellInPowr = s.cellArea()*s.maxChgDen() * kAvrOCV;
+    }
+    cell_powrs.push_back(cellInPowr);
+    totPowr += cellInPowr;
+    ovpLoss += cell_currs[i]*kAvrOCV - cellInPowr;
 
     cir_powrs.push_back(std::pow(cell_currs[i], 2) * sys.cellR());
 
@@ -84,8 +89,13 @@ ShuntPerf::ShuntPerf(double cc, double cv, const SysParam& s,
         cmpt_currs{std::move(cmptlist)}, cmpb_currs{std::move(cmpblist)},
         cmnt_currs{std::move(cmntlist)}, cmnb_currs{std::move(cmnblist)} {
   for (std::size_t i = 0; i < cell_currs.size(); ++i) {
-    cell_powrs.push_back(cell_currs[i]*kAvrOCV);
-    totPowr += cell_currs[i]*kAvrOCV;
+    double cellInPowr = cell_currs[i]*kAvrOCV;
+    if (s.cellArea()*s.maxChgDen() < cell_currs[i]) {
+      cellInPowr = s.cellArea()*s.maxChgDen() * kAvrOCV;
+    }
+    cell_powrs.push_back(cellInPowr);
+    totPowr += cellInPowr;
+    ovpLoss += cell_currs[i]*kAvrOCV - cellInPowr;
 
     cir_powrs.push_back(std::pow(cell_currs[i], 2) * sys.cellR());
 

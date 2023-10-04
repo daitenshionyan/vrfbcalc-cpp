@@ -103,42 +103,50 @@ void writeShuntSummary(xlnt::worksheet& ws, const vrfb::shuntcur::ShuntPerf& p) 
   ws.cell(2, 1).value(p.numStacks());
   ws.cell(1, 2).value("Cells per stack");
   ws.cell(2, 2).value(p.numCells());
+  ws.cell(1, 3).value("Resistivity (Ohm m)");
+  ws.cell(2, 3).value(p.resistivity());
+  ws.cell(1, 4).value("Max charge density (mA cm-2)");
+  ws.cell(2, 4).value(p.maxChgDen() / 10);
+  ws.cell(1, 5).value("Max charging current (A)");
+  ws.cell(2, 5).value(p.maxChgCurr());
 
-  ws.cell(1, 3).value("ASR (cm2 Ohm)");
-  ws.cell(2, 3).value(p.asr() * 10000);
-  ws.cell(1, 4).value("Cell Area (cm2)");
-  ws.cell(2, 4).value(p.cellArea() * 10000);
-  ws.cell(1, 5).value("Shunt length (cm)");
-  ws.cell(2, 5).value(p.stackShuntLen() * 100);
-  ws.cell(1, 6).value("Shunt area (cm2)");
-  ws.cell(2, 6).value(p.stackShuntArea() * 10000);
-  ws.cell(1, 7).value("Manifold length (cm)");
-  ws.cell(2, 7).value(p.stackManiLen() * 100);
-  ws.cell(1, 8).value("Manifold area (cm2)");
-  ws.cell(2, 8).value(p.stackManiArea() * 10000);
+  ws.cell(1, 6).value("ASR (cm2 Ohm)");
+  ws.cell(2, 6).value(p.asr() * 10000);
+  ws.cell(1, 7).value("Cell Area (cm2)");
+  ws.cell(2, 7).value(p.cellArea() * 10000);
+  ws.cell(1, 8).value("Shunt length (cm)");
+  ws.cell(2, 8).value(p.stackShuntLen() * 100);
+  ws.cell(1, 9).value("Shunt area (cm2)");
+  ws.cell(2, 9).value(p.stackShuntArea() * 10000);
+  ws.cell(1, 10).value("Manifold length (cm)");
+  ws.cell(2, 10).value(p.stackManiLen() * 100);
+  ws.cell(1, 11).value("Manifold area (cm2)");
+  ws.cell(2, 11).value(p.stackManiArea() * 10000);
 
-  ws.cell(1, 9).value("Connector shunt length (cm)");
-  ws.cell(2, 9).value(p.connShuntLen() * 100);
-  ws.cell(1, 10).value("Connector shunt area (cm2)");
-  ws.cell(2, 10).value(p.connShuntArea() * 10000);
-  ws.cell(1, 11).value("Connector manifold length (cm)");
-  ws.cell(2, 11).value(p.connManiLen() * 100);
-  ws.cell(1, 12).value("Connector manifold area (cm2)");
-  ws.cell(2, 12).value(p.connManiArea() * 10000);
+  ws.cell(1, 12).value("Connector shunt length (cm)");
+  ws.cell(2, 12).value(p.connShuntLen() * 100);
+  ws.cell(1, 13).value("Connector shunt area (cm2)");
+  ws.cell(2, 13).value(p.connShuntArea() * 10000);
+  ws.cell(1, 14).value("Connector manifold length (cm)");
+  ws.cell(2, 14).value(p.connManiLen() * 100);
+  ws.cell(1, 15).value("Connector manifold area (cm2)");
+  ws.cell(2, 15).value(p.connManiArea() * 10000);
 
-  ws.cell(1, 13).value("Charging voltage (V)");
-  ws.cell(2, 13).value(p.chargingVolt());
-  ws.cell(1, 14).value("Charging current (A)");
-  ws.cell(2, 14).value(p.chargingCurr());
-  ws.cell(1, 15).value("Charging power (W)");
-  ws.cell(2, 15).value(p.chargingPowr());
-  ws.cell(1, 16).value("Stored power (W)");
-  ws.cell(2, 16).value(p.totalPowr());
-  ws.cell(1, 17).value("Power efficiency (%)");
-  ws.cell(2, 17).value(p.powrEff() * 100);
+  ws.cell(1, 16).value("Charging voltage (V)");
+  ws.cell(2, 16).value(p.chargingVolt());
+  ws.cell(1, 17).value("Charging current (A)");
+  ws.cell(2, 17).value(p.chargingCurr());
+  ws.cell(1, 18).value("Charging power (W)");
+  ws.cell(2, 18).value(p.chargingPowr());
+  ws.cell(1, 19).value("Over voltage loss (W)");
+  ws.cell(2, 19).value(p.overVoltPowr());
+  ws.cell(1, 20).value("Stored power (W)");
+  ws.cell(2, 20).value(p.totalPowr());
+  ws.cell(1, 21).value("Power efficiency (%)");
+  ws.cell(2, 21).value(p.powrEff() * 100);
 
-  ws.cell(1, 18).value("Norm error");
-  ws.cell(2, 18).value(p.err());
+  ws.cell(1, 22).value("Norm error");
+  ws.cell(2, 22).value(p.err());
 }
 
 

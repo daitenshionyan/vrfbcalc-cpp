@@ -156,9 +156,9 @@ struct ConnParam {
 
 class SysParam {
   public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
-    SysParam(std::size_t num_s, std::size_t num_c, double rho,
+    SysParam(std::size_t num_s, std::size_t num_c, double rho, double mcd,
         const StackParam& stack, const ConnParam& conn)
-        : ns{num_s}, nc{num_c}, r{rho},
+        : ns{num_s}, nc{num_c}, r{rho}, maxCD{mcd},
           s{stack}, c{conn} {}
 
     SysParam(const SysParam&) = default;
@@ -174,6 +174,7 @@ class SysParam {
     inline std::size_t numStacks() const {return ns;}
     inline std::size_t numCells() const {return nc;}
     inline double resistivity() const {return r;}
+    inline double maxChgDen() const {return maxCD;}
 
     inline double asr() const {return s.asr;}
     inline double cellArea() const {return s.ca;}
@@ -199,6 +200,7 @@ class SysParam {
     std::size_t ns;             // number of stacks
     std::size_t nc;             // number of cells per stack
     double r;                   // resistivity (Ohm m)
+    double maxCD;               // maximum charge density (A m-2)
 
     StackParam s;
     ConnParam c;
@@ -248,10 +250,15 @@ class ShuntPerf {
     inline double chargingCurr() const {return chgCurr;}
     inline double chargingVolt() const {return chgVolt;}
     inline double chargingPowr() const {return chgCurr*chgVolt;}
+    inline double overVoltPowr() const {return ovpLoss;}
 
     inline std::size_t numCells() const {return sys.numCells();}
     inline std::size_t numStacks() const {return sys.numStacks();}
     inline std::size_t totCells() const {return cell_currs.size();}
+
+    inline double resistivity() const {return sys.resistivity();}
+    inline double maxChgDen() const {return sys.maxChgDen();}
+    inline double maxChgCurr() const {return sys.maxChgDen()*sys.cellArea();}
 
     inline const std::vector<double>& cellCurrs() const {return cell_currs;}
     inline const std::vector<double>& cellPowrs() const {return cell_powrs;}
@@ -349,7 +356,8 @@ class ShuntPerf {
 
     double chgCurr;
     double chgVolt;
-    double totPowr = 0;
+    double totPowr = 0;     // Total input power to cells
+    double ovpLoss = 0;     // Over voltage power lost
     SysParam sys;
 
     std::vector<double> cell_currs;

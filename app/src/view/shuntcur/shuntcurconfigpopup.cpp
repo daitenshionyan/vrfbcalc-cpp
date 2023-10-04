@@ -30,6 +30,7 @@ vrfbdriver::ShuntJob SCConfigPopup::getJob() {
       (std::size_t) ui->numStackField->value(),
       (std::size_t) ui->numCellField->value(),
       ui->resistivityField->value(),
+      ui->maxChgDenField->value() * 10,   // mA cm-2    ->      A m-2
       {
         ui->asrField->value() / 10000,
         ui->cellAreaField->value() / 10000,
