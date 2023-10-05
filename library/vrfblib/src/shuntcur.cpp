@@ -1,5 +1,5 @@
 #include "vrfblib/vrfblib.hpp"
-#include "shuntcur.hpp"
+#include "shuntcur/shuntcur.hpp"
 
 #include <cmath>
 #include <stdexcept>

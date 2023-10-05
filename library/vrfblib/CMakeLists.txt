@@ -18,7 +18,7 @@ add_library(vrfblib SHARED
     include/public/vrfblib/vrfblib.hpp
 
     include/private/celleff.hpp
-    include/private/shuntcur.hpp
+    include/private/shuntcur/shuntcur.hpp
 
     src/celleff.cpp
     src/shuntcur.cpp

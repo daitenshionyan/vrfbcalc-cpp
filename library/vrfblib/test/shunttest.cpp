@@ -9,7 +9,7 @@
 #include "shunttestconst.hpp"
 
 #include "vrfblib/vrfblib.hpp"
-#include "shuntcur.hpp"
+#include "shuntcur/shuntcur.hpp"
 
 
 namespace { // ==== namespace <UNNAMED> ========================================
