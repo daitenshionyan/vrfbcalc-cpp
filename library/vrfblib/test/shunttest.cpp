@@ -10,6 +10,7 @@
 
 #include "vrfblib/vrfblib.hpp"
 #include "shuntcur/shuntcur.hpp"
+#include "shuntcur/conn_scl.hpp"
 
 
 namespace { // ==== namespace <UNNAMED> ========================================
@@ -216,8 +217,8 @@ TEST(vrfbSC, addStackLoops5C5S) {
 TEST(vrfbSC, addConnLoops5C5SFF) {
   Eigen::MatrixXd actual = Eigen::Matrix<double, 97, 97>::Zero();
   vrfb::shuntcur::addStackLoops(actual, shunttest::kTestSysParam);
-  vrfb::shuntcur::addConnLoops
-      <vrfb::shuntcur::ConnSide::csFront, vrfb::shuntcur::ConnSide::csFront>(
+  vrfb::shuntcur::scl::addConnLoops
+      <vrfb::shuntcur::scl::ConnSide::csFront, vrfb::shuntcur::scl::ConnSide::csFront>(
           actual, shunttest::kTestSysParam);
   checkMatrix(shunttest::kExCurMat_5S_Sys_FF, actual);
 }
@@ -226,8 +227,8 @@ TEST(vrfbSC, addConnLoops5C5SFF) {
 TEST(vrfbSC, addConnLoops5C5SFB) {
   Eigen::MatrixXd actual = Eigen::Matrix<double, 97, 97>::Zero();
   vrfb::shuntcur::addStackLoops(actual, shunttest::kTestSysParam);
-  vrfb::shuntcur::addConnLoops
-      <vrfb::shuntcur::ConnSide::csFront, vrfb::shuntcur::ConnSide::csBack>(
+  vrfb::shuntcur::scl::addConnLoops
+      <vrfb::shuntcur::scl::ConnSide::csFront, vrfb::shuntcur::scl::ConnSide::csBack>(
           actual, shunttest::kTestSysParam);
   checkMatrix(shunttest::kExCurMat_5S_Sys_FB, actual);
 }
@@ -235,7 +236,7 @@ TEST(vrfbSC, addConnLoops5C5SFB) {
 
 TEST(vrfbSC, addSysVolt) {
   Eigen::VectorXd actual = Eigen::Vector<double, 97>::Zero();
-  vrfb::shuntcur::addSysVolt(actual, shunttest::kTestSysParam, shunttest::kTestChgVolt);
+  vrfb::shuntcur::scl::addSysVolt(actual, shunttest::kTestSysParam, shunttest::kTestChgVolt);
   checkMatrix(shunttest::kExVoltVec_5S_Sys_FF, actual);
 }
 

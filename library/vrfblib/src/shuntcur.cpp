@@ -1,9 +1,11 @@
 #include "vrfblib/vrfblib.hpp"
-#include "shuntcur/shuntcur.hpp"
 
 #include <cmath>
 #include <stdexcept>
 #include <utility>
+
+#include "shuntcur/shuntcur.hpp"
+#include "shuntcur/conn_scl.hpp"
 
 
 namespace vrfb {
@@ -134,9 +136,9 @@ ShuntPerf::ShuntPerf(double cc, double cv, const SysParam& s,
 ShuntPerf CommLineCalc::calculate(double chgVolt) const {
   switch (connType) {
     case ConnType::ctFF:
-      return commLineCalc<ConnSide::csFront, ConnSide::csFront>(sys, chgVolt);
+      return scl::commLineCalc<scl::ConnSide::csFront, scl::ConnSide::csFront>(sys, chgVolt);
     case ConnType::ctFB:
-      return commLineCalc<ConnSide::csFront, ConnSide::csBack>(sys, chgVolt);
+      return scl::commLineCalc<scl::ConnSide::csFront, scl::ConnSide::csBack>(sys, chgVolt);
     default:
       throw std::runtime_error("Unknown connection type");
   }
