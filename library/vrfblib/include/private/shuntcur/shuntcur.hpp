@@ -24,25 +24,12 @@ namespace shuntcur {
 
 
 /**
- * Enumberation representing the connection side of electrolyte inlet to the
- * stack relative to the positive terminal of the stack.
-*/
-enum class ConnSide {
-  /** Inlet connection on the same side as the positive terminal. */
-  csFront,
-  /** inlet connection on the opposite end of the positive terminal. */
-  csBack
-};
-
-
-/**
  * Add inner stack loop contributions coefficients to the given matrix. The
  * size of the given matrix will have to be at least an N by N matrix where
  * N = 1 + 4S(C - 1).
  *
  * @param m Matrix to add inner stack loop contribution coefficients to.
- * @param s Stack parameter of system.
- * @param num_s Number of stacks in system.
+ * @param s System parameters.
 */
 void addStackLoops(Eigen::MatrixXd& m, const SysParam& s);
 
@@ -145,6 +132,9 @@ inline Eigen::Index indexSNB(
 */
 
 
+// :::: [ CELL ] :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+
 /**
  * Returns stack inner loop contribution to the specified cell.
  *
@@ -159,6 +149,81 @@ double getStackContri_Cell(const Eigen::VectorXd& cv,
       std::size_t num_s, std::size_t num_c);
 
 
+// :::: [ STACK SHUNT ] ::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+
+/**
+ * Returns stack inner loop contribution to the specified STACK POSITIVE TOP
+ * SHUNT.
+ *
+ * @param cv Current vector.
+ * @param si Stack index.
+ * @param ci Cell index within stack.
+ * @param num_s Number of stacks.
+ * @param num_c Number of cells per stack.
+*/
+double getStackContri_SSPT(const Eigen::VectorXd& cv,
+      std::size_t si, std::size_t ci,
+      std::size_t num_s, std::size_t num_c);
+
+
+/**
+ * Returns stack inner loop contribution to the specified STACK POSITIVE BOTTOM
+ * SHUNT.
+ *
+ * @param cv Current vector.
+ * @param si Stack index.
+ * @param ci Cell index within stack.
+ * @param num_s Number of stacks.
+ * @param num_c Number of cells per stack.
+*/
+double getStackContri_SSPB(const Eigen::VectorXd& cv,
+      std::size_t si, std::size_t ci,
+      std::size_t num_s, std::size_t num_c);
+
+
+/**
+ * Returns stack inner loop contribution to the specified STACK NEGATIVE TOP
+ * SHUNT.
+ *
+ * @param cv Current vector.
+ * @param si Stack index.
+ * @param ci Cell index within stack.
+ * @param num_s Number of stacks.
+ * @param num_c Number of cells per stack.
+*/
+double getStackContri_SSNT(const Eigen::VectorXd& cv,
+      std::size_t si, std::size_t ci,
+      std::size_t num_s, std::size_t num_c);
+
+
+/**
+ * Returns stack inner loop contribution to the specified STACK NEGATIVE BOTTOM
+ * SHUNT.
+ *
+ * @param cv Current vector.
+ * @param si Stack index.
+ * @param ci Cell index within stack.
+ * @param num_s Number of stacks.
+ * @param num_c Number of cells per stack.
+*/
+double getStackContri_SSNB(const Eigen::VectorXd& cv,
+      std::size_t si, std::size_t ci,
+      std::size_t num_s, std::size_t num_c);
+
+
+// :::: [ STACK MANIFOLD ] :::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+
+/**
+ * Returns the current of the specified STACK POSITIVE TOP MANIFOLD, given
+ * the calculated current vector.
+ *
+ * @param cv Current vector.
+ * @param si Stack index.
+ * @param num_s Number of stacks.
+ * @param num_c Number of cells per stack.
+*/
 double getCurrMPT(const Eigen::VectorXd& cv,
       std::size_t si, std::size_t ci,
       std::size_t num_s, std::size_t num_c) {
@@ -166,6 +231,15 @@ double getCurrMPT(const Eigen::VectorXd& cv,
 }
 
 
+/**
+ * Returns the current of the specified STACK POSITIVE BOTTOM MANIFOLD, given
+ * the calculated current vector.
+ *
+ * @param cv Current vector.
+ * @param si Stack index.
+ * @param num_s Number of stacks.
+ * @param num_c Number of cells per stack.
+*/
 double getCurrMPB(const Eigen::VectorXd& cv,
       std::size_t si, std::size_t ci,
       std::size_t num_s, std::size_t num_c) {
@@ -173,6 +247,15 @@ double getCurrMPB(const Eigen::VectorXd& cv,
 }
 
 
+/**
+ * Returns the current of the specified STACK NEGATIVE TOP MANIFOLD, given
+ * the calculated current vector.
+ *
+ * @param cv Current vector.
+ * @param si Stack index.
+ * @param num_s Number of stacks.
+ * @param num_c Number of cells per stack.
+*/
 double getCurrMNT(const Eigen::VectorXd& cv,
       std::size_t si, std::size_t ci,
       std::size_t num_s, std::size_t num_c) {
@@ -180,6 +263,15 @@ double getCurrMNT(const Eigen::VectorXd& cv,
 }
 
 
+/**
+ * Returns the current of the specified STACK NEGATIVE BOTTOM MANIFOLD, given
+ * the calculated current vector.
+ *
+ * @param cv Current vector.
+ * @param si Stack index.
+ * @param num_s Number of stacks.
+ * @param num_c Number of cells per stack.
+*/
 double getCurrMNB(const Eigen::VectorXd& cv,
       std::size_t si, std::size_t ci,
       std::size_t num_s, std::size_t num_c) {
@@ -264,6 +356,9 @@ namespace {
 */
 
 
+// :::: [ CELL ] :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+
 double getStackContri_Cell(const Eigen::VectorXd& cv,
       std::size_t si, std::size_t ci,
       std::size_t num_s, std::size_t num_c) {
@@ -275,6 +370,65 @@ double getStackContri_Cell(const Eigen::VectorXd& cv,
   if (ci > 0) {
     result += cv(indexSNT(si, ci, num_s, num_c))
         + cv(indexSNB(si, ci, num_s, num_c));
+  }
+  return result;
+}
+
+
+// :::: [ STACK SHUNT ] ::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+
+double getStackContri_SSPT(const Eigen::VectorXd& cv,
+      std::size_t si, std::size_t ci,
+      std::size_t num_s, std::size_t num_c) {
+  double result = 0;
+  if (ci+1 < num_c) {
+    result += cv(indexSPT(si, ci, num_s, num_c));
+  }
+  if (ci > 0) {
+    result -= cv(indexSPT(si, ci, num_s, num_c) - 1);
+  }
+  return result;
+}
+
+
+double getStackContri_SSPB(const Eigen::VectorXd& cv,
+      std::size_t si, std::size_t ci,
+      std::size_t num_s, std::size_t num_c) {
+  double result = 0;
+  if (ci+1 < num_c) {
+    result += cv(indexSPB(si, ci, num_s, num_c));
+  }
+  if (ci > 0) {
+    result -= cv(indexSPB(si, ci, num_s, num_c) - 1);
+  }
+  return result;
+}
+
+
+double getStackContri_SSNT(const Eigen::VectorXd& cv,
+      std::size_t si, std::size_t ci,
+      std::size_t num_s, std::size_t num_c) {
+  double result = 0;
+  if (ci+1 < num_c) {
+    result += cv(indexSNT(si, ci, num_s, num_c) + 1);
+  }
+  if (ci > 0) {
+    result -= cv(indexSNT(si, ci, num_s, num_c));
+  }
+  return result;
+}
+
+
+double getStackContri_SSNB(const Eigen::VectorXd& cv,
+      std::size_t si, std::size_t ci,
+      std::size_t num_s, std::size_t num_c) {
+  double result = 0;
+  if (ci+1 < num_c) {
+    result += cv(indexSNB(si, ci, num_s, num_c) + 1);
+  }
+  if (ci > 0) {
+    result -= cv(indexSNB(si, ci, num_s, num_c));
   }
   return result;
 }

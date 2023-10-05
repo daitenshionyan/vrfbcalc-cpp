@@ -648,12 +648,6 @@ double getConnContri_SSPT<ConnSide::csFront>(const Eigen::VectorXd& cv,
       std::size_t si, std::size_t ci,
       std::size_t num_s, std::size_t num_c) {
   double result = 0;
-  if (ci+1 < num_c) {
-    result += cv(indexSPT(si, ci, num_s, num_c));
-  }
-  if (ci > 0) {
-    result -= cv(indexSPT(si, ci, num_s, num_c) - 1);
-  }
   if (ci+1 == num_c) {
     if (si > 0) {
       result -= cv(indexCPT<ConnSide::csFront>(si, num_s, num_c));
@@ -674,12 +668,6 @@ double getConnContri_SSPB<ConnSide::csFront>(const Eigen::VectorXd& cv,
       std::size_t si, std::size_t ci,
       std::size_t num_s, std::size_t num_c) {
   double result = 0;
-  if (ci+1 < num_c) {
-    result += cv(indexSPB(si, ci, num_s, num_c));
-  }
-  if (ci > 0) {
-    result -= cv(indexSPB(si, ci, num_s, num_c) - 1);
-  }
   if (ci == 0) {
     if (si > 0) {
       result -= cv(indexCPB<ConnSide::csFront>(si, num_s, num_c) - 1);
@@ -700,12 +688,6 @@ double getConnContri_SSNT<ConnSide::csFront>(const Eigen::VectorXd& cv,
       std::size_t si, std::size_t ci,
       std::size_t num_s, std::size_t num_c) {
   double result = 0;
-  if (ci+1 < num_c) {
-    result += cv(indexSNT(si, ci, num_s, num_c) + 1);
-  }
-  if (ci > 0) {
-    result -= cv(indexSNT(si, ci, num_s, num_c));
-  }
   if (ci+1 == num_c) {
     if (si > 0) {
       result -= cv(indexCNT<ConnSide::csFront>(si, num_s, num_c));
@@ -723,12 +705,6 @@ double getConnContri_SSNT<ConnSide::csBack>(const Eigen::VectorXd& cv,
       std::size_t si, std::size_t ci,
       std::size_t num_s, std::size_t num_c) {
   double result = 0;
-  if (ci+1 < num_c) {
-    result += cv(indexSNT(si, ci, num_s, num_c) + 1);
-  }
-  if (ci > 0) {
-    result -= cv(indexSNT(si, ci, num_s, num_c));
-  }
   if (ci == 0) {
     if (si > 0) {
       result -= cv(indexCNT<ConnSide::csBack>(si, num_s, num_c) - 1);
@@ -749,12 +725,6 @@ double getConnContri_SSNB<ConnSide::csFront>(const Eigen::VectorXd& cv,
       std::size_t si, std::size_t ci,
       std::size_t num_s, std::size_t num_c) {
   double result = 0;
-  if (ci+1 < num_c) {
-    result += cv(indexSNB(si, ci, num_s, num_c) + 1);
-  }
-  if (ci > 0) {
-    result -= cv(indexSNB(si, ci, num_s, num_c));
-  }
   if (ci == 0) {
     if (si > 0) {
       result -= cv(indexCNB<ConnSide::csFront>(si, num_s, num_c) - 1);
@@ -772,12 +742,6 @@ double getConnContri_SSNB<ConnSide::csBack>(const Eigen::VectorXd& cv,
       std::size_t si, std::size_t ci,
       std::size_t num_s, std::size_t num_c) {
   double result = 0;
-  if (ci+1 < num_c) {
-    result += cv(indexSNB(si, ci, num_s, num_c) + 1);
-  }
-  if (ci > 0) {
-    result -= cv(indexSNB(si, ci, num_s, num_c));
-  }
   if (ci+1 == num_c) {
     if (si > 0) {
       result -= cv(indexCNB<ConnSide::csBack>(si, num_s, num_c));
@@ -1534,10 +1498,14 @@ inline ShuntPerf commLineCalc(const SysParam& s, double chgVolt) {
           + getStackContri_Cell(cv, si, ci, s.numStacks(), s.numCells())
           + getPosConnContri_Cell<PS>(cv, si, ci, s.numStacks(), s.numCells())
           + getNegConnContri_Cell<NS>(cv, si, ci, s.numStacks(), s.numCells()));
-      sptlist.push_back(getConnContri_SSPT<PS>(cv, si, ci, s.numStacks(), s.numCells()));
-      spblist.push_back(getConnContri_SSPB<PS>(cv, si, ci, s.numStacks(), s.numCells()));
-      sntlist.push_back(getConnContri_SSNT<NS>(cv, si, ci, s.numStacks(), s.numCells()));
-      snblist.push_back(getConnContri_SSNB<NS>(cv, si, ci, s.numStacks(), s.numCells()));
+      sptlist.push_back(getStackContri_SSPT(cv, si, ci, s.numStacks(), s.numCells())
+          + getConnContri_SSPT<PS>(cv, si, ci, s.numStacks(), s.numCells()));
+      spblist.push_back(getStackContri_SSPB(cv, si, ci, s.numStacks(), s.numCells())
+          + getConnContri_SSPB<PS>(cv, si, ci, s.numStacks(), s.numCells()));
+      sntlist.push_back(getStackContri_SSNT(cv, si, ci, s.numStacks(), s.numCells())
+          + getConnContri_SSNT<NS>(cv, si, ci, s.numStacks(), s.numCells()));
+      snblist.push_back(getStackContri_SSNB(cv, si, ci, s.numStacks(), s.numCells())
+          + getConnContri_SSNB<NS>(cv, si, ci, s.numStacks(), s.numCells()));
       mptlist.push_back(getCurrMPT(cv, si, ci, s.numStacks(), s.numCells()));
       mpblist.push_back(getCurrMPB(cv, si, ci, s.numStacks(), s.numCells()));
       mntlist.push_back(getCurrMNT(cv, si, ci, s.numStacks(), s.numCells()));
