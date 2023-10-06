@@ -45,7 +45,7 @@ void checkMatrix(const Eigen::MatrixXd& expected, const Eigen::MatrixXd& actual)
 }
 
 
-void checkShuntPerf(const vrfb::shuntcur::ShuntPerf& expected, const vrfb::shuntcur::ShuntPerf& actual) {
+void checkShuntPerf(const vrfb::shuntcur::scl::SCLReport& expected, const vrfb::shuntcur::scl::SCLReport& actual) {
   bool is_same_size = expected.totCells() == actual.totCells();
   ASSERT_TRUE(is_same_size) << "Wrong size"
       << " - Expected size: " << expected.totCells()
@@ -246,7 +246,7 @@ TEST(vrfbSC, calculateFF) {
       shunttest::kTestSysParam,
       vrfb::shuntcur::scl::SCLCalc::ConnType::ctFF};
   auto actual = calc.calculate(shunttest::kTestChgVolt);
-  checkShuntPerf(shunttest::kExShuntPerf_5S_FF, actual);
+  checkShuntPerf(shunttest::kExShuntPerf_5S_FF, *actual);
 }
 
 
@@ -255,5 +255,5 @@ TEST(vrfbSC, calculateFB) {
       shunttest::kTestSysParam,
       vrfb::shuntcur::scl::SCLCalc::ConnType::ctFB};
   auto actual = calc.calculate(shunttest::kTestChgVolt);
-  checkShuntPerf(shunttest::kExShuntPerf_5S_FB, actual);
+  checkShuntPerf(shunttest::kExShuntPerf_5S_FB, *actual);
 }

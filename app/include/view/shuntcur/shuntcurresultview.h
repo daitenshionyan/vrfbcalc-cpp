@@ -27,7 +27,7 @@ class SCResultView : public QDialog {
   struct PlotFormData {
     std::string name;
     IndexingType it;
-    const std::vector<double>& (vrfb::shuntcur::ShuntPerf::* yseriesGetter)() const;
+    std::vector<double> (vrfb::shuntcur::scl::SCLReport::* yseriesGetter)() const;
     GraphPlotForm* plot;
   };
 
@@ -35,7 +35,7 @@ class SCResultView : public QDialog {
     SCResultView(QWidget*, const std::string&);
     ~SCResultView();
 
-    void plotGraphs(const vrfb::shuntcur::ShuntPerf&);
+    void plotGraphs(const vrfb::shuntcur::scl::SCLReport&);
     bool exportImages(logger::Logger& l);
 
 

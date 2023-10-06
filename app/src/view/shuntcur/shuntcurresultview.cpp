@@ -13,75 +13,75 @@ SCResultView::SCResultView(QWidget* parent, const std::string& p)
   connect(this, &QDialog::finished, this, &SCResultView::deleteSelf);
   formDatas.push_back({"Cell current",
     IndexingType::itStack,
-    &vrfb::shuntcur::ShuntPerf::cellCurrs,
+    &vrfb::shuntcur::scl::SCLReport::cellCurrs,
     ui->currentPlot});
   // stack shunts ------------------------------------
   formDatas.push_back({"SPT current",
     IndexingType::itStack,
-    &vrfb::shuntcur::ShuntPerf::sptCurrs,
+    &vrfb::shuntcur::scl::SCLReport::sptCurrs,
     ui->sptCurrPlot});
   formDatas.push_back({"SPB current",
     IndexingType::itStack,
-    &vrfb::shuntcur::ShuntPerf::spbCurrs,
+    &vrfb::shuntcur::scl::SCLReport::spbCurrs,
     ui->spbCurrPlot});
   formDatas.push_back({"SNT current",
     IndexingType::itStack,
-    &vrfb::shuntcur::ShuntPerf::sntCurrs,
+    &vrfb::shuntcur::scl::SCLReport::sntCurrs,
     ui->sntCurrPlot});
   formDatas.push_back({"SNB current",
     IndexingType::itStack,
-    &vrfb::shuntcur::ShuntPerf::snbCurrs,
+    &vrfb::shuntcur::scl::SCLReport::snbCurrs,
     ui->snbCurrPlot});
   // stack manifolds ---------------------------------
   formDatas.push_back({"MPT current",
     IndexingType::itStack,
-    &vrfb::shuntcur::ShuntPerf::mptCurrs,
+    &vrfb::shuntcur::scl::SCLReport::mptCurrs,
     ui->mptCurrPlot});
   formDatas.push_back({"MPB current",
     IndexingType::itStack,
-    &vrfb::shuntcur::ShuntPerf::mpbCurrs,
+    &vrfb::shuntcur::scl::SCLReport::mpbCurrs,
     ui->mpbCurrPlot});
   formDatas.push_back({"MNT current",
     IndexingType::itStack,
-    &vrfb::shuntcur::ShuntPerf::mntCurrs,
+    &vrfb::shuntcur::scl::SCLReport::mntCurrs,
     ui->mntCurrPlot});
   formDatas.push_back({"MNB current",
     IndexingType::itStack,
-    &vrfb::shuntcur::ShuntPerf::mnbCurrs,
+    &vrfb::shuntcur::scl::SCLReport::mnbCurrs,
     ui->mnbCurrPlot});
   // connector shunts --------------------------------
   formDatas.push_back({"CSPT current",
     IndexingType::itConn,
-    &vrfb::shuntcur::ShuntPerf::csptCurrs,
+    &vrfb::shuntcur::scl::SCLReport::csptCurrs,
     ui->csptCurrPlot});
   formDatas.push_back({"CSPB current",
     IndexingType::itConn,
-    &vrfb::shuntcur::ShuntPerf::cspbCurrs,
+    &vrfb::shuntcur::scl::SCLReport::cspbCurrs,
     ui->cspbCurrPlot});
   formDatas.push_back({"CSNT current",
     IndexingType::itConn,
-    &vrfb::shuntcur::ShuntPerf::csntCurrs,
+    &vrfb::shuntcur::scl::SCLReport::csntCurrs,
     ui->csntCurrPlot});
   formDatas.push_back({"CSNB current",
     IndexingType::itConn,
-    &vrfb::shuntcur::ShuntPerf::csnbCurrs,
+    &vrfb::shuntcur::scl::SCLReport::csnbCurrs,
     ui->csnbCurrPlot});
   // connector manifolds -----------------------------
   formDatas.push_back({"CMPT current",
     IndexingType::itConn,
-    &vrfb::shuntcur::ShuntPerf::cmptCurrs,
+    &vrfb::shuntcur::scl::SCLReport::cmptCurrs,
     ui->cmptCurrPlot});
   formDatas.push_back({"CMPB current",
     IndexingType::itConn,
-    &vrfb::shuntcur::ShuntPerf::cmpbCurrs,
+    &vrfb::shuntcur::scl::SCLReport::cmpbCurrs,
     ui->cmpbCurrPlot});
   formDatas.push_back({"CMNT current",
     IndexingType::itConn,
-    &vrfb::shuntcur::ShuntPerf::cmntCurrs,
+    &vrfb::shuntcur::scl::SCLReport::cmntCurrs,
     ui->cmntCurrPlot});
   formDatas.push_back({"CMNB current",
     IndexingType::itConn,
-    &vrfb::shuntcur::ShuntPerf::cmnbCurrs,
+    &vrfb::shuntcur::scl::SCLReport::cmnbCurrs,
     ui->cmnbCurrPlot});
 }
 
@@ -91,7 +91,7 @@ SCResultView::~SCResultView() {
 }
 
 
-void SCResultView::plotGraphs(const vrfb::shuntcur::ShuntPerf& p) {
+void SCResultView::plotGraphs(const vrfb::shuntcur::scl::SCLReport& p) {
   std::vector<double> series_xs {};
   std::vector<double> series_xc {};
   for (std::size_t i = 0; i < p.totCells(); ++i) {
@@ -116,8 +116,8 @@ void SCResultView::plotGraphs(const vrfb::shuntcur::ShuntPerf& p) {
   ui->chgCurrField->setText(QString::fromStdString(std::to_string(p.chargingCurr())));
   ui->chgPowrField->setText(QString::fromStdString(std::to_string(p.chargingPowr())));
   ui->ovplField->setText(QString::fromStdString(std::to_string(p.overVoltPowr())));
-  ui->inputPowrField->setText(QString::fromStdString(std::to_string(p.totalPowr())));
-  ui->energyEffField->setText(QString::fromStdString(std::to_string(p.totalPowr() / p.chargingPowr() * 100)));
+  ui->inputPowrField->setText(QString::fromStdString(std::to_string(p.storedPowr())));
+  ui->energyEffField->setText(QString::fromStdString(std::to_string(p.storedPowr() / p.chargingPowr() * 100)));
   ui->errorField->setText(QString::fromStdString(std::to_string(p.err())));
 }
 

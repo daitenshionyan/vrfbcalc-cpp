@@ -207,12 +207,106 @@ class SysParam {
 };
 
 
+class ShuntReport {
+  public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
+    ShuntReport() = default;
+    ShuntReport(const ShuntReport&) = default;
+    ShuntReport(ShuntReport&&) = default;
+
+    ShuntReport& operator=(const ShuntReport&) = default;
+    ShuntReport& operator=(ShuntReport&&) = default;
+
+    virtual ~ShuntReport() = default;
+
+
+  public: // ~~~~ accessors ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    virtual std::size_t numStacks() const = 0;
+    virtual std::size_t numCells() const = 0;
+    inline std::size_t totCells() const {return numStacks() * numCells();}
+
+    virtual double asr() const = 0;
+    virtual double cellArea() const = 0;
+    virtual double resistivity() const = 0;
+    virtual double stackShuntLen() const = 0;
+    virtual double stackShuntArea() const = 0;
+    virtual double stackManiLen() const = 0;
+    virtual double stackManiArea() const = 0;
+
+    virtual double chargingCurr() const = 0;
+    virtual double chargingVolt() const = 0;
+    virtual double chargingPowr() const = 0;
+
+    virtual std::vector<double> cellCurrs() const = 0;
+    virtual std::vector<double> cellPowrs() const = 0;
+    virtual double cellCurr(std::size_t i) const = 0;
+    virtual double cellPowr(std::size_t i) const = 0;
+    virtual double storedPowr() const = 0;
+    inline double powrEff() const {return storedPowr() / chargingPowr();}
+};
+
+
+/*
+********************************************************************************
+**    Calculator
+********************************************************************************
+*/
+
+
+// :::: [ Base class ] :::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+
+class ShuntCalc {
+  public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
+    ShuntCalc() = default;
+
+    ShuntCalc(const ShuntCalc&) = default;
+    ShuntCalc(ShuntCalc&&) = default;
+
+    ShuntCalc& operator=(const ShuntCalc&) = default;
+    ShuntCalc& operator=(ShuntCalc&&) = default;
+
+    virtual ~ShuntCalc() = default;
+
+  public: // ~~~~ functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    /**
+     * Calculates shunt current performance of the specified system.
+     *
+     * @param chgVolt The charging voltage (V). Negative value for constant
+     *    voltage discharging.
+    */
+    virtual ShuntReport* calculate(double chgVolt) const = 0;
+
+    /**
+     * Copies this instance of `ShuntCalc`.
+    */
+    virtual ShuntCalc* copy() const = 0;
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/** Series Common Line */
+namespace scl {
+
+
 /**
  * Class containing calculated shunter performance data.
 */
-class ShuntPerf {
+class SCLReport : public ShuntReport {
   public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
-    ShuntPerf(double cc, double cv, const SysParam& s,
+    SCLReport(double cc, double cv, const SysParam& s,
         const std::vector<double>& clist,
         const std::vector<double>& sptlist, const std::vector<double>& spblist,
         const std::vector<double>& sntlist, const std::vector<double>& snblist,
@@ -223,7 +317,7 @@ class ShuntPerf {
         const std::vector<double>& cmptlist, const std::vector<double>& cmpblist,
         const std::vector<double>& cmntlist, const std::vector<double>& cmnblist,
         double err = 0);
-    ShuntPerf(double cc, double cv, const SysParam& s,
+    SCLReport(double cc, double cv, const SysParam& s,
         std::vector<double>&& clist,
         std::vector<double>&& sptlist, std::vector<double>&& spblist,
         std::vector<double>&& sntlist, std::vector<double>&& snblist,
@@ -235,61 +329,59 @@ class ShuntPerf {
         std::vector<double>&& cmntlist, std::vector<double>&& cmnblist,
         double err = 0);
 
-    ShuntPerf(const ShuntPerf&) = default;
-    ShuntPerf(ShuntPerf&&) = default;
+    SCLReport(const SCLReport&) = default;
+    SCLReport(SCLReport&&) = default;
 
-    ShuntPerf& operator=(ShuntPerf&) = default;
-    ShuntPerf& operator=(ShuntPerf&&) = default;
+    SCLReport& operator=(SCLReport&) = default;
+    SCLReport& operator=(SCLReport&&) = default;
 
-    ~ShuntPerf() = default;
+    ~SCLReport() = default;
 
 
   public: // ~~~~ accessors ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     inline double err() const {return error;}
 
-    inline double chargingCurr() const {return chgCurr;}
-    inline double chargingVolt() const {return chgVolt;}
-    inline double chargingPowr() const {return chgCurr*chgVolt;}
+    double chargingCurr() const override {return chgCurr;}
+    double chargingVolt() const override {return chgVolt;}
+    double chargingPowr() const override {return chgCurr*chgVolt;}
     inline double overVoltPowr() const {return ovpLoss;}
 
-    inline std::size_t numCells() const {return sys.numCells();}
-    inline std::size_t numStacks() const {return sys.numStacks();}
-    inline std::size_t totCells() const {return cell_currs.size();}
+    std::size_t numCells() const override {return sys.numCells();}
+    std::size_t numStacks() const override {return sys.numStacks();}
 
-    inline double resistivity() const {return sys.resistivity();}
+    double resistivity() const override {return sys.resistivity();}
     inline double maxChgDen() const {return sys.maxChgDen();}
     inline double maxChgCurr() const {return sys.maxChgDen()*sys.cellArea();}
 
-    inline const std::vector<double>& cellCurrs() const {return cell_currs;}
-    inline const std::vector<double>& cellPowrs() const {return cell_powrs;}
-    inline double cellCurr(std::size_t i) const {return cell_currs.at(i);}
-    inline double cellPowr(std::size_t i) const {return cell_powrs.at(i);}
-    inline double totalPowr() const {return totPowr;}
-    inline double powrEff() const {return totalPowr()/chargingPowr();}
+    std::vector<double> cellCurrs() const override {return cell_currs;}
+    std::vector<double> cellPowrs() const override {return cell_powrs;}
+    double cellCurr(std::size_t i) const override {return cell_currs.at(i);}
+    double cellPowr(std::size_t i) const override {return cell_powrs.at(i);}
+    double storedPowr() const override {return totPowr;}
 
-    inline double asr() const {return sys.asr();}
-    inline double cellArea() const {return sys.cellArea();}
-    inline double stackShuntLen() const {return sys.stackShuntLen();}
-    inline double stackShuntArea() const {return sys.stackShuntArea();}
-    inline double stackManiLen() const {return sys.stackManiLen();}
-    inline double stackManiArea() const {return sys.stackManiArea();}
+    double asr() const override {return sys.asr();}
+    double cellArea() const override {return sys.cellArea();}
+    double stackShuntLen() const override {return sys.stackShuntLen();}
+    double stackShuntArea() const override {return sys.stackShuntArea();}
+    double stackManiLen() const override {return sys.stackManiLen();}
+    double stackManiArea() const override {return sys.stackManiArea();}
 
     inline double connShuntLen() const {return sys.connShuntLen();}
     inline double connShuntArea() const {return sys.connShuntArea();}
     inline double connManiLen() const {return sys.connManiLen();}
     inline double connManiArea() const {return sys.connManiArea();}
 
-    inline const std::vector<double> cirPowrs() const {return cir_powrs;}
+    inline std::vector<double> cirPowrs() const {return cir_powrs;}
     inline double cirPowr(std::size_t i) const {return cir_powrs.at(i);}
 
-    inline const std::vector<double>& sptCurrs() const {return spt_currs;}
-    inline const std::vector<double>& spbCurrs() const {return spb_currs;}
-    inline const std::vector<double>& sntCurrs() const {return snt_currs;}
-    inline const std::vector<double>& snbCurrs() const {return snb_currs;}
-    inline const std::vector<double>& sptPowrs() const {return spt_powrs;}
-    inline const std::vector<double>& spbPowrs() const {return spb_powrs;}
-    inline const std::vector<double>& sntPowrs() const {return snt_powrs;}
-    inline const std::vector<double>& snbPowrs() const {return snb_powrs;}
+    inline std::vector<double> sptCurrs() const {return spt_currs;}
+    inline std::vector<double> spbCurrs() const {return spb_currs;}
+    inline std::vector<double> sntCurrs() const {return snt_currs;}
+    inline std::vector<double> snbCurrs() const {return snb_currs;}
+    inline std::vector<double> sptPowrs() const {return spt_powrs;}
+    inline std::vector<double> spbPowrs() const {return spb_powrs;}
+    inline std::vector<double> sntPowrs() const {return snt_powrs;}
+    inline std::vector<double> snbPowrs() const {return snb_powrs;}
     inline double sptCurr(std::size_t i) const {return spt_currs.at(i);}
     inline double spbCurr(std::size_t i) const {return spb_currs.at(i);}
     inline double sntCurr(std::size_t i) const {return snt_currs.at(i);}
@@ -299,14 +391,14 @@ class ShuntPerf {
     inline double sntPowr(std::size_t i) const {return snt_powrs.at(i);}
     inline double snbPowr(std::size_t i) const {return snb_powrs.at(i);}
 
-    inline const std::vector<double>& mptCurrs() const {return mpt_currs;}
-    inline const std::vector<double>& mpbCurrs() const {return mpb_currs;}
-    inline const std::vector<double>& mntCurrs() const {return mnt_currs;}
-    inline const std::vector<double>& mnbCurrs() const {return mnb_currs;}
-    inline const std::vector<double>& mptPowrs() const {return mpt_powrs;}
-    inline const std::vector<double>& mpbPowrs() const {return mpb_powrs;}
-    inline const std::vector<double>& mntPowrs() const {return mnt_powrs;}
-    inline const std::vector<double>& mnbPowrs() const {return mnb_powrs;}
+    inline std::vector<double> mptCurrs() const {return mpt_currs;}
+    inline std::vector<double> mpbCurrs() const {return mpb_currs;}
+    inline std::vector<double> mntCurrs() const {return mnt_currs;}
+    inline std::vector<double> mnbCurrs() const {return mnb_currs;}
+    inline std::vector<double> mptPowrs() const {return mpt_powrs;}
+    inline std::vector<double> mpbPowrs() const {return mpb_powrs;}
+    inline std::vector<double> mntPowrs() const {return mnt_powrs;}
+    inline std::vector<double> mnbPowrs() const {return mnb_powrs;}
     inline double mptCurr(std::size_t i) const {return mpt_currs.at(i);}
     inline double mpbCurr(std::size_t i) const {return mpb_currs.at(i);}
     inline double mntCurr(std::size_t i) const {return mnt_currs.at(i);}
@@ -316,14 +408,14 @@ class ShuntPerf {
     inline double mntPowr(std::size_t i) const {return mnt_powrs.at(i);}
     inline double mnbPowr(std::size_t i) const {return mnb_powrs.at(i);}
 
-    inline const std::vector<double>& csptCurrs() const {return cspt_currs;}
-    inline const std::vector<double>& cspbCurrs() const {return cspb_currs;}
-    inline const std::vector<double>& csntCurrs() const {return csnt_currs;}
-    inline const std::vector<double>& csnbCurrs() const {return csnb_currs;}
-    inline const std::vector<double>& csptPowrs() const {return cspt_powrs;}
-    inline const std::vector<double>& cspbPowrs() const {return cspb_powrs;}
-    inline const std::vector<double>& csntPowrs() const {return csnt_powrs;}
-    inline const std::vector<double>& csnbPowrs() const {return csnb_powrs;}
+    inline std::vector<double> csptCurrs() const {return cspt_currs;}
+    inline std::vector<double> cspbCurrs() const {return cspb_currs;}
+    inline std::vector<double> csntCurrs() const {return csnt_currs;}
+    inline std::vector<double> csnbCurrs() const {return csnb_currs;}
+    inline std::vector<double> csptPowrs() const {return cspt_powrs;}
+    inline std::vector<double> cspbPowrs() const {return cspb_powrs;}
+    inline std::vector<double> csntPowrs() const {return csnt_powrs;}
+    inline std::vector<double> csnbPowrs() const {return csnb_powrs;}
     inline double csptCurr(std::size_t i) const {return cspt_currs.at(i);}
     inline double cspbCurr(std::size_t i) const {return cspb_currs.at(i);}
     inline double csntCurr(std::size_t i) const {return csnt_currs.at(i);}
@@ -333,14 +425,14 @@ class ShuntPerf {
     inline double csntPowr(std::size_t i) const {return csnt_powrs.at(i);}
     inline double csnbPowr(std::size_t i) const {return csnb_powrs.at(i);}
 
-    inline const std::vector<double>& cmptCurrs() const {return cmpt_currs;}
-    inline const std::vector<double>& cmpbCurrs() const {return cmpb_currs;}
-    inline const std::vector<double>& cmntCurrs() const {return cmnt_currs;}
-    inline const std::vector<double>& cmnbCurrs() const {return cmnb_currs;}
-    inline const std::vector<double>& cmptPowrs() const {return cmpt_powrs;}
-    inline const std::vector<double>& cmpbPowrs() const {return cmpb_powrs;}
-    inline const std::vector<double>& cmntPowrs() const {return cmnt_powrs;}
-    inline const std::vector<double>& cmnbPowrs() const {return cmnb_powrs;}
+    inline std::vector<double> cmptCurrs() const {return cmpt_currs;}
+    inline std::vector<double> cmpbCurrs() const {return cmpb_currs;}
+    inline std::vector<double> cmntCurrs() const {return cmnt_currs;}
+    inline std::vector<double> cmnbCurrs() const {return cmnb_currs;}
+    inline std::vector<double> cmptPowrs() const {return cmpt_powrs;}
+    inline std::vector<double> cmpbPowrs() const {return cmpb_powrs;}
+    inline std::vector<double> cmntPowrs() const {return cmnt_powrs;}
+    inline std::vector<double> cmnbPowrs() const {return cmnb_powrs;}
     inline double cmptCurr(std::size_t i) const {return cmpt_currs.at(i);}
     inline double cmpbCurr(std::size_t i) const {return cmpb_currs.at(i);}
     inline double cmntCurr(std::size_t i) const {return cmnt_currs.at(i);}
@@ -406,47 +498,6 @@ class ShuntPerf {
     std::vector<double> cmnb_powrs;     // Connector manifold negative bottom powers
 };
 
-/*
-********************************************************************************
-**    Calculator
-********************************************************************************
-*/
-
-
-// :::: [ Base class ] :::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-
-
-class ShuntCalc {
-  public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
-    ShuntCalc() = default;
-
-    ShuntCalc(const ShuntCalc&) = default;
-    ShuntCalc(ShuntCalc&&) = default;
-
-    ShuntCalc& operator=(const ShuntCalc&) = default;
-    ShuntCalc& operator=(ShuntCalc&&) = default;
-
-    virtual ~ShuntCalc() = default;
-
-  public: // ~~~~ functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    /**
-     * Calculates shunt current performance of the specified system.
-     *
-     * @param chgVolt The charging voltage (V). Negative value for constant
-     *    voltage discharging.
-    */
-    virtual ShuntPerf calculate(double chgVolt) const = 0;
-
-    /**
-     * Copies this instance of `ShuntCalc`.
-    */
-    virtual ShuntCalc* copy() const = 0;
-};
-
-
-/** Series Common Line */
-namespace scl {
-
 
 /**
  * Calculator to calculate shunt performance for series common line electrolyte
@@ -477,7 +528,7 @@ class SCLCalc : public ShuntCalc {
 
 
   public: // ~~~~ functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    ShuntPerf calculate(double chgVolt) const override;
+    SCLReport* calculate(double chgVolt) const override;
 
     SCLCalc* copy() const override {return new SCLCalc(*this);}
 

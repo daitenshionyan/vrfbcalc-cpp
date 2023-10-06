@@ -82,7 +82,7 @@ void addSysVolt(Eigen::VectorXd& v, const SysParam& s, double chgVolt);
  * @param chgVolt Charging voltage (V).
 */
 template<ConnSide PS, ConnSide NS>
-ShuntPerf commLineCalc(const SysParam& s, double chgVolt);
+SCLReport* commLineCalc(const SysParam& s, double chgVolt);
 
 
 
@@ -1466,7 +1466,7 @@ void addSysVolt(Eigen::VectorXd& v, const SysParam& s, double chgVolt) {
 
 
 template<ConnSide PS, ConnSide NS>
-inline ShuntPerf commLineCalc(const SysParam& s, double chgVolt) {
+inline SCLReport* commLineCalc(const SysParam& s, double chgVolt) {
   std::size_t size = matSize(s.numStacks(), s.numCells());
   Eigen::MatrixXd cm = Eigen::MatrixXd::Zero(size, size);   // current matrix
   addStackLoops(cm, s);
@@ -1524,13 +1524,13 @@ inline ShuntPerf commLineCalc(const SysParam& s, double chgVolt) {
 
   double error = ((cm*cv) - vv).norm();
 
-  return {cv(0), chgVolt, s,
+  return new SCLReport(cv(0), chgVolt, s,
       std::move(clist),
       std::move(sptlist), std::move(spblist), std::move(sntlist), std::move(snblist),
       std::move(mptlist), std::move(mpblist), std::move(mntlist), std::move(mnblist),
       std::move(csptlist), std::move(cspblist), std::move(csntlist), std::move(csnblist),
       std::move(cmptlist), std::move(cmpblist), std::move(cmntlist), std::move(cmnblist),
-      error};
+      error);
 }
 
 

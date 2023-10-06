@@ -357,7 +357,7 @@ const Eigen::Vector<double, 97> kExVoltVec_5S_Sys_FF {
 };
 
 
-const vrfb::shuntcur::ShuntPerf kExShuntPerf_5S_FF {
+const vrfb::shuntcur::scl::SCLReport kExShuntPerf_5S_FF {
   4.102282966,
   kTestChgVolt,
   kTestSysParam,
@@ -456,7 +456,7 @@ const vrfb::shuntcur::ShuntPerf kExShuntPerf_5S_FF {
 };
 
 
-const vrfb::shuntcur::ShuntPerf kExShuntPerf_5S_FB {
+const vrfb::shuntcur::scl::SCLReport kExShuntPerf_5S_FB {
   4.102282966,
   kTestChgVolt,
   kTestSysParam,

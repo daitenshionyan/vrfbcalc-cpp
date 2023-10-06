@@ -10,9 +10,10 @@
 
 namespace vrfb {
 namespace shuntcur {
+namespace scl {
 
 
-ShuntPerf::ShuntPerf(double cc, double cv, const SysParam& s,
+SCLReport::SCLReport(double cc, double cv, const SysParam& s,
       const std::vector<double>& clist,
       const std::vector<double>& sptlist, const std::vector<double>& spblist,
       const std::vector<double>& sntlist, const std::vector<double>& snblist,
@@ -69,7 +70,7 @@ ShuntPerf::ShuntPerf(double cc, double cv, const SysParam& s,
 }
 
 
-ShuntPerf::ShuntPerf(double cc, double cv, const SysParam& s,
+SCLReport::SCLReport(double cc, double cv, const SysParam& s,
       std::vector<double>&& clist,
       std::vector<double>&& sptlist, std::vector<double>&& spblist,
       std::vector<double>&& sntlist, std::vector<double>&& snblist,
@@ -126,10 +127,8 @@ ShuntPerf::ShuntPerf(double cc, double cv, const SysParam& s,
 }
 
 
-namespace scl {
 
-
-ShuntPerf SCLCalc::calculate(double chgVolt) const {
+SCLReport* SCLCalc::calculate(double chgVolt) const {
   switch (connType) {
     case ConnType::ctFF:
       return scl::commLineCalc<scl::ConnSide::csFront, scl::ConnSide::csFront>(sys, chgVolt);
