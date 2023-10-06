@@ -128,12 +128,12 @@ SCLReport::SCLReport(double cc, double cv, const SysParam& s,
 
 
 
-SCLReport* SCLCalc::calculate(double chgVolt) const {
+ShuntReport SCLCalc::calculate(double chgVolt) const {
   switch (connType) {
     case ConnType::ctFF:
-      return scl::commLineCalc<scl::ConnSide::csFront, scl::ConnSide::csFront>(sys, chgVolt);
+      return commLineCalc<ConnSide::csFront, ConnSide::csFront>(sys, chgVolt);
     case ConnType::ctFB:
-      return scl::commLineCalc<scl::ConnSide::csFront, scl::ConnSide::csBack>(sys, chgVolt);
+      return commLineCalc<ConnSide::csFront, ConnSide::csBack>(sys, chgVolt);
     default:
       throw std::runtime_error("Unknown connection type");
   }

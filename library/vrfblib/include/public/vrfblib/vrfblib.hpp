@@ -207,16 +207,16 @@ class SysParam {
 };
 
 
-class ShuntReport {
+class ShuntReportData {
   public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
-    ShuntReport() = default;
-    ShuntReport(const ShuntReport&) = default;
-    ShuntReport(ShuntReport&&) = default;
+    ShuntReportData() = default;
+    ShuntReportData(const ShuntReportData&) = default;
+    ShuntReportData(ShuntReportData&&) = default;
 
-    ShuntReport& operator=(const ShuntReport&) = default;
-    ShuntReport& operator=(ShuntReport&&) = default;
+    ShuntReportData& operator=(const ShuntReportData&) = default;
+    ShuntReportData& operator=(ShuntReportData&&) = default;
 
-    virtual ~ShuntReport() = default;
+    virtual ~ShuntReportData() = default;
 
 
   public: // ~~~~ accessors ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -245,14 +245,28 @@ class ShuntReport {
 };
 
 
-/*
-********************************************************************************
-**    Calculator
-********************************************************************************
-*/
+class ShuntReport {
+  public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
+    ShuntReport(ShuntReportData* dp) : data_p{dp} {}
+
+    ShuntReport() = default;
+    ShuntReport(const ShuntReport&) = default;
+    ShuntReport(ShuntReport&&) = default;
+
+    ShuntReport& operator=(const ShuntReport&) = default;
+    ShuntReport& operator=(ShuntReport&&) = default;
+
+    ~ShuntReport() {delete data_p;}
 
 
-// :::: [ Base class ] :::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+  public:
+    template<typename T>
+    const T& data() const {return *dynamic_cast<T*>(data_p);}
+
+
+  private:
+    ShuntReportData* data_p;
+};
 
 
 class ShuntCalc {
@@ -274,7 +288,7 @@ class ShuntCalc {
      * @param chgVolt The charging voltage (V). Negative value for constant
      *    voltage discharging.
     */
-    virtual ShuntReport* calculate(double chgVolt) const = 0;
+    virtual ShuntReport calculate(double chgVolt) const = 0;
 
     /**
      * Copies this instance of `ShuntCalc`.
@@ -304,7 +318,7 @@ namespace scl {
 /**
  * Class containing calculated shunter performance data.
 */
-class SCLReport : public ShuntReport {
+class SCLReport : public ShuntReportData {
   public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
     SCLReport(double cc, double cv, const SysParam& s,
         const std::vector<double>& clist,
@@ -528,7 +542,7 @@ class SCLCalc : public ShuntCalc {
 
 
   public: // ~~~~ functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    SCLReport* calculate(double chgVolt) const override;
+    ShuntReport calculate(double chgVolt) const override;
 
     SCLCalc* copy() const override {return new SCLCalc(*this);}
 

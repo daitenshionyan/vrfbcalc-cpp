@@ -246,7 +246,7 @@ TEST(vrfbSC, calculateFF) {
       shunttest::kTestSysParam,
       vrfb::shuntcur::scl::SCLCalc::ConnType::ctFF};
   auto actual = calc.calculate(shunttest::kTestChgVolt);
-  checkShuntPerf(shunttest::kExShuntPerf_5S_FF, *actual);
+  checkShuntPerf(shunttest::kExShuntPerf_5S_FF, actual.data<vrfb::shuntcur::scl::SCLReport>());
 }
 
 
@@ -255,5 +255,5 @@ TEST(vrfbSC, calculateFB) {
       shunttest::kTestSysParam,
       vrfb::shuntcur::scl::SCLCalc::ConnType::ctFB};
   auto actual = calc.calculate(shunttest::kTestChgVolt);
-  checkShuntPerf(shunttest::kExShuntPerf_5S_FB, *actual);
+  checkShuntPerf(shunttest::kExShuntPerf_5S_FB, actual.data<vrfb::shuntcur::scl::SCLReport>());
 }

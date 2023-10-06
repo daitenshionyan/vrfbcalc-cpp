@@ -248,21 +248,19 @@ ShuntJob& ShuntJob::operator=(ShuntJob&& o) {
 
 ShuntRes calcShuntPerf(const ShuntJob& j, logger::Logger& l) {
   auto beg = std::chrono::high_resolution_clock::now();
-  vrfb::shuntcur::scl::SCLReport* perf_c = j.calc->calculate(j.chgVolt);
-  io::saveData_XLSX(std::filesystem::u8path<std::string>("output/" + j.name + ".xlsx"), *perf_c);
+  vrfb::shuntcur::scl::SCLReport perf_c = j.calc->calculate(j.chgVolt).data<vrfb::shuntcur::scl::SCLReport>();
+  io::saveData_XLSX(std::filesystem::u8path<std::string>("output/" + j.name + ".xlsx"), perf_c);
   auto dur = std::chrono::duration_cast<std::chrono::microseconds>(
             std::chrono::high_resolution_clock::now() - beg);
   std::string finMsg = comutils::string::format_string(
       "Shunt performance calculation completed in %.3fms (Error = %.2f)",
-      dur.count() / 1000., perf_c->err());
-  if (perf_c->err() > 0.01) {
+      dur.count() / 1000., perf_c.err());
+  if (perf_c.err() > 0.01) {
     l.warn(finMsg);
   } else {
     l.info(finMsg);
   }
-  ShuntRes res = {j.name, vrfb::shuntcur::scl::SCLReport(std::move(*perf_c))};
-  delete perf_c;
-  return res;
+  return {j.name, perf_c};
 }
 
 
