@@ -444,11 +444,16 @@ class ShuntCalc {
 };
 
 
-// :::: [ CommLineCalc ] :::::::::::::::::::::::::::::::::::::::::::::::::::::::
+/** Series Common Line */
+namespace scl {
 
 
-class CommLineCalc : public ShuntCalc {
-  public:
+/**
+ * Calculator to calculate shunt performance for series common line electrolyte
+ * arrangement.
+*/
+class SCLCalc : public ShuntCalc {
+  public: // ~~~~ types ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     /** Enum representing stack connection type. */
     enum class ConnType {
       /** Positive front, negative front. */
@@ -459,31 +464,30 @@ class CommLineCalc : public ShuntCalc {
 
 
   public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
-    CommLineCalc(const SysParam& s,
-        ConnType ct = ConnType::ctFB)
-        : sys{s},
-          connType{ct} {}
+    SCLCalc(const SysParam& s, ConnType ct = ConnType::ctFB)
+        : sys{s}, connType{ct} {}
 
-    CommLineCalc(const CommLineCalc&) = default;
-    CommLineCalc(CommLineCalc&&) = default;
+    SCLCalc(const SCLCalc&) = default;
+    SCLCalc(SCLCalc&&) = default;
 
-    CommLineCalc& operator=(const CommLineCalc&) = default;
-    CommLineCalc& operator=(CommLineCalc&&) = default;
+    SCLCalc& operator=(const SCLCalc&) = default;
+    SCLCalc& operator=(SCLCalc&&) = default;
 
-    ~CommLineCalc() override = default;
+    ~SCLCalc() override = default;
 
 
   public: // ~~~~ functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     ShuntPerf calculate(double chgVolt) const override;
 
-    CommLineCalc* copy() const override {return new CommLineCalc(*this);}
+    SCLCalc* copy() const override {return new SCLCalc(*this);}
 
 
-  private:
+  private: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     SysParam sys;
     ConnType connType;
 };
 
 
+} // namespace <vrfb::shuntcur::scl>
 } // namespace <vrfb::shuntcur>
 } // namespace <vrfb>

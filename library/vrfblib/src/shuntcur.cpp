@@ -126,14 +126,10 @@ ShuntPerf::ShuntPerf(double cc, double cv, const SysParam& s,
 }
 
 
-/*
-********************************************************************************
-**    CommLineCalc Definition
-********************************************************************************
-*/
+namespace scl {
 
 
-ShuntPerf CommLineCalc::calculate(double chgVolt) const {
+ShuntPerf SCLCalc::calculate(double chgVolt) const {
   switch (connType) {
     case ConnType::ctFF:
       return scl::commLineCalc<scl::ConnSide::csFront, scl::ConnSide::csFront>(sys, chgVolt);
@@ -145,5 +141,6 @@ ShuntPerf CommLineCalc::calculate(double chgVolt) const {
 }
 
 
+}
 }
 }

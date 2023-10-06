@@ -242,18 +242,18 @@ TEST(vrfbSC, addSysVolt) {
 
 
 TEST(vrfbSC, calculateFF) {
-  vrfb::shuntcur::CommLineCalc calc {
+  vrfb::shuntcur::scl::SCLCalc calc {
       shunttest::kTestSysParam,
-      vrfb::shuntcur::CommLineCalc::ConnType::ctFF};
+      vrfb::shuntcur::scl::SCLCalc::ConnType::ctFF};
   auto actual = calc.calculate(shunttest::kTestChgVolt);
   checkShuntPerf(shunttest::kExShuntPerf_5S_FF, actual);
 }
 
 
 TEST(vrfbSC, calculateFB) {
-  vrfb::shuntcur::CommLineCalc calc {
+  vrfb::shuntcur::scl::SCLCalc calc {
       shunttest::kTestSysParam,
-      vrfb::shuntcur::CommLineCalc::ConnType::ctFB};
+      vrfb::shuntcur::scl::SCLCalc::ConnType::ctFB};
   auto actual = calc.calculate(shunttest::kTestChgVolt);
   checkShuntPerf(shunttest::kExShuntPerf_5S_FB, actual);
 }
