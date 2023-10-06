@@ -13,7 +13,7 @@ namespace shuntcur {
 namespace scl {
 
 
-SCLReport::SCLReport(double cc, double cv, const SysParam& s,
+SCLReport::SCLReport(double cc, double cv, const SCLSysParam& s,
       const std::vector<double>& clist,
       const std::vector<double>& sptlist, const std::vector<double>& spblist,
       const std::vector<double>& sntlist, const std::vector<double>& snblist,
@@ -70,7 +70,7 @@ SCLReport::SCLReport(double cc, double cv, const SysParam& s,
 }
 
 
-SCLReport::SCLReport(double cc, double cv, const SysParam& s,
+SCLReport::SCLReport(double cc, double cv, const SCLSysParam& s,
       std::vector<double>&& clist,
       std::vector<double>&& sptlist, std::vector<double>&& spblist,
       std::vector<double>&& sntlist, std::vector<double>&& snblist,

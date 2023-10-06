@@ -54,10 +54,10 @@ inline std::size_t matSize(std::size_t num_s, std::size_t num_c) {
  * @param <PS> Positive side connection side.
  * @param <NS> Negative side connection side.
  * @param m Matrix to add connector contribution coefficients to.
- * @param s System parameter.
+ * @param s SCL system parameter.
 */
 template<ConnSide PS, ConnSide NS>
-void addConnLoops(Eigen::MatrixXd& m, const SysParam& s);
+void addConnLoops(Eigen::MatrixXd& m, const SCLSysParam& s);
 
 
 /**
@@ -65,10 +65,10 @@ void addConnLoops(Eigen::MatrixXd& m, const SysParam& s);
  * vector will have to have a size of at least N = 1 + 4S(C - 1) + 4(S - 1).
  *
  * @param v Vector to add voltage to.
- * @param s System parameter.
+ * @param s SCL system parameter.
  * @param chgVolt Charging voltage (V).
 */
-void addSysVolt(Eigen::VectorXd& v, const SysParam& s, double chgVolt);
+void addSysVolt(Eigen::VectorXd& v, const SCLSysParam& s, double chgVolt);
 
 /**
  * Calculates the shunt performance for a common line type of electrolyte
@@ -78,11 +78,11 @@ void addSysVolt(Eigen::VectorXd& v, const SysParam& s, double chgVolt);
  *
  * @param <PS> Positive side connection side.
  * @param <NS> Negative side connection side.
- * @param s System parameters.
+ * @param s SCL system parameter.
  * @param chgVolt Charging voltage (V).
 */
 template<ConnSide PS, ConnSide NS>
-SCLReport* commLineCalc(const SysParam& s, double chgVolt);
+SCLReport* commLineCalc(const SCLSysParam& s, double chgVolt);
 
 
 
@@ -959,7 +959,7 @@ double getCurrCMNB<ConnSide::csBack>(const Eigen::VectorXd& cv,
 
 
 template<>
-void addConnLoops<ConnSide::csFront, ConnSide::csFront>(Eigen::MatrixXd& m, const SysParam& s) {
+void addConnLoops<ConnSide::csFront, ConnSide::csFront>(Eigen::MatrixXd& m, const SCLSysParam& s) {
   for (std::size_t si = 0; si < s.numStacks(); ++si) {
     Eigen::Index cpti = indexCPT<ConnSide::csFront>(si, s.numStacks(), s.numCells());
     Eigen::Index cpbi = indexCPB<ConnSide::csFront>(si, s.numStacks(), s.numCells());
@@ -1186,7 +1186,7 @@ void addConnLoops<ConnSide::csFront, ConnSide::csFront>(Eigen::MatrixXd& m, cons
 
 
 template<>
-void addConnLoops<ConnSide::csFront, ConnSide::csBack>(Eigen::MatrixXd& m, const SysParam& s) {
+void addConnLoops<ConnSide::csFront, ConnSide::csBack>(Eigen::MatrixXd& m, const SCLSysParam& s) {
   for (std::size_t si = 0; si < s.numStacks(); ++si) {
     Eigen::Index cpti = indexCPT<ConnSide::csFront>(si, s.numStacks(), s.numCells());
     Eigen::Index cpbi = indexCPB<ConnSide::csFront>(si, s.numStacks(), s.numCells());
@@ -1422,7 +1422,7 @@ void addConnLoops<ConnSide::csFront, ConnSide::csBack>(Eigen::MatrixXd& m, const
 */
 
 
-void addSysVolt(Eigen::VectorXd& v, const SysParam& s, double chgVolt) {
+void addSysVolt(Eigen::VectorXd& v, const SCLSysParam& s, double chgVolt) {
   v(0) += chgVolt;
   for (std::size_t si = 0; si < s.numStacks(); ++si) {
     if (si > 0) {
@@ -1466,7 +1466,7 @@ void addSysVolt(Eigen::VectorXd& v, const SysParam& s, double chgVolt) {
 
 
 template<ConnSide PS, ConnSide NS>
-inline SCLReport* commLineCalc(const SysParam& s, double chgVolt) {
+inline SCLReport* commLineCalc(const SCLSysParam& s, double chgVolt) {
   std::size_t size = matSize(s.numStacks(), s.numCells());
   Eigen::MatrixXd cm = Eigen::MatrixXd::Zero(size, size);   // current matrix
   addStackLoops(cm, s);

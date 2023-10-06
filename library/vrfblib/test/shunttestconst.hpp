@@ -29,13 +29,13 @@ const vrfb::shuntcur::StackParam kTestStackParam {
 };
 
 
-const vrfb::shuntcur::ConnParam kTestConnParam {
+const vrfb::shuntcur::scl::ConnParam kTestConnParam {
   kTestConShuntResist, 1,
   kTestConManiResist, 1
 };
 
 
-const vrfb::shuntcur::SysParam kTestSysParam {
+const vrfb::shuntcur::scl::SCLSysParam kTestSysParam {
   kTestNumStacks, kTestNumCells, 1, 1000,
   kTestStackParam, kTestConnParam
 };

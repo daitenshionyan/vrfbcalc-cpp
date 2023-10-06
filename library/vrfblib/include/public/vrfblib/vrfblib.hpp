@@ -143,24 +143,14 @@ struct StackParam {
 };
 
 
-/**
- * Structure containing the parameters of the stack connectors in a system.
-*/
-struct ConnParam {
-  double sl;      // Shunt length (m)
-  double sa;      // Shunt cross sectional area (m2)
-  double ml;      // Manifold length (m)
-  double ma;      // Manifold cross sectional area (m2)
-};
-
-
 class SysParam {
   public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
-    SysParam(std::size_t num_s, std::size_t num_c, double rho, double mcd,
-        const StackParam& stack, const ConnParam& conn)
-        : ns{num_s}, nc{num_c}, r{rho}, maxCD{mcd},
-          s{stack}, c{conn} {}
+    SysParam(std::size_t num_s, std::size_t num_c,
+        double rho, double mcd, const StackParam& stack)
+        : ns{num_s}, nc{num_c},
+          r{rho}, maxCD{mcd}, s{stack} {}
 
+    SysParam() = delete;
     SysParam(const SysParam&) = default;
     SysParam(SysParam&&) = default;
 
@@ -183,27 +173,18 @@ class SysParam {
     inline double stackManiLen() const {return s.ml;}
     inline double stackManiArea() const {return s.ma;}
 
-    inline double connShuntLen() const {return c.sl;}
-    inline double connShuntArea() const {return c.sa;}
-    inline double connManiLen() const {return c.ml;}
-    inline double connManiArea() const {return c.ma;}
-
     inline double cellR() const {return s.asr / s.ca;}
     inline double stackShuntR() const {return r * s.sl / s.sa;}
     inline double stackManiR() const {return r * s.ml / s.ma;}
 
-    inline double connShuntR() const {return r * c.sl / c.sa;}
-    inline double connManiR() const {return r * c.ml / c.ma;}
 
-
-  private: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  private:
     std::size_t ns;             // number of stacks
     std::size_t nc;             // number of cells per stack
     double r;                   // resistivity (Ohm m)
     double maxCD;               // maximum charge density (A m-2)
 
     StackParam s;
-    ConnParam c;
 };
 
 
@@ -316,11 +297,53 @@ namespace scl {
 
 
 /**
+ * Structure containing the parameters of the stack connectors in a system.
+*/
+struct ConnParam {
+  double sl;      // Shunt length (m)
+  double sa;      // Shunt cross sectional area (m2)
+  double ml;      // Manifold length (m)
+  double ma;      // Manifold cross sectional area (m2)
+};
+
+
+class SCLSysParam : public SysParam {
+  public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
+    SCLSysParam(std::size_t num_s, std::size_t num_c, double rho, double mcd,
+        const StackParam& stack, const ConnParam& conn)
+        : SysParam{num_s, num_c, rho, mcd, stack}, c{conn} {}
+
+    SCLSysParam(const SCLSysParam&) = default;
+    SCLSysParam(SCLSysParam&&) = default;
+
+    SCLSysParam& operator=(const SCLSysParam&) = default;
+    SCLSysParam& operator=(SCLSysParam&&) = default;
+
+    ~SCLSysParam() = default;
+
+
+  public: // ~~~~ accessors ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    inline double connShuntLen() const {return c.sl;}
+    inline double connShuntArea() const {return c.sa;}
+    inline double connManiLen() const {return c.ml;}
+    inline double connManiArea() const {return c.ma;}
+
+    inline double connShuntR() const {return resistivity() * c.sl / c.sa;}
+    inline double connManiR() const {return resistivity() * c.ml / c.ma;}
+
+
+  private: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    ConnParam c;
+};
+
+
+/**
  * Class containing calculated shunter performance data.
 */
 class SCLReport : public ShuntReportData {
   public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
-    SCLReport(double cc, double cv, const SysParam& s,
+    SCLReport(double cc, double cv, const SCLSysParam& s,
         const std::vector<double>& clist,
         const std::vector<double>& sptlist, const std::vector<double>& spblist,
         const std::vector<double>& sntlist, const std::vector<double>& snblist,
@@ -331,7 +354,7 @@ class SCLReport : public ShuntReportData {
         const std::vector<double>& cmptlist, const std::vector<double>& cmpblist,
         const std::vector<double>& cmntlist, const std::vector<double>& cmnblist,
         double err = 0);
-    SCLReport(double cc, double cv, const SysParam& s,
+    SCLReport(double cc, double cv, const SCLSysParam& s,
         std::vector<double>&& clist,
         std::vector<double>&& sptlist, std::vector<double>&& spblist,
         std::vector<double>&& sntlist, std::vector<double>&& snblist,
@@ -464,7 +487,7 @@ class SCLReport : public ShuntReportData {
     double chgVolt;
     double totPowr = 0;     // Total input power to cells
     double ovpLoss = 0;     // Over voltage power lost
-    SysParam sys;
+    SCLSysParam sys;
 
     std::vector<double> cell_currs;
     std::vector<double> cell_powrs;
@@ -529,7 +552,7 @@ class SCLCalc : public ShuntCalc {
 
 
   public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
-    SCLCalc(const SysParam& s, ConnType ct = ConnType::ctFB)
+    SCLCalc(const SCLSysParam& s, ConnType ct = ConnType::ctFB)
         : sys{s}, connType{ct} {}
 
     SCLCalc(const SCLCalc&) = default;
@@ -548,7 +571,7 @@ class SCLCalc : public ShuntCalc {
 
 
   private: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    SysParam sys;
+    SCLSysParam sys;
     ConnType connType;
 };
 
