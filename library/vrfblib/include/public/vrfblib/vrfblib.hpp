@@ -14,11 +14,6 @@ constexpr double kAvrOCV = 1.38;
 
 
 namespace celleff {
-/*
-================================================================================
-==    Celleff
-================================================================================
-*/
 
 
 // :::: [ Output table headers ] :::::::::::::::::::::::::::::::::::::::::::::::
@@ -121,13 +116,33 @@ comutils::Table calcPerf(const double area, const std::vector<Data>& datas);
 
 
 
-namespace shuntcur {
-/*
-================================================================================
-==    Shunt current
-================================================================================
-*/
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+namespace shuntcur {
 
 
 /**
@@ -143,6 +158,9 @@ struct StackParam {
 };
 
 
+/**
+ * System parameter of a stack system.
+*/
 class SysParam {
   public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
     SysParam(std::size_t num_s, std::size_t num_c,
@@ -188,6 +206,10 @@ class SysParam {
 };
 
 
+/**
+ * Base class that contains the data of a shunt current performance
+ * calculations.
+*/
 class ShuntReportData {
   public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
     ShuntReportData() = default;
@@ -226,6 +248,9 @@ class ShuntReportData {
 };
 
 
+/**
+ * Encapsulation of `ShuntReportData` to manage its memory.
+*/
 class ShuntReport {
   public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
     ShuntReport(ShuntReportData* dp) : data_p{dp} {}
@@ -250,6 +275,9 @@ class ShuntReport {
 };
 
 
+/**
+ * Class to calculate shunt current performance of a system.
+*/
 class ShuntCalc {
   public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
     ShuntCalc() = default;
@@ -266,8 +294,7 @@ class ShuntCalc {
     /**
      * Calculates shunt current performance of the specified system.
      *
-     * @param chgVolt The charging voltage (V). Negative value for constant
-     *    voltage discharging.
+     * @param chgVolt The charging voltage (V).
     */
     virtual ShuntReport calculate(double chgVolt) const = 0;
 
@@ -297,7 +324,7 @@ namespace scl {
 
 
 /**
- * Structure containing the parameters of the stack connectors in a system.
+ * Structure containing the parameters of the stack connectors in a SCL system.
 */
 struct ConnParam {
   double sl;      // Shunt length (m)
@@ -307,6 +334,9 @@ struct ConnParam {
 };
 
 
+/**
+ * System parameters for an SCL arrangement system.
+*/
 class SCLSysParam : public SysParam {
   public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
     SCLSysParam(std::size_t num_s, std::size_t num_c, double rho, double mcd,
