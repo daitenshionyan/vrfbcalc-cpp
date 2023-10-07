@@ -7,7 +7,7 @@
 
 #include "logger.hpp"
 #include "driver/vrfbdriver.hpp"
-#include "view/graphplotform.h"
+#include "view/graphplotformtitled.h"
 
 
 QT_BEGIN_NAMESPACE
@@ -20,6 +20,8 @@ QT_END_NAMESPACE
 class SCResultView : public QDialog {
   Q_OBJECT
 
+  using SeriesGetter = const std::vector<double>& (vrfb::shuntcur::scl::SCLReport::*)() const;
+
   enum class IndexingType {
     itStack, itConn
   };
@@ -27,8 +29,8 @@ class SCResultView : public QDialog {
   struct PlotFormData {
     std::string name;
     IndexingType it;
-    std::vector<double> (vrfb::shuntcur::scl::SCLReport::* yseriesGetter)() const;
-    GraphPlotForm* plot;
+    SeriesGetter yseriesGetter;
+    GraphPlotFormTitled* plot;
   };
 
   public:
@@ -45,6 +47,7 @@ class SCResultView : public QDialog {
 
   private:
     void deleteSelf(int) {delete this;}
+    void addPlot(const std::string& name, IndexingType it, SeriesGetter getter);
 
     Ui::SCResultView* ui;
     std::string prefix;

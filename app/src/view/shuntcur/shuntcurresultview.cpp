@@ -11,78 +11,61 @@ SCResultView::SCResultView(QWidget* parent, const std::string& p)
     : QDialog(parent), ui(new Ui::SCResultView), prefix{p} {
   ui->setupUi(this);
   connect(this, &QDialog::finished, this, &SCResultView::deleteSelf);
-  formDatas.push_back({"Cell current",
-    IndexingType::itStack,
-    &vrfb::shuntcur::scl::SCLReport::cellCurrs,
-    ui->currentPlot});
+  addPlot("Cell current",
+      IndexingType::itStack,
+      &vrfb::shuntcur::scl::SCLReport::cellCurrs);
   // stack shunts ------------------------------------
-  formDatas.push_back({"SPT current",
-    IndexingType::itStack,
-    &vrfb::shuntcur::scl::SCLReport::sptCurrs,
-    ui->sptCurrPlot});
-  formDatas.push_back({"SPB current",
-    IndexingType::itStack,
-    &vrfb::shuntcur::scl::SCLReport::spbCurrs,
-    ui->spbCurrPlot});
-  formDatas.push_back({"SNT current",
-    IndexingType::itStack,
-    &vrfb::shuntcur::scl::SCLReport::sntCurrs,
-    ui->sntCurrPlot});
-  formDatas.push_back({"SNB current",
-    IndexingType::itStack,
-    &vrfb::shuntcur::scl::SCLReport::snbCurrs,
-    ui->snbCurrPlot});
+  addPlot("SPT current",
+      IndexingType::itStack,
+      &vrfb::shuntcur::scl::SCLReport::sptCurrs);
+  addPlot("SPB current",
+      IndexingType::itStack,
+      &vrfb::shuntcur::scl::SCLReport::spbCurrs);
+  addPlot("SNT current",
+      IndexingType::itStack,
+      &vrfb::shuntcur::scl::SCLReport::sntCurrs);
+  addPlot("SNB current",
+      IndexingType::itStack,
+      &vrfb::shuntcur::scl::SCLReport::snbCurrs);
   // stack manifolds ---------------------------------
-  formDatas.push_back({"MPT current",
-    IndexingType::itStack,
-    &vrfb::shuntcur::scl::SCLReport::mptCurrs,
-    ui->mptCurrPlot});
-  formDatas.push_back({"MPB current",
-    IndexingType::itStack,
-    &vrfb::shuntcur::scl::SCLReport::mpbCurrs,
-    ui->mpbCurrPlot});
-  formDatas.push_back({"MNT current",
-    IndexingType::itStack,
-    &vrfb::shuntcur::scl::SCLReport::mntCurrs,
-    ui->mntCurrPlot});
-  formDatas.push_back({"MNB current",
-    IndexingType::itStack,
-    &vrfb::shuntcur::scl::SCLReport::mnbCurrs,
-    ui->mnbCurrPlot});
+  addPlot("MPT current",
+      IndexingType::itStack,
+      &vrfb::shuntcur::scl::SCLReport::mptCurrs);
+  addPlot("MPB current",
+      IndexingType::itStack,
+      &vrfb::shuntcur::scl::SCLReport::mpbCurrs);
+  addPlot("MNT current",
+      IndexingType::itStack,
+      &vrfb::shuntcur::scl::SCLReport::mntCurrs);
+  addPlot("MNB current",
+      IndexingType::itStack,
+      &vrfb::shuntcur::scl::SCLReport::mnbCurrs);
   // connector shunts --------------------------------
-  formDatas.push_back({"CSPT current",
-    IndexingType::itConn,
-    &vrfb::shuntcur::scl::SCLReport::csptCurrs,
-    ui->csptCurrPlot});
-  formDatas.push_back({"CSPB current",
-    IndexingType::itConn,
-    &vrfb::shuntcur::scl::SCLReport::cspbCurrs,
-    ui->cspbCurrPlot});
-  formDatas.push_back({"CSNT current",
-    IndexingType::itConn,
-    &vrfb::shuntcur::scl::SCLReport::csntCurrs,
-    ui->csntCurrPlot});
-  formDatas.push_back({"CSNB current",
-    IndexingType::itConn,
-    &vrfb::shuntcur::scl::SCLReport::csnbCurrs,
-    ui->csnbCurrPlot});
+  addPlot("CSPT current",
+      IndexingType::itConn,
+      &vrfb::shuntcur::scl::SCLReport::csptCurrs);
+  addPlot("CSPB current",
+      IndexingType::itConn,
+      &vrfb::shuntcur::scl::SCLReport::cspbCurrs);
+  addPlot("CSNT current",
+      IndexingType::itConn,
+      &vrfb::shuntcur::scl::SCLReport::csntCurrs);
+  addPlot("CSNB current",
+      IndexingType::itConn,
+      &vrfb::shuntcur::scl::SCLReport::csnbCurrs);
   // connector manifolds -----------------------------
-  formDatas.push_back({"CMPT current",
-    IndexingType::itConn,
-    &vrfb::shuntcur::scl::SCLReport::cmptCurrs,
-    ui->cmptCurrPlot});
-  formDatas.push_back({"CMPB current",
-    IndexingType::itConn,
-    &vrfb::shuntcur::scl::SCLReport::cmpbCurrs,
-    ui->cmpbCurrPlot});
-  formDatas.push_back({"CMNT current",
-    IndexingType::itConn,
-    &vrfb::shuntcur::scl::SCLReport::cmntCurrs,
-    ui->cmntCurrPlot});
-  formDatas.push_back({"CMNB current",
-    IndexingType::itConn,
-    &vrfb::shuntcur::scl::SCLReport::cmnbCurrs,
-    ui->cmnbCurrPlot});
+  addPlot("CMPT current",
+      IndexingType::itConn,
+      &vrfb::shuntcur::scl::SCLReport::cmptCurrs);
+  addPlot("CMPB current",
+      IndexingType::itConn,
+      &vrfb::shuntcur::scl::SCLReport::cmpbCurrs);
+  addPlot("CMNT current",
+      IndexingType::itConn,
+      &vrfb::shuntcur::scl::SCLReport::cmntCurrs);
+  addPlot("CMNB current",
+      IndexingType::itConn,
+      &vrfb::shuntcur::scl::SCLReport::cmnbCurrs);
 }
 
 
@@ -145,4 +128,11 @@ bool SCResultView::exportImages(logger::Logger& l) {
 
 void SCResultView::on_exportBtn_clicked() {
   emit exportRequested(this);
+}
+
+
+void SCResultView::addPlot(const std::string& name, IndexingType it, SeriesGetter getter) {
+  GraphPlotFormTitled* plot = new GraphPlotFormTitled(name, this);
+  ui->scrollAreaContents->layout()->addWidget(plot);
+  formDatas.push_back({name, it, getter, plot});
 }

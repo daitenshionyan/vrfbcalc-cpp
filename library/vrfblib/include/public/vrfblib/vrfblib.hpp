@@ -217,8 +217,8 @@ class ShuntReportData {
     virtual double chargingVolt() const = 0;
     virtual double chargingPowr() const = 0;
 
-    virtual std::vector<double> cellCurrs() const = 0;
-    virtual std::vector<double> cellPowrs() const = 0;
+    virtual const std::vector<double>& cellCurrs() const = 0;
+    virtual const std::vector<double>& cellPowrs() const = 0;
     virtual double cellCurr(std::size_t i) const = 0;
     virtual double cellPowr(std::size_t i) const = 0;
     virtual double storedPowr() const = 0;
@@ -390,8 +390,8 @@ class SCLReport : public ShuntReportData {
     inline double maxChgDen() const {return sys.maxChgDen();}
     inline double maxChgCurr() const {return sys.maxChgDen()*sys.cellArea();}
 
-    std::vector<double> cellCurrs() const override {return cell_currs;}
-    std::vector<double> cellPowrs() const override {return cell_powrs;}
+    const std::vector<double>& cellCurrs() const override {return cell_currs;}
+    const std::vector<double>& cellPowrs() const override {return cell_powrs;}
     double cellCurr(std::size_t i) const override {return cell_currs.at(i);}
     double cellPowr(std::size_t i) const override {return cell_powrs.at(i);}
     double storedPowr() const override {return totPowr;}
@@ -408,17 +408,17 @@ class SCLReport : public ShuntReportData {
     inline double connManiLen() const {return sys.connManiLen();}
     inline double connManiArea() const {return sys.connManiArea();}
 
-    inline std::vector<double> cirPowrs() const {return cir_powrs;}
+    inline const std::vector<double>& cirPowrs() const {return cir_powrs;}
     inline double cirPowr(std::size_t i) const {return cir_powrs.at(i);}
 
-    inline std::vector<double> sptCurrs() const {return spt_currs;}
-    inline std::vector<double> spbCurrs() const {return spb_currs;}
-    inline std::vector<double> sntCurrs() const {return snt_currs;}
-    inline std::vector<double> snbCurrs() const {return snb_currs;}
-    inline std::vector<double> sptPowrs() const {return spt_powrs;}
-    inline std::vector<double> spbPowrs() const {return spb_powrs;}
-    inline std::vector<double> sntPowrs() const {return snt_powrs;}
-    inline std::vector<double> snbPowrs() const {return snb_powrs;}
+    inline const std::vector<double>& sptCurrs() const {return spt_currs;}
+    inline const std::vector<double>& spbCurrs() const {return spb_currs;}
+    inline const std::vector<double>& sntCurrs() const {return snt_currs;}
+    inline const std::vector<double>& snbCurrs() const {return snb_currs;}
+    inline const std::vector<double>& sptPowrs() const {return spt_powrs;}
+    inline const std::vector<double>& spbPowrs() const {return spb_powrs;}
+    inline const std::vector<double>& sntPowrs() const {return snt_powrs;}
+    inline const std::vector<double>& snbPowrs() const {return snb_powrs;}
     inline double sptCurr(std::size_t i) const {return spt_currs.at(i);}
     inline double spbCurr(std::size_t i) const {return spb_currs.at(i);}
     inline double sntCurr(std::size_t i) const {return snt_currs.at(i);}
@@ -428,14 +428,14 @@ class SCLReport : public ShuntReportData {
     inline double sntPowr(std::size_t i) const {return snt_powrs.at(i);}
     inline double snbPowr(std::size_t i) const {return snb_powrs.at(i);}
 
-    inline std::vector<double> mptCurrs() const {return mpt_currs;}
-    inline std::vector<double> mpbCurrs() const {return mpb_currs;}
-    inline std::vector<double> mntCurrs() const {return mnt_currs;}
-    inline std::vector<double> mnbCurrs() const {return mnb_currs;}
-    inline std::vector<double> mptPowrs() const {return mpt_powrs;}
-    inline std::vector<double> mpbPowrs() const {return mpb_powrs;}
-    inline std::vector<double> mntPowrs() const {return mnt_powrs;}
-    inline std::vector<double> mnbPowrs() const {return mnb_powrs;}
+    inline const std::vector<double>& mptCurrs() const {return mpt_currs;}
+    inline const std::vector<double>& mpbCurrs() const {return mpb_currs;}
+    inline const std::vector<double>& mntCurrs() const {return mnt_currs;}
+    inline const std::vector<double>& mnbCurrs() const {return mnb_currs;}
+    inline const std::vector<double>& mptPowrs() const {return mpt_powrs;}
+    inline const std::vector<double>& mpbPowrs() const {return mpb_powrs;}
+    inline const std::vector<double>& mntPowrs() const {return mnt_powrs;}
+    inline const std::vector<double>& mnbPowrs() const {return mnb_powrs;}
     inline double mptCurr(std::size_t i) const {return mpt_currs.at(i);}
     inline double mpbCurr(std::size_t i) const {return mpb_currs.at(i);}
     inline double mntCurr(std::size_t i) const {return mnt_currs.at(i);}
@@ -445,14 +445,14 @@ class SCLReport : public ShuntReportData {
     inline double mntPowr(std::size_t i) const {return mnt_powrs.at(i);}
     inline double mnbPowr(std::size_t i) const {return mnb_powrs.at(i);}
 
-    inline std::vector<double> csptCurrs() const {return cspt_currs;}
-    inline std::vector<double> cspbCurrs() const {return cspb_currs;}
-    inline std::vector<double> csntCurrs() const {return csnt_currs;}
-    inline std::vector<double> csnbCurrs() const {return csnb_currs;}
-    inline std::vector<double> csptPowrs() const {return cspt_powrs;}
-    inline std::vector<double> cspbPowrs() const {return cspb_powrs;}
-    inline std::vector<double> csntPowrs() const {return csnt_powrs;}
-    inline std::vector<double> csnbPowrs() const {return csnb_powrs;}
+    inline const std::vector<double>& csptCurrs() const {return cspt_currs;}
+    inline const std::vector<double>& cspbCurrs() const {return cspb_currs;}
+    inline const std::vector<double>& csntCurrs() const {return csnt_currs;}
+    inline const std::vector<double>& csnbCurrs() const {return csnb_currs;}
+    inline const std::vector<double>& csptPowrs() const {return cspt_powrs;}
+    inline const std::vector<double>& cspbPowrs() const {return cspb_powrs;}
+    inline const std::vector<double>& csntPowrs() const {return csnt_powrs;}
+    inline const std::vector<double>& csnbPowrs() const {return csnb_powrs;}
     inline double csptCurr(std::size_t i) const {return cspt_currs.at(i);}
     inline double cspbCurr(std::size_t i) const {return cspb_currs.at(i);}
     inline double csntCurr(std::size_t i) const {return csnt_currs.at(i);}
@@ -462,14 +462,14 @@ class SCLReport : public ShuntReportData {
     inline double csntPowr(std::size_t i) const {return csnt_powrs.at(i);}
     inline double csnbPowr(std::size_t i) const {return csnb_powrs.at(i);}
 
-    inline std::vector<double> cmptCurrs() const {return cmpt_currs;}
-    inline std::vector<double> cmpbCurrs() const {return cmpb_currs;}
-    inline std::vector<double> cmntCurrs() const {return cmnt_currs;}
-    inline std::vector<double> cmnbCurrs() const {return cmnb_currs;}
-    inline std::vector<double> cmptPowrs() const {return cmpt_powrs;}
-    inline std::vector<double> cmpbPowrs() const {return cmpb_powrs;}
-    inline std::vector<double> cmntPowrs() const {return cmnt_powrs;}
-    inline std::vector<double> cmnbPowrs() const {return cmnb_powrs;}
+    inline const std::vector<double>& cmptCurrs() const {return cmpt_currs;}
+    inline const std::vector<double>& cmpbCurrs() const {return cmpb_currs;}
+    inline const std::vector<double>& cmntCurrs() const {return cmnt_currs;}
+    inline const std::vector<double>& cmnbCurrs() const {return cmnb_currs;}
+    inline const std::vector<double>& cmptPowrs() const {return cmpt_powrs;}
+    inline const std::vector<double>& cmpbPowrs() const {return cmpb_powrs;}
+    inline const std::vector<double>& cmntPowrs() const {return cmnt_powrs;}
+    inline const std::vector<double>& cmnbPowrs() const {return cmnb_powrs;}
     inline double cmptCurr(std::size_t i) const {return cmpt_currs.at(i);}
     inline double cmpbCurr(std::size_t i) const {return cmpb_currs.at(i);}
     inline double cmntCurr(std::size_t i) const {return cmnt_currs.at(i);}
