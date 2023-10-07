@@ -163,6 +163,15 @@ struct StackParam {
 */
 class SysParam {
   public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
+    /**
+     * Constructs a `SysParam`
+     *
+     * @param num_s Number of stacks.
+     * @param num_c Number of cells per stack.
+     * @param rho Resistivity of electrolyte (Ohm m).
+     * @param mcd Max charge density (A m-2).
+     * @param stack Stack parameters.
+    */
     SysParam(std::size_t num_s, std::size_t num_c,
         double rho, double mcd, const StackParam& stack)
         : ns{num_s}, nc{num_c},
@@ -343,6 +352,16 @@ struct ConnParam {
 */
 class SCLSysParam : public SysParam {
   public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
+    /**
+     * Constructs a `SCLSysParam`
+     *
+     * @param num_s Number of stacks.
+     * @param num_c Number of cells per stack.
+     * @param rho Resistivity of electrolyte (Ohm m).
+     * @param mcd Max charge density (A m-2).
+     * @param stack Stack parameters.
+     * @param conn SCL connector parameters.
+    */
     SCLSysParam(std::size_t num_s, std::size_t num_c, double rho, double mcd,
         const StackParam& stack, const ConnParam& conn)
         : SysParam{num_s, num_c, rho, mcd, stack}, c{conn} {}
