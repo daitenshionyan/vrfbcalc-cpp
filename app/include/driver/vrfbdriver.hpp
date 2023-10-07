@@ -40,8 +40,8 @@ std::vector<PerformanceEntry_CE> readPerformance_CE(const std::vector<std::strin
 
 
 struct ShuntJob {
-  ShuntJob(const std::string&, const vrfb::shuntcur::ShuntCalc&, double);
-  ShuntJob(const std::string&, vrfb::shuntcur::ShuntCalc*, double);
+  ShuntJob(const std::string&, const vrfb::shuntcur::scl::SCLCalc&, double);
+  ShuntJob(const std::string&, vrfb::shuntcur::scl::SCLCalc*, double);
 
   ShuntJob(const ShuntJob&);
   ShuntJob(ShuntJob&&);
@@ -52,14 +52,14 @@ struct ShuntJob {
   ~ShuntJob() {delete calc;}
 
   std::string name;
-  vrfb::shuntcur::ShuntCalc* calc;
+  vrfb::shuntcur::scl::SCLCalc* calc;
   double chgVolt;
 };
 
 
 struct ShuntRes {
   std::string name;
-  vrfb::shuntcur::ShuntPerf perf;
+  vrfb::shuntcur::scl::SCLReport perf;
 };
 
 

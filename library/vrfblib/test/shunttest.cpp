@@ -9,7 +9,8 @@
 #include "shunttestconst.hpp"
 
 #include "vrfblib/vrfblib.hpp"
-#include "shuntcur.hpp"
+#include "shuntcur/shuntcur.hpp"
+#include "shuntcur/conn_scl.hpp"
 
 
 namespace { // ==== namespace <UNNAMED> ========================================
@@ -44,7 +45,7 @@ void checkMatrix(const Eigen::MatrixXd& expected, const Eigen::MatrixXd& actual)
 }
 
 
-void checkShuntPerf(const vrfb::shuntcur::ShuntPerf& expected, const vrfb::shuntcur::ShuntPerf& actual) {
+void checkShuntPerf(const vrfb::shuntcur::scl::SCLReport& expected, const vrfb::shuntcur::scl::SCLReport& actual) {
   bool is_same_size = expected.totCells() == actual.totCells();
   ASSERT_TRUE(is_same_size) << "Wrong size"
       << " - Expected size: " << expected.totCells()
@@ -216,8 +217,8 @@ TEST(vrfbSC, addStackLoops5C5S) {
 TEST(vrfbSC, addConnLoops5C5SFF) {
   Eigen::MatrixXd actual = Eigen::Matrix<double, 97, 97>::Zero();
   vrfb::shuntcur::addStackLoops(actual, shunttest::kTestSysParam);
-  vrfb::shuntcur::addConnLoops
-      <vrfb::shuntcur::ConnSide::csFront, vrfb::shuntcur::ConnSide::csFront>(
+  vrfb::shuntcur::scl::addConnLoops
+      <vrfb::shuntcur::scl::ConnSide::csFront, vrfb::shuntcur::scl::ConnSide::csFront>(
           actual, shunttest::kTestSysParam);
   checkMatrix(shunttest::kExCurMat_5S_Sys_FF, actual);
 }
@@ -226,8 +227,8 @@ TEST(vrfbSC, addConnLoops5C5SFF) {
 TEST(vrfbSC, addConnLoops5C5SFB) {
   Eigen::MatrixXd actual = Eigen::Matrix<double, 97, 97>::Zero();
   vrfb::shuntcur::addStackLoops(actual, shunttest::kTestSysParam);
-  vrfb::shuntcur::addConnLoops
-      <vrfb::shuntcur::ConnSide::csFront, vrfb::shuntcur::ConnSide::csBack>(
+  vrfb::shuntcur::scl::addConnLoops
+      <vrfb::shuntcur::scl::ConnSide::csFront, vrfb::shuntcur::scl::ConnSide::csBack>(
           actual, shunttest::kTestSysParam);
   checkMatrix(shunttest::kExCurMat_5S_Sys_FB, actual);
 }
@@ -235,24 +236,24 @@ TEST(vrfbSC, addConnLoops5C5SFB) {
 
 TEST(vrfbSC, addSysVolt) {
   Eigen::VectorXd actual = Eigen::Vector<double, 97>::Zero();
-  vrfb::shuntcur::addSysVolt(actual, shunttest::kTestSysParam, shunttest::kTestChgVolt);
+  vrfb::shuntcur::scl::addSysVolt(actual, shunttest::kTestSysParam, shunttest::kTestChgVolt);
   checkMatrix(shunttest::kExVoltVec_5S_Sys_FF, actual);
 }
 
 
 TEST(vrfbSC, calculateFF) {
-  vrfb::shuntcur::CommLineCalc calc {
+  vrfb::shuntcur::scl::SCLCalc calc {
       shunttest::kTestSysParam,
-      vrfb::shuntcur::CommLineCalc::ConnType::ctFF};
+      vrfb::shuntcur::scl::SCLCalc::ConnType::ctFF};
   auto actual = calc.calculate(shunttest::kTestChgVolt);
-  checkShuntPerf(shunttest::kExShuntPerf_5S_FF, actual);
+  checkShuntPerf(shunttest::kExShuntPerf_5S_FF, actual.data<vrfb::shuntcur::scl::SCLReport>());
 }
 
 
 TEST(vrfbSC, calculateFB) {
-  vrfb::shuntcur::CommLineCalc calc {
+  vrfb::shuntcur::scl::SCLCalc calc {
       shunttest::kTestSysParam,
-      vrfb::shuntcur::CommLineCalc::ConnType::ctFB};
+      vrfb::shuntcur::scl::SCLCalc::ConnType::ctFB};
   auto actual = calc.calculate(shunttest::kTestChgVolt);
-  checkShuntPerf(shunttest::kExShuntPerf_5S_FB, actual);
+  checkShuntPerf(shunttest::kExShuntPerf_5S_FB, actual.data<vrfb::shuntcur::scl::SCLReport>());
 }

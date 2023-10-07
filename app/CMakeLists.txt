@@ -40,6 +40,14 @@ add_executable(vrfbcalc-cpp WIN32
     src/view/mainwindow.ui
     src/view/mainwindow.cpp
 
+    include/view/graphplotform.h
+    src/view/graphplotform.ui
+    src/view/graphplotform.cpp
+
+    include/view/graphplotformtitled.h
+    src/view/graphplotformtitled.ui
+    src/view/graphplotformtitled.cpp
+
     # :::: Cell Efficiency ::::::::::::::::::::::::::::::::::::::::::::::::::: #
 
     include/view/celleff/celleffconfigpopup.h
@@ -75,10 +83,6 @@ add_executable(vrfbcalc-cpp WIN32
     include/view/shuntcur/shuntcurresultview.h
     src/view/shuntcur/shuntcurresultview.ui
     src/view/shuntcur/shuntcurresultview.cpp
-
-    include/view/graphplotform.h
-    src/view/graphplotform.ui
-    src/view/graphplotform.cpp
 
     resource/app.o          # executable icon
 )

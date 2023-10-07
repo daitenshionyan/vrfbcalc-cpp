@@ -29,13 +29,13 @@ const vrfb::shuntcur::StackParam kTestStackParam {
 };
 
 
-const vrfb::shuntcur::ConnParam kTestConnParam {
+const vrfb::shuntcur::scl::ConnParam kTestConnParam {
   kTestConShuntResist, 1,
   kTestConManiResist, 1
 };
 
 
-const vrfb::shuntcur::SysParam kTestSysParam {
+const vrfb::shuntcur::scl::SCLSysParam kTestSysParam {
   kTestNumStacks, kTestNumCells, 1, 1000,
   kTestStackParam, kTestConnParam
 };
@@ -357,7 +357,7 @@ const Eigen::Vector<double, 97> kExVoltVec_5S_Sys_FF {
 };
 
 
-const vrfb::shuntcur::ShuntPerf kExShuntPerf_5S_FF {
+const vrfb::shuntcur::scl::SCLReport kExShuntPerf_5S_FF {
   4.102282966,
   kTestChgVolt,
   kTestSysParam,
@@ -456,7 +456,7 @@ const vrfb::shuntcur::ShuntPerf kExShuntPerf_5S_FF {
 };
 
 
-const vrfb::shuntcur::ShuntPerf kExShuntPerf_5S_FB {
+const vrfb::shuntcur::scl::SCLReport kExShuntPerf_5S_FB {
   4.102282966,
   kTestChgVolt,
   kTestSysParam,

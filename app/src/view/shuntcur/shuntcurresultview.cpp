@@ -11,78 +11,61 @@ SCResultView::SCResultView(QWidget* parent, const std::string& p)
     : QDialog(parent), ui(new Ui::SCResultView), prefix{p} {
   ui->setupUi(this);
   connect(this, &QDialog::finished, this, &SCResultView::deleteSelf);
-  formDatas.push_back({"Cell current",
-    IndexingType::itStack,
-    &vrfb::shuntcur::ShuntPerf::cellCurrs,
-    ui->currentPlot});
+  addPlot("Cell current",
+      IndexingType::itStack,
+      &vrfb::shuntcur::scl::SCLReport::cellCurrs);
   // stack shunts ------------------------------------
-  formDatas.push_back({"SPT current",
-    IndexingType::itStack,
-    &vrfb::shuntcur::ShuntPerf::sptCurrs,
-    ui->sptCurrPlot});
-  formDatas.push_back({"SPB current",
-    IndexingType::itStack,
-    &vrfb::shuntcur::ShuntPerf::spbCurrs,
-    ui->spbCurrPlot});
-  formDatas.push_back({"SNT current",
-    IndexingType::itStack,
-    &vrfb::shuntcur::ShuntPerf::sntCurrs,
-    ui->sntCurrPlot});
-  formDatas.push_back({"SNB current",
-    IndexingType::itStack,
-    &vrfb::shuntcur::ShuntPerf::snbCurrs,
-    ui->snbCurrPlot});
+  addPlot("SPT current",
+      IndexingType::itStack,
+      &vrfb::shuntcur::scl::SCLReport::sptCurrs);
+  addPlot("SPB current",
+      IndexingType::itStack,
+      &vrfb::shuntcur::scl::SCLReport::spbCurrs);
+  addPlot("SNT current",
+      IndexingType::itStack,
+      &vrfb::shuntcur::scl::SCLReport::sntCurrs);
+  addPlot("SNB current",
+      IndexingType::itStack,
+      &vrfb::shuntcur::scl::SCLReport::snbCurrs);
   // stack manifolds ---------------------------------
-  formDatas.push_back({"MPT current",
-    IndexingType::itStack,
-    &vrfb::shuntcur::ShuntPerf::mptCurrs,
-    ui->mptCurrPlot});
-  formDatas.push_back({"MPB current",
-    IndexingType::itStack,
-    &vrfb::shuntcur::ShuntPerf::mpbCurrs,
-    ui->mpbCurrPlot});
-  formDatas.push_back({"MNT current",
-    IndexingType::itStack,
-    &vrfb::shuntcur::ShuntPerf::mntCurrs,
-    ui->mntCurrPlot});
-  formDatas.push_back({"MNB current",
-    IndexingType::itStack,
-    &vrfb::shuntcur::ShuntPerf::mnbCurrs,
-    ui->mnbCurrPlot});
+  addPlot("MPT current",
+      IndexingType::itStack,
+      &vrfb::shuntcur::scl::SCLReport::mptCurrs);
+  addPlot("MPB current",
+      IndexingType::itStack,
+      &vrfb::shuntcur::scl::SCLReport::mpbCurrs);
+  addPlot("MNT current",
+      IndexingType::itStack,
+      &vrfb::shuntcur::scl::SCLReport::mntCurrs);
+  addPlot("MNB current",
+      IndexingType::itStack,
+      &vrfb::shuntcur::scl::SCLReport::mnbCurrs);
   // connector shunts --------------------------------
-  formDatas.push_back({"CSPT current",
-    IndexingType::itConn,
-    &vrfb::shuntcur::ShuntPerf::csptCurrs,
-    ui->csptCurrPlot});
-  formDatas.push_back({"CSPB current",
-    IndexingType::itConn,
-    &vrfb::shuntcur::ShuntPerf::cspbCurrs,
-    ui->cspbCurrPlot});
-  formDatas.push_back({"CSNT current",
-    IndexingType::itConn,
-    &vrfb::shuntcur::ShuntPerf::csntCurrs,
-    ui->csntCurrPlot});
-  formDatas.push_back({"CSNB current",
-    IndexingType::itConn,
-    &vrfb::shuntcur::ShuntPerf::csnbCurrs,
-    ui->csnbCurrPlot});
+  addPlot("CSPT current",
+      IndexingType::itConn,
+      &vrfb::shuntcur::scl::SCLReport::csptCurrs);
+  addPlot("CSPB current",
+      IndexingType::itConn,
+      &vrfb::shuntcur::scl::SCLReport::cspbCurrs);
+  addPlot("CSNT current",
+      IndexingType::itConn,
+      &vrfb::shuntcur::scl::SCLReport::csntCurrs);
+  addPlot("CSNB current",
+      IndexingType::itConn,
+      &vrfb::shuntcur::scl::SCLReport::csnbCurrs);
   // connector manifolds -----------------------------
-  formDatas.push_back({"CMPT current",
-    IndexingType::itConn,
-    &vrfb::shuntcur::ShuntPerf::cmptCurrs,
-    ui->cmptCurrPlot});
-  formDatas.push_back({"CMPB current",
-    IndexingType::itConn,
-    &vrfb::shuntcur::ShuntPerf::cmpbCurrs,
-    ui->cmpbCurrPlot});
-  formDatas.push_back({"CMNT current",
-    IndexingType::itConn,
-    &vrfb::shuntcur::ShuntPerf::cmntCurrs,
-    ui->cmntCurrPlot});
-  formDatas.push_back({"CMNB current",
-    IndexingType::itConn,
-    &vrfb::shuntcur::ShuntPerf::cmnbCurrs,
-    ui->cmnbCurrPlot});
+  addPlot("CMPT current",
+      IndexingType::itConn,
+      &vrfb::shuntcur::scl::SCLReport::cmptCurrs);
+  addPlot("CMPB current",
+      IndexingType::itConn,
+      &vrfb::shuntcur::scl::SCLReport::cmpbCurrs);
+  addPlot("CMNT current",
+      IndexingType::itConn,
+      &vrfb::shuntcur::scl::SCLReport::cmntCurrs);
+  addPlot("CMNB current",
+      IndexingType::itConn,
+      &vrfb::shuntcur::scl::SCLReport::cmnbCurrs);
 }
 
 
@@ -91,7 +74,7 @@ SCResultView::~SCResultView() {
 }
 
 
-void SCResultView::plotGraphs(const vrfb::shuntcur::ShuntPerf& p) {
+void SCResultView::plotGraphs(const vrfb::shuntcur::scl::SCLReport& p) {
   std::vector<double> series_xs {};
   std::vector<double> series_xc {};
   for (std::size_t i = 0; i < p.totCells(); ++i) {
@@ -116,8 +99,8 @@ void SCResultView::plotGraphs(const vrfb::shuntcur::ShuntPerf& p) {
   ui->chgCurrField->setText(QString::fromStdString(std::to_string(p.chargingCurr())));
   ui->chgPowrField->setText(QString::fromStdString(std::to_string(p.chargingPowr())));
   ui->ovplField->setText(QString::fromStdString(std::to_string(p.overVoltPowr())));
-  ui->inputPowrField->setText(QString::fromStdString(std::to_string(p.totalPowr())));
-  ui->energyEffField->setText(QString::fromStdString(std::to_string(p.totalPowr() / p.chargingPowr() * 100)));
+  ui->inputPowrField->setText(QString::fromStdString(std::to_string(p.storedPowr())));
+  ui->energyEffField->setText(QString::fromStdString(std::to_string(p.storedPowr() / p.chargingPowr() * 100)));
   ui->errorField->setText(QString::fromStdString(std::to_string(p.err())));
 }
 
@@ -145,4 +128,11 @@ bool SCResultView::exportImages(logger::Logger& l) {
 
 void SCResultView::on_exportBtn_clicked() {
   emit exportRequested(this);
+}
+
+
+void SCResultView::addPlot(const std::string& name, IndexingType it, SeriesGetter getter) {
+  GraphPlotFormTitled* plot = new GraphPlotFormTitled(name, this);
+  ui->scrollAreaContents->layout()->addWidget(plot);
+  formDatas.push_back({name, it, getter, plot});
 }

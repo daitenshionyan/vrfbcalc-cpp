@@ -95,7 +95,7 @@ inline void initColMap(
 }
 
 
-void writeShuntSummary(xlnt::worksheet& ws, const vrfb::shuntcur::ShuntPerf& p) {
+void writeShuntSummary(xlnt::worksheet& ws, const vrfb::shuntcur::scl::SCLReport& p) {
   ws.column_properties(1).width = 30;
   ws.column_properties(2).width = 15;
 
@@ -141,7 +141,7 @@ void writeShuntSummary(xlnt::worksheet& ws, const vrfb::shuntcur::ShuntPerf& p) 
   ws.cell(1, 19).value("Over voltage loss (W)");
   ws.cell(2, 19).value(p.overVoltPowr());
   ws.cell(1, 20).value("Stored power (W)");
-  ws.cell(2, 20).value(p.totalPowr());
+  ws.cell(2, 20).value(p.storedPowr());
   ws.cell(1, 21).value("Power efficiency (%)");
   ws.cell(2, 21).value(p.powrEff() * 100);
 
@@ -150,7 +150,7 @@ void writeShuntSummary(xlnt::worksheet& ws, const vrfb::shuntcur::ShuntPerf& p) 
 }
 
 
-void writeShuntPerf_Stack(xlnt::worksheet& ws, const vrfb::shuntcur::ShuntPerf& p) {
+void writeShuntPerf_Stack(xlnt::worksheet& ws, const vrfb::shuntcur::scl::SCLReport& p) {
   ws.cell(1, 1).value("Cell No.");
   ws.cell(2, 1).value("Cell Current (A)");
   ws.cell(3, 1).value("Cell Power (W)");
@@ -209,7 +209,7 @@ void writeShuntPerf_Stack(xlnt::worksheet& ws, const vrfb::shuntcur::ShuntPerf& 
 }
 
 
-void writeShuntPerf_Conn(xlnt::worksheet& ws, const vrfb::shuntcur::ShuntPerf& p) {
+void writeShuntPerf_Conn(xlnt::worksheet& ws, const vrfb::shuntcur::scl::SCLReport& p) {
   ws.cell(1, 1).value("Stack No.");
 
   ws.cell(2, 1).value("CSPT Current (A)");
@@ -485,7 +485,7 @@ void saveData_XLSX(
 
 
 void saveData_XLSX(const std::filesystem::path& p,
-    const vrfb::shuntcur::ShuntPerf& perf) {
+    const vrfb::shuntcur::scl::SCLReport& perf) {
   xlnt::workbook wb;
 
   auto ws = wb.active_sheet();

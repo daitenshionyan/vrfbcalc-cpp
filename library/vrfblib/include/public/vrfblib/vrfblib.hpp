@@ -14,11 +14,6 @@ constexpr double kAvrOCV = 1.38;
 
 
 namespace celleff {
-/*
-================================================================================
-==    Celleff
-================================================================================
-*/
 
 
 // :::: [ Output table headers ] :::::::::::::::::::::::::::::::::::::::::::::::
@@ -121,13 +116,33 @@ comutils::Table calcPerf(const double area, const std::vector<Data>& datas);
 
 
 
-namespace shuntcur {
-/*
-================================================================================
-==    Shunt current
-================================================================================
-*/
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+namespace shuntcur {
 
 
 /**
@@ -144,23 +159,25 @@ struct StackParam {
 
 
 /**
- * Structure containing the parameters of the stack connectors in a system.
+ * System parameter of a stack system.
 */
-struct ConnParam {
-  double sl;      // Shunt length (m)
-  double sa;      // Shunt cross sectional area (m2)
-  double ml;      // Manifold length (m)
-  double ma;      // Manifold cross sectional area (m2)
-};
-
-
 class SysParam {
   public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
-    SysParam(std::size_t num_s, std::size_t num_c, double rho, double mcd,
-        const StackParam& stack, const ConnParam& conn)
-        : ns{num_s}, nc{num_c}, r{rho}, maxCD{mcd},
-          s{stack}, c{conn} {}
+    /**
+     * Constructs a `SysParam`
+     *
+     * @param num_s Number of stacks.
+     * @param num_c Number of cells per stack.
+     * @param rho Resistivity of electrolyte (Ohm m).
+     * @param mcd Max charge density (A m-2).
+     * @param stack Stack parameters.
+    */
+    SysParam(std::size_t num_s, std::size_t num_c,
+        double rho, double mcd, const StackParam& stack)
+        : ns{num_s}, nc{num_c},
+          r{rho}, maxCD{mcd}, s{stack} {}
 
+    SysParam() = delete;
     SysParam(const SysParam&) = default;
     SysParam(SysParam&&) = default;
 
@@ -183,26 +200,193 @@ class SysParam {
     inline double stackManiLen() const {return s.ml;}
     inline double stackManiArea() const {return s.ma;}
 
-    inline double connShuntLen() const {return c.sl;}
-    inline double connShuntArea() const {return c.sa;}
-    inline double connManiLen() const {return c.ml;}
-    inline double connManiArea() const {return c.ma;}
-
     inline double cellR() const {return s.asr / s.ca;}
     inline double stackShuntR() const {return r * s.sl / s.sa;}
     inline double stackManiR() const {return r * s.ml / s.ma;}
 
-    inline double connShuntR() const {return r * c.sl / c.sa;}
-    inline double connManiR() const {return r * c.ml / c.ma;}
 
-
-  private: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  private:
     std::size_t ns;             // number of stacks
     std::size_t nc;             // number of cells per stack
     double r;                   // resistivity (Ohm m)
     double maxCD;               // maximum charge density (A m-2)
 
     StackParam s;
+};
+
+
+/**
+ * Base class that contains the data of a shunt current performance
+ * calculations.
+*/
+class ShuntReportData {
+  public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
+    ShuntReportData() = default;
+    ShuntReportData(const ShuntReportData&) = default;
+    ShuntReportData(ShuntReportData&&) = default;
+
+    ShuntReportData& operator=(const ShuntReportData&) = default;
+    ShuntReportData& operator=(ShuntReportData&&) = default;
+
+    virtual ~ShuntReportData() = default;
+
+
+  public: // ~~~~ accessors ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    virtual std::size_t numStacks() const = 0;
+    virtual std::size_t numCells() const = 0;
+    inline std::size_t totCells() const {return numStacks() * numCells();}
+
+    virtual double asr() const = 0;
+    virtual double cellArea() const = 0;
+    virtual double resistivity() const = 0;
+    virtual double stackShuntLen() const = 0;
+    virtual double stackShuntArea() const = 0;
+    virtual double stackManiLen() const = 0;
+    virtual double stackManiArea() const = 0;
+
+    virtual double chargingCurr() const = 0;
+    virtual double chargingVolt() const = 0;
+    virtual double chargingPowr() const = 0;
+
+    virtual const std::vector<double>& cellCurrs() const = 0;
+    virtual const std::vector<double>& cellPowrs() const = 0;
+    virtual double cellCurr(std::size_t i) const = 0;
+    virtual double cellPowr(std::size_t i) const = 0;
+    virtual double storedPowr() const = 0;
+    inline double powrEff() const {return storedPowr() / chargingPowr();}
+
+
+  public:
+    virtual ShuntReportData* copy() const = 0;
+};
+
+
+/**
+ * Encapsulation of `ShuntReportData` to manage its memory.
+*/
+class ShuntReport {
+  public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
+    ShuntReport(ShuntReportData* dp) : data_p{dp} {}
+
+    ShuntReport() = default;
+    ShuntReport(const ShuntReport&);
+    ShuntReport(ShuntReport&&);
+
+    ShuntReport& operator=(const ShuntReport&);
+    ShuntReport& operator=(ShuntReport&&);
+
+    ~ShuntReport() {delete data_p;}
+
+
+  public:
+    template<typename T>
+    const T& data() const {return *dynamic_cast<T*>(data_p);}
+
+
+  private:
+    ShuntReportData* data_p;
+};
+
+
+/**
+ * Class to calculate shunt current performance of a system.
+*/
+class ShuntCalc {
+  public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
+    ShuntCalc() = default;
+
+    ShuntCalc(const ShuntCalc&) = default;
+    ShuntCalc(ShuntCalc&&) = default;
+
+    ShuntCalc& operator=(const ShuntCalc&) = default;
+    ShuntCalc& operator=(ShuntCalc&&) = default;
+
+    virtual ~ShuntCalc() = default;
+
+  public: // ~~~~ functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    /**
+     * Calculates shunt current performance of the specified system.
+     *
+     * @param chgVolt The charging voltage (V).
+    */
+    virtual ShuntReport calculate(double chgVolt) const = 0;
+
+    /**
+     * Copies this instance of `ShuntCalc`.
+    */
+    virtual ShuntCalc* copy() const = 0;
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/** Series Common Line */
+namespace scl {
+
+
+/**
+ * Structure containing the parameters of the stack connectors in a SCL system.
+*/
+struct ConnParam {
+  double sl;      // Shunt length (m)
+  double sa;      // Shunt cross sectional area (m2)
+  double ml;      // Manifold length (m)
+  double ma;      // Manifold cross sectional area (m2)
+};
+
+
+/**
+ * System parameters for an SCL arrangement system.
+*/
+class SCLSysParam : public SysParam {
+  public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
+    /**
+     * Constructs a `SCLSysParam`
+     *
+     * @param num_s Number of stacks.
+     * @param num_c Number of cells per stack.
+     * @param rho Resistivity of electrolyte (Ohm m).
+     * @param mcd Max charge density (A m-2).
+     * @param stack Stack parameters.
+     * @param conn SCL connector parameters.
+    */
+    SCLSysParam(std::size_t num_s, std::size_t num_c, double rho, double mcd,
+        const StackParam& stack, const ConnParam& conn)
+        : SysParam{num_s, num_c, rho, mcd, stack}, c{conn} {}
+
+    SCLSysParam(const SCLSysParam&) = default;
+    SCLSysParam(SCLSysParam&&) = default;
+
+    SCLSysParam& operator=(const SCLSysParam&) = default;
+    SCLSysParam& operator=(SCLSysParam&&) = default;
+
+    ~SCLSysParam() = default;
+
+
+  public: // ~~~~ accessors ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    inline double connShuntLen() const {return c.sl;}
+    inline double connShuntArea() const {return c.sa;}
+    inline double connManiLen() const {return c.ml;}
+    inline double connManiArea() const {return c.ma;}
+
+    inline double connShuntR() const {return resistivity() * c.sl / c.sa;}
+    inline double connManiR() const {return resistivity() * c.ml / c.ma;}
+
+
+  private: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     ConnParam c;
 };
 
@@ -210,9 +394,9 @@ class SysParam {
 /**
  * Class containing calculated shunter performance data.
 */
-class ShuntPerf {
+class SCLReport : public ShuntReportData {
   public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
-    ShuntPerf(double cc, double cv, const SysParam& s,
+    SCLReport(double cc, double cv, const SCLSysParam& s,
         const std::vector<double>& clist,
         const std::vector<double>& sptlist, const std::vector<double>& spblist,
         const std::vector<double>& sntlist, const std::vector<double>& snblist,
@@ -223,7 +407,7 @@ class ShuntPerf {
         const std::vector<double>& cmptlist, const std::vector<double>& cmpblist,
         const std::vector<double>& cmntlist, const std::vector<double>& cmnblist,
         double err = 0);
-    ShuntPerf(double cc, double cv, const SysParam& s,
+    SCLReport(double cc, double cv, const SCLSysParam& s,
         std::vector<double>&& clist,
         std::vector<double>&& sptlist, std::vector<double>&& spblist,
         std::vector<double>&& sntlist, std::vector<double>&& snblist,
@@ -235,51 +419,49 @@ class ShuntPerf {
         std::vector<double>&& cmntlist, std::vector<double>&& cmnblist,
         double err = 0);
 
-    ShuntPerf(const ShuntPerf&) = default;
-    ShuntPerf(ShuntPerf&&) = default;
+    SCLReport(const SCLReport&) = default;
+    SCLReport(SCLReport&&) = default;
 
-    ShuntPerf& operator=(ShuntPerf&) = default;
-    ShuntPerf& operator=(ShuntPerf&&) = default;
+    SCLReport& operator=(SCLReport&) = default;
+    SCLReport& operator=(SCLReport&&) = default;
 
-    ~ShuntPerf() = default;
+    ~SCLReport() = default;
 
 
   public: // ~~~~ accessors ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     inline double err() const {return error;}
 
-    inline double chargingCurr() const {return chgCurr;}
-    inline double chargingVolt() const {return chgVolt;}
-    inline double chargingPowr() const {return chgCurr*chgVolt;}
+    double chargingCurr() const override {return chgCurr;}
+    double chargingVolt() const override {return chgVolt;}
+    double chargingPowr() const override {return chgCurr*chgVolt;}
     inline double overVoltPowr() const {return ovpLoss;}
 
-    inline std::size_t numCells() const {return sys.numCells();}
-    inline std::size_t numStacks() const {return sys.numStacks();}
-    inline std::size_t totCells() const {return cell_currs.size();}
+    std::size_t numCells() const override {return sys.numCells();}
+    std::size_t numStacks() const override {return sys.numStacks();}
 
-    inline double resistivity() const {return sys.resistivity();}
+    double resistivity() const override {return sys.resistivity();}
     inline double maxChgDen() const {return sys.maxChgDen();}
     inline double maxChgCurr() const {return sys.maxChgDen()*sys.cellArea();}
 
-    inline const std::vector<double>& cellCurrs() const {return cell_currs;}
-    inline const std::vector<double>& cellPowrs() const {return cell_powrs;}
-    inline double cellCurr(std::size_t i) const {return cell_currs.at(i);}
-    inline double cellPowr(std::size_t i) const {return cell_powrs.at(i);}
-    inline double totalPowr() const {return totPowr;}
-    inline double powrEff() const {return totalPowr()/chargingPowr();}
+    const std::vector<double>& cellCurrs() const override {return cell_currs;}
+    const std::vector<double>& cellPowrs() const override {return cell_powrs;}
+    double cellCurr(std::size_t i) const override {return cell_currs.at(i);}
+    double cellPowr(std::size_t i) const override {return cell_powrs.at(i);}
+    double storedPowr() const override {return totPowr;}
 
-    inline double asr() const {return sys.asr();}
-    inline double cellArea() const {return sys.cellArea();}
-    inline double stackShuntLen() const {return sys.stackShuntLen();}
-    inline double stackShuntArea() const {return sys.stackShuntArea();}
-    inline double stackManiLen() const {return sys.stackManiLen();}
-    inline double stackManiArea() const {return sys.stackManiArea();}
+    double asr() const override {return sys.asr();}
+    double cellArea() const override {return sys.cellArea();}
+    double stackShuntLen() const override {return sys.stackShuntLen();}
+    double stackShuntArea() const override {return sys.stackShuntArea();}
+    double stackManiLen() const override {return sys.stackManiLen();}
+    double stackManiArea() const override {return sys.stackManiArea();}
 
     inline double connShuntLen() const {return sys.connShuntLen();}
     inline double connShuntArea() const {return sys.connShuntArea();}
     inline double connManiLen() const {return sys.connManiLen();}
     inline double connManiArea() const {return sys.connManiArea();}
 
-    inline const std::vector<double> cirPowrs() const {return cir_powrs;}
+    inline const std::vector<double>& cirPowrs() const {return cir_powrs;}
     inline double cirPowr(std::size_t i) const {return cir_powrs.at(i);}
 
     inline const std::vector<double>& sptCurrs() const {return spt_currs;}
@@ -351,6 +533,10 @@ class ShuntPerf {
     inline double cmnbPowr(std::size_t i) const {return cmnb_powrs.at(i);}
 
 
+  public:
+    SCLReport* copy() const override {return new SCLReport(*this);}
+
+
   private: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     double error;
 
@@ -358,7 +544,7 @@ class ShuntPerf {
     double chgVolt;
     double totPowr = 0;     // Total input power to cells
     double ovpLoss = 0;     // Over voltage power lost
-    SysParam sys;
+    SCLSysParam sys;
 
     std::vector<double> cell_currs;
     std::vector<double> cell_powrs;
@@ -406,49 +592,13 @@ class ShuntPerf {
     std::vector<double> cmnb_powrs;     // Connector manifold negative bottom powers
 };
 
-/*
-********************************************************************************
-**    Calculator
-********************************************************************************
+
+/**
+ * Calculator to calculate shunt performance for series common line electrolyte
+ * arrangement.
 */
-
-
-// :::: [ Base class ] :::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-
-
-class ShuntCalc {
-  public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
-    ShuntCalc() = default;
-
-    ShuntCalc(const ShuntCalc&) = default;
-    ShuntCalc(ShuntCalc&&) = default;
-
-    ShuntCalc& operator=(const ShuntCalc&) = default;
-    ShuntCalc& operator=(ShuntCalc&&) = default;
-
-    virtual ~ShuntCalc() = default;
-
-  public: // ~~~~ functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    /**
-     * Calculates shunt current performance of the specified system.
-     *
-     * @param chgVolt The charging voltage (V). Negative value for constant
-     *    voltage discharging.
-    */
-    virtual ShuntPerf calculate(double chgVolt) const = 0;
-
-    /**
-     * Copies this instance of `ShuntCalc`.
-    */
-    virtual ShuntCalc* copy() const = 0;
-};
-
-
-// :::: [ CommLineCalc ] :::::::::::::::::::::::::::::::::::::::::::::::::::::::
-
-
-class CommLineCalc : public ShuntCalc {
-  public:
+class SCLCalc : public ShuntCalc {
+  public: // ~~~~ types ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     /** Enum representing stack connection type. */
     enum class ConnType {
       /** Positive front, negative front. */
@@ -459,31 +609,30 @@ class CommLineCalc : public ShuntCalc {
 
 
   public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
-    CommLineCalc(const SysParam& s,
-        ConnType ct = ConnType::ctFB)
-        : sys{s},
-          connType{ct} {}
+    SCLCalc(const SCLSysParam& s, ConnType ct = ConnType::ctFB)
+        : sys{s}, connType{ct} {}
 
-    CommLineCalc(const CommLineCalc&) = default;
-    CommLineCalc(CommLineCalc&&) = default;
+    SCLCalc(const SCLCalc&) = default;
+    SCLCalc(SCLCalc&&) = default;
 
-    CommLineCalc& operator=(const CommLineCalc&) = default;
-    CommLineCalc& operator=(CommLineCalc&&) = default;
+    SCLCalc& operator=(const SCLCalc&) = default;
+    SCLCalc& operator=(SCLCalc&&) = default;
 
-    ~CommLineCalc() override = default;
+    ~SCLCalc() override = default;
 
 
   public: // ~~~~ functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    ShuntPerf calculate(double chgVolt) const override;
+    ShuntReport calculate(double chgVolt) const override;
 
-    CommLineCalc* copy() const override {return new CommLineCalc(*this);}
+    SCLCalc* copy() const override {return new SCLCalc(*this);}
 
 
-  private:
-    SysParam sys;
+  private: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    SCLSysParam sys;
     ConnType connType;
 };
 
 
+} // namespace <vrfb::shuntcur::scl>
 } // namespace <vrfb::shuntcur>
 } // namespace <vrfb>

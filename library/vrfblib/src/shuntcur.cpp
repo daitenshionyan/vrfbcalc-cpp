@@ -1,16 +1,44 @@
 #include "vrfblib/vrfblib.hpp"
-#include "shuntcur.hpp"
 
 #include <cmath>
 #include <stdexcept>
 #include <utility>
+
+#include "shuntcur/shuntcur.hpp"
+#include "shuntcur/conn_scl.hpp"
 
 
 namespace vrfb {
 namespace shuntcur {
 
 
-ShuntPerf::ShuntPerf(double cc, double cv, const SysParam& s,
+ShuntReport::ShuntReport(const ShuntReport& o) : data_p{o.data_p->copy()} {}
+
+
+ShuntReport::ShuntReport(ShuntReport&& o) : data_p{o.data_p} {
+  o.data_p = nullptr;
+}
+
+
+ShuntReport& ShuntReport::operator=(const ShuntReport& o) {
+  delete data_p;
+  data_p = o.data_p->copy();
+  return *this;
+}
+
+
+ShuntReport& ShuntReport::operator=(ShuntReport&& o) {
+  delete data_p;
+  data_p = o.data_p;
+  o.data_p = nullptr;
+  return *this;
+}
+
+
+namespace scl {
+
+
+SCLReport::SCLReport(double cc, double cv, const SCLSysParam& s,
       const std::vector<double>& clist,
       const std::vector<double>& sptlist, const std::vector<double>& spblist,
       const std::vector<double>& sntlist, const std::vector<double>& snblist,
@@ -67,7 +95,7 @@ ShuntPerf::ShuntPerf(double cc, double cv, const SysParam& s,
 }
 
 
-ShuntPerf::ShuntPerf(double cc, double cv, const SysParam& s,
+SCLReport::SCLReport(double cc, double cv, const SCLSysParam& s,
       std::vector<double>&& clist,
       std::vector<double>&& sptlist, std::vector<double>&& spblist,
       std::vector<double>&& sntlist, std::vector<double>&& snblist,
@@ -124,14 +152,8 @@ ShuntPerf::ShuntPerf(double cc, double cv, const SysParam& s,
 }
 
 
-/*
-********************************************************************************
-**    CommLineCalc Definition
-********************************************************************************
-*/
 
-
-ShuntPerf CommLineCalc::calculate(double chgVolt) const {
+ShuntReport SCLCalc::calculate(double chgVolt) const {
   switch (connType) {
     case ConnType::ctFF:
       return commLineCalc<ConnSide::csFront, ConnSide::csFront>(sys, chgVolt);
@@ -143,5 +165,6 @@ ShuntPerf CommLineCalc::calculate(double chgVolt) const {
 }
 
 
+}
 }
 }

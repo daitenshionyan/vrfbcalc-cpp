@@ -1,11 +1,9 @@
 #pragma once
 
-#include <utility>
-#include <vector>
-
 #include <Eigen/Dense>
 
 #include "vrfblib/vrfblib.hpp"
+#include "shuntcur/shuntcur.hpp"
 
 
 /*
@@ -21,6 +19,7 @@
 
 namespace vrfb {
 namespace shuntcur {
+namespace scl {
 
 
 /**
@@ -36,15 +35,16 @@ enum class ConnSide {
 
 
 /**
- * Add inner stack loop contributions coefficients to the given matrix. The
- * size of the given matrix will have to be at least an N by N matrix where
- * N = 1 + 4S(C - 1).
+ * Returns N that is the required matrix (N x N) or vector (N x 1) size to
+ * calculate shunt current for a SLC electrolyte connection.
  *
- * @param m Matrix to add inner stack loop contribution coefficients to.
- * @param s Stack parameter of system.
- * @param num_s Number of stacks in system.
+ * @param num_s Number of stacks
+ * @param num_c Number of cells per stack.
 */
-void addStackLoops(Eigen::MatrixXd& m, const SysParam& s);
+inline std::size_t matSize(std::size_t num_s, std::size_t num_c) {
+  return 1 + 4*num_s*(num_c - 1) + 4*(num_s - 1);
+}
+
 
 /**
  * Adds stack connector loop contributions coefficients to the given matrix. The
@@ -54,23 +54,21 @@ void addStackLoops(Eigen::MatrixXd& m, const SysParam& s);
  * @param <PS> Positive side connection side.
  * @param <NS> Negative side connection side.
  * @param m Matrix to add connector contribution coefficients to.
- * @param s Stack parameter of system.
- * @param c Connection parameter of system.
- * @param num_s Number of stacks in system.
+ * @param s SCL system parameter.
 */
 template<ConnSide PS, ConnSide NS>
-void addConnLoops(Eigen::MatrixXd& m, const SysParam& s);
+void addConnLoops(Eigen::MatrixXd& m, const SCLSysParam& s);
+
 
 /**
  * Adds the voltage of the system within all loops to the given vector. The
  * vector will have to have a size of at least N = 1 + 4S(C - 1) + 4(S - 1).
  *
  * @param v Vector to add voltage to.
- * @param s Stack parameter of system.
- * @param num_s Number of stacks in system.
+ * @param s SCL system parameter.
  * @param chgVolt Charging voltage (V).
 */
-void addSysVolt(Eigen::VectorXd& v, const SysParam& s, double chgVolt);
+void addSysVolt(Eigen::VectorXd& v, const SCLSysParam& s, double chgVolt);
 
 /**
  * Calculates the shunt performance for a common line type of electrolyte
@@ -80,17 +78,393 @@ void addSysVolt(Eigen::VectorXd& v, const SysParam& s, double chgVolt);
  *
  * @param <PS> Positive side connection side.
  * @param <NS> Negative side connection side.
- * @param s Stack parameter of system.
- * @param c Connection parameter of system.
- * @param num_s Number of stacks in system.
+ * @param s SCL system parameter.
  * @param chgVolt Charging voltage (V).
 */
 template<ConnSide PS, ConnSide NS>
-ShuntPerf commLineCalc(const SysParam& s, double chgVolt);
+SCLReport* commLineCalc(const SCLSysParam& s, double chgVolt);
+
+
+
+
+
+
+
+
+/*
+********************************************************************************
+**    Indexing functions
+********************************************************************************
+*/
+
+
+/**
+ * Returns the index of the CONNECTOR POSITIVE TOP electrolyte coefficient
+ * within the current vector or matrix at the specified stack index.
+ *
+ * @param <ConnSide> Inlet connection side.
+ * @param si Stack index.
+ * @param num_s Number of stacks.
+ * @param num_c Number of cells per stack.
+*/
+template<ConnSide>
+Eigen::Index indexCPT(std::size_t si, std::size_t num_s, std::size_t num_c);
+
+
+/**
+ * Returns the index of the CONNECTOR POSITIVE BOTTOM electrolyte coefficient
+ * within the current vector or matrix at the specified stack index.
+ *
+ * @param <ConnSide> Inlet connection side.
+ * @param si Stack index.
+ * @param num_s Number of stacks.
+ * @param num_c Number of cells per stack.
+*/
+template<ConnSide>
+Eigen::Index indexCPB(std::size_t si, std::size_t num_s, std::size_t num_c);
+
+
+/**
+ * Returns the index of the CONNECTOR NEGATIVE TOP electrolyte coefficient
+ * within the current vector or matrix at the specified stack index.
+ *
+ * @param <ConnSide> Inlet connection side.
+ * @param si Stack index.
+ * @param num_s Number of stacks.
+ * @param num_c Number of cells per stack.
+*/
+template<ConnSide>
+Eigen::Index indexCNT(std::size_t si, std::size_t num_s, std::size_t num_c);
+
+
+/**
+ * Returns the index of the CONNECTOR NEGATIVE BOTTOM electrolyte coefficient
+ * within the current vector or matrix at the specified stack index.
+ *
+ * @param <ConnSide> Inlet connection side.
+ * @param si Stack index.
+ * @param num_s Number of stacks.
+ * @param num_c Number of cells per stack.
+*/
+template<ConnSide>
+Eigen::Index indexCNB(std::size_t si, std::size_t num_s, std::size_t num_c);
+
+
+
+
+
+
+
+
+/*
+********************************************************************************
+**    Current calculation functions for CELL
+********************************************************************************
+*/
+
+
+/**
+ * Returns the POSITIVE CONNECTOR current contribution to the specified cell,
+ * given the calculated current vector.
+ *
+ * @param <Side> Inlet connection side.
+ * @param cv Current vector.
+ * @param si Stack index.
+ * @param ci Cell index within stack.
+ * @param num_s Number of stacks.
+ * @param num_c Number of cells per stack.
+*/
+template<ConnSide Side>
+double getPosConnContri_Cell(const Eigen::VectorXd& cv,
+      std::size_t si, std::size_t ci,
+      std::size_t num_s, std::size_t num_c);
+
+
+/**
+ * Returns the NEGATIVE CONNECTOR current contribution to the specified cell,
+ * given the calculated current vector.
+ *
+ * @param <Side> Inlet connection side.
+ * @param cv Current vector.
+ * @param si Stack index.
+ * @param ci Cell index within stack.
+ * @param num_s Number of stacks.
+ * @param num_c Number of cells per stack.
+*/
+template<ConnSide Side>
+double getNegConnContri_Cell(const Eigen::VectorXd& cv,
+      std::size_t si, std::size_t ci,
+      std::size_t num_s, std::size_t num_c);
+
+
+
+
+
+
+
+
+/*
+********************************************************************************
+**    Current calculation functions for STACK SHUNT
+********************************************************************************
+*/
+
+
+/**
+ * Returns the CONNECTOR current contribution to the specified POSITIVE TOP
+ * STACK SHUNT, given the calculated current vector.
+ *
+ * @param <Side> Inlet connection side.
+ * @param cv Current vector.
+ * @param si Stack index.
+ * @param ci Cell index within stack.
+ * @param num_s Number of stacks.
+ * @param num_c Number of cells per stack.
+*/
+template<ConnSide Side>
+double getConnContri_SSPT(const Eigen::VectorXd& cv,
+      std::size_t si, std::size_t ci,
+      std::size_t num_s, std::size_t num_c);
+
+
+/**
+ * Returns the CONNECTOR current contribution to the specified POSITIVE BOTTOM
+ * STACK SHUNT, given the calculated current vector.
+ *
+ * @param <Side> Inlet connection side.
+ * @param cv Current vector.
+ * @param si Stack index.
+ * @param ci Cell index within stack.
+ * @param num_s Number of stacks.
+ * @param num_c Number of cells per stack.
+*/
+template<ConnSide Side>
+double getConnContri_SSPB(const Eigen::VectorXd& cv,
+      std::size_t si, std::size_t ci,
+      std::size_t num_s, std::size_t num_c);
+
+
+/**
+ * Returns the CONNECTOR current contribution to the specified NEGATIVE TOP
+ * STACK SHUNT, given the calculated current vector.
+ *
+ * @param <Side> Inlet connection side.
+ * @param cv Current vector.
+ * @param si Stack index.
+ * @param ci Cell index within stack.
+ * @param num_s Number of stacks.
+ * @param num_c Number of cells per stack.
+*/
+template<ConnSide Side>
+double getConnContri_SSNT(const Eigen::VectorXd& cv,
+      std::size_t si, std::size_t ci,
+      std::size_t num_s, std::size_t num_c);
+
+
+/**
+ * Returns the CONNECTOR current contribution to the specified NEGATIVE BOTTOM
+ * STACK SHUNT, given the calculated current vector.
+ *
+ * @param <Side> Inlet connection side.
+ * @param cv Current vector.
+ * @param si Stack index.
+ * @param ci Cell index within stack.
+ * @param num_s Number of stacks.
+ * @param num_c Number of cells per stack.
+*/
+template<ConnSide Side>
+double getConnContri_SSNB(const Eigen::VectorXd& cv,
+      std::size_t si, std::size_t ci,
+      std::size_t num_s, std::size_t num_c);
+
+
+
+
+
+
+
+
+/*
+********************************************************************************
+**    Current calculation functions for CONNECTOR SHUNT
+********************************************************************************
+*/
+
+
+/**
+ * Returns the current of the specified CONNECTOR POSITIVE TOP SHUNT, given
+ * the calculated current vector.
+ *
+ * @param <Side> Inlet connection side.
+ * @param cv Current vector.
+ * @param si Stack index.
+ * @param num_s Number of stacks.
+ * @param num_c Number of cells per stack.
+*/
+template<ConnSide Side>
+double getCurrCSPT(const Eigen::VectorXd& cv,
+      std::size_t si,
+      std::size_t num_s, std::size_t num_c);
+
+
+/**
+ * Returns the current of the specified CONNECTOR POSITIVE BOTTOM SHUNT, given
+ * the calculated current vector.
+ *
+ * @param <Side> Inlet connection side.
+ * @param cv Current vector.
+ * @param si Stack index.
+ * @param num_s Number of stacks.
+ * @param num_c Number of cells per stack.
+*/
+template<ConnSide Side>
+double getCurrCSPB(const Eigen::VectorXd& cv,
+      std::size_t si,
+      std::size_t num_s, std::size_t num_c);
+
+
+/**
+ * Returns the current of the specified CONNECTOR NEGATIVE TOP SHUNT, given
+ * the calculated current vector.
+ *
+ * @param <Side> Inlet connection side.
+ * @param cv Current vector.
+ * @param si Stack index.
+ * @param num_s Number of stacks.
+ * @param num_c Number of cells per stack.
+*/
+template<ConnSide Side>
+double getCurrCSNT(const Eigen::VectorXd& cv,
+      std::size_t si,
+      std::size_t num_s, std::size_t num_c);
+
+
+/**
+ * Returns the current of the specified CONNECTOR NEGATIVE BOTTOM SHUNT, given
+ * the calculated current vector.
+ *
+ * @param <Side> Inlet connection side.
+ * @param cv Current vector.
+ * @param si Stack index.
+ * @param num_s Number of stacks.
+ * @param num_c Number of cells per stack.
+*/
+template<ConnSide Side>
+double getCurrCSNB(const Eigen::VectorXd& cv,
+      std::size_t si,
+      std::size_t num_s, std::size_t num_c);
+
+
+
+
+
+
+
+
+/*
+********************************************************************************
+**    Current calculation functions for CONNECTOR MANIFOLD
+********************************************************************************
+*/
+
+
+/**
+ * Returns the current of the specified CONNECTOR POSITIVE TOP MANIFOLD, given
+ * the calculated current vector.
+ *
+ * @param <Side> Inlet connection side.
+ * @param cv Current vector.
+ * @param si Stack index.
+ * @param num_s Number of stacks.
+ * @param num_c Number of cells per stack.
+*/
+template<ConnSide Side>
+double getCurrCMPT(const Eigen::VectorXd& cv,
+      std::size_t si,
+      std::size_t num_s, std::size_t num_c);
+
+
+/**
+ * Returns the current of the specified CONNECTOR POSITIVE BOTTOM MANIFOLD,
+ * given the calculated current vector.
+ *
+ * @param <Side> Inlet connection side.
+ * @param cv Current vector.
+ * @param si Stack index.
+ * @param num_s Number of stacks.
+ * @param num_c Number of cells per stack.
+*/
+template<ConnSide Side>
+double getCurrCMPB(const Eigen::VectorXd& cv,
+      std::size_t si,
+      std::size_t num_s, std::size_t num_c);
+
+
+/**
+ * Returns the current of the specified CONNECTOR NEGATIVE TOP MANIFOLD, given
+ * the calculated current vector.
+ *
+ * @param <Side> Inlet connection side.
+ * @param cv Current vector.
+ * @param si Stack index.
+ * @param num_s Number of stacks.
+ * @param num_c Number of cells per stack.
+*/
+template<ConnSide Side>
+double getCurrCMNT(const Eigen::VectorXd& cv,
+      std::size_t si,
+      std::size_t num_s, std::size_t num_c);
+
+
+/**
+ * Returns the current of the specified CONNECTOR NEGATIVE BOTTOM MANIFOLD,
+ * given the calculated current vector.
+ *
+ * @param <Side> Inlet connection side.
+ * @param cv Current vector.
+ * @param si Stack index.
+ * @param num_s Number of stacks.
+ * @param num_c Number of cells per stack.
+*/
+template<ConnSide Side>
+double getCurrCMNB(const Eigen::VectorXd& cv,
+      std::size_t si,
+      std::size_t num_s, std::size_t num_c);
 
 
 }
 }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -114,14 +488,7 @@ ShuntPerf commLineCalc(const SysParam& s, double chgVolt);
 
 namespace vrfb {
 namespace shuntcur {
-
-
-namespace {
-
-
-inline std::size_t matSize(std::size_t num_s, std::size_t num_c) {
-  return 1 + 4*num_s*(num_c - 1) + 4*(num_s - 1);
-}
+namespace scl {
 
 
 /*
@@ -131,42 +498,7 @@ inline std::size_t matSize(std::size_t num_s, std::size_t num_c) {
 */
 
 
-// :::: [ Stack Indexing ] :::::::::::::::::::::::::::::::::::::::::::::::::::::
-
-
-inline Eigen::Index indexSPT(
-      std::size_t si, std::size_t ci,
-      std::size_t num_s, std::size_t num_c) {
-  return ci +  si * (num_c - 1) + 1;
-}
-
-
-inline Eigen::Index indexSPB(
-      std::size_t si, std::size_t ci,
-      std::size_t num_s, std::size_t num_c) {
-  return ci + (si + num_s) * (num_c - 1) + 1;
-}
-
-
-inline Eigen::Index indexSNT(
-      std::size_t si, std::size_t ci,
-      std::size_t num_s, std::size_t num_c) {
-  return ci + (si + 2*num_s) * (num_c - 1);
-}
-
-
-inline Eigen::Index indexSNB(
-      std::size_t si, std::size_t ci,
-      std::size_t num_s, std::size_t num_c) {
-  return ci + (si + 3*num_s) * (num_c - 1);
-}
-
-
 // :::: [ Connector Positive Top ] :::::::::::::::::::::::::::::::::::::::::::::
-
-
-template<ConnSide>
-Eigen::Index indexCPT(std::size_t si, std::size_t num_s, std::size_t num_c);
 
 
 template<>
@@ -179,10 +511,6 @@ inline Eigen::Index indexCPT<ConnSide::csFront>(std::size_t si,
 // :::: [ Connector Positive Bot ] :::::::::::::::::::::::::::::::::::::::::::::
 
 
-template<ConnSide>
-Eigen::Index indexCPB(std::size_t si, std::size_t num_s, std::size_t num_c);
-
-
 template<>
 inline Eigen::Index indexCPB<ConnSide::csFront>(std::size_t si,
       std::size_t num_s, std::size_t num_c) {
@@ -191,10 +519,6 @@ inline Eigen::Index indexCPB<ConnSide::csFront>(std::size_t si,
 
 
 // :::: [ Connector Negative Top ] :::::::::::::::::::::::::::::::::::::::::::::
-
-
-template<ConnSide>
-Eigen::Index indexCNT(std::size_t si, std::size_t num_s, std::size_t num_c);
 
 
 template<>
@@ -214,10 +538,6 @@ inline Eigen::Index indexCNT<ConnSide::csBack>(std::size_t si,
 // :::: [ Connector Negative Top ] :::::::::::::::::::::::::::::::::::::::::::::
 
 
-template<ConnSide>
-Eigen::Index indexCNB(std::size_t si, std::size_t num_s, std::size_t num_c);
-
-
 template<>
 inline Eigen::Index indexCNB<ConnSide::csFront>(std::size_t si,
       std::size_t num_s, std::size_t num_c) {
@@ -232,6 +552,12 @@ inline Eigen::Index indexCNB<ConnSide::csBack>(std::size_t si,
 }
 
 
+
+
+
+
+
+
 /*
 ********************************************************************************
 **    Current calculation functions for CELL
@@ -239,55 +565,30 @@ inline Eigen::Index indexCNB<ConnSide::csBack>(std::size_t si,
 */
 
 
-// :::: [ STACK INNER LOOPS ] ::::::::::::::::::::::::::::::::::::::::::::::::::
-
-
-/**
- * Returns stack inner loop contribution to the specified cell.
-*/
-double getStackContri_Cell(const Eigen::VectorXd& cv,
-      std::size_t si, std::size_t ci,
-      std::size_t num_s, std::size_t num_c) {
-  double result = 0;
-  if (ci+1 < num_c) {
-    result += cv(indexSPT(si, ci, num_s, num_c))
-        + cv(indexSPB(si, ci, num_s, num_c));
-  }
-  if (ci > 0) {
-    result += cv(indexSNT(si, ci, num_s, num_c))
-        + cv(indexSNB(si, ci, num_s, num_c));
-  }
-  return result;
-}
-
-
 // :::: [ POSITIVE CONNECTOR ] :::::::::::::::::::::::::::::::::::::::::::::::::
 
 
-template<ConnSide Side>
-double getPosConnContri_Cell(const Eigen::VectorXd& cv,
+template<>
+double getPosConnContri_Cell<ConnSide::csFront>(const Eigen::VectorXd& cv,
       std::size_t si, std::size_t ci,
       std::size_t num_s, std::size_t num_c) {
   double result = 0;
   if (si > 0 && ci+1 < num_c) {
-    result += cv(indexCPT<Side>(si, num_s, num_c));
+    result += cv(indexCPT<ConnSide::csFront>(si, num_s, num_c));
   } else if (si+1 < num_s && ci+1 == num_c) {
-    result += cv(indexCPT<Side>(si, num_s, num_c) + 1);
+    result += cv(indexCPT<ConnSide::csFront>(si, num_s, num_c) + 1);
   }
   if (si+1 < num_s) {
-    result += cv(indexCPB<Side>(si, num_s, num_c));
+    result += cv(indexCPB<ConnSide::csFront>(si, num_s, num_c));
   }
   return result;
 }
 
 
+// TODO: getPosConnCOntri_Cell<ConnSide::csBack>
+
+
 // :::: [ NEGATIVE CONNECTOR ] :::::::::::::::::::::::::::::::::::::::::::::::::
-
-
-template<ConnSide Side>
-double getNegConnContri_Cell(const Eigen::VectorXd& cv,
-      std::size_t si, std::size_t ci,
-      std::size_t num_s, std::size_t num_c);
 
 
 template<>
@@ -326,6 +627,12 @@ double getNegConnContri_Cell<ConnSide::csBack>(
 }
 
 
+
+
+
+
+
+
 /*
 ********************************************************************************
 **    Current calculation functions for STACK SHUNT
@@ -336,23 +643,11 @@ double getNegConnContri_Cell<ConnSide::csBack>(
 // :::: [ POSITIVE TOP ] :::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 
-template<ConnSide Side>
-double getCurrSPT(const Eigen::VectorXd& cv,
-      std::size_t si, std::size_t ci,
-      std::size_t num_s, std::size_t num_c);
-
-
 template<>
-double getCurrSPT<ConnSide::csFront>(const Eigen::VectorXd& cv,
+double getConnContri_SSPT<ConnSide::csFront>(const Eigen::VectorXd& cv,
       std::size_t si, std::size_t ci,
       std::size_t num_s, std::size_t num_c) {
   double result = 0;
-  if (ci+1 < num_c) {
-    result += cv(indexSPT(si, ci, num_s, num_c));
-  }
-  if (ci > 0) {
-    result -= cv(indexSPT(si, ci, num_s, num_c) - 1);
-  }
   if (ci+1 == num_c) {
     if (si > 0) {
       result -= cv(indexCPT<ConnSide::csFront>(si, num_s, num_c));
@@ -368,23 +663,11 @@ double getCurrSPT<ConnSide::csFront>(const Eigen::VectorXd& cv,
 // :::: [ POSITIVE BOT ] :::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 
-template<ConnSide Side>
-double getCurrSPB(const Eigen::VectorXd& cv,
-      std::size_t si, std::size_t ci,
-      std::size_t num_s, std::size_t num_c);
-
-
 template<>
-double getCurrSPB<ConnSide::csFront>(const Eigen::VectorXd& cv,
+double getConnContri_SSPB<ConnSide::csFront>(const Eigen::VectorXd& cv,
       std::size_t si, std::size_t ci,
       std::size_t num_s, std::size_t num_c) {
   double result = 0;
-  if (ci+1 < num_c) {
-    result += cv(indexSPB(si, ci, num_s, num_c));
-  }
-  if (ci > 0) {
-    result -= cv(indexSPB(si, ci, num_s, num_c) - 1);
-  }
   if (ci == 0) {
     if (si > 0) {
       result -= cv(indexCPB<ConnSide::csFront>(si, num_s, num_c) - 1);
@@ -400,23 +683,11 @@ double getCurrSPB<ConnSide::csFront>(const Eigen::VectorXd& cv,
 // :::: [ NEGATIVE TOP ] :::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 
-template<ConnSide Side>
-double getCurrSNT(const Eigen::VectorXd& cv,
-      std::size_t si, std::size_t ci,
-      std::size_t num_s, std::size_t num_c);
-
-
 template<>
-double getCurrSNT<ConnSide::csFront>(const Eigen::VectorXd& cv,
+double getConnContri_SSNT<ConnSide::csFront>(const Eigen::VectorXd& cv,
       std::size_t si, std::size_t ci,
       std::size_t num_s, std::size_t num_c) {
   double result = 0;
-  if (ci+1 < num_c) {
-    result += cv(indexSNT(si, ci, num_s, num_c) + 1);
-  }
-  if (ci > 0) {
-    result -= cv(indexSNT(si, ci, num_s, num_c));
-  }
   if (ci+1 == num_c) {
     if (si > 0) {
       result -= cv(indexCNT<ConnSide::csFront>(si, num_s, num_c));
@@ -430,16 +701,10 @@ double getCurrSNT<ConnSide::csFront>(const Eigen::VectorXd& cv,
 
 
 template<>
-double getCurrSNT<ConnSide::csBack>(const Eigen::VectorXd& cv,
+double getConnContri_SSNT<ConnSide::csBack>(const Eigen::VectorXd& cv,
       std::size_t si, std::size_t ci,
       std::size_t num_s, std::size_t num_c) {
   double result = 0;
-  if (ci+1 < num_c) {
-    result += cv(indexSNT(si, ci, num_s, num_c) + 1);
-  }
-  if (ci > 0) {
-    result -= cv(indexSNT(si, ci, num_s, num_c));
-  }
   if (ci == 0) {
     if (si > 0) {
       result -= cv(indexCNT<ConnSide::csBack>(si, num_s, num_c) - 1);
@@ -455,23 +720,11 @@ double getCurrSNT<ConnSide::csBack>(const Eigen::VectorXd& cv,
 // :::: [ NEGATIVE BOT ] :::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 
-template<ConnSide Side>
-double getCurrSNB(const Eigen::VectorXd& cv,
-      std::size_t si, std::size_t ci,
-      std::size_t num_s, std::size_t num_c);
-
-
 template<>
-double getCurrSNB<ConnSide::csFront>(const Eigen::VectorXd& cv,
+double getConnContri_SSNB<ConnSide::csFront>(const Eigen::VectorXd& cv,
       std::size_t si, std::size_t ci,
       std::size_t num_s, std::size_t num_c) {
   double result = 0;
-  if (ci+1 < num_c) {
-    result += cv(indexSNB(si, ci, num_s, num_c) + 1);
-  }
-  if (ci > 0) {
-    result -= cv(indexSNB(si, ci, num_s, num_c));
-  }
   if (ci == 0) {
     if (si > 0) {
       result -= cv(indexCNB<ConnSide::csFront>(si, num_s, num_c) - 1);
@@ -485,16 +738,10 @@ double getCurrSNB<ConnSide::csFront>(const Eigen::VectorXd& cv,
 
 
 template<>
-double getCurrSNB<ConnSide::csBack>(const Eigen::VectorXd& cv,
+double getConnContri_SSNB<ConnSide::csBack>(const Eigen::VectorXd& cv,
       std::size_t si, std::size_t ci,
       std::size_t num_s, std::size_t num_c) {
   double result = 0;
-  if (ci+1 < num_c) {
-    result += cv(indexSNB(si, ci, num_s, num_c) + 1);
-  }
-  if (ci > 0) {
-    result -= cv(indexSNB(si, ci, num_s, num_c));
-  }
   if (ci+1 == num_c) {
     if (si > 0) {
       result -= cv(indexCNB<ConnSide::csBack>(si, num_s, num_c));
@@ -507,39 +754,10 @@ double getCurrSNB<ConnSide::csBack>(const Eigen::VectorXd& cv,
 }
 
 
-/*
-********************************************************************************
-**    Current calculation functions for STACK MANIFOLD
-********************************************************************************
-*/
 
 
-double getCurrMPT(const Eigen::VectorXd& cv,
-      std::size_t si, std::size_t ci,
-      std::size_t num_s, std::size_t num_c) {
-  return (ci+1 < num_c) ? -cv(indexSPT(si, ci, num_s, num_c)) : 0;
-}
 
 
-double getCurrMPB(const Eigen::VectorXd& cv,
-      std::size_t si, std::size_t ci,
-      std::size_t num_s, std::size_t num_c) {
-  return (ci+1 < num_c) ? -cv(indexSPB(si, ci, num_s, num_c)) : 0;
-}
-
-
-double getCurrMNT(const Eigen::VectorXd& cv,
-      std::size_t si, std::size_t ci,
-      std::size_t num_s, std::size_t num_c) {
-  return (ci+1 < num_c) ? -cv(indexSNT(si, ci, num_s, num_c) + 1) : 0;
-}
-
-
-double getCurrMNB(const Eigen::VectorXd& cv,
-      std::size_t si, std::size_t ci,
-      std::size_t num_s, std::size_t num_c) {
-  return (ci+1 < num_c) ? -cv(indexSNB(si, ci, num_s, num_c) + 1) : 0;
-}
 
 
 /*
@@ -550,12 +768,6 @@ double getCurrMNB(const Eigen::VectorXd& cv,
 
 
 // :::: [ POSITIVE TOP ] :::::::::::::::::::::::::::::::::::::::::::::::::::::::
-
-
-template<ConnSide Side>
-double getCurrCSPT(const Eigen::VectorXd& cv,
-      std::size_t si,
-      std::size_t num_s, std::size_t num_c);
 
 
 template<>
@@ -576,12 +788,6 @@ double getCurrCSPT<ConnSide::csFront>(const Eigen::VectorXd& cv,
 // :::: [ POSITIVE BOT ] :::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 
-template<ConnSide Side>
-double getCurrCSPB(const Eigen::VectorXd& cv,
-      std::size_t si,
-      std::size_t num_s, std::size_t num_c);
-
-
 template<>
 double getCurrCSPB<ConnSide::csFront>(const Eigen::VectorXd& cv,
       std::size_t si,
@@ -598,12 +804,6 @@ double getCurrCSPB<ConnSide::csFront>(const Eigen::VectorXd& cv,
 
 
 // :::: [ NEGATIVE TOP ] :::::::::::::::::::::::::::::::::::::::::::::::::::::::
-
-
-template<ConnSide Side>
-double getCurrCSNT(const Eigen::VectorXd& cv,
-      std::size_t si,
-      std::size_t num_s, std::size_t num_c);
 
 
 template<>
@@ -639,12 +839,6 @@ double getCurrCSNT<ConnSide::csBack>(const Eigen::VectorXd& cv,
 // :::: [ NEGATIVE BOT ] :::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 
-template<ConnSide Side>
-double getCurrCSNB(const Eigen::VectorXd& cv,
-      std::size_t si,
-      std::size_t num_s, std::size_t num_c);
-
-
 template<>
 double getCurrCSNB<ConnSide::csFront>(const Eigen::VectorXd& cv,
       std::size_t si,
@@ -675,6 +869,12 @@ double getCurrCSNB<ConnSide::csBack>(const Eigen::VectorXd& cv,
 }
 
 
+
+
+
+
+
+
 /*
 ********************************************************************************
 **    Current calculation functions for CONNECTOR MANIFOLD
@@ -685,12 +885,6 @@ double getCurrCSNB<ConnSide::csBack>(const Eigen::VectorXd& cv,
 // :::: [ POSITIVE TOP ] :::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 
-template<ConnSide Side>
-double getCurrCMPT(const Eigen::VectorXd& cv,
-      std::size_t si,
-      std::size_t num_s, std::size_t num_c);
-
-
 template<>
 double getCurrCMPT<ConnSide::csFront>(const Eigen::VectorXd& cv,
       std::size_t si,
@@ -699,21 +893,7 @@ double getCurrCMPT<ConnSide::csFront>(const Eigen::VectorXd& cv,
 }
 
 
-template<>
-double getCurrCMPT<ConnSide::csBack>(const Eigen::VectorXd& cv,
-      std::size_t si,
-      std::size_t num_s, std::size_t num_c) {
-  return (si+1 < num_s) ? -cv(indexCPT<ConnSide::csBack>(si, num_s, num_c)) : 0;
-}
-
-
 // :::: [ POSITIVE BOT ] :::::::::::::::::::::::::::::::::::::::::::::::::::::::
-
-
-template<ConnSide Side>
-double getCurrCMPB(const Eigen::VectorXd& cv,
-      std::size_t si,
-      std::size_t num_s, std::size_t num_c);
 
 
 template<>
@@ -724,21 +904,7 @@ double getCurrCMPB<ConnSide::csFront>(const Eigen::VectorXd& cv,
 }
 
 
-template<>
-double getCurrCMPB<ConnSide::csBack>(const Eigen::VectorXd& cv,
-      std::size_t si,
-      std::size_t num_s, std::size_t num_c) {
-  return (si+1 < num_s) ? -cv(indexCPB<ConnSide::csBack>(si, num_s, num_c) + 1) : 0;
-}
-
-
 // :::: [ POSITIVE TOP ] :::::::::::::::::::::::::::::::::::::::::::::::::::::::
-
-
-template<ConnSide Side>
-double getCurrCMNT(const Eigen::VectorXd& cv,
-      std::size_t si,
-      std::size_t num_s, std::size_t num_c);
 
 
 template<>
@@ -760,12 +926,6 @@ double getCurrCMNT<ConnSide::csBack>(const Eigen::VectorXd& cv,
 // :::: [ POSITIVE BOT ] :::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 
-template<ConnSide Side>
-double getCurrCMNB(const Eigen::VectorXd& cv,
-      std::size_t si,
-      std::size_t num_s, std::size_t num_c);
-
-
 template<>
 double getCurrCMNB<ConnSide::csFront>(const Eigen::VectorXd& cv,
       std::size_t si,
@@ -782,103 +942,10 @@ double getCurrCMNB<ConnSide::csBack>(const Eigen::VectorXd& cv,
 }
 
 
-} // NAMESPACE vrfb::shuntcur::UNNAMED
 
 
-/*
-********************************************************************************
-**    addStackLoops Definition
-********************************************************************************
-*/
 
 
-void addStackLoops(Eigen::MatrixXd& m, const SysParam& s) {
-  std::size_t totalCells = s.numCells() * s.numStacks();
-
-  for (std::size_t si = 0; si < s.numStacks(); ++si) {
-    for (std::size_t ci = 0; ci < s.numCells(); ++ci) {
-      // main loop
-      m(0, 0) += s.cellR();
-
-      Eigen::Index pti = indexSPT(si, ci, s.numStacks(), s.numCells());
-      Eigen::Index pbi = indexSPB(si, ci, s.numStacks(), s.numCells());
-      Eigen::Index nti = indexSNT(si, ci, s.numStacks(), s.numCells());
-      Eigen::Index nbi = indexSNB(si, ci, s.numStacks(), s.numCells());
-
-      if (ci+1 < s.numCells()) {
-        // main loop
-        m(0, pti) = s.cellR();
-        m(0, pbi) = s.cellR();
-
-        // main loop contribution
-        m(pti, 0) = s.cellR();
-        m(pbi, 0) = s.cellR();
-
-        if (ci > 0) {
-          // previous loop contribution
-          m(pti, pti-1) = -s.stackShuntR();
-          m(pbi, pbi-1) = -s.stackShuntR();
-
-          // contribution from negative loops
-          m(pti, nti) = s.cellR();
-          m(pti, nbi) = s.cellR();
-          m(pbi, nti) = s.cellR();
-          m(pbi, nbi) = s.cellR();
-        }
-
-        // current loop contribution
-        m(pti, pti) = s.cellR() + 2*s.stackShuntR() + s.stackManiR();
-        m(pbi, pbi) = s.cellR() + 2*s.stackShuntR() + s.stackManiR();
-
-        if (ci+2 < s.numCells()) {
-          // next loop contribution
-          m(pti, pti+1) = -s.stackShuntR();
-          m(pbi, pbi+1) = -s.stackShuntR();
-        }
-
-        // contribution from other side positive loop
-        m(pti, pbi) = s.cellR();
-        m(pbi, pti) = s.cellR();
-      }
-
-      if (ci > 0) {
-        // main loop
-        m(0, nti) = s.cellR();
-        m(0, nbi) = s.cellR();
-
-        // main loop contribution
-        m(nti, 0) = s.cellR();
-        m(nbi, 0) = s.cellR();
-
-        if (ci > 1) {
-          // previous loop contribution
-          m(nti, nti-1) = -s.stackShuntR();
-          m(nbi, nbi-1) = -s.stackShuntR();
-        }
-
-        // current loop contribution
-        m(nti, nti) = s.cellR() + 2*s.stackShuntR() + s.stackManiR();
-        m(nbi, nbi) = s.cellR() + 2*s.stackShuntR() + s.stackManiR();
-
-        if (ci+1 < s.numCells()) {
-          // next loop contribution
-          m(nti, nti+1) = -s.stackShuntR();
-          m(nbi, nbi+1) = -s.stackShuntR();
-
-          // contribution from positive loops
-          m(nti, pti) = s.cellR();
-          m(nti, pbi) = s.cellR();
-          m(nbi, pti) = s.cellR();
-          m(nbi, pbi) = s.cellR();
-        }
-
-        // contribution from other side negative loops
-        m(nti, nbi) = s.cellR();
-        m(nbi, nti) = s.cellR();
-      }
-    }
-  }
-}
 
 
 /*
@@ -892,7 +959,7 @@ void addStackLoops(Eigen::MatrixXd& m, const SysParam& s) {
 
 
 template<>
-void addConnLoops<ConnSide::csFront, ConnSide::csFront>(Eigen::MatrixXd& m, const SysParam& s) {
+void addConnLoops<ConnSide::csFront, ConnSide::csFront>(Eigen::MatrixXd& m, const SCLSysParam& s) {
   for (std::size_t si = 0; si < s.numStacks(); ++si) {
     Eigen::Index cpti = indexCPT<ConnSide::csFront>(si, s.numStacks(), s.numCells());
     Eigen::Index cpbi = indexCPB<ConnSide::csFront>(si, s.numStacks(), s.numCells());
@@ -1119,7 +1186,7 @@ void addConnLoops<ConnSide::csFront, ConnSide::csFront>(Eigen::MatrixXd& m, cons
 
 
 template<>
-void addConnLoops<ConnSide::csFront, ConnSide::csBack>(Eigen::MatrixXd& m, const SysParam& s) {
+void addConnLoops<ConnSide::csFront, ConnSide::csBack>(Eigen::MatrixXd& m, const SCLSysParam& s) {
   for (std::size_t si = 0; si < s.numStacks(); ++si) {
     Eigen::Index cpti = indexCPT<ConnSide::csFront>(si, s.numStacks(), s.numCells());
     Eigen::Index cpbi = indexCPB<ConnSide::csFront>(si, s.numStacks(), s.numCells());
@@ -1342,6 +1409,12 @@ void addConnLoops<ConnSide::csFront, ConnSide::csBack>(Eigen::MatrixXd& m, const
 }
 
 
+
+
+
+
+
+
 /*
 ********************************************************************************
 **    addSysVolt Definition
@@ -1349,7 +1422,7 @@ void addConnLoops<ConnSide::csFront, ConnSide::csBack>(Eigen::MatrixXd& m, const
 */
 
 
-void addSysVolt(Eigen::VectorXd& v, const SysParam& s, double chgVolt) {
+void addSysVolt(Eigen::VectorXd& v, const SCLSysParam& s, double chgVolt) {
   v(0) += chgVolt;
   for (std::size_t si = 0; si < s.numStacks(); ++si) {
     if (si > 0) {
@@ -1379,6 +1452,12 @@ void addSysVolt(Eigen::VectorXd& v, const SysParam& s, double chgVolt) {
 }
 
 
+
+
+
+
+
+
 /*
 ********************************************************************************
 **    commLineCalc Definitions
@@ -1387,7 +1466,7 @@ void addSysVolt(Eigen::VectorXd& v, const SysParam& s, double chgVolt) {
 
 
 template<ConnSide PS, ConnSide NS>
-inline ShuntPerf commLineCalc(const SysParam& s, double chgVolt) {
+inline SCLReport* commLineCalc(const SCLSysParam& s, double chgVolt) {
   std::size_t size = matSize(s.numStacks(), s.numCells());
   Eigen::MatrixXd cm = Eigen::MatrixXd::Zero(size, size);   // current matrix
   addStackLoops(cm, s);
@@ -1419,10 +1498,14 @@ inline ShuntPerf commLineCalc(const SysParam& s, double chgVolt) {
           + getStackContri_Cell(cv, si, ci, s.numStacks(), s.numCells())
           + getPosConnContri_Cell<PS>(cv, si, ci, s.numStacks(), s.numCells())
           + getNegConnContri_Cell<NS>(cv, si, ci, s.numStacks(), s.numCells()));
-      sptlist.push_back(getCurrSPT<PS>(cv, si, ci, s.numStacks(), s.numCells()));
-      spblist.push_back(getCurrSPB<PS>(cv, si, ci, s.numStacks(), s.numCells()));
-      sntlist.push_back(getCurrSNT<NS>(cv, si, ci, s.numStacks(), s.numCells()));
-      snblist.push_back(getCurrSNB<NS>(cv, si, ci, s.numStacks(), s.numCells()));
+      sptlist.push_back(getStackContri_SSPT(cv, si, ci, s.numStacks(), s.numCells())
+          + getConnContri_SSPT<PS>(cv, si, ci, s.numStacks(), s.numCells()));
+      spblist.push_back(getStackContri_SSPB(cv, si, ci, s.numStacks(), s.numCells())
+          + getConnContri_SSPB<PS>(cv, si, ci, s.numStacks(), s.numCells()));
+      sntlist.push_back(getStackContri_SSNT(cv, si, ci, s.numStacks(), s.numCells())
+          + getConnContri_SSNT<NS>(cv, si, ci, s.numStacks(), s.numCells()));
+      snblist.push_back(getStackContri_SSNB(cv, si, ci, s.numStacks(), s.numCells())
+          + getConnContri_SSNB<NS>(cv, si, ci, s.numStacks(), s.numCells()));
       mptlist.push_back(getCurrMPT(cv, si, ci, s.numStacks(), s.numCells()));
       mpblist.push_back(getCurrMPB(cv, si, ci, s.numStacks(), s.numCells()));
       mntlist.push_back(getCurrMNT(cv, si, ci, s.numStacks(), s.numCells()));
@@ -1441,15 +1524,16 @@ inline ShuntPerf commLineCalc(const SysParam& s, double chgVolt) {
 
   double error = ((cm*cv) - vv).norm();
 
-  return {cv(0), chgVolt, s,
+  return new SCLReport(cv(0), chgVolt, s,
       std::move(clist),
       std::move(sptlist), std::move(spblist), std::move(sntlist), std::move(snblist),
       std::move(mptlist), std::move(mpblist), std::move(mntlist), std::move(mnblist),
       std::move(csptlist), std::move(cspblist), std::move(csntlist), std::move(csnblist),
       std::move(cmptlist), std::move(cmpblist), std::move(cmntlist), std::move(cmnblist),
-      error};
+      error);
 }
 
 
+}
 }
 }

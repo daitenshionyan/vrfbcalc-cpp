@@ -25,7 +25,7 @@ vrfbdriver::ShuntJob SCConfigPopup::getJob() {
   if (ui->numCellField->value() <= 0) {
     throw std::runtime_error("Negative or 0 number of cells");
   }
-  vrfb::shuntcur::CommLineCalc* calc = new vrfb::shuntcur::CommLineCalc(
+  vrfb::shuntcur::scl::SCLCalc* calc = new vrfb::shuntcur::scl::SCLCalc(
     {
       (std::size_t) ui->numStackField->value(),
       (std::size_t) ui->numCellField->value(),
