@@ -245,6 +245,10 @@ class ShuntReportData {
     virtual double cellPowr(std::size_t i) const = 0;
     virtual double storedPowr() const = 0;
     inline double powrEff() const {return storedPowr() / chargingPowr();}
+
+
+  public:
+    virtual ShuntReportData* copy() const = 0;
 };
 
 
@@ -256,11 +260,11 @@ class ShuntReport {
     ShuntReport(ShuntReportData* dp) : data_p{dp} {}
 
     ShuntReport() = default;
-    ShuntReport(const ShuntReport&) = default;
-    ShuntReport(ShuntReport&&) = default;
+    ShuntReport(const ShuntReport&);
+    ShuntReport(ShuntReport&&);
 
-    ShuntReport& operator=(const ShuntReport&) = default;
-    ShuntReport& operator=(ShuntReport&&) = default;
+    ShuntReport& operator=(const ShuntReport&);
+    ShuntReport& operator=(ShuntReport&&);
 
     ~ShuntReport() {delete data_p;}
 
@@ -508,6 +512,10 @@ class SCLReport : public ShuntReportData {
     inline double cmpbPowr(std::size_t i) const {return cmpb_powrs.at(i);}
     inline double cmntPowr(std::size_t i) const {return cmnt_powrs.at(i);}
     inline double cmnbPowr(std::size_t i) const {return cmnb_powrs.at(i);}
+
+
+  public:
+    SCLReport* copy() const override {return new SCLReport(*this);}
 
 
   private: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
