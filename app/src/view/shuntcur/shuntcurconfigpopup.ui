@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>405</width>
-    <height>502</height>
+    <height>520</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -25,7 +25,7 @@
         <x>0</x>
         <y>0</y>
         <width>368</width>
-        <height>480</height>
+        <height>508</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -75,14 +75,14 @@
              <item row="0" column="1">
               <widget class="QLineEdit" name="nameField"/>
              </item>
-             <item row="1" column="0">
+             <item row="2" column="0">
               <widget class="QLabel" name="chgVoltLabel">
                <property name="text">
                 <string>Chg Volt</string>
                </property>
               </widget>
              </item>
-             <item row="1" column="1">
+             <item row="2" column="1">
               <widget class="QWidget" name="chgVoltBox" native="true">
                <layout class="QHBoxLayout" name="horizontalLayout">
                 <property name="spacing">
@@ -132,14 +132,14 @@
                </layout>
               </widget>
              </item>
-             <item row="2" column="0">
+             <item row="3" column="0">
               <widget class="QLabel" name="resistivityLabel">
                <property name="text">
                 <string>Resistivity</string>
                </property>
               </widget>
              </item>
-             <item row="2" column="1">
+             <item row="3" column="1">
               <widget class="QWidget" name="resistivityBox" native="true">
                <layout class="QHBoxLayout" name="horizontalLayout_2">
                 <property name="spacing">
@@ -192,14 +192,14 @@
                </layout>
               </widget>
              </item>
-             <item row="4" column="0">
+             <item row="5" column="0">
               <widget class="QLabel" name="numStackLabel">
                <property name="text">
                 <string>Num Stacks</string>
                </property>
               </widget>
              </item>
-             <item row="4" column="1">
+             <item row="5" column="1">
               <widget class="QWidget" name="numStackBox" native="true">
                <layout class="QHBoxLayout" name="horizontalLayout_3">
                 <property name="spacing">
@@ -246,14 +246,14 @@
                </layout>
               </widget>
              </item>
-             <item row="5" column="0">
+             <item row="6" column="0">
               <widget class="QLabel" name="numCellLabel">
                <property name="text">
                 <string>Num Cells</string>
                </property>
               </widget>
              </item>
-             <item row="5" column="1">
+             <item row="6" column="1">
               <widget class="QWidget" name="numCellBox" native="true">
                <layout class="QHBoxLayout" name="horizontalLayout_4">
                 <property name="spacing">
@@ -300,14 +300,14 @@
                </layout>
               </widget>
              </item>
-             <item row="8" column="0">
+             <item row="9" column="0">
               <widget class="QLabel" name="shuntLenLabel">
                <property name="text">
                 <string>Shunt Len</string>
                </property>
               </widget>
              </item>
-             <item row="8" column="1">
+             <item row="9" column="1">
               <widget class="QWidget" name="shuntLenBox" native="true">
                <layout class="QHBoxLayout" name="horizontalLayout_5">
                 <property name="spacing">
@@ -360,14 +360,14 @@
                </layout>
               </widget>
              </item>
-             <item row="9" column="0">
+             <item row="10" column="0">
               <widget class="QLabel" name="shuntAreaLabel">
                <property name="text">
                 <string>Shunt Area</string>
                </property>
               </widget>
              </item>
-             <item row="9" column="1">
+             <item row="10" column="1">
               <widget class="QWidget" name="shuntAreaBox" native="true">
                <layout class="QHBoxLayout" name="horizontalLayout_6">
                 <property name="spacing">
@@ -420,14 +420,14 @@
                </layout>
               </widget>
              </item>
-             <item row="10" column="0">
+             <item row="11" column="0">
               <widget class="QLabel" name="maniLenLabel">
                <property name="text">
                 <string>Mani Len</string>
                </property>
               </widget>
              </item>
-             <item row="10" column="1">
+             <item row="11" column="1">
               <widget class="QWidget" name="maniLenBox" native="true">
                <layout class="QHBoxLayout" name="horizontalLayout_7">
                 <property name="spacing">
@@ -480,14 +480,14 @@
                </layout>
               </widget>
              </item>
-             <item row="11" column="0">
+             <item row="12" column="0">
               <widget class="QLabel" name="maniAreaLabel">
                <property name="text">
                 <string>Mani Area</string>
                </property>
               </widget>
              </item>
-             <item row="11" column="1">
+             <item row="12" column="1">
               <widget class="QWidget" name="maniAreaBox" native="true">
                <layout class="QHBoxLayout" name="horizontalLayout_8">
                 <property name="spacing">
@@ -540,14 +540,14 @@
                </layout>
               </widget>
              </item>
-             <item row="12" column="0">
+             <item row="13" column="0">
               <widget class="QLabel" name="connShuntLenLabel">
                <property name="text">
                 <string>Conn Shunt Len</string>
                </property>
               </widget>
              </item>
-             <item row="12" column="1">
+             <item row="13" column="1">
               <widget class="QWidget" name="connShuntLenBox" native="true">
                <layout class="QHBoxLayout" name="horizontalLayout_9">
                 <property name="spacing">
@@ -600,14 +600,14 @@
                </layout>
               </widget>
              </item>
-             <item row="13" column="0">
+             <item row="14" column="0">
               <widget class="QLabel" name="connShuntAreaLabel">
                <property name="text">
                 <string>Conn Shunt Area</string>
                </property>
               </widget>
              </item>
-             <item row="13" column="1">
+             <item row="14" column="1">
               <widget class="QWidget" name="connShuntAreaBox" native="true">
                <layout class="QHBoxLayout" name="horizontalLayout_10">
                 <property name="spacing">
@@ -660,14 +660,14 @@
                </layout>
               </widget>
              </item>
-             <item row="14" column="0">
+             <item row="15" column="0">
               <widget class="QLabel" name="connManiLenLabel">
                <property name="text">
                 <string>Conn Mani Len</string>
                </property>
               </widget>
              </item>
-             <item row="14" column="1">
+             <item row="15" column="1">
               <widget class="QWidget" name="connManiLenBox" native="true">
                <layout class="QHBoxLayout" name="horizontalLayout_11">
                 <property name="spacing">
@@ -720,14 +720,14 @@
                </layout>
               </widget>
              </item>
-             <item row="15" column="0">
+             <item row="16" column="0">
               <widget class="QLabel" name="connManiAreaLabel">
                <property name="text">
                 <string>Conn Mani Area</string>
                </property>
               </widget>
              </item>
-             <item row="15" column="1">
+             <item row="16" column="1">
               <widget class="QWidget" name="connManiAreaBox" native="true">
                <layout class="QHBoxLayout" name="horizontalLayout_12">
                 <property name="spacing">
@@ -780,14 +780,14 @@
                </layout>
               </widget>
              </item>
-             <item row="6" column="0">
+             <item row="7" column="0">
               <widget class="QLabel" name="asrLabel">
                <property name="text">
                 <string>ASR</string>
                </property>
               </widget>
              </item>
-             <item row="6" column="1">
+             <item row="7" column="1">
               <widget class="QWidget" name="asrBox" native="true">
                <layout class="QHBoxLayout" name="horizontalLayout_13">
                 <property name="spacing">
@@ -840,14 +840,14 @@
                </layout>
               </widget>
              </item>
-             <item row="7" column="0">
+             <item row="8" column="0">
               <widget class="QLabel" name="cellAreaLabel">
                <property name="text">
                 <string>Cell Area</string>
                </property>
               </widget>
              </item>
-             <item row="7" column="1">
+             <item row="8" column="1">
               <widget class="QWidget" name="cellAreaBox" native="true">
                <layout class="QHBoxLayout" name="horizontalLayout_14">
                 <property name="spacing">
@@ -900,14 +900,14 @@
                </layout>
               </widget>
              </item>
-             <item row="3" column="0">
+             <item row="4" column="0">
               <widget class="QLabel" name="maxChgDenLabel">
                <property name="text">
                 <string>Max Chg Density</string>
                </property>
               </widget>
              </item>
-             <item row="3" column="1">
+             <item row="4" column="1">
               <widget class="QWidget" name="maxChgDenBox" native="true">
                <layout class="QHBoxLayout" name="horizontalLayout_15">
                 <property name="spacing">
@@ -958,6 +958,20 @@
                  </widget>
                 </item>
                </layout>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="label">
+               <property name="text">
+                <string>Arrangement</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QComboBox" name="arrComboBox">
+               <property name="editable">
+                <bool>true</bool>
+               </property>
               </widget>
              </item>
             </layout>

@@ -207,12 +207,12 @@ std::vector<PerformanceEntry_CE> readPerformance_CE(
 // ==== [ ShuntCalc Definition ] ===============================================
 
 
-ShuntJob::ShuntJob(const std::string& n, const vrfb::shuntcur::scl::SCLCalc& sc, double cv,
+ShuntJob::ShuntJob(const std::string& n, const vrfb::shuntcur::ShuntCalc& sc, double cv,
     SCArrangement a)
     : name{n}, calc{sc.copy()}, chgVolt{cv}, arr{a} {}
 
 
-ShuntJob::ShuntJob(const std::string& n, vrfb::shuntcur::scl::SCLCalc* scp, double cv,
+ShuntJob::ShuntJob(const std::string& n, vrfb::shuntcur::ShuntCalc* scp, double cv,
     SCArrangement a)
     : name{n}, calc{scp}, chgVolt{cv}, arr{a} {}
 
