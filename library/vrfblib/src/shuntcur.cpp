@@ -48,8 +48,9 @@ SCLReport::SCLReport(double cc, double cv, const SCLSysParam& s,
       const std::vector<double>& csntlist, const std::vector<double>& csnblist,
       const std::vector<double>& cmptlist, const std::vector<double>& cmpblist,
       const std::vector<double>& cmntlist, const std::vector<double>& cmnblist,
-      double err)
-      : error{err}, chgCurr{cc}, chgVolt{cv}, sys{s},
+      double err, const std::string& an)
+      : error{err}, arrangementName{an},
+        chgCurr{cc}, chgVolt{cv}, sys{s},
         cell_currs{clist},
         spt_currs{sptlist}, spb_currs{spblist},
         snt_currs{sntlist}, snb_currs{snblist},
@@ -105,8 +106,9 @@ SCLReport::SCLReport(double cc, double cv, const SCLSysParam& s,
       std::vector<double>&& csntlist, std::vector<double>&& csnblist,
       std::vector<double>&& cmptlist, std::vector<double>&& cmpblist,
       std::vector<double>&& cmntlist, std::vector<double>&& cmnblist,
-      double err)
-      : error{err}, chgCurr{cc}, chgVolt{cv}, sys{s},
+      double err, const std::string& an)
+      : error{err}, arrangementName{an},
+        chgCurr{cc}, chgVolt{cv}, sys{s},
         cell_currs{std::move(clist)},
         spt_currs{std::move(sptlist)}, spb_currs{std::move(spblist)},
         snt_currs{std::move(sntlist)}, snb_currs{std::move(snblist)},

@@ -232,6 +232,8 @@ class ShuntReportData {
 
 
   public: // ~~~~ accessors ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    virtual std::string arrName() const = 0;
+
     virtual std::size_t numStacks() const = 0;
     virtual std::size_t numCells() const = 0;
     inline std::size_t totCells() const {return numStacks() * numCells();}
@@ -406,7 +408,7 @@ class SCLReport : public ShuntReportData {
         const std::vector<double>& csntlist, const std::vector<double>& csnblist,
         const std::vector<double>& cmptlist, const std::vector<double>& cmpblist,
         const std::vector<double>& cmntlist, const std::vector<double>& cmnblist,
-        double err = 0);
+        double err = 0, const std::string& an = "");
     SCLReport(double cc, double cv, const SCLSysParam& s,
         std::vector<double>&& clist,
         std::vector<double>&& sptlist, std::vector<double>&& spblist,
@@ -417,7 +419,7 @@ class SCLReport : public ShuntReportData {
         std::vector<double>&& csntlist, std::vector<double>&& csnblist,
         std::vector<double>&& cmptlist, std::vector<double>&& cmpblist,
         std::vector<double>&& cmntlist, std::vector<double>&& cmnblist,
-        double err = 0);
+        double err = 0, const std::string& an = "");
 
     SCLReport(const SCLReport&) = default;
     SCLReport(SCLReport&&) = default;
@@ -430,6 +432,8 @@ class SCLReport : public ShuntReportData {
 
   public: // ~~~~ accessors ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     inline double err() const {return error;}
+
+    std::string arrName() const override {return arrangementName;}
 
     double chargingCurr() const override {return chgCurr;}
     double chargingVolt() const override {return chgVolt;}
@@ -539,6 +543,7 @@ class SCLReport : public ShuntReportData {
 
   private: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     double error;
+    std::string arrangementName;
 
     double chgCurr;
     double chgVolt;
