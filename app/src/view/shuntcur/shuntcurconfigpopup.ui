@@ -970,7 +970,7 @@
              <item row="1" column="1">
               <widget class="QComboBox" name="arrComboBox">
                <property name="editable">
-                <bool>true</bool>
+                <bool>false</bool>
                </property>
               </widget>
              </item>
