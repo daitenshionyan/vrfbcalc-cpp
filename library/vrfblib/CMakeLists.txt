@@ -47,6 +47,7 @@ enable_testing()
 
 add_executable(shunttest
     test/shunttestconst.hpp
+    test/shunttestconst_pcc.hpp
     test/shunttest.cpp
 )
 
