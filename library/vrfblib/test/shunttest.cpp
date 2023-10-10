@@ -262,6 +262,6 @@ TEST(vrfbSC, calculateFB) {
 
 TEST(vrfbSC, addStackLoops5C3S3P) {
   Eigen::MatrixXd actual = Eigen::MatrixXd::Zero(149, 149);
-  vrfb::shuntcur::addStackLoops_P(actual, shunttest_pcc::kTestSysParam);
+  vrfb::shuntcur::addStackLoops(actual, shunttest_pcc::kTestSysParam);
   checkMatrix(shunttest_pcc::kResistMat_NoConn, actual);
 }

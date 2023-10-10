@@ -174,7 +174,7 @@ class SysParam {
     */
     SysParam(std::size_t num_s, std::size_t num_c,
         double rho, double mcd, const StackParam& stack)
-        : nl{0}, ns{num_s}, nc{num_c},
+        : nl{1}, ns{num_s}, nc{num_c},
           r{rho}, maxCD{mcd}, s{stack} {}
 
     SysParam(const StackParam& stack, double rho, double mcd,
