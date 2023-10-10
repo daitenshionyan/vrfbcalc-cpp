@@ -154,8 +154,7 @@ inline Eigen::Index indexSNB_P(
 
 
 inline Eigen::Index indexPLoop(
-    std::size_t ci, std::size_t num_c,
-    std::size_t si, std::size_t num_s,
+    std::size_t num_c, std::size_t num_s,
     std::size_t li, std::size_t num_l) {
   return num_l + 4*num_l*num_s*(num_c - 1) + li;
 }
@@ -573,6 +572,143 @@ void addStackLoops(Eigen::MatrixXd& m, const SysParam& s) {
         // contribution from other side negative loops
         m(nti, nbi) = s.cellR();
         m(nbi, nti) = s.cellR();
+      }
+    }
+  }
+}
+
+
+
+
+
+
+
+
+
+/*
+********************************************************************************
+**    addStackLoops_P Definition
+********************************************************************************
+*/
+
+
+void addStackLoops_P(Eigen::MatrixXd& m, const SysParam& s) {
+  for (std::size_t li = 0; li < s.numLines(); ++li) {
+    Eigen::Index pli = indexPLoop(s.numCells(), s.numStacks(), li, s.numLines());
+
+    m(li, li) += s.numCells() * s.numStacks() * s.cellR();
+    if (li+1 < s.numLines()) {
+      if (li > 0) {
+        // previus parallel loop
+        m(pli, pli-1) -= s.numCells() * s.numStacks() * s.cellR();
+      }
+      // line to parallel loops
+      m(li, pli) += s.numCells() * s.numStacks() * s.cellR();
+      m(pli, li) += s.numCells() * s.numStacks() * s.cellR();
+      m(li+1, pli) -= s.numCells() * s.numStacks() * s.cellR();
+      m(pli, li+1) -= s.numCells() * s.numStacks() * s.cellR();
+      // current parallel loop
+      m(pli, pli) +=  2 * s.numCells() * s.numStacks() * s.cellR();
+      if (li+2 < s.numLines()) {
+        // next parallel loop
+        m(pli, pli+1) -= s.numCells() * s.numStacks() * s.cellR();
+      }
+    }
+
+    for (std::size_t si = 0; si < s.numStacks(); ++si) {
+      for (std::size_t ci = 0; ci < s.numCells(); ++ci) {
+        Eigen::Index pti = indexSPT_P(ci, s.numCells(), si, s.numStacks(), li, s.numLines());
+        Eigen::Index pbi = indexSPB_P(ci, s.numCells(), si, s.numStacks(), li, s.numLines());
+        Eigen::Index nti = indexSNT_P(ci, s.numCells(), si, s.numStacks(), li, s.numLines());
+        Eigen::Index nbi = indexSNB_P(ci, s.numCells(), si, s.numStacks(), li, s.numLines());
+
+        // :::: [ POSITIVE LOOPS ] ::::
+        if (ci+1 < s.numCells()) {
+          // line contribution
+          m(li, pti) += s.cellR();
+          m(pti, li) += s.cellR();
+          m(li, pbi) += s.cellR();
+          m(pbi, li) += s.cellR();
+          if (ci > 0) {
+            // previous loop contribution
+            m(pti, pti-1) -= s.stackShuntR();
+            m(pbi, pbi-1) -= s.stackShuntR();
+            // negative loop contribution
+            m(pti, nti) += s.cellR();
+            m(pti, nbi) += s.cellR();
+            m(pbi, nti) += s.cellR();
+            m(pbi, nbi) += s.cellR();
+          }
+          // current loop contribution
+          m(pti, pti) += s.cellR() + 2*s.stackShuntR() + s.stackManiR();
+          m(pbi, pbi) += s.cellR() + 2*s.stackShuntR() + s.stackManiR();
+          // contribution from other positive
+          m(pti, pbi) += s.cellR();
+          m(pbi, pti) += s.cellR();
+          if (ci+2 < s.numCells()) {
+            // next loop contribution
+            m(pti, pti+1) -= s.stackShuntR();
+            m(pbi, pbi+1) -= s.stackShuntR();
+          }
+          if (li+1 < s.numLines()) {
+            // current parallel loop
+            m(pti, pli) += s.cellR();
+            m(pli, pti) += s.cellR();
+            m(pbi, pli) += s.cellR();
+            m(pli, pbi) += s.cellR();
+          }
+          if (li > 0) {
+            // previous parallel loop
+            m(pti, pli-1) -= s.cellR();
+            m(pli-1, pti) -= s.cellR();
+            m(pbi, pli-1) -= s.cellR();
+            m(pli-1, pbi) -= s.cellR();
+          }
+        }
+
+        // :::: [ NEGATIVE LOOPS ] ::::
+        if (ci > 0) {
+          // line contribution
+          m(li, nti) += s.cellR();
+          m(nti, li) += s.cellR();
+          m(li, nbi) += s.cellR();
+          m(nbi, li) += s.cellR();
+          if (ci > 1) {
+            // previous loop contribution
+            m(nti, nti-1) -= s.stackShuntR();
+            m(nbi, nbi-1) -= s.stackShuntR();
+          }
+          // current loop contribution
+          m(nti, nti) += s.cellR() + 2*s.stackShuntR() + s.stackManiR();
+          m(nbi, nbi) += s.cellR() + 2*s.stackShuntR() + s.stackManiR();
+          // contribution from other negative
+          m(nti, nbi) += s.cellR();
+          m(nbi, nti) += s.cellR();
+          if (ci+1 < s.numCells()) {
+            // next loop contribution
+            m(nti, nti+1) -= s.stackShuntR();
+            m(nbi, nbi+1) -= s.stackShuntR();
+            // positive loop contribution
+            m(nti, pti) += s.cellR();
+            m(nti, pbi) += s.cellR();
+            m(nbi, pti) += s.cellR();
+            m(nbi, pbi) += s.cellR();
+          }
+          if (li+1 < s.numLines()) {
+            // current parallel loop
+            m(nti, pli) += s.cellR();
+            m(pli, nti) += s.cellR();
+            m(nbi, pli) += s.cellR();
+            m(pli, nbi) += s.cellR();
+          }
+          if (li > 0) {
+            // previous parallel loop
+            m(nti, pli-1) -= s.cellR();
+            m(pli-1, nti) -= s.cellR();
+            m(nbi, pli-1) -= s.cellR();
+            m(pli-1, nbi) -= s.cellR();
+          }
+        }
       }
     }
   }

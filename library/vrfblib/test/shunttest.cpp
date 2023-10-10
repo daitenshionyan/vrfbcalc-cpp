@@ -7,6 +7,7 @@
 #include <Eigen/Dense>
 
 #include "shunttestconst.hpp"
+#include "shunttestconst_pcc.hpp"
 
 #include "vrfblib/vrfblib.hpp"
 #include "shuntcur/shuntcur.hpp"
@@ -256,4 +257,11 @@ TEST(vrfbSC, calculateFB) {
       vrfb::shuntcur::scl::SCLCalc::ConnType::ctFB};
   auto actual = calc.calculate(shunttest::kTestChgVolt);
   checkShuntPerf(shunttest::kExShuntPerf_5S_FB, actual.data<vrfb::shuntcur::scl::SCLReport>());
+}
+
+
+TEST(vrfbSC, addStackLoops5C3S3P) {
+  Eigen::MatrixXd actual = Eigen::MatrixXd::Zero(149, 149);
+  vrfb::shuntcur::addStackLoops_P(actual, shunttest_pcc::kTestSysParam);
+  checkMatrix(shunttest_pcc::kResistMat_NoConn, actual);
 }
