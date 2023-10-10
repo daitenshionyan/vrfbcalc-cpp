@@ -174,8 +174,13 @@ class SysParam {
     */
     SysParam(std::size_t num_s, std::size_t num_c,
         double rho, double mcd, const StackParam& stack)
-        : ns{num_s}, nc{num_c},
+        : nl{0}, ns{num_s}, nc{num_c},
           r{rho}, maxCD{mcd}, s{stack} {}
+
+    SysParam(const StackParam& stack, double rho, double mcd,
+        std::size_t num_c, std::size_t num_s, std::size_t num_p)
+        : s{stack}, r{rho}, maxCD{mcd},
+          nl{num_p}, ns{num_s}, nc{num_c} {}
 
     SysParam() = delete;
     SysParam(const SysParam&) = default;
@@ -188,6 +193,7 @@ class SysParam {
 
 
   public: // ~~~~ accessors ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    inline std::size_t numLines() const {return nl;}
     inline std::size_t numStacks() const {return ns;}
     inline std::size_t numCells() const {return nc;}
     inline double resistivity() const {return r;}
@@ -206,6 +212,7 @@ class SysParam {
 
 
   private:
+    std::size_t nl;
     std::size_t ns;             // number of stacks
     std::size_t nc;             // number of cells per stack
     double r;                   // resistivity (Ohm m)

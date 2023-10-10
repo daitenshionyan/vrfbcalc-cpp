@@ -33,6 +33,8 @@ namespace shuntcur {
 */
 void addStackLoops(Eigen::MatrixXd& m, const SysParam& s);
 
+void addStackLoops_P(Eigen::MatrixXd& m, const SysParam& s);
+
 
 
 
@@ -116,6 +118,46 @@ inline Eigen::Index indexSNB(
       std::size_t si, std::size_t ci,
       std::size_t num_s, std::size_t num_c) {
   return ci + (si + 3*num_s) * (num_c - 1);
+}
+
+
+inline Eigen::Index indexSPT_P(
+    std::size_t ci, std::size_t num_c,
+    std::size_t si, std::size_t num_s,
+    std::size_t li, std::size_t num_l) {
+  return num_l + li*num_s*(num_c - 1) + si*(num_c - 1) + ci;
+}
+
+
+inline Eigen::Index indexSPB_P(
+    std::size_t ci, std::size_t num_c,
+    std::size_t si, std::size_t num_s,
+    std::size_t li, std::size_t num_l) {
+  return num_l + num_l*num_s*(num_c - 1) + li*num_s*(num_c - 1) + si*(num_c - 1) + ci;
+}
+
+
+inline Eigen::Index indexSNT_P(
+    std::size_t ci, std::size_t num_c,
+    std::size_t si, std::size_t num_s,
+    std::size_t li, std::size_t num_l) {
+  return num_l + 2*num_l*num_s*(num_c - 1) + li*num_s*(num_c - 1) + si*(num_c - 1) + ci - 1;
+}
+
+
+inline Eigen::Index indexSNB_P(
+    std::size_t ci, std::size_t num_c,
+    std::size_t si, std::size_t num_s,
+    std::size_t li, std::size_t num_l) {
+  return num_l + 3*num_l*num_s*(num_c - 1) + li*num_s*(num_c - 1) + si*(num_c - 1) + ci - 1;
+}
+
+
+inline Eigen::Index indexPLoop(
+    std::size_t ci, std::size_t num_c,
+    std::size_t si, std::size_t num_s,
+    std::size_t li, std::size_t num_l) {
+  return num_l + 4*num_l*num_s*(num_c - 1) + li;
 }
 
 
@@ -432,6 +474,13 @@ double getStackContri_SSNB(const Eigen::VectorXd& cv,
   }
   return result;
 }
+
+
+
+
+
+
+
 
 
 /*
