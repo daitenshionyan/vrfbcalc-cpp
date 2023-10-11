@@ -29,7 +29,7 @@ namespace scl {
 enum class ConnSide {
   /** Inlet connection on the same side as the positive terminal. */
   csFront,
-  /** inlet connection on the opposite end of the positive terminal. */
+  /** Inlet connection on the opposite end of the positive terminal. */
   csBack
 };
 

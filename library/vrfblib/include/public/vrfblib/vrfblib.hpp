@@ -189,7 +189,7 @@ class SysParam {
     SysParam& operator=(const SysParam&) = default;
     SysParam& operator=(SysParam&&) = default;
 
-    ~SysParam() = default;
+    virtual ~SysParam() = default;
 
 
   public: // ~~~~ accessors ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -641,5 +641,82 @@ class SCLCalc : public ShuntCalc {
 
 
 } // namespace <vrfb::shuntcur::scl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/** Parallel criss cross */
+namespace pcc {
+
+
+/**
+ * Structure containing the parameters of the stack connectors in a PCC system.
+*/
+struct ConnParam {
+  double sub_sl;      // Sub shunt length (m)
+  double sub_sa;      // Sub shunt cross sectional area (m2)
+  double sub_ml;      // Sub manifold length (m)
+  double sub_ma;      // Sub manifold cross sectional area (m2)
+
+  double main_sl;      // Main shunt length (m)
+  double main_sa;      // Main shunt cross sectional area (m2)
+  double main_ml;      // Main manifold length (m)
+  double main_ma;      // Main manifold cross sectional area (m2)
+};
+
+
+class PCCSysParam : public SysParam {
+  public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
+    PCCSysParam(
+        double rho, double mcd,
+        std::size_t num_c, std::size_t num_s, std::size_t num_p,
+        const StackParam& stack, const ConnParam& conn)
+        : SysParam{stack, rho, mcd, num_c, num_s, num_p},
+          c{conn} {}
+
+    PCCSysParam() = delete;
+    PCCSysParam(const PCCSysParam&) = default;
+    PCCSysParam(PCCSysParam&&) = default;
+
+    PCCSysParam& operator=(const PCCSysParam&) = default;
+    PCCSysParam& operator=(PCCSysParam&&) = default;
+
+    ~PCCSysParam() = default;
+
+
+  public: // ~~~~ accessors ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    inline double connSubShuntLen() const {return c.sub_sl;}
+    inline double connSubShuntArea() const {return c.sub_sa;}
+    inline double connSubManiLen() const {return c.sub_ml;}
+    inline double connSubManiArea() const {return c.sub_ma;}
+
+    inline double connMainShuntLen() const {return c.main_sl;}
+    inline double connMainShuntArea() const {return c.main_sa;}
+    inline double connMainManiLen() const {return c.main_ml;}
+    inline double connMainManiArea() const {return c.main_ma;}
+
+    inline double connSubShuntR() const {return resistivity() * c.sub_sl / c.sub_sa;}
+    inline double connSubManiR() const {return resistivity() * c.sub_ml / c.sub_ma;}
+    inline double connMainShuntR() const {return resistivity() * c.main_sl / c.main_sa;}
+    inline double connMainManiR() const {return resistivity() * c.main_ml / c.main_ma;}
+
+
+  private:
+    ConnParam c;
+};
+
+
+} // namespace <vrfb::shuntcur::pcc>
 } // namespace <vrfb::shuntcur>
 } // namespace <vrfb>
