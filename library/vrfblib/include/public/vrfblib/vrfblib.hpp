@@ -723,6 +723,9 @@ class PCCReport : public ShuntReportData {
     PCCReport(double cc, double cv, const PCCSysParam& s,
         const std::vector<double>& clist,
         double err=0);
+    PCCReport(double cc, double cv, const PCCSysParam& s,
+        std::vector<double>&& clist,
+        double err=0);
 
     PCCReport() = delete;
     PCCReport(const PCCReport&) = default;

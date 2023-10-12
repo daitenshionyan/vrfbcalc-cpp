@@ -166,5 +166,47 @@ ShuntReport SCLCalc::calculate(double chgVolt) const {
 
 
 }
+
+
+namespace pcc {
+
+
+PCCReport::PCCReport(double cc, double cv, const PCCSysParam& s,
+      const std::vector<double>& clist,
+      double err)
+      : chgCurr{cc}, chgVolt{cv}, sys{s},
+        cell_currs{clist},
+        error{err} {
+  for (std::size_t i = 0; cell_currs.size(); ++i) {
+    double cellInPowr = cell_currs[i]*kAvrOCV;
+    if (s.cellArea()*s.maxChgDen() < cell_currs[i]) {
+      cellInPowr = s.cellArea()*s.maxChgDen() * kAvrOCV;
+    }
+    cell_powrs.push_back(cellInPowr);
+    totPowr += cellInPowr;
+    ovpLoss += cell_currs[i]*kAvrOCV - cellInPowr;
+  }
+}
+
+
+PCCReport::PCCReport(double cc, double cv, const PCCSysParam& s,
+      std::vector<double>&& clist,
+      double err)
+      : chgCurr{cc}, chgVolt{cv}, sys{s},
+      cell_currs{std::move(clist)},
+      error{err} {
+  for (std::size_t i = 0; cell_currs.size(); ++i) {
+    double cellInPowr = cell_currs[i]*kAvrOCV;
+    if (s.cellArea()*s.maxChgDen() < cell_currs[i]) {
+      cellInPowr = s.cellArea()*s.maxChgDen() * kAvrOCV;
+    }
+    cell_powrs.push_back(cellInPowr);
+    totPowr += cellInPowr;
+    ovpLoss += cell_currs[i]*kAvrOCV - cellInPowr;
+  }
+}
+
+
+}
 }
 }
