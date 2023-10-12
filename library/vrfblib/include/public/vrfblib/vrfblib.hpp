@@ -239,9 +239,10 @@ class ShuntReportData {
 
 
   public: // ~~~~ accessors ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    virtual std::size_t numLines() const {return 1;}
     virtual std::size_t numStacks() const = 0;
     virtual std::size_t numCells() const = 0;
-    inline std::size_t totCells() const {return numStacks() * numCells();}
+    virtual std::size_t totCells() const {return numLines() * numStacks() * numCells();}
 
     virtual double asr() const = 0;
     virtual double cellArea() const = 0;
@@ -260,7 +261,7 @@ class ShuntReportData {
     virtual double cellCurr(std::size_t i) const = 0;
     virtual double cellPowr(std::size_t i) const = 0;
     virtual double storedPowr() const = 0;
-    inline double powrEff() const {return storedPowr() / chargingPowr();}
+    virtual double powrEff() const {return storedPowr() / chargingPowr();}
 
 
   public:
@@ -714,6 +715,95 @@ class PCCSysParam : public SysParam {
 
   private:
     ConnParam c;
+};
+
+
+class PCCReport : public ShuntReportData {
+  public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
+    PCCReport(double cc, double cv, const PCCSysParam& s,
+        const std::vector<double>& clist,
+        double err=0);
+
+    PCCReport() = delete;
+    PCCReport(const PCCReport&) = default;
+    PCCReport(PCCReport&&) = default;
+
+    PCCReport& operator=(const PCCReport&) = default;
+    PCCReport& operator=(PCCReport&&) = default;
+
+    ~PCCReport() = default;
+
+
+  public: // ~~~~ accessors ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    std::size_t numLines() const override {return sys.numLines();}
+    virtual std::size_t numStacks() const override {return sys.numStacks();};
+    virtual std::size_t numCells() const override {return sys.numCells();}
+
+    virtual double asr() const override {return sys.asr();}
+    virtual double cellArea() const override {return sys.cellArea();}
+    virtual double resistivity() const override {return sys.resistivity();}
+    virtual double stackShuntLen() const override {return sys.stackShuntLen();}
+    virtual double stackShuntArea() const override {return sys.stackShuntArea();}
+    virtual double stackManiLen() const override {return sys.stackManiLen();}
+    virtual double stackManiArea() const override {return sys.stackManiArea();}
+
+    virtual double chargingCurr() const override {return chgCurr;}
+    virtual double chargingVolt() const override {return chgVolt;}
+    virtual double chargingPowr() const override {return chgCurr*chgVolt;}
+
+    virtual const std::vector<double>& cellCurrs() const override {return cell_currs;}
+    virtual const std::vector<double>& cellPowrs() const override {return cell_powrs;}
+    virtual double cellCurr(std::size_t i) const override {return cell_currs.at(i);}
+    virtual double cellPowr(std::size_t i) const override {return cell_powrs.at(i);}
+    virtual double storedPowr() const override {return totPowr;}
+
+
+  private: // ~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    double error;
+
+    double chgCurr;
+    double chgVolt;
+    double totPowr = 0;     // Total input power to cells
+    double ovpLoss = 0;     // Over voltage power lost
+    PCCSysParam sys;
+
+    std::vector<double> cell_currs;
+    std::vector<double> cell_powrs;
+};
+
+
+class PCCCalc : public ShuntCalc {
+  public: // ~~~~ types ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    /** Enum representing stack connection type. */
+    enum class ConnType {
+      /** Positive front, negative back. */
+      ctFB
+    };
+
+
+  public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
+    PCCCalc(const PCCSysParam& s, ConnType ct=ConnType::ctFB)
+        : sys{s}, connType{ct} {}
+
+    PCCCalc() = delete;
+    PCCCalc(const PCCCalc&) = default;
+    PCCCalc(PCCCalc&&) = default;
+
+    PCCCalc& operator=(const PCCCalc&) = default;
+    PCCCalc& operator=(PCCCalc&&) = default;
+
+    ~PCCCalc() = default;
+
+
+  public: // ~~~~ functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    ShuntReport calculate(double chgVolt) const override;
+
+    PCCCalc* copy() const override {return new PCCCalc(*this);}
+
+
+  private: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    PCCSysParam sys;
+    ConnType connType;
 };
 
 
