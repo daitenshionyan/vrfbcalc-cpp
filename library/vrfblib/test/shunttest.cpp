@@ -12,6 +12,7 @@
 #include "vrfblib/vrfblib.hpp"
 #include "shuntcur/shuntcur.hpp"
 #include "shuntcur/conn_scl.hpp"
+#include "shuntcur/conn_pcc.hpp"
 
 
 namespace { // ==== namespace <UNNAMED> ========================================
@@ -264,4 +265,14 @@ TEST(vrfbSC, addStackLoops5C3S3P) {
   Eigen::MatrixXd actual = Eigen::MatrixXd::Zero(149, 149);
   vrfb::shuntcur::addStackLoops(actual, shunttest_pcc::kTestSysParam);
   checkMatrix(shunttest_pcc::kResistMat_NoConn, actual);
+}
+
+
+TEST(vrfbSC, addConnLoops5C3S3PFB) {
+  Eigen::MatrixXd actual = Eigen::MatrixXd::Zero(173, 173);
+  vrfb::shuntcur::addStackLoops(actual, shunttest_pcc::kTestSysParam);
+  vrfb::shuntcur::pcc::addConnLoops
+      <vrfb::shuntcur::pcc::ConnSide::csFront, vrfb::shuntcur::pcc::ConnSide::csBack>(
+          actual, shunttest_pcc::kTestSysParam);
+  checkMatrix(shunttest_pcc::kResistMat_WithConn, actual);
 }
