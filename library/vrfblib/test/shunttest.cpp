@@ -132,7 +132,7 @@ void checkShuntPerf(const vrfb::shuntcur::scl::SCLReport& expected, const vrfb::
   }
 
   for (std::size_t i = 0; i < expected.numStacks(); ++i) {
-// CONNECTOR :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+  // CONNECTOR :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
     if (std::abs(actual.csptCurr(i) - expected.csptCurr(i)) > threshold) {
       is_same = false;
@@ -209,14 +209,28 @@ void checkShuntPerf(const vrfb::shuntcur::scl::SCLReport& expected, const vrfb::
 // namespace <GLOBAL>
 
 
-TEST(vrfbSC, addStackLoops5C5S) {
+
+
+
+
+
+
+
+/*
+********************************************************************************
+**    SCL tests
+********************************************************************************
+*/
+
+
+TEST(vrfbShuntCurrSCL, addStackLoops) {
   Eigen::MatrixXd actual = Eigen::Matrix<double, 81, 81>::Zero();
   vrfb::shuntcur::addStackLoops(actual, shunttest::kTestSysParam);
   checkMatrix(shunttest::kExCurMat_5S, actual);
 }
 
 
-TEST(vrfbSC, addConnLoops5C5SFF) {
+TEST(vrfbShuntCurrSCL, addConnLoopsFF) {
   Eigen::MatrixXd actual = Eigen::Matrix<double, 97, 97>::Zero();
   vrfb::shuntcur::addStackLoops(actual, shunttest::kTestSysParam);
   vrfb::shuntcur::scl::addConnLoops
@@ -226,7 +240,7 @@ TEST(vrfbSC, addConnLoops5C5SFF) {
 }
 
 
-TEST(vrfbSC, addConnLoops5C5SFB) {
+TEST(vrfbShuntCurrSCL, addConnLoopsFB) {
   Eigen::MatrixXd actual = Eigen::Matrix<double, 97, 97>::Zero();
   vrfb::shuntcur::addStackLoops(actual, shunttest::kTestSysParam);
   vrfb::shuntcur::scl::addConnLoops
@@ -236,14 +250,14 @@ TEST(vrfbSC, addConnLoops5C5SFB) {
 }
 
 
-TEST(vrfbSC, addSysVolt) {
+TEST(vrfbShuntCurrSCL, addSysVolt) {
   Eigen::VectorXd actual = Eigen::Vector<double, 97>::Zero();
   vrfb::shuntcur::scl::addSysVolt(actual, shunttest::kTestSysParam, shunttest::kTestChgVolt);
   checkMatrix(shunttest::kExVoltVec_5S_Sys_FF, actual);
 }
 
 
-TEST(vrfbSC, calculateFF) {
+TEST(vrfbShuntCurrSCL, calculateFF) {
   vrfb::shuntcur::scl::SCLCalc calc {
       shunttest::kTestSysParam,
       vrfb::shuntcur::scl::SCLCalc::ConnType::ctFF};
@@ -252,7 +266,7 @@ TEST(vrfbSC, calculateFF) {
 }
 
 
-TEST(vrfbSC, calculateFB) {
+TEST(vrfbShuntCurrSCL, calculateFB) {
   vrfb::shuntcur::scl::SCLCalc calc {
       shunttest::kTestSysParam,
       vrfb::shuntcur::scl::SCLCalc::ConnType::ctFB};
@@ -261,31 +275,45 @@ TEST(vrfbSC, calculateFB) {
 }
 
 
-TEST(vrfbSC, addStackLoops5C3S3P) {
+
+
+
+
+
+
+
+/*
+********************************************************************************
+**    PCC tests
+********************************************************************************
+*/
+
+
+TEST(vrfbShuntCurrPCC, addStackLoops) {
   Eigen::MatrixXd actual = Eigen::MatrixXd::Zero(147, 147);
   vrfb::shuntcur::addStackLoops(actual, shunttest_pcc::kTestSysParam);
-  checkMatrix(shunttest_pcc::kResistMat_NoConn, actual);
+  checkMatrix(shunttest_pcc::kExResistMat_NoConn, actual);
 }
 
 
-TEST(vrfbSC, addConnLoops5C3S3PFB) {
+TEST(vrfbShuntCurrPCC, addConnLoopsFB) {
   Eigen::MatrixXd actual = Eigen::MatrixXd::Zero(171, 171);
   vrfb::shuntcur::addStackLoops(actual, shunttest_pcc::kTestSysParam);
   vrfb::shuntcur::pcc::addConnLoops
       <vrfb::shuntcur::pcc::ConnSide::csFront, vrfb::shuntcur::pcc::ConnSide::csBack>(
           actual, shunttest_pcc::kTestSysParam);
-  checkMatrix(shunttest_pcc::kResistMat_WithConn, actual);
+  checkMatrix(shunttest_pcc::kExResistMat_WithConn, actual);
 }
 
 
-TEST(vrfbSC, addSysVoltPCC) {
+TEST(vrfbShuntCurrPCC, addVolt) {
   Eigen::VectorXd actual = Eigen::VectorXd::Zero(171);
   vrfb::shuntcur::pcc::addVolt(actual, shunttest_pcc::kTestSysParam, shunttest_pcc::kTestChgVolt);
-  checkMatrix(shunttest_pcc::kVoltVector, actual);
+  checkMatrix(shunttest_pcc::kExVoltVector, actual);
 }
 
 
-TEST(vrfbSC, calculatePCCFB) {
+TEST(vrfbShuntCurrPCC, calculateFB) {
   vrfb::shuntcur::pcc::PCCCalc calc {
       shunttest_pcc::kTestSysParam,
       vrfb::shuntcur::pcc::PCCCalc::ConnType::ctFB};
