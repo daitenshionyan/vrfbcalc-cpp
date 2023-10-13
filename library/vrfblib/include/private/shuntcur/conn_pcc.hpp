@@ -302,9 +302,10 @@ void addConnLoops<ConnSide::csFront, ConnSide::csBack>(Eigen::MatrixXd& m, const
         // :::: [ CONTRI TO SELF ] ::::
         for (std::size_t i = 0; i < s.numLines(); ++i) {
           double connR = 2*fullConnShuntR + s.connMainManiR();
-          double otherR = fullConnShuntR + s.stackShuntR() + s.connSubShuntR();
+          double otherR = fullConnShuntR;
           if (i == li) {
             connR += stackR;
+            otherR += s.stackShuntR() + s.connSubShuntR();
           } else if (i > li) {
             connR -= (i-li) * 2*s.connSubManiR();
             otherR -= (i-li) * s.connSubManiR();
@@ -381,9 +382,10 @@ void addConnLoops<ConnSide::csFront, ConnSide::csBack>(Eigen::MatrixXd& m, const
         // :::: [ CONTRI TO SELF ] ::::
         for (std::size_t i = 0; i < s.numLines(); ++i) {
           double connR = 2*fullConnShuntR + s.connMainManiR();
-          double otherR = fullConnShuntR + s.stackShuntR() + s.connSubShuntR();
+          double otherR = fullConnShuntR;
           if (i == li) {
             connR += stackR;
+            otherR += s.stackShuntR() + s.connSubShuntR();
           } else if (i > li) {
             connR -= (i-li) * 2*s.connSubManiR();
             otherR -= (i-li) * s.connSubManiR();
