@@ -739,26 +739,30 @@ class PCCReport : public ShuntReportData {
 
   public: // ~~~~ accessors ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     std::size_t numLines() const override {return sys.numLines();}
-    virtual std::size_t numStacks() const override {return sys.numStacks();};
-    virtual std::size_t numCells() const override {return sys.numCells();}
+    std::size_t numStacks() const override {return sys.numStacks();};
+    std::size_t numCells() const override {return sys.numCells();}
 
-    virtual double asr() const override {return sys.asr();}
-    virtual double cellArea() const override {return sys.cellArea();}
-    virtual double resistivity() const override {return sys.resistivity();}
-    virtual double stackShuntLen() const override {return sys.stackShuntLen();}
-    virtual double stackShuntArea() const override {return sys.stackShuntArea();}
-    virtual double stackManiLen() const override {return sys.stackManiLen();}
-    virtual double stackManiArea() const override {return sys.stackManiArea();}
+    double asr() const override {return sys.asr();}
+    double cellArea() const override {return sys.cellArea();}
+    double resistivity() const override {return sys.resistivity();}
+    double stackShuntLen() const override {return sys.stackShuntLen();}
+    double stackShuntArea() const override {return sys.stackShuntArea();}
+    double stackManiLen() const override {return sys.stackManiLen();}
+    double stackManiArea() const override {return sys.stackManiArea();}
 
-    virtual double chargingCurr() const override {return chgCurr;}
-    virtual double chargingVolt() const override {return chgVolt;}
-    virtual double chargingPowr() const override {return chgCurr*chgVolt;}
+    double chargingCurr() const override {return chgCurr;}
+    double chargingVolt() const override {return chgVolt;}
+    double chargingPowr() const override {return chgCurr*chgVolt;}
 
-    virtual const std::vector<double>& cellCurrs() const override {return cell_currs;}
-    virtual const std::vector<double>& cellPowrs() const override {return cell_powrs;}
-    virtual double cellCurr(std::size_t i) const override {return cell_currs.at(i);}
-    virtual double cellPowr(std::size_t i) const override {return cell_powrs.at(i);}
-    virtual double storedPowr() const override {return totPowr;}
+    const std::vector<double>& cellCurrs() const override {return cell_currs;}
+    const std::vector<double>& cellPowrs() const override {return cell_powrs;}
+    double cellCurr(std::size_t i) const override {return cell_currs.at(i);}
+    double cellPowr(std::size_t i) const override {return cell_powrs.at(i);}
+    double storedPowr() const override {return totPowr;}
+
+
+  public:
+    PCCReport* copy() const override {return new PCCReport(*this);}
 
 
   private: // ~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

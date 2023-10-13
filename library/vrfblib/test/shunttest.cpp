@@ -283,3 +283,13 @@ TEST(vrfbSC, addSysVoltPCC) {
   vrfb::shuntcur::pcc::addVolt(actual, shunttest_pcc::kTestSysParam, shunttest_pcc::kTestChgVolt);
   checkMatrix(shunttest_pcc::kVoltVector, actual);
 }
+
+
+TEST(vrfbSC, calculatePCCFB) {
+  vrfb::shuntcur::pcc::PCCCalc calc {
+      shunttest_pcc::kTestSysParam,
+      vrfb::shuntcur::pcc::PCCCalc::ConnType::ctFB};
+  auto actual = calc.calculate(shunttest_pcc::kTestChgVolt);
+
+  FAIL() << actual.data<vrfb::shuntcur::pcc::PCCReport>().chargingCurr();
+}

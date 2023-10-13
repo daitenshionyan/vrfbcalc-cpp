@@ -73,6 +73,10 @@ void addConnLoops(Eigen::MatrixXd& m, const PCCSysParam& s);
 void addVolt(Eigen::VectorXd& v, const PCCSysParam& s, double chgVolt);
 
 
+template<ConnSide PS, ConnSide NS>
+PCCReport* calculate_pcc(const PCCSysParam& s, double chgVolt);
+
+
 
 
 
@@ -298,7 +302,7 @@ void addConnLoops<ConnSide::csFront, ConnSide::csBack>(Eigen::MatrixXd& m, const
         // :::: [ CONTRI TO SELF ] ::::
         for (std::size_t i = 0; i < s.numLines(); ++i) {
           double connR = 2*fullConnShuntR + s.connMainManiR();
-          double otherR = fullConnShuntR;
+          double otherR = fullConnShuntR + s.stackShuntR() + s.connSubShuntR();
           if (i == li) {
             connR += stackR;
           } else if (i > li) {
@@ -377,7 +381,7 @@ void addConnLoops<ConnSide::csFront, ConnSide::csBack>(Eigen::MatrixXd& m, const
         // :::: [ CONTRI TO SELF ] ::::
         for (std::size_t i = 0; i < s.numLines(); ++i) {
           double connR = 2*fullConnShuntR + s.connMainManiR();
-          double otherR = fullConnShuntR;
+          double otherR = fullConnShuntR + s.stackShuntR() + s.connSubShuntR();
           if (i == li) {
             connR += stackR;
           } else if (i > li) {
@@ -557,6 +561,46 @@ void addVolt(Eigen::VectorXd& v, const PCCSysParam& s, double chgVolt) {
       }
     }
   }
+}
+
+
+
+
+
+
+
+
+/*
+********************************************************************************
+**    calculate Definitions
+********************************************************************************
+*/
+
+
+template<ConnSide PS, ConnSide NS>
+PCCReport* calculate_pcc(const PCCSysParam& s, double chgVolt) {
+  std::size_t size = matSize(s);
+  Eigen::MatrixXd rm = Eigen::MatrixXd::Zero(size, size);     // Resistance matrix
+  addStackLoops(rm, s);
+  addConnLoops<PS, NS>(rm, s);
+  Eigen::VectorXd vv = Eigen::VectorXd::Zero(size);           // Voltage vector
+  addVolt(vv, s, chgVolt);
+  Eigen::VectorXd cv = rm.colPivHouseholderQr().solve(vv);    // Current vector
+
+  double chgCurr = 0;
+  std::vector<double> clist {};
+  for (std::size_t li = 0; li < s.numLines(); ++li) {
+    chgCurr += cv(li);
+    for (std::size_t si = 0; si < s.numStacks(); ++si) {
+      for (std::size_t ci = 0; ci < s.numCells(); ++ci) {
+        clist.push_back(0);
+      }
+    }
+  }
+
+  double error = ((rm*cv) - vv).norm();
+
+  return new PCCReport(chgCurr, chgVolt, s, std::move(clist), error);
 }
 
 

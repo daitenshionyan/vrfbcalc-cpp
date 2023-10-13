@@ -6,6 +6,7 @@
 
 #include "shuntcur/shuntcur.hpp"
 #include "shuntcur/conn_scl.hpp"
+#include "shuntcur/conn_pcc.hpp"
 
 
 namespace vrfb {
@@ -177,7 +178,7 @@ PCCReport::PCCReport(double cc, double cv, const PCCSysParam& s,
       : chgCurr{cc}, chgVolt{cv}, sys{s},
         cell_currs{clist},
         error{err} {
-  for (std::size_t i = 0; cell_currs.size(); ++i) {
+  for (std::size_t i = 0; i < cell_currs.size(); ++i) {
     double cellInPowr = cell_currs[i]*kAvrOCV;
     if (s.cellArea()*s.maxChgDen() < cell_currs[i]) {
       cellInPowr = s.cellArea()*s.maxChgDen() * kAvrOCV;
@@ -195,7 +196,7 @@ PCCReport::PCCReport(double cc, double cv, const PCCSysParam& s,
       : chgCurr{cc}, chgVolt{cv}, sys{s},
       cell_currs{std::move(clist)},
       error{err} {
-  for (std::size_t i = 0; cell_currs.size(); ++i) {
+  for (std::size_t i = 0; i < cell_currs.size(); ++i) {
     double cellInPowr = cell_currs[i]*kAvrOCV;
     if (s.cellArea()*s.maxChgDen() < cell_currs[i]) {
       cellInPowr = s.cellArea()*s.maxChgDen() * kAvrOCV;
@@ -203,6 +204,16 @@ PCCReport::PCCReport(double cc, double cv, const PCCSysParam& s,
     cell_powrs.push_back(cellInPowr);
     totPowr += cellInPowr;
     ovpLoss += cell_currs[i]*kAvrOCV - cellInPowr;
+  }
+}
+
+
+ShuntReport PCCCalc::calculate(double chgVolt) const {
+  switch (connType) {
+    case ConnType::ctFB:
+      return calculate_pcc<ConnSide::csFront, ConnSide::csBack>(sys, chgVolt);
+    default:
+      throw std::runtime_error("Unknown connection type");
   }
 }
 
