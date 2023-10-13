@@ -262,14 +262,14 @@ TEST(vrfbSC, calculateFB) {
 
 
 TEST(vrfbSC, addStackLoops5C3S3P) {
-  Eigen::MatrixXd actual = Eigen::MatrixXd::Zero(149, 149);
+  Eigen::MatrixXd actual = Eigen::MatrixXd::Zero(147, 147);
   vrfb::shuntcur::addStackLoops(actual, shunttest_pcc::kTestSysParam);
   checkMatrix(shunttest_pcc::kResistMat_NoConn, actual);
 }
 
 
 TEST(vrfbSC, addConnLoops5C3S3PFB) {
-  Eigen::MatrixXd actual = Eigen::MatrixXd::Zero(173, 173);
+  Eigen::MatrixXd actual = Eigen::MatrixXd::Zero(171, 171);
   vrfb::shuntcur::addStackLoops(actual, shunttest_pcc::kTestSysParam);
   vrfb::shuntcur::pcc::addConnLoops
       <vrfb::shuntcur::pcc::ConnSide::csFront, vrfb::shuntcur::pcc::ConnSide::csBack>(
@@ -279,7 +279,7 @@ TEST(vrfbSC, addConnLoops5C3S3PFB) {
 
 
 TEST(vrfbSC, addSysVoltPCC) {
-  Eigen::VectorXd actual = Eigen::VectorXd::Zero(173);
+  Eigen::VectorXd actual = Eigen::VectorXd::Zero(171);
   vrfb::shuntcur::pcc::addVolt(actual, shunttest_pcc::kTestSysParam, shunttest_pcc::kTestChgVolt);
   checkMatrix(shunttest_pcc::kVoltVector, actual);
 }

@@ -126,13 +126,6 @@ inline Eigen::Index indexSNB(const SysParam& s,
 }
 
 
-inline Eigen::Index indexPLoop(const SysParam& s, std::size_t li) {
-  return s.numLines()
-      + 4*s.numLines()*s.numStacks()*(s.numCells() - 1)
-      + li;
-}
-
-
 
 
 
@@ -454,26 +447,7 @@ double getStackContri_SSNB(const Eigen::VectorXd& cv, const SysParam& s,
 
 void addStackLoops(Eigen::MatrixXd& m, const SysParam& s) {
   for (std::size_t li = 0; li < s.numLines(); ++li) {
-    Eigen::Index pli = indexPLoop(s, li);
-
     m(li, li) += s.numCells() * s.numStacks() * s.cellR();
-    if (li+1 < s.numLines()) {
-      if (li > 0) {
-        // previus parallel loop
-        m(pli, pli-1) -= s.numCells() * s.numStacks() * s.cellR();
-      }
-      // line to parallel loops
-      m(li, pli) += s.numCells() * s.numStacks() * s.cellR();
-      m(pli, li) += s.numCells() * s.numStacks() * s.cellR();
-      m(li+1, pli) -= s.numCells() * s.numStacks() * s.cellR();
-      m(pli, li+1) -= s.numCells() * s.numStacks() * s.cellR();
-      // current parallel loop
-      m(pli, pli) +=  2 * s.numCells() * s.numStacks() * s.cellR();
-      if (li+2 < s.numLines()) {
-        // next parallel loop
-        m(pli, pli+1) -= s.numCells() * s.numStacks() * s.cellR();
-      }
-    }
 
     for (std::size_t si = 0; si < s.numStacks(); ++si) {
       for (std::size_t ci = 0; ci < s.numCells(); ++ci) {
@@ -510,20 +484,6 @@ void addStackLoops(Eigen::MatrixXd& m, const SysParam& s) {
             m(pti, pti+1) -= s.stackShuntR();
             m(pbi, pbi+1) -= s.stackShuntR();
           }
-          if (li+1 < s.numLines()) {
-            // current parallel loop
-            m(pti, pli) += s.cellR();
-            m(pli, pti) += s.cellR();
-            m(pbi, pli) += s.cellR();
-            m(pli, pbi) += s.cellR();
-          }
-          if (li > 0) {
-            // previous parallel loop
-            m(pti, pli-1) -= s.cellR();
-            m(pli-1, pti) -= s.cellR();
-            m(pbi, pli-1) -= s.cellR();
-            m(pli-1, pbi) -= s.cellR();
-          }
         }
 
         // :::: [ NEGATIVE LOOPS ] ::::
@@ -553,20 +513,6 @@ void addStackLoops(Eigen::MatrixXd& m, const SysParam& s) {
             m(nti, pbi) += s.cellR();
             m(nbi, pti) += s.cellR();
             m(nbi, pbi) += s.cellR();
-          }
-          if (li+1 < s.numLines()) {
-            // current parallel loop
-            m(nti, pli) += s.cellR();
-            m(pli, nti) += s.cellR();
-            m(nbi, pli) += s.cellR();
-            m(pli, nbi) += s.cellR();
-          }
-          if (li > 0) {
-            // previous parallel loop
-            m(nti, pli-1) -= s.cellR();
-            m(pli-1, nti) -= s.cellR();
-            m(nbi, pli-1) -= s.cellR();
-            m(pli-1, nbi) -= s.cellR();
           }
         }
       }

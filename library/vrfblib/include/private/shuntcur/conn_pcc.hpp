@@ -41,7 +41,7 @@ enum class ConnSide {
  * @param s System parameters.
 */
 inline std::size_t matSize(const SysParam& s) {
-  return 2 * s.numLines() - 1
+  return s.numLines()
       + 4 * s.numLines() * s.numStacks() * (s.numCells() -1)
       + 4 * s.numLines() * (s.numStacks() - 1);
 }
@@ -183,7 +183,7 @@ namespace pcc {
 template<>
 inline Eigen::Index indexCPT<ConnSide::csFront>(const SysParam& s,
       std::size_t si, std::size_t li) {
-  return 2*s.numLines() - 1
+  return s.numLines()
       + 4*s.numLines()*s.numStacks()*(s.numCells() - 1)
       + li*(s.numStacks() - 1)
       + si - 1;
@@ -196,7 +196,7 @@ inline Eigen::Index indexCPT<ConnSide::csFront>(const SysParam& s,
 template<>
 inline Eigen::Index indexCPB<ConnSide::csFront>(const SysParam& s,
       std::size_t si, std::size_t li) {
-  return 2*s.numLines() - 1
+  return s.numLines()
       + 4*s.numLines()*s.numStacks()*(s.numCells() - 1)
       + s.numLines()*(s.numStacks() - 1)
       + li*(s.numStacks() - 1)
@@ -210,7 +210,7 @@ inline Eigen::Index indexCPB<ConnSide::csFront>(const SysParam& s,
 template<>
 inline Eigen::Index indexCNT<ConnSide::csBack>(const SysParam& s,
       std::size_t si, std::size_t li) {
-  return 2*s.numLines() - 1
+  return s.numLines()
       + 4*s.numLines()*s.numStacks()*(s.numCells() - 1)
       + 2*s.numLines()*(s.numStacks() - 1)
       + li*(s.numStacks() - 1)
@@ -224,7 +224,7 @@ inline Eigen::Index indexCNT<ConnSide::csBack>(const SysParam& s,
 template<>
 inline Eigen::Index indexCNB<ConnSide::csBack>(const SysParam& s,
       std::size_t si, std::size_t li) {
-  return 2*s.numLines() - 1
+  return s.numLines()
       + 4*s.numLines()*s.numStacks()*(s.numCells() - 1)
       + 3*s.numLines()*(s.numStacks() - 1)
       + li*(s.numStacks() - 1)
@@ -250,7 +250,6 @@ void addConnLoops<ConnSide::csFront, ConnSide::csBack>(Eigen::MatrixXd& m, const
   double stackR = s.numCells()*s.cellR() + 2*s.stackShuntR() + 2*s.connSubShuntR();
 
   for (std::size_t li = 0; li < s.numLines(); ++li) {
-    Eigen::Index pli = indexPLoop(s, li);
     double fullConnShuntR = (s.numLines()-li-1)*s.connSubManiR() + s.connMainShuntR();
 
     for (std::size_t si = 0; si < s.numStacks(); ++ si) {
@@ -321,22 +320,6 @@ void addConnLoops<ConnSide::csFront, ConnSide::csBack>(Eigen::MatrixXd& m, const
             m(cnbi, indexCNB<ConnSide::csBack>(s, si, i)+1) -= otherR;
           }
         }
-
-        // :::: [ CONTRIBUTION TO PARALLEL LOOPS ] ::::
-        if (li+1 < s.numLines()) {
-          // current parallel loop
-          m(cpti, pli) += s.numCells() * s.cellR();
-          m(pli, cpti) += s.numCells() * s.cellR();
-          m(cnbi, pli) += s.numCells() * s.cellR();
-          m(pli, cnbi) += s.numCells() * s.cellR();
-        }
-        if (li > 0) {
-          // previous parallel loop
-          m(cpti, pli-1) -= s.numCells() * s.cellR();
-          m(pli-1, cpti) -= s.numCells() * s.cellR();
-          m(cnbi, pli-1) -= s.numCells() * s.cellR();
-          m(pli-1, cnbi) -= s.numCells() * s.cellR();
-        }
       }
 
       if (si+1 < s.numStacks()) {
@@ -400,22 +383,6 @@ void addConnLoops<ConnSide::csFront, ConnSide::csBack>(Eigen::MatrixXd& m, const
             m(cpbi, indexCPB<ConnSide::csFront>(s, si, i)+1) -= otherR;
             m(cnti, indexCNT<ConnSide::csBack>(s, si, i)+1) -= otherR;
           }
-        }
-
-        // :::: [ CONTRIBUTION TO PARALLEL LOOPS ] ::::
-        if (li+1 < s.numLines()) {
-          // current parallel loop
-          m(cpbi, pli) += s.numCells() * s.cellR();
-          m(pli, cpbi) += s.numCells() * s.cellR();
-          m(cnti, pli) += s.numCells() * s.cellR();
-          m(pli, cnti) += s.numCells() * s.cellR();
-        }
-        if (li > 0) {
-          // previous parallel loop
-          m(cpbi, pli-1) -= s.numCells() * s.cellR();
-          m(pli-1, cpbi) -= s.numCells() * s.cellR();
-          m(cnti, pli-1) -= s.numCells() * s.cellR();
-          m(pli-1, cnti) -= s.numCells() * s.cellR();
         }
       }
 
