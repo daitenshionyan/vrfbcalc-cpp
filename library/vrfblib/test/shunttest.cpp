@@ -205,6 +205,36 @@ void checkShuntPerf(const vrfb::shuntcur::scl::SCLReport& expected, const vrfb::
 }
 
 
+void checkShuntPerf(const vrfb::shuntcur::pcc::PCCReport& expected, const vrfb::shuntcur::pcc::PCCReport& actual) {
+  bool is_same_size = expected.totCells() == actual.totCells();
+  ASSERT_TRUE(is_same_size) << "Wrong size"
+      << " - Expected size: " << expected.totCells()
+      << " | Actual size: " << actual.totCells();
+
+  bool is_same = true;
+  std::stringstream miscdiff {};
+  if (std::abs(actual.chargingCurr() - expected.chargingCurr()) > threshold) {
+    is_same = false;
+    miscdiff << "Charging current"
+        << " - Expected: " << expected.chargingCurr()
+        << " | Actual: " << actual.chargingCurr() << "\n";
+  }
+  std::stringstream celldiff {};
+  for (std::size_t i = 0; i < expected.totCells(); ++i) {
+    // STACK :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+    if (std::abs(actual.cellCurr(i) - expected.cellCurr(i)) > threshold) {
+      is_same = false;
+      celldiff << "At (" << i << ")"
+        << " - Expected: " <<  expected.cellCurr(i)
+        << " | Actual: " << actual.cellCurr(i) << "\n";
+    }
+  }
+  ASSERT_TRUE(is_same)
+      << miscdiff.str()
+      << "Cell Difference:\n" << celldiff.str();
+}
+
+
 } // ---- namespace <UNNAMED>
 // namespace <GLOBAL>
 
@@ -318,6 +348,5 @@ TEST(vrfbShuntCurrPCC, calculateFB) {
       shunttest_pcc::kTestSysParam,
       vrfb::shuntcur::pcc::PCCCalc::ConnType::ctFB};
   auto actual = calc.calculate(shunttest_pcc::kTestChgVolt);
-
-  FAIL() << actual.data<vrfb::shuntcur::pcc::PCCReport>().chargingCurr();
+  checkShuntPerf(shunttest_pcc::kExReport, actual.data<vrfb::shuntcur::pcc::PCCReport>());
 }

@@ -110,6 +110,51 @@ Eigen::Index indexCNB(const SysParam& s,
       std::size_t si, std::size_t li);
 
 
+
+
+
+
+
+
+/*
+********************************************************************************
+**    Current calculation functions for CELL
+********************************************************************************
+*/
+
+
+/**
+ * Returns the POSITIVE CONNECTOR current contribution to the specified cell,
+ * given the calculated current vector.
+ *
+ * @param <Side> Inlet connection side.
+ * @param cv Current vector.
+ * @param s System parameters.
+ * @param ci Cell index within stack.
+ * @param si Stack index within line.
+ * @param li Line index.
+*/
+template<ConnSide Side>
+double getPosConnContri_Cell(const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t ci, std::size_t si, std::size_t li);
+
+
+/**
+ * Returns the NEGATIVE CONNECTOR current contribution to the specified cell,
+ * given the calculated current vector.
+ *
+ * @param <Side> Inlet connection side.
+ * @param cv Current vector.
+ * @param s System parameters.
+ * @param ci Cell index within stack.
+ * @param si Stack index within line.
+ * @param li Line index.
+*/
+template<ConnSide Side>
+double getNegConnContri_Cell(const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t ci, std::size_t si, std::size_t li);
+
+
 }
 }
 }
@@ -229,6 +274,62 @@ inline Eigen::Index indexCNB<ConnSide::csBack>(const SysParam& s,
       + 3*s.numLines()*(s.numStacks() - 1)
       + li*(s.numStacks() - 1)
       + si - 1;
+}
+
+
+
+
+
+
+
+
+/*
+********************************************************************************
+**    Current calculation functions for CELL
+********************************************************************************
+*/
+
+
+// :::: [ POSITIVE CONNECTOR ] :::::::::::::::::::::::::::::::::::::::::::::::::
+
+
+template<>
+double getPosConnContri_Cell<ConnSide::csFront>(
+      const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t ci, std::size_t si, std::size_t li) {
+  double result = 0;
+  if (si > 0 && ci+1 < s.numCells()) {
+    result += cv(indexCPT<ConnSide::csFront>(s, si, li));
+  } else if (si+1 < s.numStacks() && ci+1 == s.numCells()) {
+    result += cv(indexCPT<ConnSide::csFront>(s, si, li) + 1);
+  }
+  if (si+1 < s.numStacks()) {
+    result += cv(indexCPB<ConnSide::csFront>(s, si, li));
+  }
+  return result;
+}
+
+
+// TODO: getPosConnContri_Cell<ConnSide::csBack>
+
+
+// :::: [ POSITIVE CONNECTOR ] :::::::::::::::::::::::::::::::::::::::::::::::::
+
+
+template<>
+double getNegConnContri_Cell<ConnSide::csBack>(
+      const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t ci, std::size_t si, std::size_t li) {
+  double result = 0;
+  if (si+1 < s.numStacks() && ci > 0) {
+    result += cv(indexCNT<ConnSide::csBack>(s, si, li));
+  } else if (si > 0 && ci == 0) {
+    result += cv(indexCNT<ConnSide::csBack>(s, si, li) - 1);
+  }
+  if (si > 0) {
+    result += cv(indexCNB<ConnSide::csBack>(s, si, li));
+  }
+  return result;
 }
 
 
@@ -562,7 +663,10 @@ PCCReport* calculate_pcc(const PCCSysParam& s, double chgVolt) {
     chgCurr += cv(li);
     for (std::size_t si = 0; si < s.numStacks(); ++si) {
       for (std::size_t ci = 0; ci < s.numCells(); ++ci) {
-        clist.push_back(0);
+        clist.push_back(cv(li)
+            + getStackContri_Cell(cv, s, ci, si, li)
+            + getPosConnContri_Cell<PS>(cv, s, ci, si, li)
+            + getNegConnContri_Cell<NS>(cv, s, ci, si, li));
       }
     }
   }

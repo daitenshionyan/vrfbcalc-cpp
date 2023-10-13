@@ -338,19 +338,6 @@ namespace vrfb {
 namespace shuntcur {
 
 
-namespace {
-
-
-} // NAMESPACE vrfb::shuntcur::UNNAMED
-
-
-
-
-
-
-
-
-
 /*
 ********************************************************************************
 **    Current calculation functions for CELL
