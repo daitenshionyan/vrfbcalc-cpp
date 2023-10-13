@@ -61,6 +61,18 @@ template<ConnSide PS, ConnSide NS>
 void addConnLoops(Eigen::MatrixXd& m, const PCCSysParam& s);
 
 
+/**
+ * Adds the voltage of each loop for a PCC system to the corresponding indexes
+ * of the given vector. The vector will have to have a size of at least N where
+ * `N = pcc::matSize(s)`
+ *
+ * @param v Voltage vector to add voltage coefficients to.
+ * @param s System parameters.
+ * @param chgVolt Charging voltage.
+*/
+void addVolt(Eigen::VectorXd& v, const PCCSysParam& s, double chgVolt);
+
+
 
 
 
@@ -227,18 +239,6 @@ inline Eigen::Index indexCNB<ConnSide::csBack>(const SysParam& s,
 **    addConnLoops Definitions
 ********************************************************************************
 */
-
-
-namespace {
-
-
-void addConn(Eigen::MatrixXd& m, const PCCSysParam& s,
-      std::size_t si, std::size_t li) {
-
-}
-
-
-}
 
 
 template<>
@@ -509,6 +509,50 @@ void addConnLoops<ConnSide::csFront, ConnSide::csBack>(Eigen::MatrixXd& m, const
               m(cnti, snti+1) -= s.stackShuntR();
             }
           }
+        }
+      }
+    }
+  }
+}
+
+
+
+
+
+
+
+
+/*
+********************************************************************************
+**    addVolt Definitions
+********************************************************************************
+*/
+
+
+void addVolt(Eigen::VectorXd& v, const PCCSysParam& s, double chgVolt) {
+  for (std::size_t li = 0; li < s.numLines(); ++li) {
+    // line loops
+    v(li) += chgVolt - s.numStacks()*s.numCells()*kAvrOCV;
+    for (std::size_t si = 0; si < s.numStacks(); ++si) {
+      // connector loops
+      if (si > 0) {
+        v(indexCPT<ConnSide::csFront>(s, si, li)) -= s.numCells()*kAvrOCV;
+        v(indexCNB<ConnSide::csBack>(s, si, li)) -= s.numCells()*kAvrOCV;
+      }
+      if (si+1 < s.numStacks()) {
+        v(indexCPB<ConnSide::csFront>(s, si, li)) -= s.numCells()*kAvrOCV;
+        v(indexCNT<ConnSide::csBack>(s, si, li)) -= s.numCells()*kAvrOCV;
+      }
+      for (std::size_t ci = 0; ci < s.numCells(); ++ci) {
+        if (ci+1 < s.numCells()) {
+          // positive cell loops
+          v(indexSPT(s, ci, si, li)) -= kAvrOCV;
+          v(indexSPB(s, ci, si, li)) -= kAvrOCV;
+        }
+        if (ci > 0) {
+          // negative cell loops
+          v(indexSNT(s, ci, si, li)) -= kAvrOCV;
+          v(indexSNB(s, ci, si, li)) -= kAvrOCV;
         }
       }
     }

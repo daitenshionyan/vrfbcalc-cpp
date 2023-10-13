@@ -276,3 +276,10 @@ TEST(vrfbSC, addConnLoops5C3S3PFB) {
           actual, shunttest_pcc::kTestSysParam);
   checkMatrix(shunttest_pcc::kResistMat_WithConn, actual);
 }
+
+
+TEST(vrfbSC, addSysVoltPCC) {
+  Eigen::VectorXd actual = Eigen::VectorXd::Zero(173);
+  vrfb::shuntcur::pcc::addVolt(actual, shunttest_pcc::kTestSysParam, shunttest_pcc::kTestChgVolt);
+  checkMatrix(shunttest_pcc::kVoltVector, actual);
+}
