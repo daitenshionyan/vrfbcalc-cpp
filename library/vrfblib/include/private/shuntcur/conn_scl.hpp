@@ -432,6 +432,47 @@ double getCurrCMNB(const Eigen::VectorXd& cv,
       std::size_t num_s, std::size_t num_c);
 
 
+
+
+
+
+
+
+/*
+********************************************************************************
+**    Arrangement name getter
+********************************************************************************
+*/
+
+
+template<ConnSide PS, ConnSide NS>
+std::string getArrName();
+
+
+template<>
+std::string getArrName<ConnSide::csFront, ConnSide::csFront>() {
+  return "SCL FF";
+}
+
+
+template<>
+std::string getArrName<ConnSide::csFront, ConnSide::csBack>() {
+  return "SCL FB";
+}
+
+
+template<>
+std::string getArrName<ConnSide::csBack, ConnSide::csFront>() {
+  return "SCL BF";
+}
+
+
+template<>
+std::string getArrName<ConnSide::csBack, ConnSide::csBack>() {
+  return "SCL BB";
+}
+
+
 }
 }
 }
@@ -1530,7 +1571,7 @@ inline SCLReport* commLineCalc(const SCLSysParam& s, double chgVolt) {
       std::move(mptlist), std::move(mpblist), std::move(mntlist), std::move(mnblist),
       std::move(csptlist), std::move(cspblist), std::move(csntlist), std::move(csnblist),
       std::move(cmptlist), std::move(cmpblist), std::move(cmntlist), std::move(cmnblist),
-      error);
+      error, getArrName<PS, NS>());
 }
 
 

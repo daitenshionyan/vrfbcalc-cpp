@@ -121,6 +121,17 @@ QPlainTextEdit {
 
 
 
+QComboBox {
+    background-color: #303340;
+	border-color: #606680;
+	border-radius: 5px;
+	border-style: solid;
+	border-width: 1.5px;
+}
+
+
+
+
 QPushButton {
 	border-radius: 5px;
 	background-color: #4C4E5C;

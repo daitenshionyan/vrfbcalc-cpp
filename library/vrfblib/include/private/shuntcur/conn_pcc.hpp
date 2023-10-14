@@ -188,6 +188,47 @@ double getConnContri_SSNB(const Eigen::VectorXd& cv, const SysParam& s,
       std::size_t ci, std::size_t si, std::size_t li);
 
 
+
+
+
+
+
+
+/*
+********************************************************************************
+**    Arrangement name getter
+********************************************************************************
+*/
+
+
+template<ConnSide PS, ConnSide NS>
+std::string getArrName();
+
+
+template<>
+std::string getArrName<ConnSide::csFront, ConnSide::csFront>() {
+  return "PCC FF";
+}
+
+
+template<>
+std::string getArrName<ConnSide::csFront, ConnSide::csBack>() {
+  return "PCC FB";
+}
+
+
+template<>
+std::string getArrName<ConnSide::csBack, ConnSide::csFront>() {
+  return "PCC BF";
+}
+
+
+template<>
+std::string getArrName<ConnSide::csBack, ConnSide::csBack>() {
+  return "PCC BB";
+}
+
+
 }
 }
 }
@@ -828,7 +869,7 @@ PCCReport* calculate_pcc(const PCCSysParam& s, double chgVolt) {
       std::move(clist),
       std::move(sptlist), std::move(spblist), std::move(sntlist), std::move(snblist),
       std::move(mptlist), std::move(mpblist), std::move(mntlist), std::move(mnblist),
-      error);
+      error, getArrName<PS, NS>());
 }
 
 

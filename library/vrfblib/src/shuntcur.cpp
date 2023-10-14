@@ -49,8 +49,9 @@ SCLReport::SCLReport(double cc, double cv, const SCLSysParam& s,
       const std::vector<double>& csntlist, const std::vector<double>& csnblist,
       const std::vector<double>& cmptlist, const std::vector<double>& cmpblist,
       const std::vector<double>& cmntlist, const std::vector<double>& cmnblist,
-      double err)
-      : error{err}, chgCurr{cc}, chgVolt{cv}, sys{s},
+      double err, const std::string& an)
+      : error{err}, arrangementName{an},
+        chgCurr{cc}, chgVolt{cv}, sys{s},
         cell_currs{clist},
         spt_currs{sptlist}, spb_currs{spblist},
         snt_currs{sntlist}, snb_currs{snblist},
@@ -106,8 +107,9 @@ SCLReport::SCLReport(double cc, double cv, const SCLSysParam& s,
       std::vector<double>&& csntlist, std::vector<double>&& csnblist,
       std::vector<double>&& cmptlist, std::vector<double>&& cmpblist,
       std::vector<double>&& cmntlist, std::vector<double>&& cmnblist,
-      double err)
-      : error{err}, chgCurr{cc}, chgVolt{cv}, sys{s},
+      double err, const std::string& an)
+      : error{err}, arrangementName{an},
+        chgCurr{cc}, chgVolt{cv}, sys{s},
         cell_currs{std::move(clist)},
         spt_currs{std::move(sptlist)}, spb_currs{std::move(spblist)},
         snt_currs{std::move(sntlist)}, snb_currs{std::move(snblist)},
@@ -178,14 +180,14 @@ PCCReport::PCCReport(double cc, double cv, const PCCSysParam& s,
       const std::vector<double>& sntlist, const std::vector<double>& snblist,
       const std::vector<double>& mptlist, const std::vector<double>& mpblist,
       const std::vector<double>& mntlist, const std::vector<double>& mnblist,
-      double err)
+      double err, const std::string& an)
       : chgCurr{cc}, chgVolt{cv}, sys{s},
         cell_currs{clist},
         spt_currs{sptlist}, spb_currs{spblist},
         snt_currs{sntlist}, snb_currs{snblist},
         mpt_currs{mptlist}, mpb_currs{mpblist},
         mnt_currs{mntlist}, mnb_currs{mnblist},
-        error{err} {
+        error{err}, arrangementName{an} {
   for (std::size_t i = 0; i < cell_currs.size(); ++i) {
     double cellInPowr = cell_currs[i]*kAvrOCV;
     if (s.cellArea()*s.maxChgDen() < cell_currs[i]) {
@@ -216,14 +218,14 @@ PCCReport::PCCReport(double cc, double cv, const PCCSysParam& s,
       std::vector<double>&& sntlist, std::vector<double>&& snblist,
       std::vector<double>&& mptlist, std::vector<double>&& mpblist,
       std::vector<double>&& mntlist, std::vector<double>&& mnblist,
-      double err)
+      double err, const std::string& an)
       : chgCurr{cc}, chgVolt{cv}, sys{s},
         cell_currs{std::move(clist)},
         spt_currs{std::move(sptlist)}, spb_currs{std::move(spblist)},
         snt_currs{std::move(sntlist)}, snb_currs{std::move(snblist)},
         mpt_currs{std::move(mptlist)}, mpb_currs{std::move(mpblist)},
         mnt_currs{std::move(mntlist)}, mnb_currs{std::move(mnblist)},
-        error{err} {
+        error{err}, arrangementName{an} {
   for (std::size_t i = 0; i < cell_currs.size(); ++i) {
     double cellInPowr = cell_currs[i]*kAvrOCV;
     if (s.cellArea()*s.maxChgDen() < cell_currs[i]) {

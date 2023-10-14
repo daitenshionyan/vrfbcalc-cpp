@@ -180,18 +180,22 @@ void MainWindow::displayPerformanceView(
 
 
 void MainWindow::displayPerformanceView_SC(const vrfbdriver::ShuntRes& r) {
-  SCResultView* rv = new SCResultView(this, r.name);
-  try {
-    rv->plotGraphs(r.perf);
-  } catch (std::exception& ex) {
-    fail(comutils::string::format_string("Failed to plot graphs due to - %s",
-        ex.what()));
-    delete rv;
-    return;
+  switch (r.arrType) {
+    case vrfbdriver::SCArrType::scatSCL:
+      SCResultView* rv = new SCResultView(this, r.name);
+      try {
+        rv->plotGraphs(r.perf.data<vrfb::shuntcur::scl::SCLReport>());
+      } catch (std::exception& ex) {
+        fail(comutils::string::format_string("Failed to plot graphs due to - %s",
+            ex.what()));
+        delete rv;
+        return;
+      }
+      connect(rv, &SCResultView::exportRequested,
+          this, &MainWindow::exportSEPerformance);
+      rv->open();
+      break;
   }
-  connect(rv, &SCResultView::exportRequested,
-      this, &MainWindow::exportSEPerformance);
-  rv->open();
 }
 
 
