@@ -224,6 +224,10 @@ void checkShuntPerf(const vrfb::shuntcur::pcc::PCCReport& expected, const vrfb::
   std::stringstream spbdiff {};
   std::stringstream sntdiff {};
   std::stringstream snbdiff {};
+  std::stringstream mptdiff {};
+  std::stringstream mpbdiff {};
+  std::stringstream mntdiff {};
+  std::stringstream mnbdiff {};
   for (std::size_t i = 0; i < expected.totCells(); ++i) {
     // STACK :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
     if (std::abs(actual.cellCurr(i) - expected.cellCurr(i)) > threshold) {
@@ -257,6 +261,31 @@ void checkShuntPerf(const vrfb::shuntcur::pcc::PCCReport& expected, const vrfb::
         << " - Expected: " <<  expected.snbCurr(i)
         << " | Actual: " << actual.snbCurr(i) << "\n";
     }
+
+    if (std::abs(actual.mptCurr(i) - expected.mptCurr(i)) > threshold) {
+      is_same = false;
+      mptdiff << "At (" << i << ")"
+        << " - Expected: " <<  expected.mptCurr(i)
+        << " | Actual: " << actual.mptCurr(i) << "\n";
+    }
+    if (std::abs(actual.mpbCurr(i) - expected.mpbCurr(i)) > threshold) {
+      is_same = false;
+      mpbdiff << "At (" << i << ")"
+        << " - Expected: " <<  expected.mpbCurr(i)
+        << " | Actual: " << actual.mpbCurr(i) << "\n";
+    }
+    if (std::abs(actual.mntCurr(i) - expected.mntCurr(i)) > threshold) {
+      is_same = false;
+      mntdiff << "At (" << i << ")"
+        << " - Expected: " <<  expected.mntCurr(i)
+        << " | Actual: " << actual.mntCurr(i) << "\n";
+    }
+    if (std::abs(actual.mnbCurr(i) - expected.mnbCurr(i)) > threshold) {
+      is_same = false;
+      mnbdiff << "At (" << i << ")"
+        << " - Expected: " <<  expected.mnbCurr(i)
+        << " | Actual: " << actual.mnbCurr(i) << "\n";
+    }
   }
   ASSERT_TRUE(is_same)
       << miscdiff.str()
@@ -264,7 +293,11 @@ void checkShuntPerf(const vrfb::shuntcur::pcc::PCCReport& expected, const vrfb::
       << "SPT Difference\n" << sptdiff.str()
       << "SPB Difference\n" << spbdiff.str()
       << "SNT Difference\n" << sntdiff.str()
-      << "SNB Difference\n" << snbdiff.str();
+      << "SNB Difference\n" << snbdiff.str()
+      << "MPT Difference\n" << mptdiff.str()
+      << "MPB Difference\n" << mpbdiff.str()
+      << "MNT Difference\n" << mntdiff.str()
+      << "MNB Difference\n" << mnbdiff.str();
 }
 
 

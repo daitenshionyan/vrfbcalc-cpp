@@ -789,6 +789,10 @@ PCCReport* calculate_pcc(const PCCSysParam& s, double chgVolt) {
   std::vector<double> spblist {};
   std::vector<double> sntlist {};
   std::vector<double> snblist {};
+  std::vector<double> mptlist {};
+  std::vector<double> mpblist {};
+  std::vector<double> mntlist {};
+  std::vector<double> mnblist {};
   for (std::size_t li = 0; li < s.numLines(); ++li) {
     chgCurr += cv(li);
     for (std::size_t si = 0; si < s.numStacks(); ++si) {
@@ -810,6 +814,10 @@ PCCReport* calculate_pcc(const PCCSysParam& s, double chgVolt) {
         snblist.push_back(
               getStackContri_SSNB(cv, s, ci, si, li)
             + getConnContri_SSNB<NS>(cv, s, ci, si, li));
+        mptlist.push_back(getCurrMPT(cv, s, ci, si, li));
+        mpblist.push_back(getCurrMPB(cv, s, ci, si, li));
+        mntlist.push_back(getCurrMNT(cv, s, ci, si, li));
+        mnblist.push_back(getCurrMNB(cv, s, ci, si, li));
       }
     }
   }
@@ -818,8 +826,8 @@ PCCReport* calculate_pcc(const PCCSysParam& s, double chgVolt) {
 
   return new PCCReport(chgCurr, chgVolt, s,
       std::move(clist),
-      std::move(sptlist), std::move(spblist),
-      std::move(sntlist), std::move(snblist),
+      std::move(sptlist), std::move(spblist), std::move(sntlist), std::move(snblist),
+      std::move(mptlist), std::move(mpblist), std::move(mntlist), std::move(mnblist),
       error);
 }
 

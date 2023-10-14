@@ -724,11 +724,15 @@ class PCCReport : public ShuntReportData {
         const std::vector<double>& clist,
         const std::vector<double>& sptlist, const std::vector<double>& spblist,
         const std::vector<double>& sntlist, const std::vector<double>& snblist,
+        const std::vector<double>& mptlist, const std::vector<double>& mpblist,
+        const std::vector<double>& mntlist, const std::vector<double>& mnblist,
         double err=0);
     PCCReport(double cc, double cv, const PCCSysParam& s,
         std::vector<double>&& clist,
         std::vector<double>&& sptlist, std::vector<double>&& spblist,
         std::vector<double>&& sntlist, std::vector<double>&& snblist,
+        std::vector<double>&& mptlist, std::vector<double>&& mpblist,
+        std::vector<double>&& mntlist, std::vector<double>&& mnblist,
         double err=0);
 
     PCCReport() = delete;
@@ -784,6 +788,23 @@ class PCCReport : public ShuntReportData {
     inline double sntPowr(std::size_t i) const {return snt_powrs.at(i);}
     inline double snbPowr(std::size_t i) const {return snb_powrs.at(i);}
 
+    inline const std::vector<double>& mptCurrs() const {return mpt_currs;}
+    inline const std::vector<double>& mpbCurrs() const {return mpb_currs;}
+    inline const std::vector<double>& mntCurrs() const {return mnt_currs;}
+    inline const std::vector<double>& mnbCurrs() const {return mnb_currs;}
+    inline const std::vector<double>& mptPowrs() const {return mpt_powrs;}
+    inline const std::vector<double>& mpbPowrs() const {return mpb_powrs;}
+    inline const std::vector<double>& mntPowrs() const {return mnt_powrs;}
+    inline const std::vector<double>& mnbPowrs() const {return mnb_powrs;}
+    inline double mptCurr(std::size_t i) const {return mpt_currs.at(i);}
+    inline double mpbCurr(std::size_t i) const {return mpb_currs.at(i);}
+    inline double mntCurr(std::size_t i) const {return mnt_currs.at(i);}
+    inline double mnbCurr(std::size_t i) const {return mnb_currs.at(i);}
+    inline double mptPowr(std::size_t i) const {return mpt_powrs.at(i);}
+    inline double mpbPowr(std::size_t i) const {return mpb_powrs.at(i);}
+    inline double mntPowr(std::size_t i) const {return mnt_powrs.at(i);}
+    inline double mnbPowr(std::size_t i) const {return mnb_powrs.at(i);}
+
 
   public:
     PCCReport* copy() const override {return new PCCReport(*this);}
@@ -813,6 +834,15 @@ class PCCReport : public ShuntReportData {
     std::vector<double> spb_powrs;      // Stack shunt positive bottom powers
     std::vector<double> snt_powrs;      // Stack shunt negative top powers
     std::vector<double> snb_powrs;      // Stack shunt negative bottom powers
+
+    std::vector<double> mpt_currs;      // Stack manifold positive top currents
+    std::vector<double> mpb_currs;      // Stack manifold positive bottom currents
+    std::vector<double> mnt_currs;      // Stack manifold negative top currents
+    std::vector<double> mnb_currs;      // Stack manifold negative bottom currents
+    std::vector<double> mpt_powrs;      // Stack manifold positive top powers
+    std::vector<double> mpb_powrs;      // Stack manifold positive bottom powers
+    std::vector<double> mnt_powrs;      // Stack manifold negative top powers
+    std::vector<double> mnb_powrs;      // Stack manifold negative bottom powers
 };
 
 
