@@ -722,9 +722,13 @@ class PCCReport : public ShuntReportData {
   public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
     PCCReport(double cc, double cv, const PCCSysParam& s,
         const std::vector<double>& clist,
+        const std::vector<double>& sptlist, const std::vector<double>& spblist,
+        const std::vector<double>& sntlist, const std::vector<double>& snblist,
         double err=0);
     PCCReport(double cc, double cv, const PCCSysParam& s,
         std::vector<double>&& clist,
+        std::vector<double>&& sptlist, std::vector<double>&& spblist,
+        std::vector<double>&& sntlist, std::vector<double>&& snblist,
         double err=0);
 
     PCCReport() = delete;
@@ -760,6 +764,26 @@ class PCCReport : public ShuntReportData {
     double cellPowr(std::size_t i) const override {return cell_powrs.at(i);}
     double storedPowr() const override {return totPowr;}
 
+    inline const std::vector<double>& cirPowrs() const {return cir_powrs;}
+    inline double cirPowr(std::size_t i) const {return cir_powrs.at(i);}
+
+    inline const std::vector<double>& sptCurrs() const {return spt_currs;}
+    inline const std::vector<double>& spbCurrs() const {return spb_currs;}
+    inline const std::vector<double>& sntCurrs() const {return snt_currs;}
+    inline const std::vector<double>& snbCurrs() const {return snb_currs;}
+    inline const std::vector<double>& sptPowrs() const {return spt_powrs;}
+    inline const std::vector<double>& spbPowrs() const {return spb_powrs;}
+    inline const std::vector<double>& sntPowrs() const {return snt_powrs;}
+    inline const std::vector<double>& snbPowrs() const {return snb_powrs;}
+    inline double sptCurr(std::size_t i) const {return spt_currs.at(i);}
+    inline double spbCurr(std::size_t i) const {return spb_currs.at(i);}
+    inline double sntCurr(std::size_t i) const {return snt_currs.at(i);}
+    inline double snbCurr(std::size_t i) const {return snb_currs.at(i);}
+    inline double sptPowr(std::size_t i) const {return spt_powrs.at(i);}
+    inline double spbPowr(std::size_t i) const {return spb_powrs.at(i);}
+    inline double sntPowr(std::size_t i) const {return snt_powrs.at(i);}
+    inline double snbPowr(std::size_t i) const {return snb_powrs.at(i);}
+
 
   public:
     PCCReport* copy() const override {return new PCCReport(*this);}
@@ -776,6 +800,19 @@ class PCCReport : public ShuntReportData {
 
     std::vector<double> cell_currs;
     std::vector<double> cell_powrs;
+
+    // :::: [ STACK ] ::::
+
+    std::vector<double> cir_powrs;      // Cell internal resistance power
+
+    std::vector<double> spt_currs;      // Stack shunt positive top currents
+    std::vector<double> spb_currs;      // Stack shunt positive bottom currents
+    std::vector<double> snt_currs;      // Stack shunt negative top currents
+    std::vector<double> snb_currs;      // Stack shunt negative bottom currents
+    std::vector<double> spt_powrs;      // Stack shunt positive top powers
+    std::vector<double> spb_powrs;      // Stack shunt positive bottom powers
+    std::vector<double> snt_powrs;      // Stack shunt negative top powers
+    std::vector<double> snb_powrs;      // Stack shunt negative bottom powers
 };
 
 

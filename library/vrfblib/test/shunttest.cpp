@@ -220,6 +220,10 @@ void checkShuntPerf(const vrfb::shuntcur::pcc::PCCReport& expected, const vrfb::
         << " | Actual: " << actual.chargingCurr() << "\n";
   }
   std::stringstream celldiff {};
+  std::stringstream sptdiff {};
+  std::stringstream spbdiff {};
+  std::stringstream sntdiff {};
+  std::stringstream snbdiff {};
   for (std::size_t i = 0; i < expected.totCells(); ++i) {
     // STACK :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
     if (std::abs(actual.cellCurr(i) - expected.cellCurr(i)) > threshold) {
@@ -228,10 +232,39 @@ void checkShuntPerf(const vrfb::shuntcur::pcc::PCCReport& expected, const vrfb::
         << " - Expected: " <<  expected.cellCurr(i)
         << " | Actual: " << actual.cellCurr(i) << "\n";
     }
+
+    if (std::abs(actual.sptCurr(i) - expected.sptCurr(i)) > threshold) {
+      is_same = false;
+      sptdiff << "At (" << i << ")"
+        << " - Expected: " <<  expected.sptCurr(i)
+        << " | Actual: " << actual.sptCurr(i) << "\n";
+    }
+    if (std::abs(actual.spbCurr(i) - expected.spbCurr(i)) > threshold) {
+      is_same = false;
+      spbdiff << "At (" << i << ")"
+        << " - Expected: " <<  expected.spbCurr(i)
+        << " | Actual: " << actual.spbCurr(i) << "\n";
+    }
+    if (std::abs(actual.sntCurr(i) - expected.sntCurr(i)) > threshold) {
+      is_same = false;
+      sntdiff << "At (" << i << ")"
+        << " - Expected: " <<  expected.sntCurr(i)
+        << " | Actual: " << actual.sntCurr(i) << "\n";
+    }
+    if (std::abs(actual.snbCurr(i) - expected.snbCurr(i)) > threshold) {
+      is_same = false;
+      snbdiff << "At (" << i << ")"
+        << " - Expected: " <<  expected.snbCurr(i)
+        << " | Actual: " << actual.snbCurr(i) << "\n";
+    }
   }
   ASSERT_TRUE(is_same)
       << miscdiff.str()
-      << "Cell Difference:\n" << celldiff.str();
+      << "Cell Difference:\n" << celldiff.str()
+      << "SPT Difference\n" << sptdiff.str()
+      << "SPB Difference\n" << spbdiff.str()
+      << "SNT Difference\n" << sntdiff.str()
+      << "SNB Difference\n" << snbdiff.str();
 }
 
 

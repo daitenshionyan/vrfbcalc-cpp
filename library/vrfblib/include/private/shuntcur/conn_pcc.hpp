@@ -155,6 +155,39 @@ double getNegConnContri_Cell(const Eigen::VectorXd& cv, const SysParam& s,
       std::size_t ci, std::size_t si, std::size_t li);
 
 
+
+
+
+
+
+
+/*
+********************************************************************************
+**    Current calculation functions for STACK SHUNT
+********************************************************************************
+*/
+
+
+template<ConnSide Side>
+double getConnContri_SSPT(const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t ci, std::size_t si, std::size_t li);
+
+
+template<ConnSide Side>
+double getConnContri_SSPB(const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t ci, std::size_t si, std::size_t li);
+
+
+template<ConnSide Side>
+double getConnContri_SSNT(const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t ci, std::size_t si, std::size_t li);
+
+
+template<ConnSide Side>
+double getConnContri_SSNB(const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t ci, std::size_t si, std::size_t li);
+
+
 }
 }
 }
@@ -328,6 +361,99 @@ double getNegConnContri_Cell<ConnSide::csBack>(
   }
   if (si > 0) {
     result += cv(indexCNB<ConnSide::csBack>(s, si, li));
+  }
+  return result;
+}
+
+
+
+
+
+
+
+
+/*
+********************************************************************************
+**    Current calculation functions for STACK SHUNT
+********************************************************************************
+*/
+
+
+// :::: [ POSITIVE TOP ] :::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+
+template<>
+double getConnContri_SSPT<ConnSide::csFront>(
+      const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t ci, std::size_t si, std::size_t li) {
+  double result = 0;
+  if (ci+1 == s.numCells()) {
+    if (si > 0) {
+      result -= cv(indexCPT<ConnSide::csFront>(s, si, li));
+    }
+    if (si+1 < s.numStacks()) {
+      result += cv(indexCPT<ConnSide::csFront>(s, si, li) + 1);
+    }
+  }
+  return result;
+}
+
+
+// :::: [ POSITIVE BOT ] :::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+
+template<>
+double getConnContri_SSPB<ConnSide::csFront>(
+      const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t ci, std::size_t si, std::size_t li) {
+  double result = 0;
+  if (ci == 0) {
+    if (si > 0) {
+      result -= cv(indexCPB<ConnSide::csFront>(s, si, li) - 1);
+    }
+    if (si+1 < s.numStacks()) {
+      result += cv(indexCPB<ConnSide::csFront>(s, si, li));
+    }
+  }
+  return result;
+}
+
+
+// :::: [ NEGATIVE TOP ] :::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+
+template<>
+double getConnContri_SSNT<ConnSide::csBack>(
+      const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t ci, std::size_t si, std::size_t li) {
+  double result = 0;
+  if (ci == 0) {
+    if (si > 0) {
+      result -= cv(indexCNT<ConnSide::csBack>(s, si, li) - 1);
+    }
+    if (si+1 < s.numStacks()) {
+      result += cv(indexCNT<ConnSide::csBack>(s, si, li));
+    }
+  }
+  return result;
+}
+
+
+// :::: [ NEGATIVE BOT ] :::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+
+template<>
+double getConnContri_SSNB<ConnSide::csBack>(
+      const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t ci, std::size_t si, std::size_t li) {
+  double result = 0;
+  if (ci+1 == s.numCells()) {
+    if (si > 0) {
+      result -= cv(indexCNB<ConnSide::csBack>(s, si, li));
+    }
+    if (si+1 < s.numStacks()) {
+      result += cv(indexCNB<ConnSide::csBack>(s, si, li) + 1);
+    }
   }
   return result;
 }
@@ -659,21 +785,42 @@ PCCReport* calculate_pcc(const PCCSysParam& s, double chgVolt) {
 
   double chgCurr = 0;
   std::vector<double> clist {};
+  std::vector<double> sptlist {};
+  std::vector<double> spblist {};
+  std::vector<double> sntlist {};
+  std::vector<double> snblist {};
   for (std::size_t li = 0; li < s.numLines(); ++li) {
     chgCurr += cv(li);
     for (std::size_t si = 0; si < s.numStacks(); ++si) {
       for (std::size_t ci = 0; ci < s.numCells(); ++ci) {
-        clist.push_back(cv(li)
+        clist.push_back(
+              cv(li)
             + getStackContri_Cell(cv, s, ci, si, li)
             + getPosConnContri_Cell<PS>(cv, s, ci, si, li)
             + getNegConnContri_Cell<NS>(cv, s, ci, si, li));
+        sptlist.push_back(
+              getStackContri_SSPT(cv, s, ci, si, li)
+            + getConnContri_SSPT<PS>(cv, s, ci, si, li));
+        spblist.push_back(
+              getStackContri_SSPB(cv, s, ci, si, li)
+            + getConnContri_SSPB<PS>(cv, s, ci, si, li));
+        sntlist.push_back(
+              getStackContri_SSNT(cv, s, ci, si, li)
+            + getConnContri_SSNT<NS>(cv, s, ci, si, li));
+        snblist.push_back(
+              getStackContri_SSNB(cv, s, ci, si, li)
+            + getConnContri_SSNB<NS>(cv, s, ci, si, li));
       }
     }
   }
 
   double error = ((rm*cv) - vv).norm();
 
-  return new PCCReport(chgCurr, chgVolt, s, std::move(clist), error);
+  return new PCCReport(chgCurr, chgVolt, s,
+      std::move(clist),
+      std::move(sptlist), std::move(spblist),
+      std::move(sntlist), std::move(snblist),
+      error);
 }
 
 

@@ -174,9 +174,13 @@ namespace pcc {
 
 PCCReport::PCCReport(double cc, double cv, const PCCSysParam& s,
       const std::vector<double>& clist,
+      const std::vector<double>& sptlist, const std::vector<double>& spblist,
+      const std::vector<double>& sntlist, const std::vector<double>& snblist,
       double err)
       : chgCurr{cc}, chgVolt{cv}, sys{s},
         cell_currs{clist},
+        spt_currs{sptlist}, spb_currs{spblist},
+        snt_currs{sntlist}, snb_currs{snblist},
         error{err} {
   for (std::size_t i = 0; i < cell_currs.size(); ++i) {
     double cellInPowr = cell_currs[i]*kAvrOCV;
@@ -186,15 +190,26 @@ PCCReport::PCCReport(double cc, double cv, const PCCSysParam& s,
     cell_powrs.push_back(cellInPowr);
     totPowr += cellInPowr;
     ovpLoss += cell_currs[i]*kAvrOCV - cellInPowr;
+
+    cir_powrs.push_back(std::pow(cell_currs[i], 2) * sys.cellR());
+
+    spt_powrs.push_back(std::pow(spt_currs[i], 2) * sys.stackShuntR());
+    spb_powrs.push_back(std::pow(spb_currs[i], 2) * sys.stackShuntR());
+    snt_powrs.push_back(std::pow(snt_currs[i], 2) * sys.stackShuntR());
+    snb_powrs.push_back(std::pow(snb_currs[i], 2) * sys.stackShuntR());
   }
 }
 
 
 PCCReport::PCCReport(double cc, double cv, const PCCSysParam& s,
       std::vector<double>&& clist,
+      std::vector<double>&& sptlist, std::vector<double>&& spblist,
+      std::vector<double>&& sntlist, std::vector<double>&& snblist,
       double err)
       : chgCurr{cc}, chgVolt{cv}, sys{s},
       cell_currs{std::move(clist)},
+      spt_currs{std::move(sptlist)}, spb_currs{std::move(spblist)},
+      snt_currs{std::move(sntlist)}, snb_currs{std::move(snblist)},
       error{err} {
   for (std::size_t i = 0; i < cell_currs.size(); ++i) {
     double cellInPowr = cell_currs[i]*kAvrOCV;
@@ -204,6 +219,13 @@ PCCReport::PCCReport(double cc, double cv, const PCCSysParam& s,
     cell_powrs.push_back(cellInPowr);
     totPowr += cellInPowr;
     ovpLoss += cell_currs[i]*kAvrOCV - cellInPowr;
+
+    cir_powrs.push_back(std::pow(cell_currs[i], 2) * sys.cellR());
+
+    spt_powrs.push_back(std::pow(spt_currs[i], 2) * sys.stackShuntR());
+    spb_powrs.push_back(std::pow(spb_currs[i], 2) * sys.stackShuntR());
+    snt_powrs.push_back(std::pow(snt_currs[i], 2) * sys.stackShuntR());
+    snb_powrs.push_back(std::pow(snb_currs[i], 2) * sys.stackShuntR());
   }
 }
 
