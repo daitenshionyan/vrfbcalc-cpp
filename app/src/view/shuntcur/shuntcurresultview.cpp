@@ -95,6 +95,7 @@ void SCResultView::plotGraphs(const vrfb::shuntcur::scl::SCLReport& p) {
     }
   }
 
+  ui->arrField->setText(QString::fromStdString(p.arrName()));
   ui->chgVoltField->setText(QString::fromStdString(std::to_string(p.chargingVolt())));
   ui->chgCurrField->setText(QString::fromStdString(std::to_string(p.chargingCurr())));
   ui->chgPowrField->setText(QString::fromStdString(std::to_string(p.chargingPowr())));
