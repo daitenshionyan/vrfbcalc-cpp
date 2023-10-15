@@ -766,6 +766,17 @@ class PCCReport : public ShuntReportData {
     double stackShuntArea() const override {return sys.stackShuntArea();}
     double stackManiLen() const override {return sys.stackManiLen();}
     double stackManiArea() const override {return sys.stackManiArea();}
+    inline double maxChgDen() const {return sys.maxChgDen();}
+    inline double maxChgCurr() const {return sys.maxChgDen()*sys.cellArea();}
+
+    inline double connSubShuntLen() const {return sys.connSubShuntLen();}
+    inline double connSubShuntArea() const {return sys.connSubShuntArea();}
+    inline double connSubManiLen() const {return sys.connSubManiLen();}
+    inline double connSubManiArea() const {return sys.connSubManiArea();}
+    inline double connMainShuntLen() const {return sys.connMainShuntLen();}
+    inline double connMainShuntArea() const {return sys.connMainShuntArea();}
+    inline double connMainManiLen() const {return sys.connMainManiLen();}
+    inline double connMainManiArea() const {return sys.connMainManiArea();}
 
     double chargingCurr() const override {return chgCurr;}
     double chargingVolt() const override {return chgVolt;}

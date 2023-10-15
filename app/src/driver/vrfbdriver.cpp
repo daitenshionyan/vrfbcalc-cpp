@@ -260,6 +260,7 @@ ShuntRes calcShuntPerf(const ShuntJob& j, logger::Logger& l) {
       arrType = SCArrType::scatSCL;
       break;
     case SCArrangement::scaPCCFB:
+      io::saveData_XLSX(path, report.data<vrfb::shuntcur::pcc::PCCReport>());
       arrType = SCArrType::scatPCC;
       break;
   }

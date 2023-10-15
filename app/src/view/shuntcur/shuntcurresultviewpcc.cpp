@@ -58,7 +58,7 @@ void SCResultView_PCC::plotGraphs(const vrfb::shuntcur::pcc::PCCReport& p) {
       case IndexingType::itStack: {
         std::vector<GraphPlotForm::Series> slist {};
         for (std::size_t li = 0; li < p.numLines(); ++li) {
-          slist.push_back({"Line " + std::to_string(li)});
+          slist.push_back({"Line " + std::to_string(li+1)});
           for (std::size_t i = 0; i < p.numCells()*p.numStacks(); ++i) {
             slist.back().xs.push_back(i);
             slist.back().ys.push_back((p.*form.yseriesGetter)(li*p.numCells()*p.numStacks() + i));
