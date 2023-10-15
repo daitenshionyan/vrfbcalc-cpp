@@ -207,12 +207,14 @@ std::vector<PerformanceEntry_CE> readPerformance_CE(
 // ==== [ ShuntCalc Definition ] ===============================================
 
 
-ShuntJob::ShuntJob(const std::string& n, const vrfb::shuntcur::ShuntCalc& sc, double cv)
-    : name{n}, calc{sc.copy()}, chgVolt{cv} {}
+ShuntJob::ShuntJob(const std::string& n, const vrfb::shuntcur::ShuntCalc& sc, double cv,
+    SCArrangement a)
+    : name{n}, calc{sc.copy()}, chgVolt{cv}, arr{a} {}
 
 
-ShuntJob::ShuntJob(const std::string& n, vrfb::shuntcur::ShuntCalc* scp, double cv)
-    : name{n}, calc{scp}, chgVolt{cv} {}
+ShuntJob::ShuntJob(const std::string& n, vrfb::shuntcur::ShuntCalc* scp, double cv,
+    SCArrangement a)
+    : name{n}, calc{scp}, chgVolt{cv}, arr{a} {}
 
 
 ShuntJob::ShuntJob(const ShuntJob& o)
@@ -248,19 +250,26 @@ ShuntJob& ShuntJob::operator=(ShuntJob&& o) {
 
 ShuntRes calcShuntPerf(const ShuntJob& j, logger::Logger& l) {
   auto beg = std::chrono::high_resolution_clock::now();
-  vrfb::shuntcur::ShuntPerf perf_c = j.calc->calculate(j.chgVolt);
-  io::saveData_XLSX(std::filesystem::u8path<std::string>("output/" + j.name + ".xlsx"), perf_c);
+  vrfb::shuntcur::ShuntReport report = j.calc->calculate(j.chgVolt);
+  std::filesystem::path path = std::filesystem::u8path<std::string>("output/" + j.name + ".xlsx");
+  SCArrType arrType;
+  switch (j.arr) {
+    case SCArrangement::scaSCLFF:
+    case SCArrangement::scaSCLFB:
+      io::saveData_XLSX(path, report.data<vrfb::shuntcur::scl::SCLReport>());
+      arrType = SCArrType::scatSCL;
+      break;
+    case SCArrangement::scaPCCFB:
+      io::saveData_XLSX(path, report.data<vrfb::shuntcur::pcc::PCCReport>());
+      arrType = SCArrType::scatPCC;
+      break;
+  }
   auto dur = std::chrono::duration_cast<std::chrono::microseconds>(
             std::chrono::high_resolution_clock::now() - beg);
-  std::string finMsg = comutils::string::format_string(
-      "Shunt performance calculation completed in %.3fms (Error = %.2f)",
-      dur.count() / 1000., perf_c.err());
-  if (perf_c.err() > 0.01) {
-    l.warn(finMsg);
-  } else {
-    l.info(finMsg);
-  }
-  return {j.name, perf_c};
+  l.info(comutils::string::format_string(
+      "Shunt performance calculation completed in %.3fms",
+      dur.count() / 1000.));
+  return {j.name, arrType, report};
 }
 
 

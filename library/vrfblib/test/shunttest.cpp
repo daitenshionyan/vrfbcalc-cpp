@@ -7,9 +7,12 @@
 #include <Eigen/Dense>
 
 #include "shunttestconst.hpp"
+#include "shunttestconst_pcc.hpp"
 
 #include "vrfblib/vrfblib.hpp"
-#include "shuntcur.hpp"
+#include "shuntcur/shuntcur.hpp"
+#include "shuntcur/conn_scl.hpp"
+#include "shuntcur/conn_pcc.hpp"
 
 
 namespace { // ==== namespace <UNNAMED> ========================================
@@ -44,7 +47,7 @@ void checkMatrix(const Eigen::MatrixXd& expected, const Eigen::MatrixXd& actual)
 }
 
 
-void checkShuntPerf(const vrfb::shuntcur::ShuntPerf& expected, const vrfb::shuntcur::ShuntPerf& actual) {
+void checkShuntPerf(const vrfb::shuntcur::scl::SCLReport& expected, const vrfb::shuntcur::scl::SCLReport& actual) {
   bool is_same_size = expected.totCells() == actual.totCells();
   ASSERT_TRUE(is_same_size) << "Wrong size"
       << " - Expected size: " << expected.totCells()
@@ -129,7 +132,7 @@ void checkShuntPerf(const vrfb::shuntcur::ShuntPerf& expected, const vrfb::shunt
   }
 
   for (std::size_t i = 0; i < expected.numStacks(); ++i) {
-// CONNECTOR :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+  // CONNECTOR :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
     if (std::abs(actual.csptCurr(i) - expected.csptCurr(i)) > threshold) {
       is_same = false;
@@ -202,57 +205,214 @@ void checkShuntPerf(const vrfb::shuntcur::ShuntPerf& expected, const vrfb::shunt
 }
 
 
+void checkShuntPerf(const vrfb::shuntcur::pcc::PCCReport& expected, const vrfb::shuntcur::pcc::PCCReport& actual) {
+  bool is_same_size = expected.totCells() == actual.totCells();
+  ASSERT_TRUE(is_same_size) << "Wrong size"
+      << " - Expected size: " << expected.totCells()
+      << " | Actual size: " << actual.totCells();
+
+  bool is_same = true;
+  std::stringstream miscdiff {};
+  if (std::abs(actual.chargingCurr() - expected.chargingCurr()) > threshold) {
+    is_same = false;
+    miscdiff << "Charging current"
+        << " - Expected: " << expected.chargingCurr()
+        << " | Actual: " << actual.chargingCurr() << "\n";
+  }
+  std::stringstream celldiff {};
+  std::stringstream sptdiff {};
+  std::stringstream spbdiff {};
+  std::stringstream sntdiff {};
+  std::stringstream snbdiff {};
+  std::stringstream mptdiff {};
+  std::stringstream mpbdiff {};
+  std::stringstream mntdiff {};
+  std::stringstream mnbdiff {};
+  for (std::size_t i = 0; i < expected.totCells(); ++i) {
+    // STACK :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+    if (std::abs(actual.cellCurr(i) - expected.cellCurr(i)) > threshold) {
+      is_same = false;
+      celldiff << "At (" << i << ")"
+        << " - Expected: " <<  expected.cellCurr(i)
+        << " | Actual: " << actual.cellCurr(i) << "\n";
+    }
+
+    if (std::abs(actual.sptCurr(i) - expected.sptCurr(i)) > threshold) {
+      is_same = false;
+      sptdiff << "At (" << i << ")"
+        << " - Expected: " <<  expected.sptCurr(i)
+        << " | Actual: " << actual.sptCurr(i) << "\n";
+    }
+    if (std::abs(actual.spbCurr(i) - expected.spbCurr(i)) > threshold) {
+      is_same = false;
+      spbdiff << "At (" << i << ")"
+        << " - Expected: " <<  expected.spbCurr(i)
+        << " | Actual: " << actual.spbCurr(i) << "\n";
+    }
+    if (std::abs(actual.sntCurr(i) - expected.sntCurr(i)) > threshold) {
+      is_same = false;
+      sntdiff << "At (" << i << ")"
+        << " - Expected: " <<  expected.sntCurr(i)
+        << " | Actual: " << actual.sntCurr(i) << "\n";
+    }
+    if (std::abs(actual.snbCurr(i) - expected.snbCurr(i)) > threshold) {
+      is_same = false;
+      snbdiff << "At (" << i << ")"
+        << " - Expected: " <<  expected.snbCurr(i)
+        << " | Actual: " << actual.snbCurr(i) << "\n";
+    }
+
+    if (std::abs(actual.mptCurr(i) - expected.mptCurr(i)) > threshold) {
+      is_same = false;
+      mptdiff << "At (" << i << ")"
+        << " - Expected: " <<  expected.mptCurr(i)
+        << " | Actual: " << actual.mptCurr(i) << "\n";
+    }
+    if (std::abs(actual.mpbCurr(i) - expected.mpbCurr(i)) > threshold) {
+      is_same = false;
+      mpbdiff << "At (" << i << ")"
+        << " - Expected: " <<  expected.mpbCurr(i)
+        << " | Actual: " << actual.mpbCurr(i) << "\n";
+    }
+    if (std::abs(actual.mntCurr(i) - expected.mntCurr(i)) > threshold) {
+      is_same = false;
+      mntdiff << "At (" << i << ")"
+        << " - Expected: " <<  expected.mntCurr(i)
+        << " | Actual: " << actual.mntCurr(i) << "\n";
+    }
+    if (std::abs(actual.mnbCurr(i) - expected.mnbCurr(i)) > threshold) {
+      is_same = false;
+      mnbdiff << "At (" << i << ")"
+        << " - Expected: " <<  expected.mnbCurr(i)
+        << " | Actual: " << actual.mnbCurr(i) << "\n";
+    }
+  }
+  ASSERT_TRUE(is_same)
+      << miscdiff.str()
+      << "Cell Difference:\n" << celldiff.str()
+      << "SPT Difference\n" << sptdiff.str()
+      << "SPB Difference\n" << spbdiff.str()
+      << "SNT Difference\n" << sntdiff.str()
+      << "SNB Difference\n" << snbdiff.str()
+      << "MPT Difference\n" << mptdiff.str()
+      << "MPB Difference\n" << mpbdiff.str()
+      << "MNT Difference\n" << mntdiff.str()
+      << "MNB Difference\n" << mnbdiff.str();
+}
+
+
 } // ---- namespace <UNNAMED>
 // namespace <GLOBAL>
 
 
-TEST(vrfbSC, addStackLoops5C5S) {
+
+
+
+
+
+
+
+/*
+********************************************************************************
+**    SCL tests
+********************************************************************************
+*/
+
+
+TEST(vrfbShuntCurrSCL, addStackLoops) {
   Eigen::MatrixXd actual = Eigen::Matrix<double, 81, 81>::Zero();
   vrfb::shuntcur::addStackLoops(actual, shunttest::kTestSysParam);
   checkMatrix(shunttest::kExCurMat_5S, actual);
 }
 
 
-TEST(vrfbSC, addConnLoops5C5SFF) {
+TEST(vrfbShuntCurrSCL, addConnLoopsFF) {
   Eigen::MatrixXd actual = Eigen::Matrix<double, 97, 97>::Zero();
   vrfb::shuntcur::addStackLoops(actual, shunttest::kTestSysParam);
-  vrfb::shuntcur::addConnLoops
-      <vrfb::shuntcur::ConnSide::csFront, vrfb::shuntcur::ConnSide::csFront>(
+  vrfb::shuntcur::scl::addConnLoops
+      <vrfb::shuntcur::scl::ConnSide::csFront, vrfb::shuntcur::scl::ConnSide::csFront>(
           actual, shunttest::kTestSysParam);
   checkMatrix(shunttest::kExCurMat_5S_Sys_FF, actual);
 }
 
 
-TEST(vrfbSC, addConnLoops5C5SFB) {
+TEST(vrfbShuntCurrSCL, addConnLoopsFB) {
   Eigen::MatrixXd actual = Eigen::Matrix<double, 97, 97>::Zero();
   vrfb::shuntcur::addStackLoops(actual, shunttest::kTestSysParam);
-  vrfb::shuntcur::addConnLoops
-      <vrfb::shuntcur::ConnSide::csFront, vrfb::shuntcur::ConnSide::csBack>(
+  vrfb::shuntcur::scl::addConnLoops
+      <vrfb::shuntcur::scl::ConnSide::csFront, vrfb::shuntcur::scl::ConnSide::csBack>(
           actual, shunttest::kTestSysParam);
   checkMatrix(shunttest::kExCurMat_5S_Sys_FB, actual);
 }
 
 
-TEST(vrfbSC, addSysVolt) {
+TEST(vrfbShuntCurrSCL, addSysVolt) {
   Eigen::VectorXd actual = Eigen::Vector<double, 97>::Zero();
-  vrfb::shuntcur::addSysVolt(actual, shunttest::kTestSysParam, shunttest::kTestChgVolt);
+  vrfb::shuntcur::scl::addSysVolt(actual, shunttest::kTestSysParam, shunttest::kTestChgVolt);
   checkMatrix(shunttest::kExVoltVec_5S_Sys_FF, actual);
 }
 
 
-TEST(vrfbSC, calculateFF) {
-  vrfb::shuntcur::CommLineCalc calc {
+TEST(vrfbShuntCurrSCL, calculateFF) {
+  vrfb::shuntcur::scl::SCLCalc calc {
       shunttest::kTestSysParam,
-      vrfb::shuntcur::CommLineCalc::ConnType::ctFF};
+      vrfb::shuntcur::scl::SCLCalc::ConnType::ctFF};
   auto actual = calc.calculate(shunttest::kTestChgVolt);
-  checkShuntPerf(shunttest::kExShuntPerf_5S_FF, actual);
+  checkShuntPerf(shunttest::kExShuntPerf_5S_FF, actual.data<vrfb::shuntcur::scl::SCLReport>());
 }
 
 
-TEST(vrfbSC, calculateFB) {
-  vrfb::shuntcur::CommLineCalc calc {
+TEST(vrfbShuntCurrSCL, calculateFB) {
+  vrfb::shuntcur::scl::SCLCalc calc {
       shunttest::kTestSysParam,
-      vrfb::shuntcur::CommLineCalc::ConnType::ctFB};
+      vrfb::shuntcur::scl::SCLCalc::ConnType::ctFB};
   auto actual = calc.calculate(shunttest::kTestChgVolt);
-  checkShuntPerf(shunttest::kExShuntPerf_5S_FB, actual);
+  checkShuntPerf(shunttest::kExShuntPerf_5S_FB, actual.data<vrfb::shuntcur::scl::SCLReport>());
+}
+
+
+
+
+
+
+
+
+
+/*
+********************************************************************************
+**    PCC tests
+********************************************************************************
+*/
+
+
+TEST(vrfbShuntCurrPCC, addStackLoops) {
+  Eigen::MatrixXd actual = Eigen::MatrixXd::Zero(147, 147);
+  vrfb::shuntcur::addStackLoops(actual, shunttest_pcc::kTestSysParam);
+  checkMatrix(shunttest_pcc::kExResistMat_NoConn, actual);
+}
+
+
+TEST(vrfbShuntCurrPCC, addConnLoopsFB) {
+  Eigen::MatrixXd actual = Eigen::MatrixXd::Zero(171, 171);
+  vrfb::shuntcur::addStackLoops(actual, shunttest_pcc::kTestSysParam);
+  vrfb::shuntcur::pcc::addConnLoops
+      <vrfb::shuntcur::pcc::ConnSide::csFront, vrfb::shuntcur::pcc::ConnSide::csBack>(
+          actual, shunttest_pcc::kTestSysParam);
+  checkMatrix(shunttest_pcc::kExResistMat_WithConn, actual);
+}
+
+
+TEST(vrfbShuntCurrPCC, addVolt) {
+  Eigen::VectorXd actual = Eigen::VectorXd::Zero(171);
+  vrfb::shuntcur::pcc::addVolt(actual, shunttest_pcc::kTestSysParam, shunttest_pcc::kTestChgVolt);
+  checkMatrix(shunttest_pcc::kExVoltVector, actual);
+}
+
+
+TEST(vrfbShuntCurrPCC, calculateFB) {
+  vrfb::shuntcur::pcc::PCCCalc calc {
+      shunttest_pcc::kTestSysParam,
+      vrfb::shuntcur::pcc::PCCCalc::ConnType::ctFB};
+  auto actual = calc.calculate(shunttest_pcc::kTestChgVolt);
+  checkShuntPerf(shunttest_pcc::kExReport, actual.data<vrfb::shuntcur::pcc::PCCReport>());
 }

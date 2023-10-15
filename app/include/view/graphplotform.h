@@ -18,6 +18,15 @@ QT_END_NAMESPACE
 class GraphPlotForm : public QWidget {
   Q_OBJECT
 
+
+  public:
+    struct Series {
+      std::string name;
+      std::vector<double> xs;
+      std::vector<double> ys;
+    };
+
+
   public:
     GraphPlotForm(QWidget* parent);
     ~GraphPlotForm();
@@ -25,6 +34,8 @@ class GraphPlotForm : public QWidget {
     void setupPlot(
         const std::vector<vrfbdriver::PerformanceEntry_CE>&,
         const std::string&, const std::string&);
+    void setupPlot(const std::vector<Series>& slist,
+        const std::string& name_x, std::string name_y);
     void setupPlot(
         const std::vector<double>& series_x,
         const std::vector<double>& series_y,

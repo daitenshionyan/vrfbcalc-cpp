@@ -25,7 +25,9 @@ void saveTable_XLSX(const std::filesystem::path&, const comutils::Table&);
 
 void saveData_XLSX(const std::filesystem::path&, const comutils::Table&, const DataSet_CE&);
 void saveData_XLSX(const std::filesystem::path& p,
-    const vrfb::shuntcur::ShuntPerf& perf_c);
+    const vrfb::shuntcur::scl::SCLReport& perf_c);
+void saveData_XLSX(const std::filesystem::path& p,
+    const vrfb::shuntcur::pcc::PCCReport& perf);
 
 
 }

@@ -22,7 +22,7 @@ find_package(Qt6 REQUIRED COMPONENTS
     Charts
 )
 
-set(VRFBCALC-CPP_VERSION "0.3.0")
+set(VRFBCALC-CPP_VERSION "0.3.1")
 configure_file(include/vrfbcalccfg.hpp.in include/vrfbcalccfg.hpp)
 
 add_executable(vrfbcalc-cpp WIN32
@@ -39,6 +39,14 @@ add_executable(vrfbcalc-cpp WIN32
     include/view/mainwindow.h
     src/view/mainwindow.ui
     src/view/mainwindow.cpp
+
+    include/view/graphplotform.h
+    src/view/graphplotform.ui
+    src/view/graphplotform.cpp
+
+    include/view/graphplotformtitled.h
+    src/view/graphplotformtitled.ui
+    src/view/graphplotformtitled.cpp
 
     # :::: Cell Efficiency ::::::::::::::::::::::::::::::::::::::::::::::::::: #
 
@@ -76,9 +84,9 @@ add_executable(vrfbcalc-cpp WIN32
     src/view/shuntcur/shuntcurresultview.ui
     src/view/shuntcur/shuntcurresultview.cpp
 
-    include/view/graphplotform.h
-    src/view/graphplotform.ui
-    src/view/graphplotform.cpp
+    include/view/shuntcur/shuntcurresultviewpcc.h
+    src/view/shuntcur/shuntcurresultviewpcc.ui
+    src/view/shuntcur/shuntcurresultviewpcc.cpp
 
     resource/app.o          # executable icon
 )

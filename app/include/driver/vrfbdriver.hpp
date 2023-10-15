@@ -39,9 +39,36 @@ void calcCellEff(const SetSupplierVec_CE&, logger::Logger&);
 std::vector<PerformanceEntry_CE> readPerformance_CE(const std::vector<std::string>&, logger::Logger&);
 
 
+
+
+
+
+
+/*
+================================================================================
+        Shunt Current
+================================================================================
+*/
+
+
+enum class SCArrangement {
+  scaSCLFF = 0,
+  scaSCLFB,
+  scaPCCFB
+};
+
+
+enum class SCArrType {
+  scatSCL = 0,
+  scatPCC
+};
+
+
 struct ShuntJob {
-  ShuntJob(const std::string&, const vrfb::shuntcur::ShuntCalc&, double);
-  ShuntJob(const std::string&, vrfb::shuntcur::ShuntCalc*, double);
+  ShuntJob(const std::string&, const vrfb::shuntcur::ShuntCalc&, double,
+      SCArrangement a = SCArrangement::scaSCLFB);
+  ShuntJob(const std::string&, vrfb::shuntcur::ShuntCalc*, double,
+      SCArrangement a = SCArrangement::scaSCLFB);
 
   ShuntJob(const ShuntJob&);
   ShuntJob(ShuntJob&&);
@@ -54,12 +81,14 @@ struct ShuntJob {
   std::string name;
   vrfb::shuntcur::ShuntCalc* calc;
   double chgVolt;
+  SCArrangement arr;
 };
 
 
 struct ShuntRes {
   std::string name;
-  vrfb::shuntcur::ShuntPerf perf;
+  SCArrType arrType;
+  vrfb::shuntcur::ShuntReport perf;
 };
 
 
