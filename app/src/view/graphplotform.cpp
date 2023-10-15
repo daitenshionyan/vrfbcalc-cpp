@@ -11,9 +11,6 @@ namespace { // BEGIN OF NAMESPACE <GLOBAL::UNNAMED> ============================
 
 constexpr int kBaseDecimals = 2;
 
-constexpr double kZeroAreaPortion = 0.2;
-constexpr double kEndSpacePortion = 0.1;
-
 
 int getFieldDecimals(double min, double max) {
   int pow = kBaseDecimals;
@@ -21,71 +18,6 @@ int getFieldDecimals(double min, double max) {
     ++pow;
   }
   return pow;
-}
-
-
-double correctLowerValue(double lv, double uv, double corrDiff, int pow) {
-  double fac = std::pow(10, pow);
-  int clv = std::floor(std::ceil(uv * fac) - corrDiff);
-  clv += 10 - std::abs(clv % 10);
-  if (clv > std::ceil(lv * fac)) {
-    clv = std::ceil(lv * fac);
-    clv -= std::abs(clv % 10);
-  }
-  return clv / fac;
-}
-
-
-double correctUpperValue(double lv, double uv, double corrDiff, int pow) {
-  double fac = std::pow(10, pow);
-  int cuv = std::floor(std::ceil(lv * fac) + corrDiff);
-  cuv -= std::abs(cuv % 10);
-  if (cuv < std::ceil(uv * fac)) {
-    cuv = std::ceil(uv * fac);
-    cuv += 10 - std::abs(cuv % 10);
-  }
-  return cuv / fac;
-}
-
-
-void adjustAxisRange(QCPAxis* axis) {
-  auto r = axis->range();
-  double diff = r.upper - r.lower;
-  if (diff == 0) {
-    return;
-  }
-
-  // find inverse power to get ceil of diff to at least a 10
-  // 10 so that modulo operator works
-  int pow = 0;
-  for (double num = diff; std::ceil(num) < 10; num *= 10) {
-    ++pow;
-  }
-
-  double lower = r.lower;
-  double upper = r.upper;
-  double corrDiff = std::ceil(diff * std::pow(10, pow)) * (1+kEndSpacePortion);
-  if (upper < 0 || lower < 0) {
-    // correct lower
-    lower = correctLowerValue(r.lower, r.upper, corrDiff, pow);
-    // correct upper
-    if (diff*kZeroAreaPortion > -upper || upper == 0) {
-      upper = 0;
-    } else {
-      upper = correctUpperValue(r.lower, r.upper, corrDiff, pow);
-    }
-  } else {
-    // correct lower
-    if (diff*kZeroAreaPortion > lower || lower == 0) {
-      lower = 0;
-    } else {
-      lower = correctLowerValue(r.lower, r.upper, corrDiff, pow);
-    }
-    // correct upper
-    upper = correctUpperValue(r.lower, r.upper, corrDiff, pow);
-  }
-
-  axis->setRange(lower, upper);
 }
 
 
@@ -343,6 +275,67 @@ void GraphPlotForm::setupPlot(
   // adjustAxisRange(ui->plot->yAxis);
   ui->plot->xAxis->setLabel(QString::fromStdString(xHdr));
   ui->plot->yAxis->setLabel(QString::fromStdString(yHdr));
+  ui->plot->replot();
+}
+
+
+void GraphPlotForm::setupPlot(const std::vector<Series>& slist,
+      const std::string& name_x, std::string name_y) {
+  ui->plotWidthField->setValue(ui->plot->width());
+  ui->plotHeightField->setValue(ui->plot->height());
+  if (slist.empty()) {
+    return;
+  }
+
+  double min_x = std::numeric_limits<double>::max();
+  double max_x = -std::numeric_limits<double>::max();
+  double min_y = std::numeric_limits<double>::max();
+  double max_y = -std::numeric_limits<double>::max();
+
+  QCPLayoutGrid *subLayout = new QCPLayoutGrid;
+  ui->plot->plotLayout()->addElement(0, 1, subLayout);
+  ui->plot->plotLayout()->addElement(0, 2, new QCPLayoutElement);
+  subLayout->addElement(0, 0, new QCPLayoutElement);
+  subLayout->addElement(1, 1, ui->plot->legend);
+  subLayout->setRowStretchFactor(1, 0.001);
+  subLayout->addElement(2, 2, new QCPLayoutElement);
+  ui->plot->plotLayout()->setColumnStretchFactor(1, 0.001);
+  ui->plot->plotLayout()->setColumnStretchFactor(2, 0.001);
+  ui->plot->legend->setVisible(true);
+
+  std::size_t i_series = 0;
+  for (const auto& s : slist) {
+    auto graph = ui->plot->addGraph();
+
+    // set graph style
+    QColor color {};
+    color.setHsvF((float) ((double) i_series / slist.size()), 1, 0.7);
+    graph->setPen(color);
+    graph->setName(QString::fromStdString(s.name));
+    graph->setAntialiased(true);
+
+    // add graph data
+    for (std::size_t i = 0; i < s.xs.size(); ++i) {
+      double x = s.xs.at(i);
+      double y = s.ys.at(i);
+      graph->addData(x, y);
+      min_x = (min_x < x) ? min_x : x;
+      max_x = (max_x < x) ? x : max_x;
+      min_y = (min_y < y) ? min_y : y;
+      max_y = (max_y < y) ? y : max_y;
+    }
+    ++i_series;
+  }
+
+  // set up fields
+  setupXFields(min_x, max_x);
+  setupYFields(min_y, max_y);
+
+  // set initial range
+  ui->plot->xAxis->setRange(min_x, max_x);
+  ui->plot->yAxis->setRange(min_y, max_y);
+  ui->plot->xAxis->setLabel(QString::fromStdString(name_x));
+  ui->plot->yAxis->setLabel(QString::fromStdString(name_y));
   ui->plot->replot();
 }
 

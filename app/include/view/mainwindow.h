@@ -8,7 +8,6 @@
 #include "view/celleff/celleffconfigpopup.h"
 #include "view/celleff/celleffresultview.h"
 #include "view/shuntcur/shuntcurconfigpopup.h"
-#include "view/shuntcur/shuntcurresultview.h"
 #include "driver/vrfbdriver.hpp"
 #include "logger.hpp"
 
@@ -22,6 +21,15 @@ QT_END_NAMESPACE
 
 class MainWindow : public QMainWindow, private logger::Logger {
   Q_OBJECT
+
+  public:
+    class SCDataView : public QDialog {
+      public:
+        SCDataView(QWidget* parent) : QDialog(parent) {}
+
+        virtual bool exportImages(logger::Logger& l) = 0;
+    };
+
 
   public:
     MainWindow(QWidget* parent = nullptr);
@@ -51,7 +59,7 @@ class MainWindow : public QMainWindow, private logger::Logger {
     void exportCEPerformance(CEResultView*);
 
     void displayPerformanceView_SC(const vrfbdriver::ShuntRes&);
-    void exportSEPerformance(SCResultView*);
+    void exportSEPerformance(SCDataView*);
 
     Ui::MainWindow* ui;
     CEConfigPopup* popup_ce;

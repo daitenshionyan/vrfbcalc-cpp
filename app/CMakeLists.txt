@@ -84,6 +84,10 @@ add_executable(vrfbcalc-cpp WIN32
     src/view/shuntcur/shuntcurresultview.ui
     src/view/shuntcur/shuntcurresultview.cpp
 
+    include/view/shuntcur/shuntcurresultviewpcc.h
+    src/view/shuntcur/shuntcurresultviewpcc.ui
+    src/view/shuntcur/shuntcurresultviewpcc.cpp
+
     resource/app.o          # executable icon
 )
 

@@ -29,7 +29,7 @@ namespace scl {
 enum class ConnSide {
   /** Inlet connection on the same side as the positive terminal. */
   csFront,
-  /** inlet connection on the opposite end of the positive terminal. */
+  /** Inlet connection on the opposite end of the positive terminal. */
   csBack
 };
 
@@ -1122,10 +1122,10 @@ void addConnLoops<ConnSide::csFront, ConnSide::csFront>(Eigen::MatrixXd& m, cons
     }
 
     for (std::size_t ci = 0; ci < s.numCells(); ++ci) {
-      Eigen::Index spti = indexSPT(si, ci, s.numStacks(), s.numCells());
-      Eigen::Index spbi = indexSPB(si, ci, s.numStacks(), s.numCells());
-      Eigen::Index snti = indexSNT(si, ci, s.numStacks(), s.numCells());
-      Eigen::Index snbi = indexSNB(si, ci, s.numStacks(), s.numCells());
+      Eigen::Index spti = indexSPT(s, ci, si);
+      Eigen::Index spbi = indexSPB(s, ci, si);
+      Eigen::Index snti = indexSNT(s, ci, si);
+      Eigen::Index snbi = indexSNB(s, ci, si);
 
       if (si > 0) {
         // :::: [ POSITIVE STACK LOOPS ] ::::
@@ -1349,10 +1349,10 @@ void addConnLoops<ConnSide::csFront, ConnSide::csBack>(Eigen::MatrixXd& m, const
     }
 
     for (std::size_t ci = 0; ci < s.numCells(); ++ci) {
-      Eigen::Index spti = indexSPT(si, ci, s.numStacks(), s.numCells());
-      Eigen::Index spbi = indexSPB(si, ci, s.numStacks(), s.numCells());
-      Eigen::Index snti = indexSNT(si, ci, s.numStacks(), s.numCells());
-      Eigen::Index snbi = indexSNB(si, ci, s.numStacks(), s.numCells());
+      Eigen::Index spti = indexSPT(s, ci, si);
+      Eigen::Index spbi = indexSPB(s, ci, si);
+      Eigen::Index snti = indexSNT(s, ci, si);
+      Eigen::Index snbi = indexSNB(s, ci, si);
 
       if (si > 0) {
         // :::: [ POSITIVE STACK LOOPS ] ::::
@@ -1480,13 +1480,13 @@ void addSysVolt(Eigen::VectorXd& v, const SCLSysParam& s, double chgVolt) {
       v(0) -= kAvrOCV;
 
       if (ci+1 < s.numCells()) {
-        v(indexSPT(si, ci, s.numStacks(), s.numCells())) -= kAvrOCV;
-        v(indexSPB(si, ci, s.numStacks(), s.numCells())) -= kAvrOCV;
+        v(indexSPT(s, ci, si)) -= kAvrOCV;
+        v(indexSPB(s, ci, si)) -= kAvrOCV;
       }
 
       if (ci > 0) {
-        v(indexSNT(si, ci, s.numStacks(), s.numCells())) -= kAvrOCV;
-        v(indexSNB(si, ci, s.numStacks(), s.numCells())) -= kAvrOCV;
+        v(indexSNT(s, ci, si)) -= kAvrOCV;
+        v(indexSNB(s, ci, si)) -= kAvrOCV;
       }
     }
   }
@@ -1536,21 +1536,21 @@ inline SCLReport* commLineCalc(const SCLSysParam& s, double chgVolt) {
   for (std::size_t si = 0; si < s.numStacks(); ++si) {
     for (std::size_t ci = 0; ci < s.numCells(); ++ci) {
       clist.push_back(cv(0)
-          + getStackContri_Cell(cv, si, ci, s.numStacks(), s.numCells())
+          + getStackContri_Cell(cv, s, ci, si)
           + getPosConnContri_Cell<PS>(cv, si, ci, s.numStacks(), s.numCells())
           + getNegConnContri_Cell<NS>(cv, si, ci, s.numStacks(), s.numCells()));
-      sptlist.push_back(getStackContri_SSPT(cv, si, ci, s.numStacks(), s.numCells())
+      sptlist.push_back(getStackContri_SSPT(cv, s, ci, si)
           + getConnContri_SSPT<PS>(cv, si, ci, s.numStacks(), s.numCells()));
-      spblist.push_back(getStackContri_SSPB(cv, si, ci, s.numStacks(), s.numCells())
+      spblist.push_back(getStackContri_SSPB(cv, s, ci, si)
           + getConnContri_SSPB<PS>(cv, si, ci, s.numStacks(), s.numCells()));
-      sntlist.push_back(getStackContri_SSNT(cv, si, ci, s.numStacks(), s.numCells())
+      sntlist.push_back(getStackContri_SSNT(cv, s, ci, si)
           + getConnContri_SSNT<NS>(cv, si, ci, s.numStacks(), s.numCells()));
-      snblist.push_back(getStackContri_SSNB(cv, si, ci, s.numStacks(), s.numCells())
+      snblist.push_back(getStackContri_SSNB(cv, s, ci, si)
           + getConnContri_SSNB<NS>(cv, si, ci, s.numStacks(), s.numCells()));
-      mptlist.push_back(getCurrMPT(cv, si, ci, s.numStacks(), s.numCells()));
-      mpblist.push_back(getCurrMPB(cv, si, ci, s.numStacks(), s.numCells()));
-      mntlist.push_back(getCurrMNT(cv, si, ci, s.numStacks(), s.numCells()));
-      mnblist.push_back(getCurrMNB(cv, si, ci, s.numStacks(), s.numCells()));
+      mptlist.push_back(getCurrMPT(cv, s, ci, si));
+      mpblist.push_back(getCurrMPB(cv, s, ci, si));
+      mntlist.push_back(getCurrMNT(cv, s, ci, si));
+      mnblist.push_back(getCurrMNB(cv, s, ci, si));
     }
 
     csptlist.push_back(getCurrCSPT<PS>(cv, si, s.numStacks(), s.numCells()));

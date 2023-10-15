@@ -53,12 +53,14 @@ std::vector<PerformanceEntry_CE> readPerformance_CE(const std::vector<std::strin
 
 enum class SCArrangement {
   scaSCLFF = 0,
-  scaSCLFB
+  scaSCLFB,
+  scaPCCFB
 };
 
 
 enum class SCArrType {
-  scatSCL = 0
+  scatSCL = 0,
+  scatPCC
 };
 
 

@@ -259,6 +259,10 @@ ShuntRes calcShuntPerf(const ShuntJob& j, logger::Logger& l) {
       io::saveData_XLSX(path, report.data<vrfb::shuntcur::scl::SCLReport>());
       arrType = SCArrType::scatSCL;
       break;
+    case SCArrangement::scaPCCFB:
+      io::saveData_XLSX(path, report.data<vrfb::shuntcur::pcc::PCCReport>());
+      arrType = SCArrType::scatPCC;
+      break;
   }
   auto dur = std::chrono::duration_cast<std::chrono::microseconds>(
             std::chrono::high_resolution_clock::now() - beg);

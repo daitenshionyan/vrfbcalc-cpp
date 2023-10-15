@@ -22,6 +22,12 @@ void GraphPlotFormTitled::setupPlot(
 }
 
 
+void GraphPlotFormTitled::setupPlot(const std::vector<GraphPlotForm::Series>& slist,
+    const std::string& name_x, const std::string& name_y) {
+  ui->plot->setupPlot(slist, name_x, name_y);
+}
+
+
 bool GraphPlotFormTitled::savePng(const QString& path) {
   return ui->plot->savePng(path);
 }
