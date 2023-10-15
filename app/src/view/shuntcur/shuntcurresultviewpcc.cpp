@@ -8,33 +8,33 @@ SCResultView_PCC::SCResultView_PCC(QWidget* parent, const std::string& p)
   connect(this, &QDialog::finished, this, &SCResultView_PCC::deleteSelf);
   addPlot("Cell current",
       IndexingType::itStack,
-      &vrfb::shuntcur::pcc::PCCReport::cellCurrs);
+      &vrfb::shuntcur::pcc::PCCReport::cellCurr);
   // stack shunts ------------------------------------
   addPlot("SPT current",
       IndexingType::itStack,
-      &vrfb::shuntcur::pcc::PCCReport::sptCurrs);
+      &vrfb::shuntcur::pcc::PCCReport::sptCurr);
   addPlot("SPB current",
       IndexingType::itStack,
-      &vrfb::shuntcur::pcc::PCCReport::spbCurrs);
+      &vrfb::shuntcur::pcc::PCCReport::spbCurr);
   addPlot("SNT current",
       IndexingType::itStack,
-      &vrfb::shuntcur::pcc::PCCReport::sntCurrs);
+      &vrfb::shuntcur::pcc::PCCReport::sntCurr);
   addPlot("SNB current",
       IndexingType::itStack,
-      &vrfb::shuntcur::pcc::PCCReport::snbCurrs);
+      &vrfb::shuntcur::pcc::PCCReport::snbCurr);
   // stack manifolds ---------------------------------
   addPlot("MPT current",
       IndexingType::itStack,
-      &vrfb::shuntcur::pcc::PCCReport::mptCurrs);
+      &vrfb::shuntcur::pcc::PCCReport::mptCurr);
   addPlot("MPB current",
       IndexingType::itStack,
-      &vrfb::shuntcur::pcc::PCCReport::mpbCurrs);
+      &vrfb::shuntcur::pcc::PCCReport::mpbCurr);
   addPlot("MNT current",
       IndexingType::itStack,
-      &vrfb::shuntcur::pcc::PCCReport::mntCurrs);
+      &vrfb::shuntcur::pcc::PCCReport::mntCurr);
   addPlot("MNB current",
       IndexingType::itStack,
-      &vrfb::shuntcur::pcc::PCCReport::mnbCurrs);
+      &vrfb::shuntcur::pcc::PCCReport::mnbCurr);
 }
 
 
@@ -55,12 +55,18 @@ void SCResultView_PCC::plotGraphs(const vrfb::shuntcur::pcc::PCCReport& p) {
 
   for (const auto& form : formDatas) {
     switch (form.it) {
-      case IndexingType::itStack:
-        form.plot->setupPlot(series_xs, (p.*form.yseriesGetter)(), "Cell No.", "Current (A)");
+      case IndexingType::itStack: {
+        std::vector<GraphPlotForm::Series> slist {};
+        for (std::size_t li = 0; li < p.numLines(); ++li) {
+          slist.push_back({"Line " + std::to_string(li)});
+          for (std::size_t i = 0; i < p.numCells()*p.numStacks(); ++i) {
+            slist.back().xs.push_back(i);
+            slist.back().ys.push_back((p.*form.yseriesGetter)(li*p.numCells()*p.numStacks() + i));
+          }
+        }
+        form.plot->setupPlot(slist, "Cell No.", "Current (A)");
         break;
-      case IndexingType::itConn:
-        form.plot->setupPlot(series_xc, (p.*form.yseriesGetter)(), "Stack No.", "Current (A)");
-        break;
+      }
     }
   }
 

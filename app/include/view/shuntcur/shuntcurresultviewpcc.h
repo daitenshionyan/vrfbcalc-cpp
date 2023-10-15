@@ -21,7 +21,7 @@ QT_END_NAMESPACE
 class SCResultView_PCC : public MainWindow::SCDataView {
   Q_OBJECT
 
-  using SeriesGetter = const std::vector<double>& (vrfb::shuntcur::pcc::PCCReport::*)() const;
+  using SeriesGetter = double (vrfb::shuntcur::pcc::PCCReport::*)(std::size_t) const;
 
   enum class IndexingType {
     itStack, itConn
