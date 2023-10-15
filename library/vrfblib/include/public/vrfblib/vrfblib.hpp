@@ -770,6 +770,7 @@ class PCCReport : public ShuntReportData {
     double chargingCurr() const override {return chgCurr;}
     double chargingVolt() const override {return chgVolt;}
     double chargingPowr() const override {return chgCurr*chgVolt;}
+    inline double overVoltPowr() const {return ovpLoss;}
 
     const std::vector<double>& cellCurrs() const override {return cell_currs;}
     const std::vector<double>& cellPowrs() const override {return cell_powrs;}

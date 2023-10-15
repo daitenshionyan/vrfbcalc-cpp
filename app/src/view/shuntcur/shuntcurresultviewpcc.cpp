@@ -1,80 +1,49 @@
-#include "view/shuntcur/shuntcurresultview.h"
-#include "./ui_shuntcurresultview.h"
-
-#include <filesystem>
-#include <vector>
-
-#include "utillib/utils.hpp"
+#include "view/shuntcur/shuntcurresultviewpcc.h"
+#include "./ui_shuntcurresultviewpcc.h"
 
 
-SCResultView::SCResultView(QWidget* parent, const std::string& p)
-    : MainWindow::SCDataView(parent), ui(new Ui::SCResultView), prefix{p} {
+SCResultView_PCC::SCResultView_PCC(QWidget* parent, const std::string& p)
+    : MainWindow::SCDataView(parent), ui(new Ui::SCResultView_PCC), prefix(p) {
   ui->setupUi(this);
-  connect(this, &QDialog::finished, this, &SCResultView::deleteSelf);
+  connect(this, &QDialog::finished, this, &SCResultView_PCC::deleteSelf);
   addPlot("Cell current",
       IndexingType::itStack,
-      &vrfb::shuntcur::scl::SCLReport::cellCurrs);
+      &vrfb::shuntcur::pcc::PCCReport::cellCurrs);
   // stack shunts ------------------------------------
   addPlot("SPT current",
       IndexingType::itStack,
-      &vrfb::shuntcur::scl::SCLReport::sptCurrs);
+      &vrfb::shuntcur::pcc::PCCReport::sptCurrs);
   addPlot("SPB current",
       IndexingType::itStack,
-      &vrfb::shuntcur::scl::SCLReport::spbCurrs);
+      &vrfb::shuntcur::pcc::PCCReport::spbCurrs);
   addPlot("SNT current",
       IndexingType::itStack,
-      &vrfb::shuntcur::scl::SCLReport::sntCurrs);
+      &vrfb::shuntcur::pcc::PCCReport::sntCurrs);
   addPlot("SNB current",
       IndexingType::itStack,
-      &vrfb::shuntcur::scl::SCLReport::snbCurrs);
+      &vrfb::shuntcur::pcc::PCCReport::snbCurrs);
   // stack manifolds ---------------------------------
   addPlot("MPT current",
       IndexingType::itStack,
-      &vrfb::shuntcur::scl::SCLReport::mptCurrs);
+      &vrfb::shuntcur::pcc::PCCReport::mptCurrs);
   addPlot("MPB current",
       IndexingType::itStack,
-      &vrfb::shuntcur::scl::SCLReport::mpbCurrs);
+      &vrfb::shuntcur::pcc::PCCReport::mpbCurrs);
   addPlot("MNT current",
       IndexingType::itStack,
-      &vrfb::shuntcur::scl::SCLReport::mntCurrs);
+      &vrfb::shuntcur::pcc::PCCReport::mntCurrs);
   addPlot("MNB current",
       IndexingType::itStack,
-      &vrfb::shuntcur::scl::SCLReport::mnbCurrs);
-  // connector shunts --------------------------------
-  addPlot("CSPT current",
-      IndexingType::itConn,
-      &vrfb::shuntcur::scl::SCLReport::csptCurrs);
-  addPlot("CSPB current",
-      IndexingType::itConn,
-      &vrfb::shuntcur::scl::SCLReport::cspbCurrs);
-  addPlot("CSNT current",
-      IndexingType::itConn,
-      &vrfb::shuntcur::scl::SCLReport::csntCurrs);
-  addPlot("CSNB current",
-      IndexingType::itConn,
-      &vrfb::shuntcur::scl::SCLReport::csnbCurrs);
-  // connector manifolds -----------------------------
-  addPlot("CMPT current",
-      IndexingType::itConn,
-      &vrfb::shuntcur::scl::SCLReport::cmptCurrs);
-  addPlot("CMPB current",
-      IndexingType::itConn,
-      &vrfb::shuntcur::scl::SCLReport::cmpbCurrs);
-  addPlot("CMNT current",
-      IndexingType::itConn,
-      &vrfb::shuntcur::scl::SCLReport::cmntCurrs);
-  addPlot("CMNB current",
-      IndexingType::itConn,
-      &vrfb::shuntcur::scl::SCLReport::cmnbCurrs);
+      &vrfb::shuntcur::pcc::PCCReport::mnbCurrs);
 }
 
 
-SCResultView::~SCResultView() {
+SCResultView_PCC::~SCResultView_PCC() {
   delete ui;
 }
 
 
-void SCResultView::plotGraphs(const vrfb::shuntcur::scl::SCLReport& p) {
+void SCResultView_PCC::plotGraphs(const vrfb::shuntcur::pcc::PCCReport& p) {
   std::vector<double> series_xs {};
   std::vector<double> series_xc {};
   for (std::size_t i = 0; i < p.totCells(); ++i) {
@@ -106,7 +75,7 @@ void SCResultView::plotGraphs(const vrfb::shuntcur::scl::SCLReport& p) {
 }
 
 
-bool SCResultView::exportImages(logger::Logger& l) {
+bool SCResultView_PCC::exportImages(logger::Logger& l) {
   std::filesystem::create_directories("output/images");
   bool is_success = true;
   for (const auto& form : formDatas) {
@@ -127,12 +96,12 @@ bool SCResultView::exportImages(logger::Logger& l) {
 }
 
 
-void SCResultView::on_exportBtn_clicked() {
+void SCResultView_PCC::on_exportBtn_clicked() {
   emit exportRequested(this);
 }
 
 
-void SCResultView::addPlot(const std::string& name, IndexingType it, SeriesGetter getter) {
+void SCResultView_PCC::addPlot(const std::string& name, IndexingType it, SeriesGetter getter) {
   GraphPlotFormTitled* plot = new GraphPlotFormTitled(name, this);
   ui->scrollAreaContents->layout()->addWidget(plot);
   formDatas.push_back({name, it, getter, plot});

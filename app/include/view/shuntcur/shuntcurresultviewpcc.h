@@ -13,15 +13,15 @@
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
-  class SCResultView;
+  class SCResultView_PCC;
 }
 QT_END_NAMESPACE
 
 
-class SCResultView : public MainWindow::SCDataView {
+class SCResultView_PCC : public MainWindow::SCDataView {
   Q_OBJECT
 
-  using SeriesGetter = const std::vector<double>& (vrfb::shuntcur::scl::SCLReport::*)() const;
+  using SeriesGetter = const std::vector<double>& (vrfb::shuntcur::pcc::PCCReport::*)() const;
 
   enum class IndexingType {
     itStack, itConn
@@ -35,22 +35,22 @@ class SCResultView : public MainWindow::SCDataView {
   };
 
   public:
-    SCResultView(QWidget*, const std::string&);
-    ~SCResultView();
+    SCResultView_PCC(QWidget*, const std::string&);
+    ~SCResultView_PCC();
 
-    void plotGraphs(const vrfb::shuntcur::scl::SCLReport&);
+    void plotGraphs(const vrfb::shuntcur::pcc::PCCReport&);
     bool exportImages(logger::Logger& l) override;
 
 
   signals:
-    void exportRequested(SCResultView*);
+    void exportRequested(SCResultView_PCC*);
 
 
   private:
     void deleteSelf(int) {delete this;}
     void addPlot(const std::string& name, IndexingType it, SeriesGetter getter);
 
-    Ui::SCResultView* ui;
+    Ui::SCResultView_PCC* ui;
     std::string prefix;
     std::vector<PlotFormData> formDatas;
 

@@ -12,6 +12,9 @@
 #include "vrfbcalccfg.hpp"
 #include "driver/vrfbdriver_io.hpp"
 
+#include "view/shuntcur/shuntcurresultview.h"
+#include "view/shuntcur/shuntcurresultviewpcc.h"
+
 
 namespace {
 
@@ -181,7 +184,7 @@ void MainWindow::displayPerformanceView(
 
 void MainWindow::displayPerformanceView_SC(const vrfbdriver::ShuntRes& r) {
   switch (r.arrType) {
-    case vrfbdriver::SCArrType::scatSCL:
+    case vrfbdriver::SCArrType::scatSCL: {
       SCResultView* rv = new SCResultView(this, r.name);
       try {
         rv->plotGraphs(r.perf.data<vrfb::shuntcur::scl::SCLReport>());
@@ -195,6 +198,22 @@ void MainWindow::displayPerformanceView_SC(const vrfbdriver::ShuntRes& r) {
           this, &MainWindow::exportSEPerformance);
       rv->open();
       break;
+    }
+    case vrfbdriver::SCArrType::scatPCC: {
+      SCResultView_PCC* rv = new SCResultView_PCC(this, r.name);
+      try {
+        rv->plotGraphs(r.perf.data<vrfb::shuntcur::pcc::PCCReport>());
+      } catch (std::exception& ex) {
+        fail(comutils::string::format_string("Failed to plot graphs due to - %s",
+            ex.what()));
+        delete rv;
+        return;
+      }
+      connect(rv, &SCResultView_PCC::exportRequested,
+          this, &MainWindow::exportSEPerformance);
+      rv->open();
+      break;
+    }
   }
 }
 
@@ -220,7 +239,7 @@ void MainWindow::exportCEPerformance(CEResultView* rv) {
 }
 
 
-void MainWindow::exportSEPerformance(SCResultView* rv) {
+void MainWindow::exportSEPerformance(SCDataView* rv) {
   if (watcher.isRunning()) {
     warn("Cannot export as another process is already running");
     return;
