@@ -1,6 +1,6 @@
 #pragma once
 
-
+#include <cmath>
 #include <string>
 #include <unordered_set>
 
@@ -10,7 +10,14 @@
 namespace vrfb {
 
 
-constexpr double kAvrOCV = 1.38;
+inline double getOCV(double soc=0.3642530, double t=298) {
+  return 1.38
+      - 0.00193 * (t - 273)
+      + (8.314 * t) / 96485.3321
+          * std::log(
+              ((1.8*soc+3) * (1.8*soc+4.8) * std::pow(soc, 2))
+              / std::pow(1-soc, 2));
+}
 
 
 namespace celleff {

@@ -18,7 +18,7 @@
 namespace { // ==== namespace <UNNAMED> ========================================
 
 
-constexpr double threshold = 0.000001;
+constexpr double threshold = 1e-6;
 
 
 void checkMatrix(const Eigen::MatrixXd& expected, const Eigen::MatrixXd& actual) {

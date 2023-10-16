@@ -62,13 +62,13 @@ SCLReport::SCLReport(double cc, double cv, const SCLSysParam& s,
         cmpt_currs{cmptlist}, cmpb_currs{cmpblist},
         cmnt_currs{cmntlist}, cmnb_currs{cmnblist} {
   for (std::size_t i = 0; i < cell_currs.size(); ++i) {
-    double cellInPowr = cell_currs[i]*kAvrOCV;
+    double cellInPowr = cell_currs[i]*getOCV();
     if (s.cellArea()*s.maxChgDen() < cell_currs[i]) {
-      cellInPowr = s.cellArea()*s.maxChgDen() * kAvrOCV;
+      cellInPowr = s.cellArea()*s.maxChgDen() * getOCV();
     }
     cell_powrs.push_back(cellInPowr);
     totPowr += cellInPowr;
-    ovpLoss += cell_currs[i]*kAvrOCV - cellInPowr;
+    ovpLoss += cell_currs[i]*getOCV() - cellInPowr;
 
     cir_powrs.push_back(std::pow(cell_currs[i], 2) * sys.cellR());
 
@@ -120,13 +120,13 @@ SCLReport::SCLReport(double cc, double cv, const SCLSysParam& s,
         cmpt_currs{std::move(cmptlist)}, cmpb_currs{std::move(cmpblist)},
         cmnt_currs{std::move(cmntlist)}, cmnb_currs{std::move(cmnblist)} {
   for (std::size_t i = 0; i < cell_currs.size(); ++i) {
-    double cellInPowr = cell_currs[i]*kAvrOCV;
+    double cellInPowr = cell_currs[i]*getOCV();
     if (s.cellArea()*s.maxChgDen() < cell_currs[i]) {
-      cellInPowr = s.cellArea()*s.maxChgDen() * kAvrOCV;
+      cellInPowr = s.cellArea()*s.maxChgDen() * getOCV();
     }
     cell_powrs.push_back(cellInPowr);
     totPowr += cellInPowr;
-    ovpLoss += cell_currs[i]*kAvrOCV - cellInPowr;
+    ovpLoss += cell_currs[i]*getOCV() - cellInPowr;
 
     cir_powrs.push_back(std::pow(cell_currs[i], 2) * sys.cellR());
 
@@ -189,13 +189,13 @@ PCCReport::PCCReport(double cc, double cv, const PCCSysParam& s,
         mnt_currs{mntlist}, mnb_currs{mnblist},
         error{err}, arrangementName{an} {
   for (std::size_t i = 0; i < cell_currs.size(); ++i) {
-    double cellInPowr = cell_currs[i]*kAvrOCV;
+    double cellInPowr = cell_currs[i]*getOCV();
     if (s.cellArea()*s.maxChgDen() < cell_currs[i]) {
-      cellInPowr = s.cellArea()*s.maxChgDen() * kAvrOCV;
+      cellInPowr = s.cellArea()*s.maxChgDen() * getOCV();
     }
     cell_powrs.push_back(cellInPowr);
     totPowr += cellInPowr;
-    ovpLoss += cell_currs[i]*kAvrOCV - cellInPowr;
+    ovpLoss += cell_currs[i]*getOCV() - cellInPowr;
 
     cir_powrs.push_back(std::pow(cell_currs[i], 2) * sys.cellR());
 
@@ -227,13 +227,13 @@ PCCReport::PCCReport(double cc, double cv, const PCCSysParam& s,
         mnt_currs{std::move(mntlist)}, mnb_currs{std::move(mnblist)},
         error{err}, arrangementName{an} {
   for (std::size_t i = 0; i < cell_currs.size(); ++i) {
-    double cellInPowr = cell_currs[i]*kAvrOCV;
+    double cellInPowr = cell_currs[i]*getOCV();
     if (s.cellArea()*s.maxChgDen() < cell_currs[i]) {
-      cellInPowr = s.cellArea()*s.maxChgDen() * kAvrOCV;
+      cellInPowr = s.cellArea()*s.maxChgDen() * getOCV();
     }
     cell_powrs.push_back(cellInPowr);
     totPowr += cellInPowr;
-    ovpLoss += cell_currs[i]*kAvrOCV - cellInPowr;
+    ovpLoss += cell_currs[i]*getOCV() - cellInPowr;
 
     cir_powrs.push_back(std::pow(cell_currs[i], 2) * sys.cellR());
 
