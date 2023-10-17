@@ -773,27 +773,27 @@ void addConnLoops<ConnSide::csFront, ConnSide::csBack>(Eigen::MatrixXd& m, const
 void addVolt(Eigen::VectorXd& v, const PCCSysParam& s, double chgVolt) {
   for (std::size_t li = 0; li < s.numLines(); ++li) {
     // line loops
-    v(li) += chgVolt - s.numStacks()*s.numCells()*getOCV();
+    v(li) += chgVolt - s.numStacks()*s.numCells()*s.ocv();
     for (std::size_t si = 0; si < s.numStacks(); ++si) {
       // connector loops
       if (si > 0) {
-        v(indexCPT<ConnSide::csFront>(s, si, li)) -= s.numCells()*getOCV();
-        v(indexCNB<ConnSide::csBack>(s, si, li)) -= s.numCells()*getOCV();
+        v(indexCPT<ConnSide::csFront>(s, si, li)) -= s.numCells()*s.ocv();
+        v(indexCNB<ConnSide::csBack>(s, si, li)) -= s.numCells()*s.ocv();
       }
       if (si+1 < s.numStacks()) {
-        v(indexCPB<ConnSide::csFront>(s, si, li)) -= s.numCells()*getOCV();
-        v(indexCNT<ConnSide::csBack>(s, si, li)) -= s.numCells()*getOCV();
+        v(indexCPB<ConnSide::csFront>(s, si, li)) -= s.numCells()*s.ocv();
+        v(indexCNT<ConnSide::csBack>(s, si, li)) -= s.numCells()*s.ocv();
       }
       for (std::size_t ci = 0; ci < s.numCells(); ++ci) {
         if (ci+1 < s.numCells()) {
           // positive cell loops
-          v(indexSPT(s, ci, si, li)) -= getOCV();
-          v(indexSPB(s, ci, si, li)) -= getOCV();
+          v(indexSPT(s, ci, si, li)) -= s.ocv();
+          v(indexSPB(s, ci, si, li)) -= s.ocv();
         }
         if (ci > 0) {
           // negative cell loops
-          v(indexSNT(s, ci, si, li)) -= getOCV();
-          v(indexSNB(s, ci, si, li)) -= getOCV();
+          v(indexSNT(s, ci, si, li)) -= s.ocv();
+          v(indexSNB(s, ci, si, li)) -= s.ocv();
         }
       }
     }

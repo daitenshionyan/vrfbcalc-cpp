@@ -185,9 +185,11 @@ class SysParam {
           r{rho}, maxCD{mcd}, s{stack} {}
 
     SysParam(const StackParam& stack, double rho, double mcd,
-        std::size_t num_c, std::size_t num_s, std::size_t num_p)
+        std::size_t num_c, std::size_t num_s, std::size_t num_p,
+        double soc=0.3642530, double temp=298)
         : s{stack}, r{rho}, maxCD{mcd},
-          nl{num_p}, ns{num_s}, nc{num_c} {}
+          nl{num_p}, ns{num_s}, nc{num_c},
+          chargeFrac{soc}, t{temp} {}
 
     SysParam() = delete;
     SysParam(const SysParam&) = default;
@@ -205,6 +207,9 @@ class SysParam {
     inline std::size_t numCells() const {return nc;}
     inline double resistivity() const {return r;}
     inline double maxChgDen() const {return maxCD;}
+    inline double soc() const {return chargeFrac;}
+    inline double temperature() const {return t;}
+    inline double ocv() const {return getOCV(chargeFrac, t);}
 
     inline double asr() const {return s.asr;}
     inline double cellArea() const {return s.ca;}
@@ -219,11 +224,13 @@ class SysParam {
 
 
   private:
-    std::size_t nl;
-    std::size_t ns;             // number of stacks
+    std::size_t nl;             // number of lines
+    std::size_t ns;             // number of stacks per line
     std::size_t nc;             // number of cells per stack
     double r;                   // resistivity (Ohm m)
     double maxCD;               // maximum charge density (A m-2)
+    double chargeFrac;          // state of charge (fractional)
+    double t;                   // temperature (K)
 
     StackParam s;
 };

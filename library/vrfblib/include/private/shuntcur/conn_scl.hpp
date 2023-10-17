@@ -1467,26 +1467,26 @@ void addSysVolt(Eigen::VectorXd& v, const SCLSysParam& s, double chgVolt) {
   v(0) += chgVolt;
   for (std::size_t si = 0; si < s.numStacks(); ++si) {
     if (si > 0) {
-      v(indexCPT<ConnSide::csFront>(si, s.numStacks(), s.numCells())) -= s.numCells() * getOCV();
-      v(indexCNT<ConnSide::csFront>(si, s.numStacks(), s.numCells())) -= s.numCells() * getOCV();
+      v(indexCPT<ConnSide::csFront>(si, s.numStacks(), s.numCells())) -= s.numCells() * s.ocv();
+      v(indexCNT<ConnSide::csFront>(si, s.numStacks(), s.numCells())) -= s.numCells() * s.ocv();
     }
 
     if (si+1 < s.numStacks()) {
-      v(indexCPB<ConnSide::csFront>(si, s.numStacks(), s.numCells())) -= s.numCells() * getOCV();
-      v(indexCNB<ConnSide::csFront>(si, s.numStacks(), s.numCells())) -= s.numCells() * getOCV();
+      v(indexCPB<ConnSide::csFront>(si, s.numStacks(), s.numCells())) -= s.numCells() * s.ocv();
+      v(indexCNB<ConnSide::csFront>(si, s.numStacks(), s.numCells())) -= s.numCells() * s.ocv();
     }
 
     for (std::size_t ci = 0; ci < s.numCells(); ++ci) {
-      v(0) -= getOCV();
+      v(0) -= s.ocv();
 
       if (ci+1 < s.numCells()) {
-        v(indexSPT(s, ci, si)) -= getOCV();
-        v(indexSPB(s, ci, si)) -= getOCV();
+        v(indexSPT(s, ci, si)) -= s.ocv();
+        v(indexSPB(s, ci, si)) -= s.ocv();
       }
 
       if (ci > 0) {
-        v(indexSNT(s, ci, si)) -= getOCV();
-        v(indexSNB(s, ci, si)) -= getOCV();
+        v(indexSNT(s, ci, si)) -= s.ocv();
+        v(indexSNB(s, ci, si)) -= s.ocv();
       }
     }
   }
