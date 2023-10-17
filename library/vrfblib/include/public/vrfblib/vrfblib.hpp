@@ -170,25 +170,11 @@ struct StackParam {
 */
 class SysParam {
   public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
-    /**
-     * Constructs a `SysParam`
-     *
-     * @param num_s Number of stacks.
-     * @param num_c Number of cells per stack.
-     * @param rho Resistivity of electrolyte (Ohm m).
-     * @param mcd Max charge density (A m-2).
-     * @param stack Stack parameters.
-    */
-    SysParam(std::size_t num_s, std::size_t num_c,
-        double rho, double mcd, const StackParam& stack)
-        : nl{1}, ns{num_s}, nc{num_c},
-          r{rho}, maxCD{mcd}, s{stack} {}
-
     SysParam(const StackParam& stack, double rho, double mcd,
-        std::size_t num_c, std::size_t num_s, std::size_t num_p,
+        std::size_t num_c, std::size_t num_s, std::size_t num_l,
         double soc=0.3642530, double temp=298)
         : s{stack}, r{rho}, maxCD{mcd},
-          nl{num_p}, ns{num_s}, nc{num_c},
+          nl{num_l}, ns{num_s}, nc{num_c},
           chargeFrac{soc}, t{temp} {}
 
     SysParam() = delete;
@@ -372,20 +358,6 @@ struct ConnParam {
 */
 class SCLSysParam : public SysParam {
   public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
-    /**
-     * Constructs a `SCLSysParam`
-     *
-     * @param num_s Number of stacks.
-     * @param num_c Number of cells per stack.
-     * @param rho Resistivity of electrolyte (Ohm m).
-     * @param mcd Max charge density (A m-2).
-     * @param stack Stack parameters.
-     * @param conn SCL connector parameters.
-    */
-    SCLSysParam(std::size_t num_s, std::size_t num_c, double rho, double mcd,
-        const StackParam& stack, const ConnParam& conn)
-        : SysParam{num_s, num_c, rho, mcd, stack}, c{conn} {}
-
     SCLSysParam(const SysParam& sys, const ConnParam& conn)
         : SysParam{sys}, c{conn} {}
 
@@ -688,13 +660,6 @@ struct ConnParam {
 
 class PCCSysParam : public SysParam {
   public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
-    PCCSysParam(
-        double rho, double mcd,
-        std::size_t num_c, std::size_t num_s, std::size_t num_p,
-        const StackParam& stack, const ConnParam& conn)
-        : SysParam{stack, rho, mcd, num_c, num_s, num_p},
-          c{conn} {}
-
     PCCSysParam(const SysParam& sys, const ConnParam& conn)
         : SysParam{sys}, c{conn} {}
 

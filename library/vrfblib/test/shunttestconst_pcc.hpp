@@ -41,9 +41,11 @@ const vrfb::shuntcur::pcc::ConnParam kTestConnParam {
 
 
 const vrfb::shuntcur::pcc::PCCSysParam kTestSysParam {
-  1, 1000,
-  kNumCells, kNumStacks, kNumParallel,
-  kTestStackParam, kTestConnParam
+  vrfb::shuntcur::SysParam {
+    kTestStackParam, 1, 1000,
+    kNumCells, kNumStacks, kNumParallel
+  },
+  kTestConnParam
 };
 
 
