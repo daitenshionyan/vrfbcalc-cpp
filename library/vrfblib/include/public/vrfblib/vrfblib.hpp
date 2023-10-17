@@ -273,6 +273,7 @@ class ShuntReportData {
     virtual double chargingCurr() const = 0;
     virtual double chargingVolt() const = 0;
     virtual double chargingPowr() const = 0;
+    virtual double overVoltPowr() const = 0;
 
     virtual const std::vector<double>& cellCurrs() const = 0;
     virtual const std::vector<double>& cellPowrs() const = 0;
@@ -464,7 +465,7 @@ class SCLReport : public ShuntReportData {
     double chargingCurr() const override {return chgCurr;}
     double chargingVolt() const override {return chgVolt;}
     double chargingPowr() const override {return chgCurr*chgVolt;}
-    inline double overVoltPowr() const {return ovpLoss;}
+    double overVoltPowr() const override {return ovpLoss;}
 
     std::size_t numCells() const override {return sys.numCells();}
     std::size_t numStacks() const override {return sys.numStacks();}
@@ -804,7 +805,7 @@ class PCCReport : public ShuntReportData {
     double chargingCurr() const override {return chgCurr;}
     double chargingVolt() const override {return chgVolt;}
     double chargingPowr() const override {return chgCurr*chgVolt;}
-    inline double overVoltPowr() const {return ovpLoss;}
+    double overVoltPowr() const override {return ovpLoss;}
 
     const std::vector<double>& cellCurrs() const override {return cell_currs;}
     const std::vector<double>& cellPowrs() const override {return cell_powrs;}

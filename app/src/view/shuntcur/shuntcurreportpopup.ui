@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>SCResultView_PCC</class>
- <widget class="QDialog" name="SCResultView_PCC">
+ <class>SCReportPopup</class>
+ <widget class="QDialog" name="SCReportPopup">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -54,6 +54,128 @@
        <item>
         <widget class="QWidget" name="summaryBox" native="true">
          <layout class="QFormLayout" name="formLayout">
+          <item row="0" column="0">
+           <widget class="QLabel" name="arrLabel">
+            <property name="text">
+             <string>Arrangement</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="arrField">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label">
+            <property name="text">
+             <string>Temperature</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QWidget" name="tempBox" native="true">
+            <layout class="QHBoxLayout" name="horizontalLayout_8">
+             <property name="spacing">
+              <number>5</number>
+             </property>
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QLineEdit" name="tempField">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="tempUnitLabel">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>11</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>C</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="socLabel">
+            <property name="text">
+             <string>SOC</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QWidget" name="socBox" native="true">
+            <layout class="QHBoxLayout" name="horizontalLayout_9">
+             <property name="spacing">
+              <number>5</number>
+             </property>
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QLineEdit" name="socField">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="socUnitLabel">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>11</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>%</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
           <item row="3" column="0">
            <widget class="QLabel" name="chgVoltLabel">
             <property name="text">
@@ -216,6 +338,60 @@
             </layout>
            </widget>
           </item>
+          <item row="6" column="0">
+           <widget class="QLabel" name="ovplLabel">
+            <property name="text">
+             <string>Over Volt Powr</string>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="1">
+           <widget class="QWidget" name="ovplBox" native="true">
+            <layout class="QHBoxLayout" name="horizontalLayout_7">
+             <property name="spacing">
+              <number>5</number>
+             </property>
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QLineEdit" name="ovplField">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="ovplUnitLabel">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>11</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>W</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
           <item row="7" column="0">
            <widget class="QLabel" name="inputPowrLabel">
             <property name="text">
@@ -292,236 +468,6 @@
              </item>
              <item>
               <widget class="QLabel" name="energyEffUnitLabel">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>11</width>
-                 <height>0</height>
-                </size>
-               </property>
-               <property name="text">
-                <string>%</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item row="9" column="0">
-           <widget class="QLabel" name="errorLabel">
-            <property name="text">
-             <string>Norm Err</string>
-            </property>
-           </widget>
-          </item>
-          <item row="9" column="1">
-           <widget class="QWidget" name="errorBox" native="true">
-            <layout class="QHBoxLayout" name="horizontalLayout_6">
-             <property name="spacing">
-              <number>5</number>
-             </property>
-             <property name="leftMargin">
-              <number>0</number>
-             </property>
-             <property name="topMargin">
-              <number>0</number>
-             </property>
-             <property name="rightMargin">
-              <number>0</number>
-             </property>
-             <property name="bottomMargin">
-              <number>0</number>
-             </property>
-             <item>
-              <widget class="QLineEdit" name="errorField">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QLabel" name="errorUnitLabel">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>11</width>
-                 <height>0</height>
-                </size>
-               </property>
-               <property name="text">
-                <string/>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item row="6" column="0">
-           <widget class="QLabel" name="ovplLabel">
-            <property name="text">
-             <string>Over Volt Powr</string>
-            </property>
-           </widget>
-          </item>
-          <item row="6" column="1">
-           <widget class="QWidget" name="ovplBox" native="true">
-            <layout class="QHBoxLayout" name="horizontalLayout_7">
-             <property name="spacing">
-              <number>5</number>
-             </property>
-             <property name="leftMargin">
-              <number>0</number>
-             </property>
-             <property name="topMargin">
-              <number>0</number>
-             </property>
-             <property name="rightMargin">
-              <number>0</number>
-             </property>
-             <property name="bottomMargin">
-              <number>0</number>
-             </property>
-             <item>
-              <widget class="QLineEdit" name="ovplField">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QLabel" name="ovplUnitLabel">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>11</width>
-                 <height>0</height>
-                </size>
-               </property>
-               <property name="text">
-                <string>W</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="arrLabel">
-            <property name="text">
-             <string>Arrangement</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QLineEdit" name="arrField">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label">
-            <property name="text">
-             <string>Temperature</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QWidget" name="tempBox" native="true">
-            <layout class="QHBoxLayout" name="horizontalLayout_8">
-             <property name="spacing">
-              <number>5</number>
-             </property>
-             <property name="leftMargin">
-              <number>0</number>
-             </property>
-             <property name="topMargin">
-              <number>0</number>
-             </property>
-             <property name="rightMargin">
-              <number>0</number>
-             </property>
-             <property name="bottomMargin">
-              <number>0</number>
-             </property>
-             <item>
-              <widget class="QLineEdit" name="tempField">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QLabel" name="tempUnitLabel">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>11</width>
-                 <height>0</height>
-                </size>
-               </property>
-               <property name="text">
-                <string>C</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="socLabel">
-            <property name="text">
-             <string>SOC</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QWidget" name="socBox" native="true">
-            <layout class="QHBoxLayout" name="horizontalLayout_9">
-             <property name="spacing">
-              <number>5</number>
-             </property>
-             <property name="leftMargin">
-              <number>0</number>
-             </property>
-             <property name="topMargin">
-              <number>0</number>
-             </property>
-             <property name="rightMargin">
-              <number>0</number>
-             </property>
-             <property name="bottomMargin">
-              <number>0</number>
-             </property>
-             <item>
-              <widget class="QLineEdit" name="socField">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QLabel" name="socUnitLabel">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
                  <horstretch>0</horstretch>

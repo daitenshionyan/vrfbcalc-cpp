@@ -13,7 +13,6 @@
 #include "driver/vrfbdriver_io.hpp"
 
 #include "view/shuntcur/shuntcurresultview.h"
-#include "view/shuntcur/shuntcurresultviewpcc.h"
 
 
 namespace {
@@ -200,18 +199,65 @@ void MainWindow::displayPerformanceView_SC(const vrfbdriver::ShuntRes& r) {
       break;
     }
     case vrfbdriver::SCArrType::scatPCC: {
-      SCResultView_PCC* rv = new SCResultView_PCC(this, r.name);
+      SCReportPopup* rp = new SCReportPopup(r.name, this);
       try {
-        rv->plotGraphs(r.perf.data<vrfb::shuntcur::pcc::PCCReport>());
+        rp->plotGraphs(r.perf.data<vrfb::shuntcur::pcc::PCCReport>(),
+            {
+              {
+                "Cell current",
+                SCReportPopup::IndexingType::itCell,
+                &vrfb::shuntcur::pcc::PCCReport::cellCurr
+              },
+              {
+                "SPT current",
+                SCReportPopup::IndexingType::itCell,
+                &vrfb::shuntcur::pcc::PCCReport::sptCurr
+              },
+              {
+                "SPB current",
+                SCReportPopup::IndexingType::itCell,
+                &vrfb::shuntcur::pcc::PCCReport::spbCurr
+              },
+              {
+                "SNT current",
+                SCReportPopup::IndexingType::itCell,
+                &vrfb::shuntcur::pcc::PCCReport::sntCurr
+              },
+              {
+                "SNB current",
+                SCReportPopup::IndexingType::itCell,
+                &vrfb::shuntcur::pcc::PCCReport::snbCurr
+              },
+              {
+                "MPT current",
+                SCReportPopup::IndexingType::itCell,
+                &vrfb::shuntcur::pcc::PCCReport::mptCurr
+              },
+              {
+                "MPB current",
+                SCReportPopup::IndexingType::itCell,
+                &vrfb::shuntcur::pcc::PCCReport::mpbCurr
+              },
+              {
+                "MNT current",
+                SCReportPopup::IndexingType::itCell,
+                &vrfb::shuntcur::pcc::PCCReport::mntCurr
+              },
+              {
+                "MNB current",
+                SCReportPopup::IndexingType::itCell,
+                &vrfb::shuntcur::pcc::PCCReport::mnbCurr
+              }
+            });
       } catch (std::exception& ex) {
         fail(comutils::string::format_string("Failed to plot graphs due to - %s",
             ex.what()));
-        delete rv;
+        delete rp;
         return;
       }
-      connect(rv, &SCResultView_PCC::exportRequested,
-          this, &MainWindow::exportSEPerformance);
-      rv->open();
+      connect(rp, &SCReportPopup::exportRequested,
+          this, &MainWindow::exportSCReport);
+      rp->open();
       break;
     }
   }
@@ -240,6 +286,27 @@ void MainWindow::exportCEPerformance(CEResultView* rv) {
 
 
 void MainWindow::exportSEPerformance(SCDataView* rv) {
+  if (watcher.isRunning()) {
+    warn("Cannot export as another process is already running");
+    return;
+  }
+  rv->hide();
+  watcher.setFuture(QtConcurrent::run(
+      &pool,
+      [&, rv](QPromise<logger::LogMsg>& p) {
+        auto l = PromLogger{p};
+        bool is_success = rv->exportImages(l);
+        if (is_success) {
+          rv->done(QDialog::Accepted);
+        } else {
+          rv->show();
+        }
+      }
+  ));
+}
+
+
+void MainWindow::exportSCReport(SCReportPopup* rv) {
   if (watcher.isRunning()) {
     warn("Cannot export as another process is already running");
     return;
