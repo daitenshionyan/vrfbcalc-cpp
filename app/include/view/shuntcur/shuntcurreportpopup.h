@@ -52,9 +52,10 @@ class SCReportPopup : public QDialog {
     void plotGraphs(const T& r) {
       initSummary(*static_cast<const vrfb::shuntcur::ShuntReportData*>(&r));
       for (const auto& p : getPlotConfig<T>()) {
+        std::vector<GraphPlotForm::Series> slist {};
+        std::string name_x;
         switch (p.it) {
-          case IndexingType::itCell: {
-            std::vector<GraphPlotForm::Series> slist {};
+          case IndexingType::itCell:
             for (std::size_t li = 0; li < r.numLines(); ++li) {
               slist.push_back({"Line " + std::to_string(li+1)});
               for (std::size_t i = 0; i < r.numCells()*r.numStacks(); ++i) {
@@ -62,9 +63,28 @@ class SCReportPopup : public QDialog {
                 slist.back().ys.push_back((r.*p.supplier)(li*r.numCells()*r.numStacks()+i));
               }
             }
-            initPlot(slist, "Cell No.", "Current (A)", p.name);
-          }
+            name_x = "Cell No.";
+            break;
+          case IndexingType::itStack:
+            for (std::size_t li = 0; li < r.numLines(); ++li) {
+              slist.push_back({"Line " + std::to_string(li+1)});
+              for (std::size_t i = 0; i < r.numStacks(); ++i) {
+                slist.back().xs.push_back(i);
+                slist.back().ys.push_back((r.*p.supplier)(li*r.numStacks()+i));
+              }
+            }
+            name_x = "Stack No.";
+            break;
+          case IndexingType::itLine:
+            for (std::size_t li = 0; li < r.numLines(); ++li) {
+              slist.push_back({"System"});
+              slist.back().xs.push_back(li);
+              slist.back().ys.push_back((r.*p.supplier)(li));
+            }
+            name_x = "Line No.";
+            break;
         }
+        initPlot(slist, name_x, "Current (A)", p.name);
       }
     }
 

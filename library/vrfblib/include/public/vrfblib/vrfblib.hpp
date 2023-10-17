@@ -393,6 +393,9 @@ class SCLSysParam : public SysParam {
         const StackParam& stack, const ConnParam& conn)
         : SysParam{num_s, num_c, rho, mcd, stack}, c{conn} {}
 
+    SCLSysParam(const SysParam& sys, const ConnParam& conn)
+        : SysParam{sys}, c{conn} {}
+
     SCLSysParam(const SCLSysParam&) = default;
     SCLSysParam(SCLSysParam&&) = default;
 

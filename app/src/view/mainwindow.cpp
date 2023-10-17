@@ -12,8 +12,6 @@
 #include "vrfbcalccfg.hpp"
 #include "driver/vrfbdriver_io.hpp"
 
-#include "view/shuntcur/shuntcurresultview.h"
-
 
 namespace {
 
@@ -182,38 +180,26 @@ void MainWindow::displayPerformanceView(
 
 
 void MainWindow::displayPerformanceView_SC(const vrfbdriver::ShuntRes& r) {
-  switch (r.arrType) {
-    case vrfbdriver::SCArrType::scatSCL: {
-      SCResultView* rv = new SCResultView(this, r.name);
-      try {
-        rv->plotGraphs(r.perf.data<vrfb::shuntcur::scl::SCLReport>());
-      } catch (std::exception& ex) {
-        fail(comutils::string::format_string("Failed to plot graphs due to - %s",
-            ex.what()));
-        delete rv;
-        return;
-      }
-      connect(rv, &SCResultView::exportRequested,
-          this, &MainWindow::exportSEPerformance);
-      rv->open();
-      break;
-    }
-    case vrfbdriver::SCArrType::scatPCC: {
-      SCReportPopup* rp = new SCReportPopup(r.name, this);
-      try {
+  SCReportPopup* rp = new SCReportPopup(r.name, this);
+  try {
+    switch (r.arrType) {
+      case vrfbdriver::SCArrType::scatSCL:
+        rp->plotGraphs(r.perf.data<vrfb::shuntcur::scl::SCLReport>());
+        break;
+      case vrfbdriver::SCArrType::scatPCC:
         rp->plotGraphs(r.perf.data<vrfb::shuntcur::pcc::PCCReport>());
-      } catch (std::exception& ex) {
-        fail(comutils::string::format_string("Failed to plot graphs due to - %s",
-            ex.what()));
-        delete rp;
-        return;
-      }
-      connect(rp, &SCReportPopup::exportRequested,
-          this, &MainWindow::exportSCReport);
-      rp->open();
-      break;
+        break;
     }
+  } catch (std::exception& ex) {
+    fail(comutils::string::format_string(
+        "Failed to plot graphs due to - %s",
+        ex.what()));
+    delete rp;
+    return;
   }
+  connect(rp, &SCReportPopup::exportRequested,
+      this, &MainWindow::exportSCReport);
+  rp->open();
 }
 
 

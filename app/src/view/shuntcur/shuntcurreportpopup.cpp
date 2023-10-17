@@ -78,6 +78,111 @@ void SCReportPopup::on_exportBtn_clicked() {
 */
 
 
+
+// :::: [ SCL ] ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+
+template<>
+std::vector<SCReportPopup::PlotConfig<vrfb::shuntcur::scl::SCLReport>>
+SCReportPopup::getPlotConfig<vrfb::shuntcur::scl::SCLReport>() {
+  return {
+      {
+        "Cell current",
+        IndexingType::itCell,
+        &vrfb::shuntcur::scl::SCLReport::cellCurr
+      },
+      // stack shunts --------------------------------------
+      {
+        "SPT current",
+        IndexingType::itCell,
+        &vrfb::shuntcur::scl::SCLReport::sptCurr
+      },
+      {
+        "SPB current",
+        IndexingType::itCell,
+        &vrfb::shuntcur::scl::SCLReport::spbCurr
+      },
+      {
+        "SNT current",
+        IndexingType::itCell,
+        &vrfb::shuntcur::scl::SCLReport::sntCurr
+      },
+      {
+        "SNB current",
+        IndexingType::itCell,
+        &vrfb::shuntcur::scl::SCLReport::snbCurr
+      },
+      // stack manifold ------------------------------------
+      {
+        "MPT current",
+        IndexingType::itCell,
+        &vrfb::shuntcur::scl::SCLReport::mptCurr
+      },
+      {
+        "MPB current",
+        IndexingType::itCell,
+        &vrfb::shuntcur::scl::SCLReport::mpbCurr
+      },
+      {
+        "MNT current",
+        IndexingType::itCell,
+        &vrfb::shuntcur::scl::SCLReport::mntCurr
+      },
+      {
+        "MNB current",
+        IndexingType::itCell,
+        &vrfb::shuntcur::scl::SCLReport::mnbCurr
+      },
+      // connector shunts ----------------------------------
+      {
+        "CSPT current",
+        IndexingType::itStack,
+        &vrfb::shuntcur::scl::SCLReport::csptCurr
+      },
+      {
+        "CSPB current",
+        IndexingType::itStack,
+        &vrfb::shuntcur::scl::SCLReport::cspbCurr
+      },
+      {
+        "CSNT current",
+        IndexingType::itStack,
+        &vrfb::shuntcur::scl::SCLReport::csntCurr
+      },
+      {
+        "CSNB current",
+        IndexingType::itStack,
+        &vrfb::shuntcur::scl::SCLReport::csnbCurr
+      },
+      // connector manifold --------------------------------
+      {
+        "CMPT current",
+        IndexingType::itStack,
+        &vrfb::shuntcur::scl::SCLReport::cmptCurr
+      },
+      {
+        "CMPB current",
+        IndexingType::itStack,
+        &vrfb::shuntcur::scl::SCLReport::cmpbCurr
+      },
+      {
+        "CMNT current",
+        IndexingType::itStack,
+        &vrfb::shuntcur::scl::SCLReport::cmntCurr
+      },
+      {
+        "CMNB current",
+        IndexingType::itStack,
+        &vrfb::shuntcur::scl::SCLReport::cmnbCurr
+      }
+  };
+}
+
+template
+std::vector<SCReportPopup::PlotConfig<vrfb::shuntcur::scl::SCLReport>>
+SCReportPopup::getPlotConfig<vrfb::shuntcur::scl::SCLReport>();
+
+
 // :::: [ PCC ] ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 
@@ -87,47 +192,49 @@ SCReportPopup::getPlotConfig<vrfb::shuntcur::pcc::PCCReport>() {
   return {
       {
         "Cell current",
-        SCReportPopup::IndexingType::itCell,
+        IndexingType::itCell,
         &vrfb::shuntcur::pcc::PCCReport::cellCurr
       },
+      // stack shunts --------------------------------------
       {
         "SPT current",
-        SCReportPopup::IndexingType::itCell,
+        IndexingType::itCell,
         &vrfb::shuntcur::pcc::PCCReport::sptCurr
       },
       {
         "SPB current",
-        SCReportPopup::IndexingType::itCell,
+        IndexingType::itCell,
         &vrfb::shuntcur::pcc::PCCReport::spbCurr
       },
       {
         "SNT current",
-        SCReportPopup::IndexingType::itCell,
+        IndexingType::itCell,
         &vrfb::shuntcur::pcc::PCCReport::sntCurr
       },
       {
         "SNB current",
-        SCReportPopup::IndexingType::itCell,
+        IndexingType::itCell,
         &vrfb::shuntcur::pcc::PCCReport::snbCurr
       },
+      // stack manifold ------------------------------------
       {
         "MPT current",
-        SCReportPopup::IndexingType::itCell,
+        IndexingType::itCell,
         &vrfb::shuntcur::pcc::PCCReport::mptCurr
       },
       {
         "MPB current",
-        SCReportPopup::IndexingType::itCell,
+        IndexingType::itCell,
         &vrfb::shuntcur::pcc::PCCReport::mpbCurr
       },
       {
         "MNT current",
-        SCReportPopup::IndexingType::itCell,
+        IndexingType::itCell,
         &vrfb::shuntcur::pcc::PCCReport::mntCurr
       },
       {
         "MNB current",
-        SCReportPopup::IndexingType::itCell,
+        IndexingType::itCell,
         &vrfb::shuntcur::pcc::PCCReport::mnbCurr
       }
   };
