@@ -71,6 +71,8 @@ void SCResultView_PCC::plotGraphs(const vrfb::shuntcur::pcc::PCCReport& p) {
   }
 
   ui->arrField->setText(QString::fromStdString(p.arrName()));
+  ui->tempField->setText(QString::fromStdString(std::to_string(p.param().temperature() - 273.15)));
+  ui->socField->setText(QString::fromStdString(std::to_string(p.param().soc() * 100)));
   ui->chgVoltField->setText(QString::fromStdString(std::to_string(p.chargingVolt())));
   ui->chgCurrField->setText(QString::fromStdString(std::to_string(p.chargingCurr())));
   ui->chgPowrField->setText(QString::fromStdString(std::to_string(p.chargingPowr())));

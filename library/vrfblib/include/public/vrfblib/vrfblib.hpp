@@ -255,6 +255,8 @@ class ShuntReportData {
   public: // ~~~~ accessors ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     virtual std::string arrName() const = 0;
 
+    virtual const SysParam& param() const = 0;
+
     virtual std::size_t numLines() const {return 1;}
     virtual std::size_t numStacks() const = 0;
     virtual std::size_t numCells() const = 0;
@@ -456,6 +458,8 @@ class SCLReport : public ShuntReportData {
     inline double err() const {return error;}
 
     std::string arrName() const override {return arrangementName;}
+
+    const SCLSysParam& param() const override {return sys;}
 
     double chargingCurr() const override {return chgCurr;}
     double chargingVolt() const override {return chgVolt;}
@@ -705,6 +709,9 @@ class PCCSysParam : public SysParam {
         : SysParam{stack, rho, mcd, num_c, num_s, num_p},
           c{conn} {}
 
+    PCCSysParam(const SysParam& sys, const ConnParam& conn)
+        : SysParam{sys}, c{conn} {}
+
     PCCSysParam() = delete;
     PCCSysParam(const PCCSysParam&) = default;
     PCCSysParam(PCCSysParam&&) = default;
@@ -768,6 +775,8 @@ class PCCReport : public ShuntReportData {
     inline double err() const {return error;}
 
     std::string arrName() const override {return arrangementName;}
+
+    const PCCSysParam& param() const override {return sys;}
 
     std::size_t numLines() const override {return sys.numLines();}
     std::size_t numStacks() const override {return sys.numStacks();};
