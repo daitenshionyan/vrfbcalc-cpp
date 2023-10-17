@@ -201,54 +201,7 @@ void MainWindow::displayPerformanceView_SC(const vrfbdriver::ShuntRes& r) {
     case vrfbdriver::SCArrType::scatPCC: {
       SCReportPopup* rp = new SCReportPopup(r.name, this);
       try {
-        rp->plotGraphs(r.perf.data<vrfb::shuntcur::pcc::PCCReport>(),
-            {
-              {
-                "Cell current",
-                SCReportPopup::IndexingType::itCell,
-                &vrfb::shuntcur::pcc::PCCReport::cellCurr
-              },
-              {
-                "SPT current",
-                SCReportPopup::IndexingType::itCell,
-                &vrfb::shuntcur::pcc::PCCReport::sptCurr
-              },
-              {
-                "SPB current",
-                SCReportPopup::IndexingType::itCell,
-                &vrfb::shuntcur::pcc::PCCReport::spbCurr
-              },
-              {
-                "SNT current",
-                SCReportPopup::IndexingType::itCell,
-                &vrfb::shuntcur::pcc::PCCReport::sntCurr
-              },
-              {
-                "SNB current",
-                SCReportPopup::IndexingType::itCell,
-                &vrfb::shuntcur::pcc::PCCReport::snbCurr
-              },
-              {
-                "MPT current",
-                SCReportPopup::IndexingType::itCell,
-                &vrfb::shuntcur::pcc::PCCReport::mptCurr
-              },
-              {
-                "MPB current",
-                SCReportPopup::IndexingType::itCell,
-                &vrfb::shuntcur::pcc::PCCReport::mpbCurr
-              },
-              {
-                "MNT current",
-                SCReportPopup::IndexingType::itCell,
-                &vrfb::shuntcur::pcc::PCCReport::mntCurr
-              },
-              {
-                "MNB current",
-                SCReportPopup::IndexingType::itCell,
-                &vrfb::shuntcur::pcc::PCCReport::mnbCurr
-              }
-            });
+        rp->plotGraphs(r.perf.data<vrfb::shuntcur::pcc::PCCReport>());
       } catch (std::exception& ex) {
         fail(comutils::string::format_string("Failed to plot graphs due to - %s",
             ex.what()));

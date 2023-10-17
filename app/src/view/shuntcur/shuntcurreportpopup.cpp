@@ -63,3 +63,76 @@ void SCReportPopup::initPlot(const std::vector<GraphPlotForm::Series>& slist,
 void SCReportPopup::on_exportBtn_clicked() {
   emit exportRequested(this);
 }
+
+
+
+
+
+
+
+
+/*
+********************************************************************************
+**    getPlotConfig
+********************************************************************************
+*/
+
+
+// :::: [ PCC ] ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+
+template<>
+std::vector<SCReportPopup::PlotConfig<vrfb::shuntcur::pcc::PCCReport>>
+SCReportPopup::getPlotConfig<vrfb::shuntcur::pcc::PCCReport>() {
+  return {
+      {
+        "Cell current",
+        SCReportPopup::IndexingType::itCell,
+        &vrfb::shuntcur::pcc::PCCReport::cellCurr
+      },
+      {
+        "SPT current",
+        SCReportPopup::IndexingType::itCell,
+        &vrfb::shuntcur::pcc::PCCReport::sptCurr
+      },
+      {
+        "SPB current",
+        SCReportPopup::IndexingType::itCell,
+        &vrfb::shuntcur::pcc::PCCReport::spbCurr
+      },
+      {
+        "SNT current",
+        SCReportPopup::IndexingType::itCell,
+        &vrfb::shuntcur::pcc::PCCReport::sntCurr
+      },
+      {
+        "SNB current",
+        SCReportPopup::IndexingType::itCell,
+        &vrfb::shuntcur::pcc::PCCReport::snbCurr
+      },
+      {
+        "MPT current",
+        SCReportPopup::IndexingType::itCell,
+        &vrfb::shuntcur::pcc::PCCReport::mptCurr
+      },
+      {
+        "MPB current",
+        SCReportPopup::IndexingType::itCell,
+        &vrfb::shuntcur::pcc::PCCReport::mpbCurr
+      },
+      {
+        "MNT current",
+        SCReportPopup::IndexingType::itCell,
+        &vrfb::shuntcur::pcc::PCCReport::mntCurr
+      },
+      {
+        "MNB current",
+        SCReportPopup::IndexingType::itCell,
+        &vrfb::shuntcur::pcc::PCCReport::mnbCurr
+      }
+  };
+}
+
+template
+std::vector<SCReportPopup::PlotConfig<vrfb::shuntcur::pcc::PCCReport>>
+SCReportPopup::getPlotConfig<vrfb::shuntcur::pcc::PCCReport>();

@@ -23,13 +23,8 @@ class SCReportPopup : public QDialog {
       itCell, itStack, itLine
     };
 
-    struct Plot {
-      std::string name;
-      GraphPlotFormTitled* plot = nullptr;
-    };
-
     template<typename T>
-    struct PlotData {
+    struct PlotConfig {
       using DataSupplier = double (T::*)(std::size_t) const;
 
       std::string name;
@@ -38,20 +33,25 @@ class SCReportPopup : public QDialog {
     };
 
 
+  public: // ~~~~ static functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    template<typename T>
+    static std::vector<PlotConfig<T>> getPlotConfig();
+
+
   public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
     SCReportPopup(const std::string& name, QWidget* parent = nullptr);
     ~SCReportPopup();
 
 
-  signals:
+  signals: // ~~~~ signals ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     void exportRequested(SCReportPopup*);
 
 
   public: // ~~~~ functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     template<typename T>
-    void plotGraphs(const T& r, const std::vector<PlotData<T>>& plist) {
+    void plotGraphs(const T& r) {
       initSummary(*static_cast<const vrfb::shuntcur::ShuntReportData*>(&r));
-      for (const auto& p : plist) {
+      for (const auto& p : getPlotConfig<T>()) {
         switch (p.it) {
           case IndexingType::itCell: {
             std::vector<GraphPlotForm::Series> slist {};
@@ -82,6 +82,13 @@ class SCReportPopup : public QDialog {
 
   private slots:
     void on_exportBtn_clicked();
+
+
+  private: // ~~~~ types ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    struct Plot {
+      std::string name;
+      GraphPlotFormTitled* plot = nullptr;
+    };
 
 
   private: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
