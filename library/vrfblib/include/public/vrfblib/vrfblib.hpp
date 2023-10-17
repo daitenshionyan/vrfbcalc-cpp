@@ -205,6 +205,7 @@ class SysParam {
     inline std::size_t numLines() const {return nl;}
     inline std::size_t numStacks() const {return ns;}
     inline std::size_t numCells() const {return nc;}
+
     inline double resistivity() const {return r;}
     inline double maxChgDen() const {return maxCD;}
     inline double soc() const {return chargeFrac;}
@@ -257,18 +258,10 @@ class ShuntReportData {
 
     virtual const SysParam& param() const = 0;
 
-    virtual std::size_t numLines() const {return 1;}
-    virtual std::size_t numStacks() const = 0;
-    virtual std::size_t numCells() const = 0;
-    virtual std::size_t totCells() const {return numLines() * numStacks() * numCells();}
-
-    virtual double asr() const = 0;
-    virtual double cellArea() const = 0;
-    virtual double resistivity() const = 0;
-    virtual double stackShuntLen() const = 0;
-    virtual double stackShuntArea() const = 0;
-    virtual double stackManiLen() const = 0;
-    virtual double stackManiArea() const = 0;
+    virtual std::size_t numLines() const {return param().numLines();}
+    virtual std::size_t numStacks() const {return param().numStacks();}
+    virtual std::size_t numCells() const {return param().numCells();}
+    virtual std::size_t totCells() const {return numLines()*numStacks()*numCells();}
 
     virtual double chargingCurr() const = 0;
     virtual double chargingVolt() const = 0;
@@ -470,10 +463,6 @@ class SCLReport : public ShuntReportData {
     double chargingPowr() const override {return chgCurr*chgVolt;}
     double overVoltPowr() const override {return ovpLoss;}
 
-    std::size_t numCells() const override {return sys.numCells();}
-    std::size_t numStacks() const override {return sys.numStacks();}
-
-    double resistivity() const override {return sys.resistivity();}
     inline double maxChgDen() const {return sys.maxChgDen();}
     inline double maxChgCurr() const {return sys.maxChgDen()*sys.cellArea();}
 
@@ -482,13 +471,6 @@ class SCLReport : public ShuntReportData {
     double cellCurr(std::size_t i) const override {return cell_currs.at(i);}
     double cellPowr(std::size_t i) const override {return cell_powrs.at(i);}
     double storedPowr() const override {return totPowr;}
-
-    double asr() const override {return sys.asr();}
-    double cellArea() const override {return sys.cellArea();}
-    double stackShuntLen() const override {return sys.stackShuntLen();}
-    double stackShuntArea() const override {return sys.stackShuntArea();}
-    double stackManiLen() const override {return sys.stackManiLen();}
-    double stackManiArea() const override {return sys.stackManiArea();}
 
     inline double connShuntLen() const {return sys.connShuntLen();}
     inline double connShuntArea() const {return sys.connShuntArea();}
@@ -782,17 +764,6 @@ class PCCReport : public ShuntReportData {
 
     const PCCSysParam& param() const override {return sys;}
 
-    std::size_t numLines() const override {return sys.numLines();}
-    std::size_t numStacks() const override {return sys.numStacks();};
-    std::size_t numCells() const override {return sys.numCells();}
-
-    double asr() const override {return sys.asr();}
-    double cellArea() const override {return sys.cellArea();}
-    double resistivity() const override {return sys.resistivity();}
-    double stackShuntLen() const override {return sys.stackShuntLen();}
-    double stackShuntArea() const override {return sys.stackShuntArea();}
-    double stackManiLen() const override {return sys.stackManiLen();}
-    double stackManiArea() const override {return sys.stackManiArea();}
     inline double maxChgDen() const {return sys.maxChgDen();}
     inline double maxChgCurr() const {return sys.maxChgDen()*sys.cellArea();}
 
