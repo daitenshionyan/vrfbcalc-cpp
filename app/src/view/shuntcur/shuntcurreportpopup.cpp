@@ -199,43 +199,43 @@ SCReportPopup::getPlotConfig<vrfb::shuntcur::pcc::PCCReport>() {
       {
         "SPT current",
         IndexingType::itCell,
-        &vrfb::shuntcur::pcc::PCCReport::sptCurr
+        &vrfb::shuntcur::pcc::PCCReport::ssptCurr
       },
       {
         "SPB current",
         IndexingType::itCell,
-        &vrfb::shuntcur::pcc::PCCReport::spbCurr
+        &vrfb::shuntcur::pcc::PCCReport::sspbCurr
       },
       {
         "SNT current",
         IndexingType::itCell,
-        &vrfb::shuntcur::pcc::PCCReport::sntCurr
+        &vrfb::shuntcur::pcc::PCCReport::ssntCurr
       },
       {
         "SNB current",
         IndexingType::itCell,
-        &vrfb::shuntcur::pcc::PCCReport::snbCurr
+        &vrfb::shuntcur::pcc::PCCReport::ssnbCurr
       },
       // stack manifold ------------------------------------
       {
         "MPT current",
         IndexingType::itCell,
-        &vrfb::shuntcur::pcc::PCCReport::mptCurr
+        &vrfb::shuntcur::pcc::PCCReport::smptCurr
       },
       {
         "MPB current",
         IndexingType::itCell,
-        &vrfb::shuntcur::pcc::PCCReport::mpbCurr
+        &vrfb::shuntcur::pcc::PCCReport::smpbCurr
       },
       {
         "MNT current",
         IndexingType::itCell,
-        &vrfb::shuntcur::pcc::PCCReport::mntCurr
+        &vrfb::shuntcur::pcc::PCCReport::smntCurr
       },
       {
         "MNB current",
         IndexingType::itCell,
-        &vrfb::shuntcur::pcc::PCCReport::mnbCurr
+        &vrfb::shuntcur::pcc::PCCReport::smnbCurr
       }
   };
 }

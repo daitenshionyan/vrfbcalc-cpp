@@ -694,16 +694,20 @@ class PCCSysParam : public SysParam {
 class PCCReportData;
 
 
-class PCCReport2 : public ShuntReportData {
+class PCCReport : public ShuntReportData {
   public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
-    PCCReport2() = default;
-    PCCReport2(const PCCReport2&) = default;
-    PCCReport2(PCCReport2&&) = default;
+    PCCReport(PCCReportData* d, double cv,
+        const std::string arrName, double err)
+        : data{d}, chgVolt{cv}, arrangementName{arrName}, error{err} {}
 
-    PCCReport2& operator=(const PCCReport2&) = default;
-    PCCReport2& operator=(PCCReport2&&) = default;
+    PCCReport() = delete;
+    PCCReport(const PCCReport&) = default;
+    PCCReport(PCCReport&&) = default;
 
-    ~PCCReport2() = default;
+    PCCReport& operator=(const PCCReport&) = default;
+    PCCReport& operator=(PCCReport&&) = default;
+
+    ~PCCReport() = default;
 
 
   public: // ~~~~ accessors ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -742,7 +746,7 @@ class PCCReport2 : public ShuntReportData {
 
 
   public: // ~~~~ functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    PCCReport2* copy() const override {return new PCCReport2(*this);}
+    PCCReport* copy() const override {return new PCCReport(*this);}
 
 
   private: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -750,131 +754,6 @@ class PCCReport2 : public ShuntReportData {
     std::string arrangementName;
     double chgVolt;
     double error;
-};
-
-
-class PCCReport : public ShuntReportData {
-  public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
-    PCCReport(double cc, double cv, const PCCSysParam& s,
-        const std::vector<double>& clist,
-        const std::vector<double>& sptlist, const std::vector<double>& spblist,
-        const std::vector<double>& sntlist, const std::vector<double>& snblist,
-        const std::vector<double>& mptlist, const std::vector<double>& mpblist,
-        const std::vector<double>& mntlist, const std::vector<double>& mnblist,
-        double err=0, const std::string& an = "");
-    PCCReport(double cc, double cv, const PCCSysParam& s,
-        std::vector<double>&& clist,
-        std::vector<double>&& sptlist, std::vector<double>&& spblist,
-        std::vector<double>&& sntlist, std::vector<double>&& snblist,
-        std::vector<double>&& mptlist, std::vector<double>&& mpblist,
-        std::vector<double>&& mntlist, std::vector<double>&& mnblist,
-        double err=0, const std::string& an = "");
-
-    PCCReport() = delete;
-    PCCReport(const PCCReport&) = default;
-    PCCReport(PCCReport&&) = default;
-
-    PCCReport& operator=(const PCCReport&) = default;
-    PCCReport& operator=(PCCReport&&) = default;
-
-    ~PCCReport() = default;
-
-
-  public: // ~~~~ accessors ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    inline double err() const {return error;}
-
-    std::string arrName() const override {return arrangementName;}
-
-    const PCCSysParam& param() const override {return sys;}
-
-    inline double maxChgDen() const {return sys.maxChgDen();}
-    inline double maxChgCurr() const {return sys.maxChgDen()*sys.cellArea();}
-
-    double chargingCurr() const override {return chgCurr;}
-    double chargingVolt() const override {return chgVolt;}
-    double chargingPowr() const override {return chgCurr*chgVolt;}
-    double overVoltPowr() const override {return ovpLoss;}
-
-    double cellCurr(std::size_t i) const override {return cell_currs.at(i);}
-    double cellPowr(std::size_t i) const override {return cell_powrs.at(i);}
-    double storedPowr() const override {return totPowr;}
-
-    inline const std::vector<double>& cirPowrs() const {return cir_powrs;}
-    inline double cirPowr(std::size_t i) const {return cir_powrs.at(i);}
-
-    inline const std::vector<double>& sptCurrs() const {return spt_currs;}
-    inline const std::vector<double>& spbCurrs() const {return spb_currs;}
-    inline const std::vector<double>& sntCurrs() const {return snt_currs;}
-    inline const std::vector<double>& snbCurrs() const {return snb_currs;}
-    inline const std::vector<double>& sptPowrs() const {return spt_powrs;}
-    inline const std::vector<double>& spbPowrs() const {return spb_powrs;}
-    inline const std::vector<double>& sntPowrs() const {return snt_powrs;}
-    inline const std::vector<double>& snbPowrs() const {return snb_powrs;}
-    inline double sptCurr(std::size_t i) const {return spt_currs.at(i);}
-    inline double spbCurr(std::size_t i) const {return spb_currs.at(i);}
-    inline double sntCurr(std::size_t i) const {return snt_currs.at(i);}
-    inline double snbCurr(std::size_t i) const {return snb_currs.at(i);}
-    inline double sptPowr(std::size_t i) const {return spt_powrs.at(i);}
-    inline double spbPowr(std::size_t i) const {return spb_powrs.at(i);}
-    inline double sntPowr(std::size_t i) const {return snt_powrs.at(i);}
-    inline double snbPowr(std::size_t i) const {return snb_powrs.at(i);}
-
-    inline const std::vector<double>& mptCurrs() const {return mpt_currs;}
-    inline const std::vector<double>& mpbCurrs() const {return mpb_currs;}
-    inline const std::vector<double>& mntCurrs() const {return mnt_currs;}
-    inline const std::vector<double>& mnbCurrs() const {return mnb_currs;}
-    inline const std::vector<double>& mptPowrs() const {return mpt_powrs;}
-    inline const std::vector<double>& mpbPowrs() const {return mpb_powrs;}
-    inline const std::vector<double>& mntPowrs() const {return mnt_powrs;}
-    inline const std::vector<double>& mnbPowrs() const {return mnb_powrs;}
-    inline double mptCurr(std::size_t i) const {return mpt_currs.at(i);}
-    inline double mpbCurr(std::size_t i) const {return mpb_currs.at(i);}
-    inline double mntCurr(std::size_t i) const {return mnt_currs.at(i);}
-    inline double mnbCurr(std::size_t i) const {return mnb_currs.at(i);}
-    inline double mptPowr(std::size_t i) const {return mpt_powrs.at(i);}
-    inline double mpbPowr(std::size_t i) const {return mpb_powrs.at(i);}
-    inline double mntPowr(std::size_t i) const {return mnt_powrs.at(i);}
-    inline double mnbPowr(std::size_t i) const {return mnb_powrs.at(i);}
-
-
-  public:
-    PCCReport* copy() const override {return new PCCReport(*this);}
-
-
-  private: // ~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    double error;
-    std::string arrangementName;
-
-    double chgCurr;
-    double chgVolt;
-    double totPowr = 0;     // Total input power to cells
-    double ovpLoss = 0;     // Over voltage power lost
-    PCCSysParam sys;
-
-    std::vector<double> cell_currs;
-    std::vector<double> cell_powrs;
-
-    // :::: [ STACK ] ::::
-
-    std::vector<double> cir_powrs;      // Cell internal resistance power
-
-    std::vector<double> spt_currs;      // Stack shunt positive top currents
-    std::vector<double> spb_currs;      // Stack shunt positive bottom currents
-    std::vector<double> snt_currs;      // Stack shunt negative top currents
-    std::vector<double> snb_currs;      // Stack shunt negative bottom currents
-    std::vector<double> spt_powrs;      // Stack shunt positive top powers
-    std::vector<double> spb_powrs;      // Stack shunt positive bottom powers
-    std::vector<double> snt_powrs;      // Stack shunt negative top powers
-    std::vector<double> snb_powrs;      // Stack shunt negative bottom powers
-
-    std::vector<double> mpt_currs;      // Stack manifold positive top currents
-    std::vector<double> mpb_currs;      // Stack manifold positive bottom currents
-    std::vector<double> mnt_currs;      // Stack manifold negative top currents
-    std::vector<double> mnb_currs;      // Stack manifold negative bottom currents
-    std::vector<double> mpt_powrs;      // Stack manifold positive top powers
-    std::vector<double> mpb_powrs;      // Stack manifold positive bottom powers
-    std::vector<double> mnt_powrs;      // Stack manifold negative top powers
-    std::vector<double> mnb_powrs;      // Stack manifold negative bottom powers
 };
 
 
