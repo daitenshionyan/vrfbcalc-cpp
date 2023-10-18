@@ -253,13 +253,11 @@ class ShuntReportData {
     virtual double chargingVolt() const = 0;
     virtual double chargingPowr() const = 0;
     virtual double overVoltPowr() const = 0;
-
-    virtual const std::vector<double>& cellCurrs() const = 0;
-    virtual const std::vector<double>& cellPowrs() const = 0;
-    virtual double cellCurr(std::size_t i) const = 0;
-    virtual double cellPowr(std::size_t i) const = 0;
     virtual double storedPowr() const = 0;
     virtual double powrEff() const {return storedPowr() / chargingPowr();}
+
+    virtual double cellCurr(std::size_t i) const = 0;
+    virtual double cellPowr(std::size_t i) const = 0;
 
 
   public:
@@ -438,8 +436,6 @@ class SCLReport : public ShuntReportData {
     inline double maxChgDen() const {return sys.maxChgDen();}
     inline double maxChgCurr() const {return sys.maxChgDen()*sys.cellArea();}
 
-    const std::vector<double>& cellCurrs() const override {return cell_currs;}
-    const std::vector<double>& cellPowrs() const override {return cell_powrs;}
     double cellCurr(std::size_t i) const override {return cell_currs.at(i);}
     double cellPowr(std::size_t i) const override {return cell_powrs.at(i);}
     double storedPowr() const override {return totPowr;}
@@ -695,6 +691,9 @@ class PCCSysParam : public SysParam {
 };
 
 
+class PCCReportData;
+
+
 class PCCReport : public ShuntReportData {
   public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
     PCCReport(double cc, double cv, const PCCSysParam& s,
@@ -732,22 +731,11 @@ class PCCReport : public ShuntReportData {
     inline double maxChgDen() const {return sys.maxChgDen();}
     inline double maxChgCurr() const {return sys.maxChgDen()*sys.cellArea();}
 
-    inline double connSubShuntLen() const {return sys.connSubShuntLen();}
-    inline double connSubShuntArea() const {return sys.connSubShuntArea();}
-    inline double connSubManiLen() const {return sys.connSubManiLen();}
-    inline double connSubManiArea() const {return sys.connSubManiArea();}
-    inline double connMainShuntLen() const {return sys.connMainShuntLen();}
-    inline double connMainShuntArea() const {return sys.connMainShuntArea();}
-    inline double connMainManiLen() const {return sys.connMainManiLen();}
-    inline double connMainManiArea() const {return sys.connMainManiArea();}
-
     double chargingCurr() const override {return chgCurr;}
     double chargingVolt() const override {return chgVolt;}
     double chargingPowr() const override {return chgCurr*chgVolt;}
     double overVoltPowr() const override {return ovpLoss;}
 
-    const std::vector<double>& cellCurrs() const override {return cell_currs;}
-    const std::vector<double>& cellPowrs() const override {return cell_powrs;}
     double cellCurr(std::size_t i) const override {return cell_currs.at(i);}
     double cellPowr(std::size_t i) const override {return cell_powrs.at(i);}
     double storedPowr() const override {return totPowr;}

@@ -140,6 +140,22 @@ double getPosConnContri_Cell(const Eigen::VectorXd& cv, const SysParam& s,
 
 
 /**
+ * Returns the POSITIVE CONNECTOR current contribution to the specified cell,
+ * given the calculated current vector.
+ *
+ * @param <Side> Inlet connection side.
+ * @param cv Current vector.
+ * @param s System parameters.
+ * @param i Cell index from the first cell in the system.
+*/
+template<ConnSide Side>
+double getPosConnContri_Cell(const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t i) {
+  return getPosConnContri_Cell<Side>(cv, s, toci(i, s), tosi(i, s), toci(s, i));
+}
+
+
+/**
  * Returns the NEGATIVE CONNECTOR current contribution to the specified cell,
  * given the calculated current vector.
  *
@@ -153,6 +169,22 @@ double getPosConnContri_Cell(const Eigen::VectorXd& cv, const SysParam& s,
 template<ConnSide Side>
 double getNegConnContri_Cell(const Eigen::VectorXd& cv, const SysParam& s,
       std::size_t ci, std::size_t si, std::size_t li);
+
+
+/**
+ * Returns the NEGATIVE CONNECTOR current contribution to the specified cell,
+ * given the calculated current vector.
+ *
+ * @param <Side> Inlet connection side.
+ * @param cv Current vector.
+ * @param s System parameters.
+ * @param i Cell index from the first cell in the system.
+*/
+template<ConnSide Side>
+double getNegConnContri_Cell(const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t i) {
+  return getNegConnContri_Cell<Side>(cv, s, toci(i, s), tosi(i, s), toci(s, i));
+}
 
 
 
@@ -174,8 +206,26 @@ double getConnContri_SSPT(const Eigen::VectorXd& cv, const SysParam& s,
 
 
 template<ConnSide Side>
+double getConnContri_SSPT(const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t i) {
+  return getConnContri_SSPT<Side>(cv, s, toci(i, s), tosi(i, s), toci(s, i));
+}
+
+
+
+
+template<ConnSide Side>
 double getConnContri_SSPB(const Eigen::VectorXd& cv, const SysParam& s,
       std::size_t ci, std::size_t si, std::size_t li);
+
+
+template<ConnSide Side>
+double getConnContri_SSPB(const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t i) {
+  return getConnContri_SSPB<Side>(cv, s, toci(i, s), tosi(i, s), toci(s, i));
+}
+
+
 
 
 template<ConnSide Side>
@@ -184,8 +234,24 @@ double getConnContri_SSNT(const Eigen::VectorXd& cv, const SysParam& s,
 
 
 template<ConnSide Side>
+double getConnContri_SSNT(const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t i) {
+  return getConnContri_SSNT<Side>(cv, s, toci(i, s), tosi(i, s), toci(s, i));
+}
+
+
+
+
+template<ConnSide Side>
 double getConnContri_SSNB(const Eigen::VectorXd& cv, const SysParam& s,
       std::size_t ci, std::size_t si, std::size_t li);
+
+
+template<ConnSide Side>
+double getConnContri_SSNB(const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t i) {
+  return getConnContri_SSNB<Side>(cv, s, toci(i, s), tosi(i, s), toci(s, i));
+}
 
 
 
@@ -799,6 +865,122 @@ void addVolt(Eigen::VectorXd& v, const PCCSysParam& s, double chgVolt) {
     }
   }
 }
+
+
+
+
+
+
+
+
+/*
+********************************************************************************
+**    PCCReportData class
+********************************************************************************
+*/
+
+
+class PCCReportData {
+  public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
+    PCCReportData() = default;
+    PCCReportData(const PCCReportData&) = default;
+    PCCReportData(PCCReportData&&) = default;
+
+    PCCReportData& operator=(const PCCReportData&) = default;
+    PCCReportData& operator=(PCCReportData&&) = default;
+
+    virtual ~PCCReportData() = default;
+
+
+  public: // ~~~~ accessors ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    virtual double lineCurr(std::size_t i) const = 0;
+    virtual double cellCurr(std::size_t i) const = 0;
+
+    virtual double ssptCurr(std::size_t i) const = 0;
+    virtual double sspbCurr(std::size_t i) const = 0;
+    virtual double ssntCurr(std::size_t i) const = 0;
+    virtual double ssnbCurr(std::size_t i) const = 0;
+
+    virtual double smptCurr(std::size_t i) const = 0;
+    virtual double smpbCurr(std::size_t i) const = 0;
+    virtual double smntCurr(std::size_t i) const = 0;
+    virtual double smnbCurr(std::size_t i) const = 0;
+};
+
+
+template<ConnSide PS, ConnSide NS>
+class PCCReportData_Impl : public PCCReportData {
+  public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
+    PCCReportData_Impl(const Eigen::VectorXd& currVec, const PCCSysParam& sys)
+        : cv{currVec}, s{sys} {}
+    PCCReportData_Impl(Eigen::VectorXd&& currVec, const PCCSysParam& sys)
+        : cv{std::move(currVec)}, s{sys} {}
+
+    PCCReportData_Impl() = delete;
+    PCCReportData_Impl(const PCCReportData_Impl&) = default;
+    PCCReportData_Impl(PCCReportData_Impl&&) = default;
+
+    PCCReportData_Impl& operator=(const PCCReportData_Impl&) = default;
+    PCCReportData_Impl& operator=(PCCReportData_Impl&&) = default;
+
+    ~PCCReportData_Impl() = default;
+
+
+  public: // ~~~~ accessors ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    double lineCurr(std::size_t i) const override {
+      return cv(toli(i, s));
+    }
+
+    double cellCurr(std::size_t i) const override {
+      return cv(toli(i, s))
+          + getStackContri_Cell(cv, s, i)
+          + getPosConnContri_Cell<PS>(cv, s, i)
+          + getNegConnContri_Cell<NS>(cv, s, i);
+    }
+
+
+    double ssptCurr(std::size_t i) const override {
+      return getStackContri_SSPT(cv, s, i)
+          + getConnContri_SSPT<PS>(cv, s, i);
+    }
+
+    double sspbCurr(std::size_t i) const override {
+      return getStackContri_SSPB(cv, s, i)
+          + getConnContri_SSPB<PS>(cv, s, i);
+    }
+
+    double ssntCurr(std::size_t i) const override {
+      return getStackContri_SSNT(cv, s, i)
+          + getConnContri_SSNT<NS>(cv, s, i);
+    }
+
+    double ssnbCurr(std::size_t i) const override {
+      return getStackContri_SSNB(cv, s, i)
+          + getConnContri_SSNB<NS>(cv, s, i);
+    }
+
+
+    double smptCurr(std::size_t i) const override {
+      return getCurrMPT(cv, s, i);
+    }
+
+    double smpbCurr(std::size_t i) const override {
+      return getCurrMPB(cv, s, i);
+    }
+
+    double smntCurr(std::size_t i) const override {
+      return getCurrMNT(cv, s, i);
+    }
+
+    double smnbCurr(std::size_t i) const override {
+      return getCurrMNB(cv, s, i);
+    }
+
+
+  private: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Eigen::VectorXd cv;
+    PCCSysParam s;
+};
 
 
 
