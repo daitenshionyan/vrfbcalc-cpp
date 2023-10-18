@@ -694,6 +694,65 @@ class PCCSysParam : public SysParam {
 class PCCReportData;
 
 
+class PCCReport2 : public ShuntReportData {
+  public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
+    PCCReport2() = default;
+    PCCReport2(const PCCReport2&) = default;
+    PCCReport2(PCCReport2&&) = default;
+
+    PCCReport2& operator=(const PCCReport2&) = default;
+    PCCReport2& operator=(PCCReport2&&) = default;
+
+    ~PCCReport2() = default;
+
+
+  public: // ~~~~ accessors ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    double err() const {return error;}
+
+    std::string arrName() const override {return arrangementName;}
+
+    const PCCSysParam& param() const override;
+
+    double chargingCurr() const override;
+    double chargingVolt() const override {return chgVolt;}
+    double chargingPowr() const override {return chargingVolt() * chargingCurr();}
+    double overVoltPowr() const override;
+    double storedPowr() const override;
+
+    double cellCurr(std::size_t i) const override;
+    double cellPowr(std::size_t i) const override {return cellCurr(i)*param().ocv();}
+
+    double ssptCurr(std::size_t i) const;
+    double sspbCurr(std::size_t i) const;
+    double ssntCurr(std::size_t i) const;
+    double ssnbCurr(std::size_t i) const;
+    double ssptPowr(std::size_t i) const {return ssptCurr(i)*param().ocv();}
+    double sspbPowr(std::size_t i) const {return sspbCurr(i)*param().ocv();}
+    double ssntPowr(std::size_t i) const {return ssntCurr(i)*param().ocv();}
+    double ssnbPowr(std::size_t i) const {return ssnbCurr(i)*param().ocv();}
+
+    double smptCurr(std::size_t i) const;
+    double smpbCurr(std::size_t i) const;
+    double smntCurr(std::size_t i) const;
+    double smnbCurr(std::size_t i) const;
+    double smptPowr(std::size_t i) const {return smptCurr(i)*param().ocv();}
+    double smpbPowr(std::size_t i) const {return smpbCurr(i)*param().ocv();}
+    double smntPowr(std::size_t i) const {return smntCurr(i)*param().ocv();}
+    double smnbPowr(std::size_t i) const {return smnbCurr(i)*param().ocv();}
+
+
+  public: // ~~~~ functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    PCCReport2* copy() const override {return new PCCReport2(*this);}
+
+
+  private: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    PCCReportData* data;
+    std::string arrangementName;
+    double chgVolt;
+    double error;
+};
+
+
 class PCCReport : public ShuntReportData {
   public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
     PCCReport(double cc, double cv, const PCCSysParam& s,

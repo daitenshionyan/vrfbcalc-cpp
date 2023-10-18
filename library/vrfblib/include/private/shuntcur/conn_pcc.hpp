@@ -893,6 +893,8 @@ class PCCReportData {
 
 
   public: // ~~~~ accessors ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    virtual const PCCSysParam& param() const = 0;
+
     virtual double lineCurr(std::size_t i) const = 0;
     virtual double cellCurr(std::size_t i) const = 0;
 
@@ -927,6 +929,11 @@ class PCCReportData_Impl : public PCCReportData {
 
 
   public: // ~~~~ accessors ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    const PCCSysParam& param() const {
+      return sys;
+    }
+
+
     double lineCurr(std::size_t i) const override {
       return cv(toli(i, s));
     }

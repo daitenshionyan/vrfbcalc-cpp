@@ -174,6 +174,116 @@ ShuntReport SCLCalc::calculate(double chgVolt) const {
 namespace pcc {
 
 
+
+
+
+
+
+
+/*
+********************************************************************************
+**    PCCReport class
+********************************************************************************
+*/
+
+
+const PCCSysParam& PCCReport2::param() const {
+  return data->param();
+}
+
+
+double PCCReport2::chargingCurr() const {
+  double result = 0;
+  for (std::size_t i = 0; i < numLines(); ++i) {
+    result += data->lineCurr(i);
+  }
+  return result;
+}
+
+
+double PCCReport2::overVoltPowr() const {
+  return chargingPowr() - storedPowr();
+}
+
+
+double PCCReport2::storedPowr() const {
+  double result = 0;
+  for (std::size_t i = 0; i < totCells(); ++i) {
+    result += (param().maxChgDen()*param().cellArea() < data->cellCurr(i))
+        ? param().maxChgDen()*param().cellArea()*param().ocv()
+        : data->cellCurr(i)*param().ocv();
+  }
+  return result;
+}
+
+
+double PCCReport2::cellCurr(std::size_t i) const {
+  return data->cellCurr(i);
+}
+
+
+
+
+double PCCReport2::ssptCurr(std::size_t i) const {
+  return data->ssptCurr(i);
+}
+
+
+double PCCReport2::sspbCurr(std::size_t i) const {
+  return data->sspbCurr(i);
+}
+
+
+double PCCReport2::ssntCurr(std::size_t i) const {
+  return data->ssntCurr(i);
+}
+
+
+double PCCReport2::ssnbCurr(std::size_t i) const {
+  return data->ssnbCurr(i);
+}
+
+
+
+
+double PCCReport2::smptCurr(std::size_t i) const {
+  return data->smptCurr(i);
+}
+
+
+double PCCReport2::smpbCurr(std::size_t i) const {
+  return data->smpbCurr(i);
+}
+
+
+double PCCReport2::smntCurr(std::size_t i) const {
+  return data->smntCurr(i);
+}
+
+
+double PCCReport2::smnbCurr(std::size_t i) const {
+  return data->smnbCurr(i);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 PCCReport::PCCReport(double cc, double cv, const PCCSysParam& s,
       const std::vector<double>& clist,
       const std::vector<double>& sptlist, const std::vector<double>& spblist,
