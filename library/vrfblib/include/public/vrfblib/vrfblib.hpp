@@ -169,6 +169,17 @@ struct StackParam {
  * System parameter of a stack system.
 */
 struct SysParam {
+  public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
+    SysParam() = default;
+    SysParam(const SysParam&) = default;
+    SysParam(SysParam&&) = default;
+
+    SysParam& operator=(const SysParam&) = default;
+    SysParam& operator=(SysParam&&) = default;
+
+    ~SysParam() = default;
+
+
   public: // ~~~~ accessors ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     inline double ocv() const {return getOCV(soc, temperature);}
     inline double cellR() const {return s.asr / s.cellArea;}
@@ -360,11 +371,12 @@ struct ConnParam {
 /**
  * System parameters for an SCL arrangement system.
 */
-class SCLSysParam : public SysParam {
+struct SCLSysParam : public SysParam {
   public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
     SCLSysParam(const SysParam& sys, const ConnParam& conn)
         : SysParam{sys}, c{conn} {}
 
+    SCLSysParam() = default;
     SCLSysParam(const SCLSysParam&) = default;
     SCLSysParam(SCLSysParam&&) = default;
 
@@ -375,17 +387,11 @@ class SCLSysParam : public SysParam {
 
 
   public: // ~~~~ accessors ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    inline double connShuntLen() const {return c.sl;}
-    inline double connShuntArea() const {return c.sa;}
-    inline double connManiLen() const {return c.ml;}
-    inline double connManiArea() const {return c.ma;}
-
     inline double connShuntR() const {return resistivity * c.sl / c.sa;}
     inline double connManiR() const {return resistivity * c.ml / c.ma;}
 
 
-  private: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  public: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     ConnParam c;
 };
 
@@ -536,12 +542,12 @@ struct ConnParam {
 };
 
 
-class PCCSysParam : public SysParam {
+struct PCCSysParam : public SysParam {
   public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
     PCCSysParam(const SysParam& sys, const ConnParam& conn)
         : SysParam{sys}, c{conn} {}
 
-    PCCSysParam() = delete;
+    PCCSysParam() = default;
     PCCSysParam(const PCCSysParam&) = default;
     PCCSysParam(PCCSysParam&&) = default;
 
@@ -552,23 +558,13 @@ class PCCSysParam : public SysParam {
 
 
   public: // ~~~~ accessors ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    inline double connSubShuntLen() const {return c.sub_sl;}
-    inline double connSubShuntArea() const {return c.sub_sa;}
-    inline double connSubManiLen() const {return c.sub_ml;}
-    inline double connSubManiArea() const {return c.sub_ma;}
-
-    inline double connMainShuntLen() const {return c.main_sl;}
-    inline double connMainShuntArea() const {return c.main_sa;}
-    inline double connMainManiLen() const {return c.main_ml;}
-    inline double connMainManiArea() const {return c.main_ma;}
-
     inline double connSubShuntR() const {return resistivity * c.sub_sl / c.sub_sa;}
     inline double connSubManiR() const {return resistivity * c.sub_ml / c.sub_ma;}
     inline double connMainShuntR() const {return resistivity * c.main_sl / c.main_sa;}
     inline double connMainManiR() const {return resistivity * c.main_ml / c.main_ma;}
 
 
-  private:
+  public: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     ConnParam c;
 };
 
