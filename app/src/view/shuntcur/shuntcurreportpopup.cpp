@@ -39,8 +39,8 @@ bool SCReportPopup::exportImages(logger::Logger& l) {
 
 void SCReportPopup::initSummary(const vrfb::shuntcur::ShuntReportData& r) {
   ui->arrField->setText(QString::fromStdString(r.arrName()));
-  ui->tempField->setText(QString::fromStdString(std::to_string(r.param().temperature() - 273.15)));
-  ui->socField->setText(QString::fromStdString(std::to_string(r.param().soc() * 100)));
+  ui->tempField->setText(QString::fromStdString(std::to_string(r.param().temperature - 273.15)));
+  ui->socField->setText(QString::fromStdString(std::to_string(r.param().soc * 100)));
   ui->chgVoltField->setText(QString::fromStdString(std::to_string(r.chargingVolt())));
   ui->chgCurrField->setText(QString::fromStdString(std::to_string(r.chargingCurr())));
   ui->chgPowrField->setText(QString::fromStdString(std::to_string(r.chargingPowr())));

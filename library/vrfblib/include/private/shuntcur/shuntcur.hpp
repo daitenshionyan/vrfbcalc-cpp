@@ -50,7 +50,7 @@ void addStackLoops(Eigen::MatrixXd& m, const SysParam& s);
 /**
  * Retruns the index of STACK POSITIVE TOP coefficent with the matrix or vector.
  * Returned index is only valid for all cell indexes other than the last within
- * the stack (`ci+1 < s.numCells()`)
+ * the stack (`ci+1 < s.numCells`)
  *
  * @param s System parameter.
  * @param ci Cell index within stack.
@@ -59,9 +59,9 @@ void addStackLoops(Eigen::MatrixXd& m, const SysParam& s);
 */
 inline Eigen::Index indexSPT(const SysParam& s,
       std::size_t ci, std::size_t si, std::size_t li = 0) {
-  return s.numLines()
-      + li*s.numStacks()*(s.numCells() - 1)
-      + si*(s.numCells() - 1)
+  return s.numLines
+      + li*s.numStacks*(s.numCells - 1)
+      + si*(s.numCells - 1)
       + ci;
 }
 
@@ -69,7 +69,7 @@ inline Eigen::Index indexSPT(const SysParam& s,
 /**
  * Retruns the index of STACK POSITIVE BOTTOM coefficent with the matrix or
  * vector. Returned index is only valid for all cell indexes other than the last
- * within the stack (`ci+1 < s.numCells()`)
+ * within the stack (`ci+1 < s.numCells`)
  *
  * @param s System parameter.
  * @param ci Cell index within stack.
@@ -78,10 +78,10 @@ inline Eigen::Index indexSPT(const SysParam& s,
 */
 inline Eigen::Index indexSPB(const SysParam& s,
       std::size_t ci, std::size_t si, std::size_t li = 0) {
-  return s.numLines()
-      + s.numLines()*s.numStacks()*(s.numCells() - 1)
-      + li*s.numStacks()*(s.numCells() - 1)
-      + si*(s.numCells() - 1)
+  return s.numLines
+      + s.numLines*s.numStacks*(s.numCells - 1)
+      + li*s.numStacks*(s.numCells - 1)
+      + si*(s.numCells - 1)
       + ci;
 }
 
@@ -98,10 +98,10 @@ inline Eigen::Index indexSPB(const SysParam& s,
 */
 inline Eigen::Index indexSNT(const SysParam& s,
       std::size_t ci, std::size_t si, std::size_t li = 0) {
-  return s.numLines()
-      + 2*s.numLines()*s.numStacks()*(s.numCells() - 1)
-      + li*s.numStacks()*(s.numCells() - 1)
-      + si*(s.numCells() - 1)
+  return s.numLines
+      + 2*s.numLines*s.numStacks*(s.numCells - 1)
+      + li*s.numStacks*(s.numCells - 1)
+      + si*(s.numCells - 1)
       + ci - 1;
 }
 
@@ -118,10 +118,10 @@ inline Eigen::Index indexSNT(const SysParam& s,
 */
 inline Eigen::Index indexSNB(const SysParam& s,
       std::size_t ci, std::size_t si, std::size_t li = 0) {
-  return s.numLines()
-      + 3*s.numLines()*s.numStacks()*(s.numCells() - 1)
-      + li*s.numStacks()*(s.numCells() - 1)
-      + si*(s.numCells() - 1)
+  return s.numLines
+      + 3*s.numLines*s.numStacks*(s.numCells - 1)
+      + li*s.numStacks*(s.numCells - 1)
+      + si*(s.numCells - 1)
       + ci - 1;
 }
 
@@ -134,7 +134,7 @@ inline Eigen::Index indexSNB(const SysParam& s,
  * @param s System parameters.
 */
 inline std::size_t toli(std::size_t i, const SysParam& s) {
-  return i / (s.numCells()*s.numStacks());
+  return i / (s.numCells*s.numStacks);
 }
 
 
@@ -146,7 +146,7 @@ inline std::size_t toli(std::size_t i, const SysParam& s) {
  * @param s System parameters.
 */
 inline std::size_t tosi(std::size_t i, const SysParam& s) {
-  return (i / s.numCells()) % s.numStacks();
+  return (i / s.numCells) % s.numStacks;
 }
 
 
@@ -158,7 +158,7 @@ inline std::size_t tosi(std::size_t i, const SysParam& s) {
  * @param s System parameters.
 */
 inline std::size_t toci(std::size_t i, const SysParam& s) {
-  return i % s.numCells();
+  return i % s.numCells;
 }
 
 
@@ -344,7 +344,7 @@ double getStackContri_SSNB(const Eigen::VectorXd& cv, const SysParam& s,
 */
 double getCurrMPT(const Eigen::VectorXd& cv, const SysParam& s,
       std::size_t ci, std::size_t si, std::size_t li = 0) {
-  return (ci+1 < s.numCells()) ? -cv(indexSPT(s, ci, si, li)) : 0;
+  return (ci+1 < s.numCells) ? -cv(indexSPT(s, ci, si, li)) : 0;
 }
 
 
@@ -376,7 +376,7 @@ double getCurrMPT(const Eigen::VectorXd& cv, const SysParam& s,
 */
 double getCurrMPB(const Eigen::VectorXd& cv, const SysParam& s,
       std::size_t ci, std::size_t si, std::size_t li = 0) {
-  return (ci+1 < s.numCells()) ? -cv(indexSPB(s, ci, si, li)) : 0;
+  return (ci+1 < s.numCells) ? -cv(indexSPB(s, ci, si, li)) : 0;
 }
 
 
@@ -408,7 +408,7 @@ double getCurrMPB(const Eigen::VectorXd& cv, const SysParam& s,
 */
 double getCurrMNT(const Eigen::VectorXd& cv, const SysParam& s,
     std::size_t ci, std::size_t si, std::size_t li = 0) {
-  return (ci+1 < s.numCells()) ? -cv(indexSNT(s, ci, si, li) + 1) : 0;
+  return (ci+1 < s.numCells) ? -cv(indexSNT(s, ci, si, li) + 1) : 0;
 }
 
 
@@ -440,7 +440,7 @@ double getCurrMNT(const Eigen::VectorXd& cv, const SysParam& s,
 */
 double getCurrMNB(const Eigen::VectorXd& cv, const SysParam& s,
     std::size_t ci, std::size_t si, std::size_t li = 0) {
-  return (ci+1 < s.numCells()) ? -cv(indexSNB(s, ci, si, li) + 1) : 0;
+  return (ci+1 < s.numCells) ? -cv(indexSNB(s, ci, si, li) + 1) : 0;
 }
 
 
@@ -528,7 +528,7 @@ namespace shuntcur {
 double getStackContri_Cell(const Eigen::VectorXd& cv, const SysParam& s,
     std::size_t ci, std::size_t si, std::size_t li) {
   double result = 0;
-  if (ci+1 < s.numCells()) {
+  if (ci+1 < s.numCells) {
     result += cv(indexSPT(s, ci, si, li))
         + cv(indexSPB(s, ci, si, li));
   }
@@ -546,7 +546,7 @@ double getStackContri_Cell(const Eigen::VectorXd& cv, const SysParam& s,
 double getStackContri_SSPT(const Eigen::VectorXd& cv, const SysParam& s,
     std::size_t ci, std::size_t si, std::size_t li) {
   double result = 0;
-  if (ci+1 < s.numCells()) {
+  if (ci+1 < s.numCells) {
     result += cv(indexSPT(s, ci, si, li));
   }
   if (ci > 0) {
@@ -559,7 +559,7 @@ double getStackContri_SSPT(const Eigen::VectorXd& cv, const SysParam& s,
 double getStackContri_SSPB(const Eigen::VectorXd& cv, const SysParam& s,
     std::size_t ci, std::size_t si, std::size_t li) {
   double result = 0;
-  if (ci+1 < s.numCells()) {
+  if (ci+1 < s.numCells) {
     result += cv(indexSPB(s, ci, si, li));
   }
   if (ci > 0) {
@@ -572,7 +572,7 @@ double getStackContri_SSPB(const Eigen::VectorXd& cv, const SysParam& s,
 double getStackContri_SSNT(const Eigen::VectorXd& cv, const SysParam& s,
     std::size_t ci, std::size_t si, std::size_t li) {
   double result = 0;
-  if (ci+1 < s.numCells()) {
+  if (ci+1 < s.numCells) {
     result += cv(indexSNT(s, ci, si, li) + 1);
   }
   if (ci > 0) {
@@ -585,7 +585,7 @@ double getStackContri_SSNT(const Eigen::VectorXd& cv, const SysParam& s,
 double getStackContri_SSNB(const Eigen::VectorXd& cv, const SysParam& s,
     std::size_t ci, std::size_t si, std::size_t li) {
   double result = 0;
-  if (ci+1 < s.numCells()) {
+  if (ci+1 < s.numCells) {
     result += cv(indexSNB(s, ci, si, li) + 1);
   }
   if (ci > 0) {
@@ -610,18 +610,18 @@ double getStackContri_SSNB(const Eigen::VectorXd& cv, const SysParam& s,
 
 
 void addStackLoops(Eigen::MatrixXd& m, const SysParam& s) {
-  for (std::size_t li = 0; li < s.numLines(); ++li) {
-    m(li, li) += s.numCells() * s.numStacks() * s.cellR();
+  for (std::size_t li = 0; li < s.numLines; ++li) {
+    m(li, li) += s.numCells * s.numStacks * s.cellR();
 
-    for (std::size_t si = 0; si < s.numStacks(); ++si) {
-      for (std::size_t ci = 0; ci < s.numCells(); ++ci) {
+    for (std::size_t si = 0; si < s.numStacks; ++si) {
+      for (std::size_t ci = 0; ci < s.numCells; ++ci) {
         Eigen::Index pti = indexSPT(s, ci, si, li);
         Eigen::Index pbi = indexSPB(s, ci, si, li);
         Eigen::Index nti = indexSNT(s, ci, si, li);
         Eigen::Index nbi = indexSNB(s, ci, si, li);
 
         // :::: [ POSITIVE LOOPS ] ::::
-        if (ci+1 < s.numCells()) {
+        if (ci+1 < s.numCells) {
           // line contribution
           m(li, pti) += s.cellR();
           m(pti, li) += s.cellR();
@@ -643,7 +643,7 @@ void addStackLoops(Eigen::MatrixXd& m, const SysParam& s) {
           // contribution from other positive
           m(pti, pbi) += s.cellR();
           m(pbi, pti) += s.cellR();
-          if (ci+2 < s.numCells()) {
+          if (ci+2 < s.numCells) {
             // next loop contribution
             m(pti, pti+1) -= s.stackShuntR();
             m(pbi, pbi+1) -= s.stackShuntR();
@@ -668,7 +668,7 @@ void addStackLoops(Eigen::MatrixXd& m, const SysParam& s) {
           // contribution from other negative
           m(nti, nbi) += s.cellR();
           m(nbi, nti) += s.cellR();
-          if (ci+1 < s.numCells()) {
+          if (ci+1 < s.numCells) {
             // next loop contribution
             m(nti, nti+1) -= s.stackShuntR();
             m(nbi, nbi+1) -= s.stackShuntR();

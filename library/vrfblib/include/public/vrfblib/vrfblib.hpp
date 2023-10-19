@@ -156,70 +156,35 @@ namespace shuntcur {
  * Structure contianing the parameters of the stacks in a system.
 */
 struct StackParam {
-  double asr;     // ASR of cell (m2 Ohm)
-  double ca;      // Cell area (m2)
-  double sl;      // Shunt length (m)
-  double sa;      // Shunt cross sectional area (m2)
-  double ml;      // Manifold length (m)
-  double ma;      // Manifold cross sectional area (m2)
+  double asr;           // ASR of cell (m2 Ohm)
+  double cellArea;      // Cell area (m2)
+  double shuntLen;      // Shunt length (m)
+  double shuntArea;     // Shunt cross sectional area (m2)
+  double maniLen;       // Manifold length (m)
+  double maniArea;      // Manifold cross sectional area (m2)
 };
 
 
 /**
  * System parameter of a stack system.
 */
-class SysParam {
-  public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
-    SysParam(const StackParam& stack, double rho, double mcd,
-        std::size_t num_c, std::size_t num_s, std::size_t num_l,
-        double soc=0.3642530, double temp=298)
-        : s{stack}, r{rho}, maxCD{mcd},
-          nl{num_l}, ns{num_s}, nc{num_c},
-          chargeFrac{soc}, t{temp} {}
-
-    SysParam() = delete;
-    SysParam(const SysParam&) = default;
-    SysParam(SysParam&&) = default;
-
-    SysParam& operator=(const SysParam&) = default;
-    SysParam& operator=(SysParam&&) = default;
-
-    virtual ~SysParam() = default;
-
-
+struct SysParam {
   public: // ~~~~ accessors ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    inline std::size_t numLines() const {return nl;}
-    inline std::size_t numStacks() const {return ns;}
-    inline std::size_t numCells() const {return nc;}
-
-    inline double resistivity() const {return r;}
-    inline double maxChgDen() const {return maxCD;}
-    inline double soc() const {return chargeFrac;}
-    inline double temperature() const {return t;}
-    inline double ocv() const {return getOCV(chargeFrac, t);}
-
-    inline double asr() const {return s.asr;}
-    inline double cellArea() const {return s.ca;}
-    inline double stackShuntLen() const {return s.sl;}
-    inline double stackShuntArea() const {return s.sa;}
-    inline double stackManiLen() const {return s.ml;}
-    inline double stackManiArea() const {return s.ma;}
-
-    inline double cellR() const {return s.asr / s.ca;}
-    inline double stackShuntR() const {return r * s.sl / s.sa;}
-    inline double stackManiR() const {return r * s.ml / s.ma;}
+    inline double ocv() const {return getOCV(soc, temperature);}
+    inline double cellR() const {return s.asr / s.cellArea;}
+    inline double stackShuntR() const {return resistivity * s.shuntLen / s.shuntArea;}
+    inline double stackManiR() const {return resistivity * s.maniLen / s.maniArea;}
 
 
-  private:
-    std::size_t nl;             // number of lines
-    std::size_t ns;             // number of stacks per line
-    std::size_t nc;             // number of cells per stack
-    double r;                   // resistivity (Ohm m)
-    double maxCD;               // maximum charge density (A m-2)
-    double chargeFrac;          // state of charge (fractional)
-    double t;                   // temperature (K)
-
-    StackParam s;
+  public: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    StackParam s;               // Stack parameters
+    double resistivity;         // Resistivity (Ohm m)
+    double maxCD;               // Maximum charge density (A m-2)
+    std::size_t numCells;       // Number of cells per stack
+    std::size_t numStacks;      // Number of stacks per line
+    std::size_t numLines;       // Number of lines
+    double soc=0.3642530;       // State of charge (fractional)
+    double temperature=298;     // Temperature (K)
 };
 
 
@@ -244,9 +209,9 @@ class ShuntReportData {
     virtual std::string arrName() const = 0;
     virtual const SysParam& param() const = 0;
 
-    virtual std::size_t numLines() const {return param().numLines();}
-    virtual std::size_t numStacks() const {return param().numStacks();}
-    virtual std::size_t numCells() const {return param().numCells();}
+    virtual std::size_t numLines() const {return param().numLines;}
+    virtual std::size_t numStacks() const {return param().numStacks;}
+    virtual std::size_t numCells() const {return param().numCells;}
     virtual std::size_t totCells() const {return numLines()*numStacks()*numCells();}
 
     virtual double chargingVolt() const = 0;
@@ -261,8 +226,8 @@ class ShuntReportData {
     virtual double overVoltPowr() const {
       double result = 0;
       for (std::size_t i = 0; i < totCells(); ++i) {
-        result += (param().maxChgDen()*param().cellArea() < cellCurr(i))
-            ? (cellCurr(i) - param().maxChgDen()*param().cellArea()) * param().ocv()
+        result += (param().maxCD*param().s.cellArea < cellCurr(i))
+            ? (cellCurr(i) - param().maxCD*param().s.cellArea) * param().ocv()
             : 0;
       }
       return result;
@@ -270,8 +235,8 @@ class ShuntReportData {
     virtual double storedPowr() const {
       double result = 0;
       for (std::size_t i = 0; i < totCells(); ++i) {
-        result += (param().maxChgDen()*param().cellArea() < cellCurr(i))
-            ? param().maxChgDen()*param().cellArea()*param().ocv()
+        result += (param().maxCD*param().s.cellArea < cellCurr(i))
+            ? param().maxCD*param().s.cellArea*param().ocv()
             : cellCurr(i)*param().ocv();
       }
       return result;
@@ -416,8 +381,8 @@ class SCLSysParam : public SysParam {
     inline double connManiLen() const {return c.ml;}
     inline double connManiArea() const {return c.ma;}
 
-    inline double connShuntR() const {return resistivity() * c.sl / c.sa;}
-    inline double connManiR() const {return resistivity() * c.ml / c.ma;}
+    inline double connShuntR() const {return resistivity * c.sl / c.sa;}
+    inline double connManiR() const {return resistivity * c.ml / c.ma;}
 
 
   private: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -597,10 +562,10 @@ class PCCSysParam : public SysParam {
     inline double connMainManiLen() const {return c.main_ml;}
     inline double connMainManiArea() const {return c.main_ma;}
 
-    inline double connSubShuntR() const {return resistivity() * c.sub_sl / c.sub_sa;}
-    inline double connSubManiR() const {return resistivity() * c.sub_ml / c.sub_ma;}
-    inline double connMainShuntR() const {return resistivity() * c.main_sl / c.main_sa;}
-    inline double connMainManiR() const {return resistivity() * c.main_ml / c.main_ma;}
+    inline double connSubShuntR() const {return resistivity * c.sub_sl / c.sub_sa;}
+    inline double connSubManiR() const {return resistivity * c.sub_ml / c.sub_ma;}
+    inline double connMainShuntR() const {return resistivity * c.main_sl / c.main_sa;}
+    inline double connMainManiR() const {return resistivity * c.main_ml / c.main_ma;}
 
 
   private:

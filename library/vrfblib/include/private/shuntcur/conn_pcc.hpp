@@ -41,9 +41,9 @@ enum class ConnSide {
  * @param s System parameters.
 */
 inline std::size_t matSize(const SysParam& s) {
-  return s.numLines()
-      + 4 * s.numLines() * s.numStacks() * (s.numCells() -1)
-      + 4 * s.numLines() * (s.numStacks() - 1);
+  return s.numLines
+      + 4 * s.numLines * s.numStacks * (s.numCells -1)
+      + 4 * s.numLines * (s.numStacks - 1);
 }
 
 
@@ -368,9 +368,9 @@ namespace pcc {
 template<>
 inline Eigen::Index indexCPT<ConnSide::csFront>(const SysParam& s,
       std::size_t si, std::size_t li) {
-  return s.numLines()
-      + 4*s.numLines()*s.numStacks()*(s.numCells() - 1)
-      + li*(s.numStacks() - 1)
+  return s.numLines
+      + 4*s.numLines*s.numStacks*(s.numCells - 1)
+      + li*(s.numStacks - 1)
       + si - 1;
 }
 
@@ -381,10 +381,10 @@ inline Eigen::Index indexCPT<ConnSide::csFront>(const SysParam& s,
 template<>
 inline Eigen::Index indexCPB<ConnSide::csFront>(const SysParam& s,
       std::size_t si, std::size_t li) {
-  return s.numLines()
-      + 4*s.numLines()*s.numStacks()*(s.numCells() - 1)
-      + s.numLines()*(s.numStacks() - 1)
-      + li*(s.numStacks() - 1)
+  return s.numLines
+      + 4*s.numLines*s.numStacks*(s.numCells - 1)
+      + s.numLines*(s.numStacks - 1)
+      + li*(s.numStacks - 1)
       + si;
 }
 
@@ -395,10 +395,10 @@ inline Eigen::Index indexCPB<ConnSide::csFront>(const SysParam& s,
 template<>
 inline Eigen::Index indexCNT<ConnSide::csBack>(const SysParam& s,
       std::size_t si, std::size_t li) {
-  return s.numLines()
-      + 4*s.numLines()*s.numStacks()*(s.numCells() - 1)
-      + 2*s.numLines()*(s.numStacks() - 1)
-      + li*(s.numStacks() - 1)
+  return s.numLines
+      + 4*s.numLines*s.numStacks*(s.numCells - 1)
+      + 2*s.numLines*(s.numStacks - 1)
+      + li*(s.numStacks - 1)
       + si;
 }
 
@@ -409,10 +409,10 @@ inline Eigen::Index indexCNT<ConnSide::csBack>(const SysParam& s,
 template<>
 inline Eigen::Index indexCNB<ConnSide::csBack>(const SysParam& s,
       std::size_t si, std::size_t li) {
-  return s.numLines()
-      + 4*s.numLines()*s.numStacks()*(s.numCells() - 1)
-      + 3*s.numLines()*(s.numStacks() - 1)
-      + li*(s.numStacks() - 1)
+  return s.numLines
+      + 4*s.numLines*s.numStacks*(s.numCells - 1)
+      + 3*s.numLines*(s.numStacks - 1)
+      + li*(s.numStacks - 1)
       + si - 1;
 }
 
@@ -438,12 +438,12 @@ double getPosConnContri_Cell<ConnSide::csFront>(
       const Eigen::VectorXd& cv, const SysParam& s,
       std::size_t ci, std::size_t si, std::size_t li) {
   double result = 0;
-  if (si > 0 && ci+1 < s.numCells()) {
+  if (si > 0 && ci+1 < s.numCells) {
     result += cv(indexCPT<ConnSide::csFront>(s, si, li));
-  } else if (si+1 < s.numStacks() && ci+1 == s.numCells()) {
+  } else if (si+1 < s.numStacks && ci+1 == s.numCells) {
     result += cv(indexCPT<ConnSide::csFront>(s, si, li) + 1);
   }
-  if (si+1 < s.numStacks()) {
+  if (si+1 < s.numStacks) {
     result += cv(indexCPB<ConnSide::csFront>(s, si, li));
   }
   return result;
@@ -461,7 +461,7 @@ double getNegConnContri_Cell<ConnSide::csBack>(
       const Eigen::VectorXd& cv, const SysParam& s,
       std::size_t ci, std::size_t si, std::size_t li) {
   double result = 0;
-  if (si+1 < s.numStacks() && ci > 0) {
+  if (si+1 < s.numStacks && ci > 0) {
     result += cv(indexCNT<ConnSide::csBack>(s, si, li));
   } else if (si > 0 && ci == 0) {
     result += cv(indexCNT<ConnSide::csBack>(s, si, li) - 1);
@@ -494,11 +494,11 @@ double getConnContri_SSPT<ConnSide::csFront>(
       const Eigen::VectorXd& cv, const SysParam& s,
       std::size_t ci, std::size_t si, std::size_t li) {
   double result = 0;
-  if (ci+1 == s.numCells()) {
+  if (ci+1 == s.numCells) {
     if (si > 0) {
       result -= cv(indexCPT<ConnSide::csFront>(s, si, li));
     }
-    if (si+1 < s.numStacks()) {
+    if (si+1 < s.numStacks) {
       result += cv(indexCPT<ConnSide::csFront>(s, si, li) + 1);
     }
   }
@@ -518,7 +518,7 @@ double getConnContri_SSPB<ConnSide::csFront>(
     if (si > 0) {
       result -= cv(indexCPB<ConnSide::csFront>(s, si, li) - 1);
     }
-    if (si+1 < s.numStacks()) {
+    if (si+1 < s.numStacks) {
       result += cv(indexCPB<ConnSide::csFront>(s, si, li));
     }
   }
@@ -538,7 +538,7 @@ double getConnContri_SSNT<ConnSide::csBack>(
     if (si > 0) {
       result -= cv(indexCNT<ConnSide::csBack>(s, si, li) - 1);
     }
-    if (si+1 < s.numStacks()) {
+    if (si+1 < s.numStacks) {
       result += cv(indexCNT<ConnSide::csBack>(s, si, li));
     }
   }
@@ -554,11 +554,11 @@ double getConnContri_SSNB<ConnSide::csBack>(
       const Eigen::VectorXd& cv, const SysParam& s,
       std::size_t ci, std::size_t si, std::size_t li) {
   double result = 0;
-  if (ci+1 == s.numCells()) {
+  if (ci+1 == s.numCells) {
     if (si > 0) {
       result -= cv(indexCNB<ConnSide::csBack>(s, si, li));
     }
-    if (si+1 < s.numStacks()) {
+    if (si+1 < s.numStacks) {
       result += cv(indexCNB<ConnSide::csBack>(s, si, li) + 1);
     }
   }
@@ -581,12 +581,12 @@ double getConnContri_SSNB<ConnSide::csBack>(
 
 template<>
 void addConnLoops<ConnSide::csFront, ConnSide::csBack>(Eigen::MatrixXd& m, const PCCSysParam&s ) {
-  double stackR = s.numCells()*s.cellR() + 2*s.stackShuntR() + 2*s.connSubShuntR();
+  double stackR = s.numCells*s.cellR() + 2*s.stackShuntR() + 2*s.connSubShuntR();
 
-  for (std::size_t li = 0; li < s.numLines(); ++li) {
-    double fullConnShuntR = (s.numLines()-li-1)*s.connSubManiR() + s.connMainShuntR();
+  for (std::size_t li = 0; li < s.numLines; ++li) {
+    double fullConnShuntR = (s.numLines-li-1)*s.connSubManiR() + s.connMainShuntR();
 
-    for (std::size_t si = 0; si < s.numStacks(); ++ si) {
+    for (std::size_t si = 0; si < s.numStacks; ++ si) {
       Eigen::Index cpti = indexCPT<ConnSide::csFront>(s, si, li);
       Eigen::Index cpbi = indexCPB<ConnSide::csFront>(s, si, li);
       Eigen::Index cnti = indexCNT<ConnSide::csBack>(s, si, li);
@@ -595,45 +595,45 @@ void addConnLoops<ConnSide::csFront, ConnSide::csBack>(Eigen::MatrixXd& m, const
       if (si > 0) {
         // :::: [ POSITIVE TOP CONN ] ::::
         // >>> LINE
-        m(cpti, li) += s.numCells() * s.cellR();
-        m(li, cpti) += s.numCells() * s.cellR();
+        m(cpti, li) += s.numCells * s.cellR();
+        m(li, cpti) += s.numCells * s.cellR();
         // >>> POSITIVE BOT CONN
         m(cpti, cpbi-1) += s.cellR();
-        if (si+1 < s.numStacks()) {
-          m(cpti, cpbi) += (s.numCells()-1) * s.cellR();
+        if (si+1 < s.numStacks) {
+          m(cpti, cpbi) += (s.numCells-1) * s.cellR();
         }
         // >>> NEGATIVE TOP CONN
         m(cpti, cnti-1) += 2*s.cellR();
-        if (si+1 < s.numStacks()) {
-          m(cpti, cnti) += (s.numCells()-2) * s.cellR();
+        if (si+1 < s.numStacks) {
+          m(cpti, cnti) += (s.numCells-2) * s.cellR();
         }
         // >>> NEGATIVE BOT CONN
-        m(cpti, cnbi) = (s.numCells()-1) * s.cellR();
+        m(cpti, cnbi) = (s.numCells-1) * s.cellR();
         if (si > 1) {
           m(cpti, cnbi-1) += s.cellR();
         }
 
         // :::: [ NEGATIVE BOTTOM CONN ] ::::
         // >>> LINE
-        m(cnbi, li) += s.numCells() * s.cellR();
-        m(li, cnbi) += s.numCells() * s.cellR();
+        m(cnbi, li) += s.numCells * s.cellR();
+        m(li, cnbi) += s.numCells * s.cellR();
         // >>> POSITIVE TOP CONN
-        m(cnbi, cpti) += (s.numCells()-1) * s.cellR();
-        if (si+1 < s.numStacks()) {
+        m(cnbi, cpti) += (s.numCells-1) * s.cellR();
+        if (si+1 < s.numStacks) {
           m(cnbi, cpti+1) += s.cellR();
         }
         // >>> POSITIVE BOT CONN
-        if (si+1 < s.numStacks()) {
-          m(cnbi, cpbi) += s.numCells() * s.cellR();
+        if (si+1 < s.numStacks) {
+          m(cnbi, cpbi) += s.numCells * s.cellR();
         }
         // >>> NEGATIVE TOP CONN
         m(cnbi, cnti-1) += s.cellR();
-        if (si+1 < s.numStacks()) {
-          m(cnbi, cnti) += (s.numCells()-1) * s.cellR();
+        if (si+1 < s.numStacks) {
+          m(cnbi, cnti) += (s.numCells-1) * s.cellR();
         }
 
         // :::: [ CONTRI TO SELF ] ::::
-        for (std::size_t i = 0; i < s.numLines(); ++i) {
+        for (std::size_t i = 0; i < s.numLines; ++i) {
           double connR = 2*fullConnShuntR + s.connMainManiR();
           double otherR = fullConnShuntR;
           if (i == li) {
@@ -649,55 +649,55 @@ void addConnLoops<ConnSide::csFront, ConnSide::csBack>(Eigen::MatrixXd& m, const
             m(cpti, indexCPT<ConnSide::csFront>(s, si, i)-1) -= otherR;
             m(cnbi, indexCNB<ConnSide::csBack>(s, si, i)-1) -= otherR;
           }
-          if (si+1 < s.numStacks()) {
+          if (si+1 < s.numStacks) {
             m(cpti, indexCPT<ConnSide::csFront>(s, si, i)+1) -= otherR;
             m(cnbi, indexCNB<ConnSide::csBack>(s, si, i)+1) -= otherR;
           }
         }
       }
 
-      if (si+1 < s.numStacks()) {
+      if (si+1 < s.numStacks) {
         // :::: [ POSITIVE BOT CONN ] ::::
         // >>> MAIN LOOP
-        m(cpbi, li) += s.numCells() * s.cellR();
-        m(li, cpbi) += s.numCells() * s.cellR();
+        m(cpbi, li) += s.numCells * s.cellR();
+        m(li, cpbi) += s.numCells * s.cellR();
         // >>> POSITIVE TOP CONN
         m(cpbi, cpti+1) += s.cellR();
         if (si > 0) {
-          m(cpbi, cpti) += (s.numCells()-1) * s.cellR();
+          m(cpbi, cpti) += (s.numCells-1) * s.cellR();
         }
         // >>> NEGATIVE TOP CONN
-        m(cpbi, cnti) += (s.numCells()-1) * s.cellR();
+        m(cpbi, cnti) += (s.numCells-1) * s.cellR();
         if (si > 0) {
           m(cpbi, cnti-1) += s.cellR();
         }
         // >>> NEGATIVE BOT CONN
         if (si > 0) {
-          m(cpbi, cnbi) += s.numCells() * s.cellR();
+          m(cpbi, cnbi) += s.numCells * s.cellR();
         }
 
         // :::: [ NEGATIVE TOP CONN ] ::::
         // >>> MAIN LOOP
-        m(cnti, li) += s.numCells() * s.cellR();
-        m(li, cnti) += s.numCells() * s.cellR();
+        m(cnti, li) += s.numCells * s.cellR();
+        m(li, cnti) += s.numCells * s.cellR();
         // >>> POSITIVE TOP CONN
         m(cnti, cpti+1) += 2*s.cellR();
         if (si > 0) {
-          m(cnti, cpti) += (s.numCells()-2) * s.cellR();
+          m(cnti, cpti) += (s.numCells-2) * s.cellR();
         }
         // >>> POSITIVE BOT CONN
-        m(cnti, cpbi) += (s.numCells()-1) * s.cellR();
-        if (si+2 < s.numStacks()) {
+        m(cnti, cpbi) += (s.numCells-1) * s.cellR();
+        if (si+2 < s.numStacks) {
           m(cnti, cpbi+1) += s.cellR();
         }
         // >>> NEGATIVE BOT CONN
         m(cnti, cnbi+1) += s.cellR();
         if (si > 0) {
-          m(cnti, cnbi) += (s.numCells()-1) * s.cellR();
+          m(cnti, cnbi) += (s.numCells-1) * s.cellR();
         }
 
         // :::: [ CONTRI TO SELF ] ::::
-        for (std::size_t i = 0; i < s.numLines(); ++i) {
+        for (std::size_t i = 0; i < s.numLines; ++i) {
           double connR = 2*fullConnShuntR + s.connMainManiR();
           double otherR = fullConnShuntR;
           if (i == li) {
@@ -713,14 +713,14 @@ void addConnLoops<ConnSide::csFront, ConnSide::csBack>(Eigen::MatrixXd& m, const
             m(cpbi, indexCPB<ConnSide::csFront>(s, si, i)-1) -= otherR;
             m(cnti, indexCNT<ConnSide::csBack>(s, si, i)-1) -= otherR;
           }
-          if (si+2 < s.numStacks()) {
+          if (si+2 < s.numStacks) {
             m(cpbi, indexCPB<ConnSide::csFront>(s, si, i)+1) -= otherR;
             m(cnti, indexCNT<ConnSide::csBack>(s, si, i)+1) -= otherR;
           }
         }
       }
 
-      for (std::size_t ci = 0; ci < s.numCells(); ++ci) {
+      for (std::size_t ci = 0; ci < s.numCells; ++ci) {
         Eigen::Index spti = indexSPT(s, ci, si, li);
         Eigen::Index spbi = indexSPB(s, ci, si, li);
         Eigen::Index snti = indexSNT(s, ci, si, li);
@@ -728,7 +728,7 @@ void addConnLoops<ConnSide::csFront, ConnSide::csBack>(Eigen::MatrixXd& m, const
 
         if (si > 0) {
           // :::: [ POSITIVE STACK LOOPS ] ::::
-          if (ci+1 < s.numCells()) {
+          if (ci+1 < s.numCells) {
             // >>> POSITIVE TOP CONN
             m(spti, cpti) += s.cellR();
             m(cpti, spti) += s.cellR();
@@ -738,7 +738,7 @@ void addConnLoops<ConnSide::csFront, ConnSide::csBack>(Eigen::MatrixXd& m, const
               m(spti-1, cpti) -= s.stackShuntR();
               m(cpti, spti-1) -= s.stackShuntR();
             }
-            if (ci+2 == s.numCells()) {
+            if (ci+2 == s.numCells) {
               m(spti, cpti) += s.stackShuntR();
               m(cpti, spti) += s.stackShuntR();
             }
@@ -765,16 +765,16 @@ void addConnLoops<ConnSide::csFront, ConnSide::csBack>(Eigen::MatrixXd& m, const
               m(snbi-1, cnbi) -= s.stackShuntR();
               m(cnbi, snbi-1) -= s.stackShuntR();
             }
-            if (ci+1 == s.numCells()) {
+            if (ci+1 == s.numCells) {
               m(snbi, cnbi) += s.stackShuntR();
               m(cnbi, snbi) += s.stackShuntR();
             }
           }
         }
 
-        if (si+1 < s.numStacks()) {
+        if (si+1 < s.numStacks) {
           // :::: [ POSITIVE STACK LOOPS ] ::::
-          if (ci+1 < s.numCells()) {
+          if (ci+1 < s.numCells) {
             // >>> POSITIVE BOT CONN
             m(spti, cpbi) += s.cellR();
             m(cpbi, spti) += s.cellR();
@@ -789,7 +789,7 @@ void addConnLoops<ConnSide::csFront, ConnSide::csBack>(Eigen::MatrixXd& m, const
               m(spbi, cpbi) += s.stackShuntR();
               m(cpbi, spbi) += s.stackShuntR();
             }
-            if (ci+2 == s.numCells()) {
+            if (ci+2 == s.numCells) {
               m(spbi+1, cpbi) -= s.stackShuntR();
               m(cpbi, spbi+1) -= s.stackShuntR();
             }
@@ -811,7 +811,7 @@ void addConnLoops<ConnSide::csFront, ConnSide::csBack>(Eigen::MatrixXd& m, const
               m(snti, cnti) += s.stackShuntR();
               m(cnti, snti) += s.stackShuntR();
             }
-            if (ci+1 == s.numCells()) {
+            if (ci+1 == s.numCells) {
               m(snti+1, cnti) -= s.stackShuntR();
               m(cnti, snti+1) -= s.stackShuntR();
             }
@@ -837,21 +837,21 @@ void addConnLoops<ConnSide::csFront, ConnSide::csBack>(Eigen::MatrixXd& m, const
 
 
 void addVolt(Eigen::VectorXd& v, const PCCSysParam& s, double chgVolt) {
-  for (std::size_t li = 0; li < s.numLines(); ++li) {
+  for (std::size_t li = 0; li < s.numLines; ++li) {
     // line loops
-    v(li) += chgVolt - s.numStacks()*s.numCells()*s.ocv();
-    for (std::size_t si = 0; si < s.numStacks(); ++si) {
+    v(li) += chgVolt - s.numStacks*s.numCells*s.ocv();
+    for (std::size_t si = 0; si < s.numStacks; ++si) {
       // connector loops
       if (si > 0) {
-        v(indexCPT<ConnSide::csFront>(s, si, li)) -= s.numCells()*s.ocv();
-        v(indexCNB<ConnSide::csBack>(s, si, li)) -= s.numCells()*s.ocv();
+        v(indexCPT<ConnSide::csFront>(s, si, li)) -= s.numCells*s.ocv();
+        v(indexCNB<ConnSide::csBack>(s, si, li)) -= s.numCells*s.ocv();
       }
-      if (si+1 < s.numStacks()) {
-        v(indexCPB<ConnSide::csFront>(s, si, li)) -= s.numCells()*s.ocv();
-        v(indexCNT<ConnSide::csBack>(s, si, li)) -= s.numCells()*s.ocv();
+      if (si+1 < s.numStacks) {
+        v(indexCPB<ConnSide::csFront>(s, si, li)) -= s.numCells*s.ocv();
+        v(indexCNT<ConnSide::csBack>(s, si, li)) -= s.numCells*s.ocv();
       }
-      for (std::size_t ci = 0; ci < s.numCells(); ++ci) {
-        if (ci+1 < s.numCells()) {
+      for (std::size_t ci = 0; ci < s.numCells; ++ci) {
+        if (ci+1 < s.numCells) {
           // positive cell loops
           v(indexSPT(s, ci, si, li)) -= s.ocv();
           v(indexSPB(s, ci, si, li)) -= s.ocv();
