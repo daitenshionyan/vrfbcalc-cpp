@@ -1,6 +1,6 @@
 #pragma once
 
-
+#include <cmath>
 #include <string>
 #include <unordered_set>
 
@@ -10,7 +10,14 @@
 namespace vrfb {
 
 
-constexpr double kAvrOCV = 1.38;
+inline double getOCV(double soc=0.3642530, double t=298) {
+  return 1.38
+      - 0.00193 * (t - 273)
+      + (8.314 * t) / 96485.3321
+          * std::log(
+              ((1.8*soc+3) * (1.8*soc+4.8) * std::pow(soc, 2))
+              / std::pow(1-soc, 2));
+}
 
 
 namespace celleff {
@@ -163,24 +170,12 @@ struct StackParam {
 */
 class SysParam {
   public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
-    /**
-     * Constructs a `SysParam`
-     *
-     * @param num_s Number of stacks.
-     * @param num_c Number of cells per stack.
-     * @param rho Resistivity of electrolyte (Ohm m).
-     * @param mcd Max charge density (A m-2).
-     * @param stack Stack parameters.
-    */
-    SysParam(std::size_t num_s, std::size_t num_c,
-        double rho, double mcd, const StackParam& stack)
-        : nl{1}, ns{num_s}, nc{num_c},
-          r{rho}, maxCD{mcd}, s{stack} {}
-
     SysParam(const StackParam& stack, double rho, double mcd,
-        std::size_t num_c, std::size_t num_s, std::size_t num_p)
+        std::size_t num_c, std::size_t num_s, std::size_t num_l,
+        double soc=0.3642530, double temp=298)
         : s{stack}, r{rho}, maxCD{mcd},
-          nl{num_p}, ns{num_s}, nc{num_c} {}
+          nl{num_l}, ns{num_s}, nc{num_c},
+          chargeFrac{soc}, t{temp} {}
 
     SysParam() = delete;
     SysParam(const SysParam&) = default;
@@ -196,8 +191,12 @@ class SysParam {
     inline std::size_t numLines() const {return nl;}
     inline std::size_t numStacks() const {return ns;}
     inline std::size_t numCells() const {return nc;}
+
     inline double resistivity() const {return r;}
     inline double maxChgDen() const {return maxCD;}
+    inline double soc() const {return chargeFrac;}
+    inline double temperature() const {return t;}
+    inline double ocv() const {return getOCV(chargeFrac, t);}
 
     inline double asr() const {return s.asr;}
     inline double cellArea() const {return s.ca;}
@@ -212,11 +211,13 @@ class SysParam {
 
 
   private:
-    std::size_t nl;
-    std::size_t ns;             // number of stacks
+    std::size_t nl;             // number of lines
+    std::size_t ns;             // number of stacks per line
     std::size_t nc;             // number of cells per stack
     double r;                   // resistivity (Ohm m)
     double maxCD;               // maximum charge density (A m-2)
+    double chargeFrac;          // state of charge (fractional)
+    double t;                   // temperature (K)
 
     StackParam s;
 };
@@ -241,29 +242,22 @@ class ShuntReportData {
   public: // ~~~~ accessors ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     virtual std::string arrName() const = 0;
 
-    virtual std::size_t numLines() const {return 1;}
-    virtual std::size_t numStacks() const = 0;
-    virtual std::size_t numCells() const = 0;
-    virtual std::size_t totCells() const {return numLines() * numStacks() * numCells();}
+    virtual const SysParam& param() const = 0;
 
-    virtual double asr() const = 0;
-    virtual double cellArea() const = 0;
-    virtual double resistivity() const = 0;
-    virtual double stackShuntLen() const = 0;
-    virtual double stackShuntArea() const = 0;
-    virtual double stackManiLen() const = 0;
-    virtual double stackManiArea() const = 0;
+    virtual std::size_t numLines() const {return param().numLines();}
+    virtual std::size_t numStacks() const {return param().numStacks();}
+    virtual std::size_t numCells() const {return param().numCells();}
+    virtual std::size_t totCells() const {return numLines()*numStacks()*numCells();}
 
     virtual double chargingCurr() const = 0;
     virtual double chargingVolt() const = 0;
     virtual double chargingPowr() const = 0;
-
-    virtual const std::vector<double>& cellCurrs() const = 0;
-    virtual const std::vector<double>& cellPowrs() const = 0;
-    virtual double cellCurr(std::size_t i) const = 0;
-    virtual double cellPowr(std::size_t i) const = 0;
+    virtual double overVoltPowr() const = 0;
     virtual double storedPowr() const = 0;
     virtual double powrEff() const {return storedPowr() / chargingPowr();}
+
+    virtual double cellCurr(std::size_t i) const = 0;
+    virtual double cellPowr(std::size_t i) const = 0;
 
 
   public:
@@ -362,19 +356,8 @@ struct ConnParam {
 */
 class SCLSysParam : public SysParam {
   public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
-    /**
-     * Constructs a `SCLSysParam`
-     *
-     * @param num_s Number of stacks.
-     * @param num_c Number of cells per stack.
-     * @param rho Resistivity of electrolyte (Ohm m).
-     * @param mcd Max charge density (A m-2).
-     * @param stack Stack parameters.
-     * @param conn SCL connector parameters.
-    */
-    SCLSysParam(std::size_t num_s, std::size_t num_c, double rho, double mcd,
-        const StackParam& stack, const ConnParam& conn)
-        : SysParam{num_s, num_c, rho, mcd, stack}, c{conn} {}
+    SCLSysParam(const SysParam& sys, const ConnParam& conn)
+        : SysParam{sys}, c{conn} {}
 
     SCLSysParam(const SCLSysParam&) = default;
     SCLSysParam(SCLSysParam&&) = default;
@@ -443,30 +426,19 @@ class SCLReport : public ShuntReportData {
 
     std::string arrName() const override {return arrangementName;}
 
+    const SCLSysParam& param() const override {return sys;}
+
     double chargingCurr() const override {return chgCurr;}
     double chargingVolt() const override {return chgVolt;}
     double chargingPowr() const override {return chgCurr*chgVolt;}
-    inline double overVoltPowr() const {return ovpLoss;}
+    double overVoltPowr() const override {return ovpLoss;}
 
-    std::size_t numCells() const override {return sys.numCells();}
-    std::size_t numStacks() const override {return sys.numStacks();}
-
-    double resistivity() const override {return sys.resistivity();}
     inline double maxChgDen() const {return sys.maxChgDen();}
     inline double maxChgCurr() const {return sys.maxChgDen()*sys.cellArea();}
 
-    const std::vector<double>& cellCurrs() const override {return cell_currs;}
-    const std::vector<double>& cellPowrs() const override {return cell_powrs;}
     double cellCurr(std::size_t i) const override {return cell_currs.at(i);}
     double cellPowr(std::size_t i) const override {return cell_powrs.at(i);}
     double storedPowr() const override {return totPowr;}
-
-    double asr() const override {return sys.asr();}
-    double cellArea() const override {return sys.cellArea();}
-    double stackShuntLen() const override {return sys.stackShuntLen();}
-    double stackShuntArea() const override {return sys.stackShuntArea();}
-    double stackManiLen() const override {return sys.stackManiLen();}
-    double stackManiArea() const override {return sys.stackManiArea();}
 
     inline double connShuntLen() const {return sys.connShuntLen();}
     inline double connShuntArea() const {return sys.connShuntArea();}
@@ -684,12 +656,8 @@ struct ConnParam {
 
 class PCCSysParam : public SysParam {
   public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
-    PCCSysParam(
-        double rho, double mcd,
-        std::size_t num_c, std::size_t num_s, std::size_t num_p,
-        const StackParam& stack, const ConnParam& conn)
-        : SysParam{stack, rho, mcd, num_c, num_s, num_p},
-          c{conn} {}
+    PCCSysParam(const SysParam& sys, const ConnParam& conn)
+        : SysParam{sys}, c{conn} {}
 
     PCCSysParam() = delete;
     PCCSysParam(const PCCSysParam&) = default;
@@ -723,22 +691,14 @@ class PCCSysParam : public SysParam {
 };
 
 
+class PCCReportData;
+
+
 class PCCReport : public ShuntReportData {
   public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
-    PCCReport(double cc, double cv, const PCCSysParam& s,
-        const std::vector<double>& clist,
-        const std::vector<double>& sptlist, const std::vector<double>& spblist,
-        const std::vector<double>& sntlist, const std::vector<double>& snblist,
-        const std::vector<double>& mptlist, const std::vector<double>& mpblist,
-        const std::vector<double>& mntlist, const std::vector<double>& mnblist,
-        double err=0, const std::string& an = "");
-    PCCReport(double cc, double cv, const PCCSysParam& s,
-        std::vector<double>&& clist,
-        std::vector<double>&& sptlist, std::vector<double>&& spblist,
-        std::vector<double>&& sntlist, std::vector<double>&& snblist,
-        std::vector<double>&& mptlist, std::vector<double>&& mpblist,
-        std::vector<double>&& mntlist, std::vector<double>&& mnblist,
-        double err=0, const std::string& an = "");
+    PCCReport(PCCReportData* d, double cv,
+        const std::string arrName, double err)
+        : data{d}, chgVolt{cv}, arrangementName{arrName}, error{err} {}
 
     PCCReport() = delete;
     PCCReport(const PCCReport&) = default;
@@ -751,120 +711,49 @@ class PCCReport : public ShuntReportData {
 
 
   public: // ~~~~ accessors ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    inline double err() const {return error;}
+    double err() const {return error;}
 
     std::string arrName() const override {return arrangementName;}
 
-    std::size_t numLines() const override {return sys.numLines();}
-    std::size_t numStacks() const override {return sys.numStacks();};
-    std::size_t numCells() const override {return sys.numCells();}
+    const PCCSysParam& param() const override;
 
-    double asr() const override {return sys.asr();}
-    double cellArea() const override {return sys.cellArea();}
-    double resistivity() const override {return sys.resistivity();}
-    double stackShuntLen() const override {return sys.stackShuntLen();}
-    double stackShuntArea() const override {return sys.stackShuntArea();}
-    double stackManiLen() const override {return sys.stackManiLen();}
-    double stackManiArea() const override {return sys.stackManiArea();}
-    inline double maxChgDen() const {return sys.maxChgDen();}
-    inline double maxChgCurr() const {return sys.maxChgDen()*sys.cellArea();}
-
-    inline double connSubShuntLen() const {return sys.connSubShuntLen();}
-    inline double connSubShuntArea() const {return sys.connSubShuntArea();}
-    inline double connSubManiLen() const {return sys.connSubManiLen();}
-    inline double connSubManiArea() const {return sys.connSubManiArea();}
-    inline double connMainShuntLen() const {return sys.connMainShuntLen();}
-    inline double connMainShuntArea() const {return sys.connMainShuntArea();}
-    inline double connMainManiLen() const {return sys.connMainManiLen();}
-    inline double connMainManiArea() const {return sys.connMainManiArea();}
-
-    double chargingCurr() const override {return chgCurr;}
+    double chargingCurr() const override;
     double chargingVolt() const override {return chgVolt;}
-    double chargingPowr() const override {return chgCurr*chgVolt;}
-    inline double overVoltPowr() const {return ovpLoss;}
+    double chargingPowr() const override {return chargingVolt() * chargingCurr();}
+    double overVoltPowr() const override;
+    double storedPowr() const override;
 
-    const std::vector<double>& cellCurrs() const override {return cell_currs;}
-    const std::vector<double>& cellPowrs() const override {return cell_powrs;}
-    double cellCurr(std::size_t i) const override {return cell_currs.at(i);}
-    double cellPowr(std::size_t i) const override {return cell_powrs.at(i);}
-    double storedPowr() const override {return totPowr;}
+    double cellCurr(std::size_t i) const override;
+    double cellPowr(std::size_t i) const override {return cellCurr(i)*param().ocv();}
 
-    inline const std::vector<double>& cirPowrs() const {return cir_powrs;}
-    inline double cirPowr(std::size_t i) const {return cir_powrs.at(i);}
+    double ssptCurr(std::size_t i) const;
+    double sspbCurr(std::size_t i) const;
+    double ssntCurr(std::size_t i) const;
+    double ssnbCurr(std::size_t i) const;
+    double ssptPowr(std::size_t i) const {return ssptCurr(i)*param().ocv();}
+    double sspbPowr(std::size_t i) const {return sspbCurr(i)*param().ocv();}
+    double ssntPowr(std::size_t i) const {return ssntCurr(i)*param().ocv();}
+    double ssnbPowr(std::size_t i) const {return ssnbCurr(i)*param().ocv();}
 
-    inline const std::vector<double>& sptCurrs() const {return spt_currs;}
-    inline const std::vector<double>& spbCurrs() const {return spb_currs;}
-    inline const std::vector<double>& sntCurrs() const {return snt_currs;}
-    inline const std::vector<double>& snbCurrs() const {return snb_currs;}
-    inline const std::vector<double>& sptPowrs() const {return spt_powrs;}
-    inline const std::vector<double>& spbPowrs() const {return spb_powrs;}
-    inline const std::vector<double>& sntPowrs() const {return snt_powrs;}
-    inline const std::vector<double>& snbPowrs() const {return snb_powrs;}
-    inline double sptCurr(std::size_t i) const {return spt_currs.at(i);}
-    inline double spbCurr(std::size_t i) const {return spb_currs.at(i);}
-    inline double sntCurr(std::size_t i) const {return snt_currs.at(i);}
-    inline double snbCurr(std::size_t i) const {return snb_currs.at(i);}
-    inline double sptPowr(std::size_t i) const {return spt_powrs.at(i);}
-    inline double spbPowr(std::size_t i) const {return spb_powrs.at(i);}
-    inline double sntPowr(std::size_t i) const {return snt_powrs.at(i);}
-    inline double snbPowr(std::size_t i) const {return snb_powrs.at(i);}
-
-    inline const std::vector<double>& mptCurrs() const {return mpt_currs;}
-    inline const std::vector<double>& mpbCurrs() const {return mpb_currs;}
-    inline const std::vector<double>& mntCurrs() const {return mnt_currs;}
-    inline const std::vector<double>& mnbCurrs() const {return mnb_currs;}
-    inline const std::vector<double>& mptPowrs() const {return mpt_powrs;}
-    inline const std::vector<double>& mpbPowrs() const {return mpb_powrs;}
-    inline const std::vector<double>& mntPowrs() const {return mnt_powrs;}
-    inline const std::vector<double>& mnbPowrs() const {return mnb_powrs;}
-    inline double mptCurr(std::size_t i) const {return mpt_currs.at(i);}
-    inline double mpbCurr(std::size_t i) const {return mpb_currs.at(i);}
-    inline double mntCurr(std::size_t i) const {return mnt_currs.at(i);}
-    inline double mnbCurr(std::size_t i) const {return mnb_currs.at(i);}
-    inline double mptPowr(std::size_t i) const {return mpt_powrs.at(i);}
-    inline double mpbPowr(std::size_t i) const {return mpb_powrs.at(i);}
-    inline double mntPowr(std::size_t i) const {return mnt_powrs.at(i);}
-    inline double mnbPowr(std::size_t i) const {return mnb_powrs.at(i);}
+    double smptCurr(std::size_t i) const;
+    double smpbCurr(std::size_t i) const;
+    double smntCurr(std::size_t i) const;
+    double smnbCurr(std::size_t i) const;
+    double smptPowr(std::size_t i) const {return smptCurr(i)*param().ocv();}
+    double smpbPowr(std::size_t i) const {return smpbCurr(i)*param().ocv();}
+    double smntPowr(std::size_t i) const {return smntCurr(i)*param().ocv();}
+    double smnbPowr(std::size_t i) const {return smnbCurr(i)*param().ocv();}
 
 
-  public:
+  public: // ~~~~ functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     PCCReport* copy() const override {return new PCCReport(*this);}
 
 
-  private: // ~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    double error;
+  private: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    PCCReportData* data;
     std::string arrangementName;
-
-    double chgCurr;
     double chgVolt;
-    double totPowr = 0;     // Total input power to cells
-    double ovpLoss = 0;     // Over voltage power lost
-    PCCSysParam sys;
-
-    std::vector<double> cell_currs;
-    std::vector<double> cell_powrs;
-
-    // :::: [ STACK ] ::::
-
-    std::vector<double> cir_powrs;      // Cell internal resistance power
-
-    std::vector<double> spt_currs;      // Stack shunt positive top currents
-    std::vector<double> spb_currs;      // Stack shunt positive bottom currents
-    std::vector<double> snt_currs;      // Stack shunt negative top currents
-    std::vector<double> snb_currs;      // Stack shunt negative bottom currents
-    std::vector<double> spt_powrs;      // Stack shunt positive top powers
-    std::vector<double> spb_powrs;      // Stack shunt positive bottom powers
-    std::vector<double> snt_powrs;      // Stack shunt negative top powers
-    std::vector<double> snb_powrs;      // Stack shunt negative bottom powers
-
-    std::vector<double> mpt_currs;      // Stack manifold positive top currents
-    std::vector<double> mpb_currs;      // Stack manifold positive bottom currents
-    std::vector<double> mnt_currs;      // Stack manifold negative top currents
-    std::vector<double> mnb_currs;      // Stack manifold negative bottom currents
-    std::vector<double> mpt_powrs;      // Stack manifold positive top powers
-    std::vector<double> mpb_powrs;      // Stack manifold positive bottom powers
-    std::vector<double> mnt_powrs;      // Stack manifold negative top powers
-    std::vector<double> mnb_powrs;      // Stack manifold negative bottom powers
+    double error;
 };
 
 

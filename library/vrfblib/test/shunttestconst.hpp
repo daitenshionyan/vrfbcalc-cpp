@@ -36,8 +36,11 @@ const vrfb::shuntcur::scl::ConnParam kTestConnParam {
 
 
 const vrfb::shuntcur::scl::SCLSysParam kTestSysParam {
-  kTestNumStacks, kTestNumCells, 1, 1000,
-  kTestStackParam, kTestConnParam
+  vrfb::shuntcur::SysParam {
+    kTestStackParam, 1, 1000,
+    kTestNumCells, kTestNumStacks, 1
+  },
+  kTestConnParam
 };
 
 

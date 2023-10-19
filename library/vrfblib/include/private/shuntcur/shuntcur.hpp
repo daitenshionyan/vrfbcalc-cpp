@@ -126,6 +126,42 @@ inline Eigen::Index indexSNB(const SysParam& s,
 }
 
 
+/**
+ * Returns the line index given the cell index from the first cell in the
+ * system.
+ *
+ * @param i Cell index from the first cell in the system.
+ * @param s System parameters.
+*/
+inline std::size_t toli(std::size_t i, const SysParam& s) {
+  return i / (s.numCells()*s.numStacks());
+}
+
+
+/**
+ * Returns the stack index within its line given the cell index from the first
+ * cell in the system.
+ *
+ * @param i Cell index from the first cell in the system.
+ * @param s System parameters.
+*/
+inline std::size_t tosi(std::size_t i, const SysParam& s) {
+  return (i / s.numCells()) % s.numStacks();
+}
+
+
+/**
+ * Returns the cell index within its stack given the cell index from the first
+ * cell in the system.
+ *
+ * @param i Cell index from the first cell in the system.
+ * @param s System parameters.
+*/
+inline std::size_t toci(std::size_t i, const SysParam& s) {
+  return i % s.numCells();
+}
+
+
 
 
 
@@ -155,6 +191,21 @@ double getStackContri_Cell(const Eigen::VectorXd& cv, const SysParam& s,
       std::size_t ci, std::size_t si, std::size_t li = 0);
 
 
+/**
+ * Returns stack inner loop contribution to the specified cell.
+ *
+ * @param cv Current vector.
+ * @param s System parameter.
+ * @param i Cell index from the first cell in the system.
+*/
+double getStackContri_Cell(const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t i) {
+  return getStackContri_Cell(cv, s, toci(i, s), tosi(i, s), toli(i, s));
+}
+
+
+
+
 // :::: [ STACK SHUNT ] ::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 
@@ -173,6 +224,22 @@ double getStackContri_SSPT(const Eigen::VectorXd& cv, const SysParam& s,
 
 
 /**
+ * Returns stack inner loop contribution to the specified STACK POSITIVE TOP
+ * SHUNT.
+ *
+ * @param cv Current vector.
+ * @param s System parameter.
+ * @param i Cell index from the first cell in the system.
+*/
+double getStackContri_SSPT(const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t i) {
+  return getStackContri_SSPT(cv, s, toci(i, s), tosi(i, s), toli(i, s));
+}
+
+
+
+
+/**
  * Returns stack inner loop contribution to the specified STACK POSITIVE BOTTOM
  * SHUNT.
  *
@@ -184,6 +251,22 @@ double getStackContri_SSPT(const Eigen::VectorXd& cv, const SysParam& s,
 */
 double getStackContri_SSPB(const Eigen::VectorXd& cv, const SysParam& s,
       std::size_t ci, std::size_t si, std::size_t li = 0);
+
+
+/**
+ * Returns stack inner loop contribution to the specified STACK POSITIVE BOTTOM
+ * SHUNT.
+ *
+ * @param cv Current vector.
+ * @param s System parameter.
+ * @param i Cell index from the first cell in the system.
+*/
+double getStackContri_SSPB(const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t i) {
+  return getStackContri_SSPB(cv, s, toci(i, s), tosi(i, s), toli(i, s));
+}
+
+
 
 
 /**
@@ -201,6 +284,22 @@ double getStackContri_SSNT(const Eigen::VectorXd& cv, const SysParam& s,
 
 
 /**
+ * Returns stack inner loop contribution to the specified STACK NEGATIVE TOP
+ * SHUNT.
+ *
+ * @param cv Current vector.
+ * @param s System parameter.
+ * @param i Cell index from the first cell in the system.
+*/
+double getStackContri_SSNT(const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t i) {
+  return getStackContri_SSNT(cv, s, toci(i, s), tosi(i, s), toli(i, s));
+}
+
+
+
+
+/**
  * Returns stack inner loop contribution to the specified STACK NEGATIVE BOTTOM
  * SHUNT.
  *
@@ -212,6 +311,22 @@ double getStackContri_SSNT(const Eigen::VectorXd& cv, const SysParam& s,
 */
 double getStackContri_SSNB(const Eigen::VectorXd& cv, const SysParam& s,
       std::size_t ci, std::size_t si, std::size_t li = 0);
+
+
+/**
+ * Returns stack inner loop contribution to the specified STACK NEGATIVE BOTTOM
+ * SHUNT.
+ *
+ * @param cv Current vector.
+ * @param s System parameter.
+ * @param i Cell index from the first cell in the system.
+*/
+double getStackContri_SSNB(const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t i) {
+  return getStackContri_SSNB(cv, s, toci(i, s), tosi(i, s), toli(i, s));
+}
+
+
 
 
 // :::: [ STACK MANIFOLD ] :::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -234,6 +349,22 @@ double getCurrMPT(const Eigen::VectorXd& cv, const SysParam& s,
 
 
 /**
+ * Returns the current of the specified STACK POSITIVE TOP MANIFOLD, given
+ * the calculated current vector.
+ *
+ * @param cv Current vector.
+ * @param s System parameter.
+ * @param i Cell index from the first cell in the system.
+*/
+double getCurrMPT(const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t i) {
+  return getCurrMPT(cv, s, toci(i, s), tosi(i, s), toli(i, s));
+}
+
+
+
+
+/**
  * Returns the current of the specified STACK POSITIVE BOTTOM MANIFOLD, given
  * the calculated current vector.
  *
@@ -247,6 +378,22 @@ double getCurrMPB(const Eigen::VectorXd& cv, const SysParam& s,
       std::size_t ci, std::size_t si, std::size_t li = 0) {
   return (ci+1 < s.numCells()) ? -cv(indexSPB(s, ci, si, li)) : 0;
 }
+
+
+/**
+ * Returns the current of the specified STACK POSITIVE BOTTOM MANIFOLD, given
+ * the calculated current vector.
+ *
+ * @param cv Current vector.
+ * @param s System parameter.
+ * @param i Cell index from the first cell in the system.
+*/
+double getCurrMPB(const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t i) {
+  return getCurrMPB(cv, s, toci(i, s), tosi(i, s), toli(i, s));
+}
+
+
 
 
 /**
@@ -266,6 +413,22 @@ double getCurrMNT(const Eigen::VectorXd& cv, const SysParam& s,
 
 
 /**
+ * Returns the current of the specified STACK NEGATIVE TOP MANIFOLD, given
+ * the calculated current vector.
+ *
+ * @param cv Current vector.
+ * @param s System parameter.
+ * @param i Cell index from the first cell in the system.
+*/
+double getCurrMNT(const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t i) {
+  return getCurrMNT(cv, s, toci(i, s), tosi(i, s), toli(i, s));
+}
+
+
+
+
+/**
  * Returns the current of the specified STACK NEGATIVE BOTTOM MANIFOLD, given
  * the calculated current vector.
  *
@@ -278,6 +441,20 @@ double getCurrMNT(const Eigen::VectorXd& cv, const SysParam& s,
 double getCurrMNB(const Eigen::VectorXd& cv, const SysParam& s,
     std::size_t ci, std::size_t si, std::size_t li = 0) {
   return (ci+1 < s.numCells()) ? -cv(indexSNB(s, ci, si, li) + 1) : 0;
+}
+
+
+/**
+ * Returns the current of the specified STACK NEGATIVE BOTTOM MANIFOLD, given
+ * the calculated current vector.
+ *
+ * @param cv Current vector.
+ * @param s System parameter.
+ * @param i Cell index from the first cell in the system.
+*/
+double getCurrMNB(const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t i) {
+  return getCurrMNB(cv, s, toci(i, s), tosi(i, s), toli(i, s));
 }
 
 

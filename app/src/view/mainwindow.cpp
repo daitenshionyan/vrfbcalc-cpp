@@ -12,9 +12,6 @@
 #include "vrfbcalccfg.hpp"
 #include "driver/vrfbdriver_io.hpp"
 
-#include "view/shuntcur/shuntcurresultview.h"
-#include "view/shuntcur/shuntcurresultviewpcc.h"
-
 
 namespace {
 
@@ -183,38 +180,26 @@ void MainWindow::displayPerformanceView(
 
 
 void MainWindow::displayPerformanceView_SC(const vrfbdriver::ShuntRes& r) {
-  switch (r.arrType) {
-    case vrfbdriver::SCArrType::scatSCL: {
-      SCResultView* rv = new SCResultView(this, r.name);
-      try {
-        rv->plotGraphs(r.perf.data<vrfb::shuntcur::scl::SCLReport>());
-      } catch (std::exception& ex) {
-        fail(comutils::string::format_string("Failed to plot graphs due to - %s",
-            ex.what()));
-        delete rv;
-        return;
-      }
-      connect(rv, &SCResultView::exportRequested,
-          this, &MainWindow::exportSEPerformance);
-      rv->open();
-      break;
+  SCReportPopup* rp = new SCReportPopup(r.name, this);
+  try {
+    switch (r.arrType) {
+      case vrfbdriver::SCArrType::scatSCL:
+        rp->plotGraphs(r.perf.data<vrfb::shuntcur::scl::SCLReport>());
+        break;
+      case vrfbdriver::SCArrType::scatPCC:
+        rp->plotGraphs(r.perf.data<vrfb::shuntcur::pcc::PCCReport>());
+        break;
     }
-    case vrfbdriver::SCArrType::scatPCC: {
-      SCResultView_PCC* rv = new SCResultView_PCC(this, r.name);
-      try {
-        rv->plotGraphs(r.perf.data<vrfb::shuntcur::pcc::PCCReport>());
-      } catch (std::exception& ex) {
-        fail(comutils::string::format_string("Failed to plot graphs due to - %s",
-            ex.what()));
-        delete rv;
-        return;
-      }
-      connect(rv, &SCResultView_PCC::exportRequested,
-          this, &MainWindow::exportSEPerformance);
-      rv->open();
-      break;
-    }
+  } catch (std::exception& ex) {
+    fail(comutils::string::format_string(
+        "Failed to plot graphs due to - %s",
+        ex.what()));
+    delete rp;
+    return;
   }
+  connect(rp, &SCReportPopup::exportRequested,
+      this, &MainWindow::exportSCReport);
+  rp->open();
 }
 
 
@@ -240,6 +225,27 @@ void MainWindow::exportCEPerformance(CEResultView* rv) {
 
 
 void MainWindow::exportSEPerformance(SCDataView* rv) {
+  if (watcher.isRunning()) {
+    warn("Cannot export as another process is already running");
+    return;
+  }
+  rv->hide();
+  watcher.setFuture(QtConcurrent::run(
+      &pool,
+      [&, rv](QPromise<logger::LogMsg>& p) {
+        auto l = PromLogger{p};
+        bool is_success = rv->exportImages(l);
+        if (is_success) {
+          rv->done(QDialog::Accepted);
+        } else {
+          rv->show();
+        }
+      }
+  ));
+}
+
+
+void MainWindow::exportSCReport(SCReportPopup* rv) {
   if (watcher.isRunning()) {
     warn("Cannot export as another process is already running");
     return;

@@ -8,6 +8,7 @@
 #include "view/celleff/celleffconfigpopup.h"
 #include "view/celleff/celleffresultview.h"
 #include "view/shuntcur/shuntcurconfigpopup.h"
+#include "view/shuntcur/shuntcurreportpopup.h"
 #include "driver/vrfbdriver.hpp"
 #include "logger.hpp"
 
@@ -60,6 +61,7 @@ class MainWindow : public QMainWindow, private logger::Logger {
 
     void displayPerformanceView_SC(const vrfbdriver::ShuntRes&);
     void exportSEPerformance(SCDataView*);
+    void exportSCReport(SCReportPopup*);
 
     Ui::MainWindow* ui;
     CEConfigPopup* popup_ce;

@@ -18,7 +18,7 @@
 namespace { // ==== namespace <UNNAMED> ========================================
 
 
-constexpr double threshold = 0.000001;
+constexpr double threshold = 1e-6;
 
 
 void checkMatrix(const Eigen::MatrixXd& expected, const Eigen::MatrixXd& actual) {
@@ -205,18 +205,18 @@ void checkShuntPerf(const vrfb::shuntcur::scl::SCLReport& expected, const vrfb::
 }
 
 
-void checkShuntPerf(const vrfb::shuntcur::pcc::PCCReport& expected, const vrfb::shuntcur::pcc::PCCReport& actual) {
-  bool is_same_size = expected.totCells() == actual.totCells();
+void checkShuntPerf(const vrfb::shuntcur::pcc::PCCReport& actual) {
+  bool is_same_size = shunttest_pcc::kExCurrList.size() == actual.totCells();
   ASSERT_TRUE(is_same_size) << "Wrong size"
-      << " - Expected size: " << expected.totCells()
+      << " - Expected size: " << shunttest_pcc::kExCurrList.size()
       << " | Actual size: " << actual.totCells();
 
   bool is_same = true;
   std::stringstream miscdiff {};
-  if (std::abs(actual.chargingCurr() - expected.chargingCurr()) > threshold) {
+  if (std::abs(actual.chargingCurr() - shunttest_pcc::kExChgCurr) > threshold) {
     is_same = false;
     miscdiff << "Charging current"
-        << " - Expected: " << expected.chargingCurr()
+        << " - Expected: " << shunttest_pcc::kExChgCurr
         << " | Actual: " << actual.chargingCurr() << "\n";
   }
   std::stringstream celldiff {};
@@ -228,63 +228,63 @@ void checkShuntPerf(const vrfb::shuntcur::pcc::PCCReport& expected, const vrfb::
   std::stringstream mpbdiff {};
   std::stringstream mntdiff {};
   std::stringstream mnbdiff {};
-  for (std::size_t i = 0; i < expected.totCells(); ++i) {
+  for (std::size_t i = 0; i < shunttest_pcc::kExCurrList.size(); ++i) {
     // STACK :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-    if (std::abs(actual.cellCurr(i) - expected.cellCurr(i)) > threshold) {
+    if (std::abs(actual.cellCurr(i) - shunttest_pcc::kExCurrList[i]) > threshold) {
       is_same = false;
       celldiff << "At (" << i << ")"
-        << " - Expected: " <<  expected.cellCurr(i)
+        << " - Expected: " <<  shunttest_pcc::kExCurrList[i]
         << " | Actual: " << actual.cellCurr(i) << "\n";
     }
 
-    if (std::abs(actual.sptCurr(i) - expected.sptCurr(i)) > threshold) {
+    if (std::abs(actual.ssptCurr(i) - shunttest_pcc::kExSSPTList[i]) > threshold) {
       is_same = false;
       sptdiff << "At (" << i << ")"
-        << " - Expected: " <<  expected.sptCurr(i)
-        << " | Actual: " << actual.sptCurr(i) << "\n";
+        << " - Expected: " <<  shunttest_pcc::kExSSPTList[i]
+        << " | Actual: " << actual.ssptCurr(i) << "\n";
     }
-    if (std::abs(actual.spbCurr(i) - expected.spbCurr(i)) > threshold) {
+    if (std::abs(actual.sspbCurr(i) - shunttest_pcc::kExSSPBList[i]) > threshold) {
       is_same = false;
       spbdiff << "At (" << i << ")"
-        << " - Expected: " <<  expected.spbCurr(i)
-        << " | Actual: " << actual.spbCurr(i) << "\n";
+        << " - Expected: " <<  shunttest_pcc::kExSSPBList[i]
+        << " | Actual: " << actual.sspbCurr(i) << "\n";
     }
-    if (std::abs(actual.sntCurr(i) - expected.sntCurr(i)) > threshold) {
+    if (std::abs(actual.ssntCurr(i) - shunttest_pcc::kExSSNTList[i]) > threshold) {
       is_same = false;
       sntdiff << "At (" << i << ")"
-        << " - Expected: " <<  expected.sntCurr(i)
-        << " | Actual: " << actual.sntCurr(i) << "\n";
+        << " - Expected: " <<  shunttest_pcc::kExSSNTList[i]
+        << " | Actual: " << actual.ssntCurr(i) << "\n";
     }
-    if (std::abs(actual.snbCurr(i) - expected.snbCurr(i)) > threshold) {
+    if (std::abs(actual.ssnbCurr(i) - shunttest_pcc::kExSSNBList[i]) > threshold) {
       is_same = false;
       snbdiff << "At (" << i << ")"
-        << " - Expected: " <<  expected.snbCurr(i)
-        << " | Actual: " << actual.snbCurr(i) << "\n";
+        << " - Expected: " <<  shunttest_pcc::kExSSNBList[i]
+        << " | Actual: " << actual.ssnbCurr(i) << "\n";
     }
 
-    if (std::abs(actual.mptCurr(i) - expected.mptCurr(i)) > threshold) {
+    if (std::abs(actual.smptCurr(i) - shunttest_pcc::kExSMPTList[i]) > threshold) {
       is_same = false;
       mptdiff << "At (" << i << ")"
-        << " - Expected: " <<  expected.mptCurr(i)
-        << " | Actual: " << actual.mptCurr(i) << "\n";
+        << " - Expected: " <<  shunttest_pcc::kExSMPTList[i]
+        << " | Actual: " << actual.smptCurr(i) << "\n";
     }
-    if (std::abs(actual.mpbCurr(i) - expected.mpbCurr(i)) > threshold) {
+    if (std::abs(actual.smpbCurr(i) - shunttest_pcc::kExSMPBList[i]) > threshold) {
       is_same = false;
       mpbdiff << "At (" << i << ")"
-        << " - Expected: " <<  expected.mpbCurr(i)
-        << " | Actual: " << actual.mpbCurr(i) << "\n";
+        << " - Expected: " <<  shunttest_pcc::kExSMPBList[i]
+        << " | Actual: " << actual.smpbCurr(i) << "\n";
     }
-    if (std::abs(actual.mntCurr(i) - expected.mntCurr(i)) > threshold) {
+    if (std::abs(actual.smntCurr(i) - shunttest_pcc::kExSMNTList[i]) > threshold) {
       is_same = false;
       mntdiff << "At (" << i << ")"
-        << " - Expected: " <<  expected.mntCurr(i)
-        << " | Actual: " << actual.mntCurr(i) << "\n";
+        << " - Expected: " <<  shunttest_pcc::kExSMNTList[i]
+        << " | Actual: " << actual.smntCurr(i) << "\n";
     }
-    if (std::abs(actual.mnbCurr(i) - expected.mnbCurr(i)) > threshold) {
+    if (std::abs(actual.smnbCurr(i) - shunttest_pcc::kExSMNBList[i]) > threshold) {
       is_same = false;
       mnbdiff << "At (" << i << ")"
-        << " - Expected: " <<  expected.mnbCurr(i)
-        << " | Actual: " << actual.mnbCurr(i) << "\n";
+        << " - Expected: " <<  shunttest_pcc::kExSMNBList[i]
+        << " | Actual: " << actual.smnbCurr(i) << "\n";
     }
   }
   ASSERT_TRUE(is_same)
@@ -414,5 +414,5 @@ TEST(vrfbShuntCurrPCC, calculateFB) {
       shunttest_pcc::kTestSysParam,
       vrfb::shuntcur::pcc::PCCCalc::ConnType::ctFB};
   auto actual = calc.calculate(shunttest_pcc::kTestChgVolt);
-  checkShuntPerf(shunttest_pcc::kExReport, actual.data<vrfb::shuntcur::pcc::PCCReport>());
+  checkShuntPerf(actual.data<vrfb::shuntcur::pcc::PCCReport>());
 }

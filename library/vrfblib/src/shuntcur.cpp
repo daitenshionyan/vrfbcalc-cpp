@@ -62,13 +62,13 @@ SCLReport::SCLReport(double cc, double cv, const SCLSysParam& s,
         cmpt_currs{cmptlist}, cmpb_currs{cmpblist},
         cmnt_currs{cmntlist}, cmnb_currs{cmnblist} {
   for (std::size_t i = 0; i < cell_currs.size(); ++i) {
-    double cellInPowr = cell_currs[i]*kAvrOCV;
+    double cellInPowr = cell_currs[i]*s.ocv();
     if (s.cellArea()*s.maxChgDen() < cell_currs[i]) {
-      cellInPowr = s.cellArea()*s.maxChgDen() * kAvrOCV;
+      cellInPowr = s.cellArea()*s.maxChgDen() * s.ocv();
     }
     cell_powrs.push_back(cellInPowr);
     totPowr += cellInPowr;
-    ovpLoss += cell_currs[i]*kAvrOCV - cellInPowr;
+    ovpLoss += cell_currs[i]*s.ocv() - cellInPowr;
 
     cir_powrs.push_back(std::pow(cell_currs[i], 2) * sys.cellR());
 
@@ -120,13 +120,13 @@ SCLReport::SCLReport(double cc, double cv, const SCLSysParam& s,
         cmpt_currs{std::move(cmptlist)}, cmpb_currs{std::move(cmpblist)},
         cmnt_currs{std::move(cmntlist)}, cmnb_currs{std::move(cmnblist)} {
   for (std::size_t i = 0; i < cell_currs.size(); ++i) {
-    double cellInPowr = cell_currs[i]*kAvrOCV;
+    double cellInPowr = cell_currs[i]*s.ocv();
     if (s.cellArea()*s.maxChgDen() < cell_currs[i]) {
-      cellInPowr = s.cellArea()*s.maxChgDen() * kAvrOCV;
+      cellInPowr = s.cellArea()*s.maxChgDen() * s.ocv();
     }
     cell_powrs.push_back(cellInPowr);
     totPowr += cellInPowr;
-    ovpLoss += cell_currs[i]*kAvrOCV - cellInPowr;
+    ovpLoss += cell_currs[i]*s.ocv() - cellInPowr;
 
     cir_powrs.push_back(std::pow(cell_currs[i], 2) * sys.cellR());
 
@@ -174,80 +174,99 @@ ShuntReport SCLCalc::calculate(double chgVolt) const {
 namespace pcc {
 
 
-PCCReport::PCCReport(double cc, double cv, const PCCSysParam& s,
-      const std::vector<double>& clist,
-      const std::vector<double>& sptlist, const std::vector<double>& spblist,
-      const std::vector<double>& sntlist, const std::vector<double>& snblist,
-      const std::vector<double>& mptlist, const std::vector<double>& mpblist,
-      const std::vector<double>& mntlist, const std::vector<double>& mnblist,
-      double err, const std::string& an)
-      : chgCurr{cc}, chgVolt{cv}, sys{s},
-        cell_currs{clist},
-        spt_currs{sptlist}, spb_currs{spblist},
-        snt_currs{sntlist}, snb_currs{snblist},
-        mpt_currs{mptlist}, mpb_currs{mpblist},
-        mnt_currs{mntlist}, mnb_currs{mnblist},
-        error{err}, arrangementName{an} {
-  for (std::size_t i = 0; i < cell_currs.size(); ++i) {
-    double cellInPowr = cell_currs[i]*kAvrOCV;
-    if (s.cellArea()*s.maxChgDen() < cell_currs[i]) {
-      cellInPowr = s.cellArea()*s.maxChgDen() * kAvrOCV;
-    }
-    cell_powrs.push_back(cellInPowr);
-    totPowr += cellInPowr;
-    ovpLoss += cell_currs[i]*kAvrOCV - cellInPowr;
 
-    cir_powrs.push_back(std::pow(cell_currs[i], 2) * sys.cellR());
 
-    spt_powrs.push_back(std::pow(spt_currs[i], 2) * sys.stackShuntR());
-    spb_powrs.push_back(std::pow(spb_currs[i], 2) * sys.stackShuntR());
-    snt_powrs.push_back(std::pow(snt_currs[i], 2) * sys.stackShuntR());
-    snb_powrs.push_back(std::pow(snb_currs[i], 2) * sys.stackShuntR());
 
-    mpt_powrs.push_back(std::pow(mpt_currs[i], 2) * sys.stackManiR());
-    mpb_powrs.push_back(std::pow(mpb_currs[i], 2) * sys.stackManiR());
-    mnt_powrs.push_back(std::pow(mnt_currs[i], 2) * sys.stackManiR());
-    mnb_powrs.push_back(std::pow(mnb_currs[i], 2) * sys.stackManiR());
-  }
+
+
+
+/*
+********************************************************************************
+**    PCCReport class
+********************************************************************************
+*/
+
+
+const PCCSysParam& PCCReport::param() const {
+  return data->param();
 }
 
 
-PCCReport::PCCReport(double cc, double cv, const PCCSysParam& s,
-      std::vector<double>&& clist,
-      std::vector<double>&& sptlist, std::vector<double>&& spblist,
-      std::vector<double>&& sntlist, std::vector<double>&& snblist,
-      std::vector<double>&& mptlist, std::vector<double>&& mpblist,
-      std::vector<double>&& mntlist, std::vector<double>&& mnblist,
-      double err, const std::string& an)
-      : chgCurr{cc}, chgVolt{cv}, sys{s},
-        cell_currs{std::move(clist)},
-        spt_currs{std::move(sptlist)}, spb_currs{std::move(spblist)},
-        snt_currs{std::move(sntlist)}, snb_currs{std::move(snblist)},
-        mpt_currs{std::move(mptlist)}, mpb_currs{std::move(mpblist)},
-        mnt_currs{std::move(mntlist)}, mnb_currs{std::move(mnblist)},
-        error{err}, arrangementName{an} {
-  for (std::size_t i = 0; i < cell_currs.size(); ++i) {
-    double cellInPowr = cell_currs[i]*kAvrOCV;
-    if (s.cellArea()*s.maxChgDen() < cell_currs[i]) {
-      cellInPowr = s.cellArea()*s.maxChgDen() * kAvrOCV;
-    }
-    cell_powrs.push_back(cellInPowr);
-    totPowr += cellInPowr;
-    ovpLoss += cell_currs[i]*kAvrOCV - cellInPowr;
-
-    cir_powrs.push_back(std::pow(cell_currs[i], 2) * sys.cellR());
-
-    spt_powrs.push_back(std::pow(spt_currs[i], 2) * sys.stackShuntR());
-    spb_powrs.push_back(std::pow(spb_currs[i], 2) * sys.stackShuntR());
-    snt_powrs.push_back(std::pow(snt_currs[i], 2) * sys.stackShuntR());
-    snb_powrs.push_back(std::pow(snb_currs[i], 2) * sys.stackShuntR());
-
-    mpt_powrs.push_back(std::pow(mpt_currs[i], 2) * sys.stackManiR());
-    mpb_powrs.push_back(std::pow(mpb_currs[i], 2) * sys.stackManiR());
-    mnt_powrs.push_back(std::pow(mnt_currs[i], 2) * sys.stackManiR());
-    mnb_powrs.push_back(std::pow(mnb_currs[i], 2) * sys.stackManiR());
+double PCCReport::chargingCurr() const {
+  double result = 0;
+  for (std::size_t i = 0; i < numLines(); ++i) {
+    result += data->lineCurr(i);
   }
+  return result;
 }
+
+
+double PCCReport::overVoltPowr() const {
+  return chargingPowr() - storedPowr();
+}
+
+
+double PCCReport::storedPowr() const {
+  double result = 0;
+  for (std::size_t i = 0; i < totCells(); ++i) {
+    result += (param().maxChgDen()*param().cellArea() < data->cellCurr(i))
+        ? param().maxChgDen()*param().cellArea()*param().ocv()
+        : data->cellCurr(i)*param().ocv();
+  }
+  return result;
+}
+
+
+double PCCReport::cellCurr(std::size_t i) const {
+  return data->cellCurr(i);
+}
+
+
+
+
+double PCCReport::ssptCurr(std::size_t i) const {
+  return data->ssptCurr(i);
+}
+
+
+double PCCReport::sspbCurr(std::size_t i) const {
+  return data->sspbCurr(i);
+}
+
+
+double PCCReport::ssntCurr(std::size_t i) const {
+  return data->ssntCurr(i);
+}
+
+
+double PCCReport::ssnbCurr(std::size_t i) const {
+  return data->ssnbCurr(i);
+}
+
+
+
+
+double PCCReport::smptCurr(std::size_t i) const {
+  return data->smptCurr(i);
+}
+
+
+double PCCReport::smpbCurr(std::size_t i) const {
+  return data->smpbCurr(i);
+}
+
+
+double PCCReport::smntCurr(std::size_t i) const {
+  return data->smntCurr(i);
+}
+
+
+double PCCReport::smnbCurr(std::size_t i) const {
+  return data->smnbCurr(i);
+}
+
+
+
 
 
 ShuntReport PCCCalc::calculate(double chgVolt) const {

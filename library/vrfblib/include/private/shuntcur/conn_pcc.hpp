@@ -140,6 +140,22 @@ double getPosConnContri_Cell(const Eigen::VectorXd& cv, const SysParam& s,
 
 
 /**
+ * Returns the POSITIVE CONNECTOR current contribution to the specified cell,
+ * given the calculated current vector.
+ *
+ * @param <Side> Inlet connection side.
+ * @param cv Current vector.
+ * @param s System parameters.
+ * @param i Cell index from the first cell in the system.
+*/
+template<ConnSide Side>
+double getPosConnContri_Cell(const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t i) {
+  return getPosConnContri_Cell<Side>(cv, s, toci(i, s), tosi(i, s), toli(i, s));
+}
+
+
+/**
  * Returns the NEGATIVE CONNECTOR current contribution to the specified cell,
  * given the calculated current vector.
  *
@@ -153,6 +169,22 @@ double getPosConnContri_Cell(const Eigen::VectorXd& cv, const SysParam& s,
 template<ConnSide Side>
 double getNegConnContri_Cell(const Eigen::VectorXd& cv, const SysParam& s,
       std::size_t ci, std::size_t si, std::size_t li);
+
+
+/**
+ * Returns the NEGATIVE CONNECTOR current contribution to the specified cell,
+ * given the calculated current vector.
+ *
+ * @param <Side> Inlet connection side.
+ * @param cv Current vector.
+ * @param s System parameters.
+ * @param i Cell index from the first cell in the system.
+*/
+template<ConnSide Side>
+double getNegConnContri_Cell(const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t i) {
+  return getNegConnContri_Cell<Side>(cv, s, toci(i, s), tosi(i, s), toli(i, s));
+}
 
 
 
@@ -174,8 +206,26 @@ double getConnContri_SSPT(const Eigen::VectorXd& cv, const SysParam& s,
 
 
 template<ConnSide Side>
+double getConnContri_SSPT(const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t i) {
+  return getConnContri_SSPT<Side>(cv, s, toci(i, s), tosi(i, s), toli(i, s));
+}
+
+
+
+
+template<ConnSide Side>
 double getConnContri_SSPB(const Eigen::VectorXd& cv, const SysParam& s,
       std::size_t ci, std::size_t si, std::size_t li);
+
+
+template<ConnSide Side>
+double getConnContri_SSPB(const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t i) {
+  return getConnContri_SSPB<Side>(cv, s, toci(i, s), tosi(i, s), toli(i, s));
+}
+
+
 
 
 template<ConnSide Side>
@@ -184,8 +234,24 @@ double getConnContri_SSNT(const Eigen::VectorXd& cv, const SysParam& s,
 
 
 template<ConnSide Side>
+double getConnContri_SSNT(const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t i) {
+  return getConnContri_SSNT<Side>(cv, s, toci(i, s), tosi(i, s), toli(i, s));
+}
+
+
+
+
+template<ConnSide Side>
 double getConnContri_SSNB(const Eigen::VectorXd& cv, const SysParam& s,
       std::size_t ci, std::size_t si, std::size_t li);
+
+
+template<ConnSide Side>
+double getConnContri_SSNB(const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t i) {
+  return getConnContri_SSNB<Side>(cv, s, toci(i, s), tosi(i, s), toli(i, s));
+}
 
 
 
@@ -773,32 +839,155 @@ void addConnLoops<ConnSide::csFront, ConnSide::csBack>(Eigen::MatrixXd& m, const
 void addVolt(Eigen::VectorXd& v, const PCCSysParam& s, double chgVolt) {
   for (std::size_t li = 0; li < s.numLines(); ++li) {
     // line loops
-    v(li) += chgVolt - s.numStacks()*s.numCells()*kAvrOCV;
+    v(li) += chgVolt - s.numStacks()*s.numCells()*s.ocv();
     for (std::size_t si = 0; si < s.numStacks(); ++si) {
       // connector loops
       if (si > 0) {
-        v(indexCPT<ConnSide::csFront>(s, si, li)) -= s.numCells()*kAvrOCV;
-        v(indexCNB<ConnSide::csBack>(s, si, li)) -= s.numCells()*kAvrOCV;
+        v(indexCPT<ConnSide::csFront>(s, si, li)) -= s.numCells()*s.ocv();
+        v(indexCNB<ConnSide::csBack>(s, si, li)) -= s.numCells()*s.ocv();
       }
       if (si+1 < s.numStacks()) {
-        v(indexCPB<ConnSide::csFront>(s, si, li)) -= s.numCells()*kAvrOCV;
-        v(indexCNT<ConnSide::csBack>(s, si, li)) -= s.numCells()*kAvrOCV;
+        v(indexCPB<ConnSide::csFront>(s, si, li)) -= s.numCells()*s.ocv();
+        v(indexCNT<ConnSide::csBack>(s, si, li)) -= s.numCells()*s.ocv();
       }
       for (std::size_t ci = 0; ci < s.numCells(); ++ci) {
         if (ci+1 < s.numCells()) {
           // positive cell loops
-          v(indexSPT(s, ci, si, li)) -= kAvrOCV;
-          v(indexSPB(s, ci, si, li)) -= kAvrOCV;
+          v(indexSPT(s, ci, si, li)) -= s.ocv();
+          v(indexSPB(s, ci, si, li)) -= s.ocv();
         }
         if (ci > 0) {
           // negative cell loops
-          v(indexSNT(s, ci, si, li)) -= kAvrOCV;
-          v(indexSNB(s, ci, si, li)) -= kAvrOCV;
+          v(indexSNT(s, ci, si, li)) -= s.ocv();
+          v(indexSNB(s, ci, si, li)) -= s.ocv();
         }
       }
     }
   }
 }
+
+
+
+
+
+
+
+
+/*
+********************************************************************************
+**    PCCReportData class
+********************************************************************************
+*/
+
+
+class PCCReportData {
+  public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
+    PCCReportData() = default;
+    PCCReportData(const PCCReportData&) = default;
+    PCCReportData(PCCReportData&&) = default;
+
+    PCCReportData& operator=(const PCCReportData&) = default;
+    PCCReportData& operator=(PCCReportData&&) = default;
+
+    virtual ~PCCReportData() = default;
+
+
+  public: // ~~~~ accessors ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    virtual const PCCSysParam& param() const = 0;
+
+    virtual double lineCurr(std::size_t i) const = 0;
+    virtual double cellCurr(std::size_t i) const = 0;
+
+    virtual double ssptCurr(std::size_t i) const = 0;
+    virtual double sspbCurr(std::size_t i) const = 0;
+    virtual double ssntCurr(std::size_t i) const = 0;
+    virtual double ssnbCurr(std::size_t i) const = 0;
+
+    virtual double smptCurr(std::size_t i) const = 0;
+    virtual double smpbCurr(std::size_t i) const = 0;
+    virtual double smntCurr(std::size_t i) const = 0;
+    virtual double smnbCurr(std::size_t i) const = 0;
+};
+
+
+template<ConnSide PS, ConnSide NS>
+class PCCReportData_Impl : public PCCReportData {
+  public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
+    PCCReportData_Impl(const Eigen::VectorXd& currVec, const PCCSysParam& sys)
+        : cv{currVec}, s{sys} {}
+    PCCReportData_Impl(Eigen::VectorXd&& currVec, const PCCSysParam& sys)
+        : cv{std::move(currVec)}, s{sys} {}
+
+    PCCReportData_Impl() = delete;
+    PCCReportData_Impl(const PCCReportData_Impl&) = default;
+    PCCReportData_Impl(PCCReportData_Impl&&) = default;
+
+    PCCReportData_Impl& operator=(const PCCReportData_Impl&) = default;
+    PCCReportData_Impl& operator=(PCCReportData_Impl&&) = default;
+
+    ~PCCReportData_Impl() = default;
+
+
+  public: // ~~~~ accessors ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    const PCCSysParam& param() const {
+      return s;
+    }
+
+
+    double lineCurr(std::size_t i) const override {
+      return cv(i);
+    }
+
+    double cellCurr(std::size_t i) const override {
+      return cv(toli(i, s))
+          + getStackContri_Cell(cv, s, i)
+          + getPosConnContri_Cell<PS>(cv, s, i)
+          + getNegConnContri_Cell<NS>(cv, s, i);
+    }
+
+
+    double ssptCurr(std::size_t i) const override {
+      return getStackContri_SSPT(cv, s, i)
+          + getConnContri_SSPT<PS>(cv, s, i);
+    }
+
+    double sspbCurr(std::size_t i) const override {
+      return getStackContri_SSPB(cv, s, i)
+          + getConnContri_SSPB<PS>(cv, s, i);
+    }
+
+    double ssntCurr(std::size_t i) const override {
+      return getStackContri_SSNT(cv, s, i)
+          + getConnContri_SSNT<NS>(cv, s, i);
+    }
+
+    double ssnbCurr(std::size_t i) const override {
+      return getStackContri_SSNB(cv, s, i)
+          + getConnContri_SSNB<NS>(cv, s, i);
+    }
+
+
+    double smptCurr(std::size_t i) const override {
+      return getCurrMPT(cv, s, i);
+    }
+
+    double smpbCurr(std::size_t i) const override {
+      return getCurrMPB(cv, s, i);
+    }
+
+    double smntCurr(std::size_t i) const override {
+      return getCurrMNT(cv, s, i);
+    }
+
+    double smnbCurr(std::size_t i) const override {
+      return getCurrMNB(cv, s, i);
+    }
+
+
+  private: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Eigen::VectorXd cv;
+    PCCSysParam s;
+};
 
 
 
@@ -824,52 +1013,9 @@ PCCReport* calculate_pcc(const PCCSysParam& s, double chgVolt) {
   addVolt(vv, s, chgVolt);
   Eigen::VectorXd cv = rm.colPivHouseholderQr().solve(vv);    // Current vector
 
-  double chgCurr = 0;
-  std::vector<double> clist {};
-  std::vector<double> sptlist {};
-  std::vector<double> spblist {};
-  std::vector<double> sntlist {};
-  std::vector<double> snblist {};
-  std::vector<double> mptlist {};
-  std::vector<double> mpblist {};
-  std::vector<double> mntlist {};
-  std::vector<double> mnblist {};
-  for (std::size_t li = 0; li < s.numLines(); ++li) {
-    chgCurr += cv(li);
-    for (std::size_t si = 0; si < s.numStacks(); ++si) {
-      for (std::size_t ci = 0; ci < s.numCells(); ++ci) {
-        clist.push_back(
-              cv(li)
-            + getStackContri_Cell(cv, s, ci, si, li)
-            + getPosConnContri_Cell<PS>(cv, s, ci, si, li)
-            + getNegConnContri_Cell<NS>(cv, s, ci, si, li));
-        sptlist.push_back(
-              getStackContri_SSPT(cv, s, ci, si, li)
-            + getConnContri_SSPT<PS>(cv, s, ci, si, li));
-        spblist.push_back(
-              getStackContri_SSPB(cv, s, ci, si, li)
-            + getConnContri_SSPB<PS>(cv, s, ci, si, li));
-        sntlist.push_back(
-              getStackContri_SSNT(cv, s, ci, si, li)
-            + getConnContri_SSNT<NS>(cv, s, ci, si, li));
-        snblist.push_back(
-              getStackContri_SSNB(cv, s, ci, si, li)
-            + getConnContri_SSNB<NS>(cv, s, ci, si, li));
-        mptlist.push_back(getCurrMPT(cv, s, ci, si, li));
-        mpblist.push_back(getCurrMPB(cv, s, ci, si, li));
-        mntlist.push_back(getCurrMNT(cv, s, ci, si, li));
-        mnblist.push_back(getCurrMNB(cv, s, ci, si, li));
-      }
-    }
-  }
-
+  PCCReportData* data = new PCCReportData_Impl<PS, NS>(cv, s);
   double error = ((rm*cv) - vv).norm();
-
-  return new PCCReport(chgCurr, chgVolt, s,
-      std::move(clist),
-      std::move(sptlist), std::move(spblist), std::move(sntlist), std::move(snblist),
-      std::move(mptlist), std::move(mpblist), std::move(mntlist), std::move(mnblist),
-      error, getArrName<PS, NS>());
+  return new PCCReport(data, chgVolt, getArrName<PS, NS>(), error);
 }
 
 
