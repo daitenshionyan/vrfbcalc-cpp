@@ -36,6 +36,36 @@ ShuntReport& ShuntReport::operator=(ShuntReport&& o) {
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 namespace scl {
 
 
@@ -91,30 +121,10 @@ const SCLSysParam& SCLReport::param() const {
 }
 
 
-double SCLReport::chargingCurr() const {
+
+
+double SCLReport::lineCurr(std::size_t) const {
   return data->chgCurr();
-}
-
-
-double SCLReport::overVoltPowr() const {
-  double result = 0;
-  for (std::size_t i = 0; i < totCells(); ++i) {
-    result += (param().maxChgDen()*param().cellArea() < data->cellCurr(i))
-        ? (data->cellCurr(i) - param().maxChgDen()*param().cellArea()) * param().ocv()
-        : 0;
-  }
-  return result;
-}
-
-
-double SCLReport::storedPowr() const {
-  double result = 0;
-  for (std::size_t i = 0; i < totCells(); ++i) {
-    result += (param().maxChgDen()*param().cellArea() < data->cellCurr(i))
-        ? param().maxChgDen()*param().cellArea()*param().ocv()
-        : data->cellCurr(i)*param().ocv();
-  }
-  return result;
 }
 
 
@@ -290,34 +300,10 @@ const PCCSysParam& PCCReport::param() const {
 }
 
 
-double PCCReport::chargingCurr() const {
-  double result = 0;
-  for (std::size_t i = 0; i < numLines(); ++i) {
-    result += data->lineCurr(i);
-  }
-  return result;
-}
 
 
-double PCCReport::overVoltPowr() const {
-  double result = 0;
-  for (std::size_t i = 0; i < totCells(); ++i) {
-    result += (param().maxChgDen()*param().cellArea() < data->cellCurr(i))
-        ? (data->cellCurr(i) - param().maxChgDen()*param().cellArea()) * param().ocv()
-        : 0;
-  }
-  return result;
-}
-
-
-double PCCReport::storedPowr() const {
-  double result = 0;
-  for (std::size_t i = 0; i < totCells(); ++i) {
-    result += (param().maxChgDen()*param().cellArea() < data->cellCurr(i))
-        ? param().maxChgDen()*param().cellArea()*param().ocv()
-        : data->cellCurr(i)*param().ocv();
-  }
-  return result;
+double PCCReport::lineCurr(std::size_t i) const {
+  return data->lineCurr(i);
 }
 
 

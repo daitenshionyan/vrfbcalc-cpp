@@ -240,8 +240,8 @@ class ShuntReportData {
 
 
   public: // ~~~~ accessors ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    virtual double err() const = 0;
     virtual std::string arrName() const = 0;
-
     virtual const SysParam& param() const = 0;
 
     virtual std::size_t numLines() const {return param().numLines();}
@@ -249,15 +249,56 @@ class ShuntReportData {
     virtual std::size_t numCells() const {return param().numCells();}
     virtual std::size_t totCells() const {return numLines()*numStacks()*numCells();}
 
-    virtual double chargingCurr() const = 0;
     virtual double chargingVolt() const = 0;
-    virtual double chargingPowr() const = 0;
-    virtual double overVoltPowr() const = 0;
-    virtual double storedPowr() const = 0;
+    virtual double chargingCurr() const {
+      double result = 0;
+      for (std::size_t i = 0; i < numLines(); ++i) {
+        result += lineCurr(i);
+      }
+      return result;
+    }
+    virtual double chargingPowr() const {return chargingVolt() * chargingCurr();}
+    virtual double overVoltPowr() const {
+      double result = 0;
+      for (std::size_t i = 0; i < totCells(); ++i) {
+        result += (param().maxChgDen()*param().cellArea() < cellCurr(i))
+            ? (cellCurr(i) - param().maxChgDen()*param().cellArea()) * param().ocv()
+            : 0;
+      }
+      return result;
+    }
+    virtual double storedPowr() const {
+      double result = 0;
+      for (std::size_t i = 0; i < totCells(); ++i) {
+        result += (param().maxChgDen()*param().cellArea() < cellCurr(i))
+            ? param().maxChgDen()*param().cellArea()*param().ocv()
+            : cellCurr(i)*param().ocv();
+      }
+      return result;
+    }
     virtual double powrEff() const {return storedPowr() / chargingPowr();}
 
+    virtual double lineCurr(std::size_t i) const = 0;
     virtual double cellCurr(std::size_t i) const = 0;
-    virtual double cellPowr(std::size_t i) const = 0;
+    virtual double cellPowr(std::size_t i) const {return cellCurr(i)*param().ocv();}
+
+    virtual double ssptCurr(std::size_t i) const = 0;
+    virtual double sspbCurr(std::size_t i) const = 0;
+    virtual double ssntCurr(std::size_t i) const = 0;
+    virtual double ssnbCurr(std::size_t i) const = 0;
+    virtual double ssptPowr(std::size_t i) const {return ssptCurr(i)*param().stackShuntR();}
+    virtual double sspbPowr(std::size_t i) const {return sspbCurr(i)*param().stackShuntR();}
+    virtual double ssntPowr(std::size_t i) const {return ssntCurr(i)*param().stackShuntR();}
+    virtual double ssnbPowr(std::size_t i) const {return ssnbCurr(i)*param().stackShuntR();}
+
+    virtual double smptCurr(std::size_t i) const = 0;
+    virtual double smpbCurr(std::size_t i) const = 0;
+    virtual double smntCurr(std::size_t i) const = 0;
+    virtual double smnbCurr(std::size_t i) const = 0;
+    virtual double smptPowr(std::size_t i) const {return smptCurr(i)*param().stackManiR();}
+    virtual double smpbPowr(std::size_t i) const {return smpbCurr(i)*param().stackManiR();}
+    virtual double smntPowr(std::size_t i) const {return smntCurr(i)*param().stackManiR();}
+    virtual double smnbPowr(std::size_t i) const {return smnbCurr(i)*param().stackManiR();}
 
 
   public:
@@ -404,38 +445,24 @@ class SCLReport : public ShuntReportData {
 
 
   public: // ~~~~ accessors ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    double err() const {return error;}
-
+    double err() const override {return error;}
     std::string arrName() const override {return arrangementName;}
-
     const SCLSysParam& param() const override;
 
-    double chargingCurr() const override;
     double chargingVolt() const override {return chgVolt;}
-    double chargingPowr() const override {return chargingVolt() * chargingCurr();}
-    double overVoltPowr() const override;
-    double storedPowr() const override;
 
+    double lineCurr(std::size_t i=0) const override;
     double cellCurr(std::size_t i) const override;
-    double cellPowr(std::size_t i) const override {return cellCurr(i)*param().ocv();}
 
     double ssptCurr(std::size_t i) const;
     double sspbCurr(std::size_t i) const;
     double ssntCurr(std::size_t i) const;
     double ssnbCurr(std::size_t i) const;
-    double ssptPowr(std::size_t i) const {return ssptCurr(i)*param().stackShuntR();}
-    double sspbPowr(std::size_t i) const {return sspbCurr(i)*param().stackShuntR();}
-    double ssntPowr(std::size_t i) const {return ssntCurr(i)*param().stackShuntR();}
-    double ssnbPowr(std::size_t i) const {return ssnbCurr(i)*param().stackShuntR();}
 
     double smptCurr(std::size_t i) const;
     double smpbCurr(std::size_t i) const;
     double smntCurr(std::size_t i) const;
     double smnbCurr(std::size_t i) const;
-    double smptPowr(std::size_t i) const {return smptCurr(i)*param().stackManiR();}
-    double smpbPowr(std::size_t i) const {return smpbCurr(i)*param().stackManiR();}
-    double smntPowr(std::size_t i) const {return smntCurr(i)*param().stackManiR();}
-    double smnbPowr(std::size_t i) const {return smnbCurr(i)*param().stackManiR();}
 
     double csptCurr(std::size_t i) const;
     double cspbCurr(std::size_t i) const;
@@ -601,38 +628,24 @@ class PCCReport : public ShuntReportData {
 
 
   public: // ~~~~ accessors ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    double err() const {return error;}
-
+    double err() const override {return error;}
     std::string arrName() const override {return arrangementName;}
-
     const PCCSysParam& param() const override;
 
-    double chargingCurr() const override;
     double chargingVolt() const override {return chgVolt;}
-    double chargingPowr() const override {return chargingVolt() * chargingCurr();}
-    double overVoltPowr() const override;
-    double storedPowr() const override;
 
+    double lineCurr(std::size_t i) const override;
     double cellCurr(std::size_t i) const override;
-    double cellPowr(std::size_t i) const override {return cellCurr(i)*param().ocv();}
 
-    double ssptCurr(std::size_t i) const;
-    double sspbCurr(std::size_t i) const;
-    double ssntCurr(std::size_t i) const;
-    double ssnbCurr(std::size_t i) const;
-    double ssptPowr(std::size_t i) const {return ssptCurr(i)*param().stackShuntR();}
-    double sspbPowr(std::size_t i) const {return sspbCurr(i)*param().stackShuntR();}
-    double ssntPowr(std::size_t i) const {return ssntCurr(i)*param().stackShuntR();}
-    double ssnbPowr(std::size_t i) const {return ssnbCurr(i)*param().stackShuntR();}
+    double ssptCurr(std::size_t i) const override;
+    double sspbCurr(std::size_t i) const override;
+    double ssntCurr(std::size_t i) const override;
+    double ssnbCurr(std::size_t i) const override;
 
-    double smptCurr(std::size_t i) const;
-    double smpbCurr(std::size_t i) const;
-    double smntCurr(std::size_t i) const;
-    double smnbCurr(std::size_t i) const;
-    double smptPowr(std::size_t i) const {return smptCurr(i)*param().stackManiR();}
-    double smpbPowr(std::size_t i) const {return smpbCurr(i)*param().stackManiR();}
-    double smntPowr(std::size_t i) const {return smntCurr(i)*param().stackManiR();}
-    double smnbPowr(std::size_t i) const {return smnbCurr(i)*param().stackManiR();}
+    double smptCurr(std::size_t i) const override;
+    double smpbCurr(std::size_t i) const override;
+    double smntCurr(std::size_t i) const override;
+    double smnbCurr(std::size_t i) const override;
 
 
   public: // ~~~~ functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
