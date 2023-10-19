@@ -655,6 +655,8 @@ class PCCCalc : public ShuntCalc {
     ShuntReport calculate(double chgVolt) const override;
 
     PCCSysParam& param() override {return sys;}
+    const PCCSysParam& param() const override {return sys;}
+
     PCCCalc* copy() const override {return new PCCCalc(*this);}
 
 
