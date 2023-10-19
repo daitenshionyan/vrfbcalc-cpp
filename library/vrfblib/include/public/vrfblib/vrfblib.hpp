@@ -591,13 +591,13 @@ class PCCReport : public ShuntReportData {
         : data{d}, chgVolt{cv}, arrangementName{arrName}, error{err} {}
 
     PCCReport() = delete;
-    PCCReport(const PCCReport&) = default;
-    PCCReport(PCCReport&&) = default;
+    PCCReport(const PCCReport&);
+    PCCReport(PCCReport&&);
 
-    PCCReport& operator=(const PCCReport&) = default;
-    PCCReport& operator=(PCCReport&&) = default;
+    PCCReport& operator=(const PCCReport&);
+    PCCReport& operator=(PCCReport&&);
 
-    ~PCCReport() override {delete data;}
+    ~PCCReport() override;
 
 
   public: // ~~~~ accessors ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -245,6 +245,46 @@ namespace pcc {
 */
 
 
+// :::: [ constructor / assignment / destructor ] ::::::::::::::::::::::::::::::
+
+
+PCCReport::PCCReport(const PCCReport& o)
+      : data{o.data->copy()}, arrangementName{o.arrangementName},
+        chgVolt{o.chgVolt}, error{error} {}
+
+
+PCCReport::PCCReport(PCCReport&& o)
+      : data{o.data}, arrangementName{o.arrangementName},
+        chgVolt{o.chgVolt}, error{error} {
+  o.data = nullptr;
+}
+
+
+PCCReport& PCCReport::operator=(const PCCReport& o) {
+  delete data;
+  data = o.data->copy();
+  arrangementName = o.arrangementName;
+  return *this;
+}
+
+
+PCCReport& PCCReport::operator=(PCCReport&& o) {
+  std::swap(data, o.data);
+  std::swap(arrangementName, o.arrangementName);
+  chgVolt = o.chgVolt;
+  error = o.error;
+  return *this;
+}
+
+
+PCCReport::~PCCReport() {
+  delete data;
+}
+
+
+// :::: [ accessors ] ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+
 const PCCSysParam& PCCReport::param() const {
   return data->param();
 }

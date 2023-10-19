@@ -907,6 +907,10 @@ class PCCReportData {
     virtual double smpbCurr(std::size_t i) const = 0;
     virtual double smntCurr(std::size_t i) const = 0;
     virtual double smnbCurr(std::size_t i) const = 0;
+
+
+  public: // ~~~~ functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    virtual PCCReportData* copy() const = 0;
 };
 
 
@@ -981,6 +985,12 @@ class PCCReportData_Impl : public PCCReportData {
 
     double smnbCurr(std::size_t i) const override {
       return getCurrMNB(cv, s, i);
+    }
+
+
+  public: // ~~~~ functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    PCCReportData_Impl<PS, NS>* copy() const override {
+      return new PCCReportData_Impl<PS, NS>(*this);
     }
 
 
