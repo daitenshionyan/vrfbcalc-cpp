@@ -103,12 +103,11 @@ SCLReport* commLineCalc(const SCLSysParam& s, double chgVolt);
  * within the current vector or matrix at the specified stack index.
  *
  * @param <ConnSide> Inlet connection side.
+ * @param s System parameters.
  * @param si Stack index.
- * @param num_s Number of stacks.
- * @param num_c Number of cells per stack.
 */
 template<ConnSide>
-Eigen::Index indexCPT(std::size_t si, std::size_t num_s, std::size_t num_c);
+Eigen::Index indexCPT(const SysParam& s, std::size_t si);
 
 
 /**
@@ -116,12 +115,11 @@ Eigen::Index indexCPT(std::size_t si, std::size_t num_s, std::size_t num_c);
  * within the current vector or matrix at the specified stack index.
  *
  * @param <ConnSide> Inlet connection side.
+ * @param s System parameters.
  * @param si Stack index.
- * @param num_s Number of stacks.
- * @param num_c Number of cells per stack.
 */
 template<ConnSide>
-Eigen::Index indexCPB(std::size_t si, std::size_t num_s, std::size_t num_c);
+Eigen::Index indexCPB(const SysParam& s, std::size_t si);
 
 
 /**
@@ -129,12 +127,11 @@ Eigen::Index indexCPB(std::size_t si, std::size_t num_s, std::size_t num_c);
  * within the current vector or matrix at the specified stack index.
  *
  * @param <ConnSide> Inlet connection side.
+ * @param s System parameters.
  * @param si Stack index.
- * @param num_s Number of stacks.
- * @param num_c Number of cells per stack.
 */
 template<ConnSide>
-Eigen::Index indexCNT(std::size_t si, std::size_t num_s, std::size_t num_c);
+Eigen::Index indexCNT(const SysParam& s, std::size_t si);
 
 
 /**
@@ -142,12 +139,11 @@ Eigen::Index indexCNT(std::size_t si, std::size_t num_s, std::size_t num_c);
  * within the current vector or matrix at the specified stack index.
  *
  * @param <ConnSide> Inlet connection side.
+ * @param s System parameters.
  * @param si Stack index.
- * @param num_s Number of stacks.
- * @param num_c Number of cells per stack.
 */
 template<ConnSide>
-Eigen::Index indexCNB(std::size_t si, std::size_t num_s, std::size_t num_c);
+Eigen::Index indexCNB(const SysParam& s, std::size_t si);
 
 
 
@@ -169,15 +165,13 @@ Eigen::Index indexCNB(std::size_t si, std::size_t num_s, std::size_t num_c);
  *
  * @param <Side> Inlet connection side.
  * @param cv Current vector.
- * @param si Stack index.
+ * @param s System parameters.
  * @param ci Cell index within stack.
- * @param num_s Number of stacks.
- * @param num_c Number of cells per stack.
+ * @param si Stack index.
 */
 template<ConnSide Side>
-double getPosConnContri_Cell(const Eigen::VectorXd& cv,
-      std::size_t si, std::size_t ci,
-      std::size_t num_s, std::size_t num_c);
+double getPosConnContri_Cell(const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t ci, std::size_t si);
 
 
 /**
@@ -186,15 +180,13 @@ double getPosConnContri_Cell(const Eigen::VectorXd& cv,
  *
  * @param <Side> Inlet connection side.
  * @param cv Current vector.
- * @param si Stack index.
+ * @param s System parameters.
  * @param ci Cell index within stack.
- * @param num_s Number of stacks.
- * @param num_c Number of cells per stack.
+ * @param si Stack index.
 */
 template<ConnSide Side>
-double getNegConnContri_Cell(const Eigen::VectorXd& cv,
-      std::size_t si, std::size_t ci,
-      std::size_t num_s, std::size_t num_c);
+double getNegConnContri_Cell(const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t ci, std::size_t si);
 
 
 
@@ -216,15 +208,13 @@ double getNegConnContri_Cell(const Eigen::VectorXd& cv,
  *
  * @param <Side> Inlet connection side.
  * @param cv Current vector.
- * @param si Stack index.
+ * @param s System parameters.
  * @param ci Cell index within stack.
- * @param num_s Number of stacks.
- * @param num_c Number of cells per stack.
+ * @param si Stack index.
 */
 template<ConnSide Side>
-double getConnContri_SSPT(const Eigen::VectorXd& cv,
-      std::size_t si, std::size_t ci,
-      std::size_t num_s, std::size_t num_c);
+double getConnContri_SSPT(const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t ci, std::size_t si);
 
 
 /**
@@ -233,15 +223,13 @@ double getConnContri_SSPT(const Eigen::VectorXd& cv,
  *
  * @param <Side> Inlet connection side.
  * @param cv Current vector.
- * @param si Stack index.
+ * @param s System parameters.
  * @param ci Cell index within stack.
- * @param num_s Number of stacks.
- * @param num_c Number of cells per stack.
+ * @param si Stack index.
 */
 template<ConnSide Side>
-double getConnContri_SSPB(const Eigen::VectorXd& cv,
-      std::size_t si, std::size_t ci,
-      std::size_t num_s, std::size_t num_c);
+double getConnContri_SSPB(const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t ci, std::size_t si);
 
 
 /**
@@ -250,15 +238,13 @@ double getConnContri_SSPB(const Eigen::VectorXd& cv,
  *
  * @param <Side> Inlet connection side.
  * @param cv Current vector.
- * @param si Stack index.
+ * @param s System parameters.
  * @param ci Cell index within stack.
- * @param num_s Number of stacks.
- * @param num_c Number of cells per stack.
+ * @param si Stack index.
 */
 template<ConnSide Side>
-double getConnContri_SSNT(const Eigen::VectorXd& cv,
-      std::size_t si, std::size_t ci,
-      std::size_t num_s, std::size_t num_c);
+double getConnContri_SSNT(const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t ci, std::size_t si);
 
 
 /**
@@ -267,15 +253,13 @@ double getConnContri_SSNT(const Eigen::VectorXd& cv,
  *
  * @param <Side> Inlet connection side.
  * @param cv Current vector.
- * @param si Stack index.
+ * @param s System parameters.
  * @param ci Cell index within stack.
- * @param num_s Number of stacks.
- * @param num_c Number of cells per stack.
+ * @param si Stack index.
 */
 template<ConnSide Side>
-double getConnContri_SSNB(const Eigen::VectorXd& cv,
-      std::size_t si, std::size_t ci,
-      std::size_t num_s, std::size_t num_c);
+double getConnContri_SSNB(const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t ci, std::size_t si);
 
 
 
@@ -297,14 +281,12 @@ double getConnContri_SSNB(const Eigen::VectorXd& cv,
  *
  * @param <Side> Inlet connection side.
  * @param cv Current vector.
+ * @param s System parameters.
  * @param si Stack index.
- * @param num_s Number of stacks.
- * @param num_c Number of cells per stack.
 */
 template<ConnSide Side>
-double getCurrCSPT(const Eigen::VectorXd& cv,
-      std::size_t si,
-      std::size_t num_s, std::size_t num_c);
+double getCurrCSPT(const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t si);
 
 
 /**
@@ -313,14 +295,12 @@ double getCurrCSPT(const Eigen::VectorXd& cv,
  *
  * @param <Side> Inlet connection side.
  * @param cv Current vector.
+ * @param s System parameters.
  * @param si Stack index.
- * @param num_s Number of stacks.
- * @param num_c Number of cells per stack.
 */
 template<ConnSide Side>
-double getCurrCSPB(const Eigen::VectorXd& cv,
-      std::size_t si,
-      std::size_t num_s, std::size_t num_c);
+double getCurrCSPB(const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t si);
 
 
 /**
@@ -329,14 +309,12 @@ double getCurrCSPB(const Eigen::VectorXd& cv,
  *
  * @param <Side> Inlet connection side.
  * @param cv Current vector.
+ * @param s System parameters.
  * @param si Stack index.
- * @param num_s Number of stacks.
- * @param num_c Number of cells per stack.
 */
 template<ConnSide Side>
-double getCurrCSNT(const Eigen::VectorXd& cv,
-      std::size_t si,
-      std::size_t num_s, std::size_t num_c);
+double getCurrCSNT(const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t si);
 
 
 /**
@@ -345,14 +323,12 @@ double getCurrCSNT(const Eigen::VectorXd& cv,
  *
  * @param <Side> Inlet connection side.
  * @param cv Current vector.
+ * @param s System parameters.
  * @param si Stack index.
- * @param num_s Number of stacks.
- * @param num_c Number of cells per stack.
 */
 template<ConnSide Side>
-double getCurrCSNB(const Eigen::VectorXd& cv,
-      std::size_t si,
-      std::size_t num_s, std::size_t num_c);
+double getCurrCSNB(const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t si);
 
 
 
@@ -374,14 +350,12 @@ double getCurrCSNB(const Eigen::VectorXd& cv,
  *
  * @param <Side> Inlet connection side.
  * @param cv Current vector.
+ * @param s System parameters.
  * @param si Stack index.
- * @param num_s Number of stacks.
- * @param num_c Number of cells per stack.
 */
 template<ConnSide Side>
-double getCurrCMPT(const Eigen::VectorXd& cv,
-      std::size_t si,
-      std::size_t num_s, std::size_t num_c);
+double getCurrCMPT(const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t si);
 
 
 /**
@@ -390,14 +364,12 @@ double getCurrCMPT(const Eigen::VectorXd& cv,
  *
  * @param <Side> Inlet connection side.
  * @param cv Current vector.
+ * @param s System parameters.
  * @param si Stack index.
- * @param num_s Number of stacks.
- * @param num_c Number of cells per stack.
 */
 template<ConnSide Side>
-double getCurrCMPB(const Eigen::VectorXd& cv,
-      std::size_t si,
-      std::size_t num_s, std::size_t num_c);
+double getCurrCMPB(const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t si);
 
 
 /**
@@ -406,14 +378,12 @@ double getCurrCMPB(const Eigen::VectorXd& cv,
  *
  * @param <Side> Inlet connection side.
  * @param cv Current vector.
+ * @param s System parameters.
  * @param si Stack index.
- * @param num_s Number of stacks.
- * @param num_c Number of cells per stack.
 */
 template<ConnSide Side>
-double getCurrCMNT(const Eigen::VectorXd& cv,
-      std::size_t si,
-      std::size_t num_s, std::size_t num_c);
+double getCurrCMNT(const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t si);
 
 
 /**
@@ -422,14 +392,12 @@ double getCurrCMNT(const Eigen::VectorXd& cv,
  *
  * @param <Side> Inlet connection side.
  * @param cv Current vector.
+ * @param s System parameters.
  * @param si Stack index.
- * @param num_s Number of stacks.
- * @param num_c Number of cells per stack.
 */
 template<ConnSide Side>
-double getCurrCMNB(const Eigen::VectorXd& cv,
-      std::size_t si,
-      std::size_t num_s, std::size_t num_c);
+double getCurrCMNB(const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t si);
 
 
 
@@ -543,9 +511,8 @@ namespace scl {
 
 
 template<>
-inline Eigen::Index indexCPT<ConnSide::csFront>(std::size_t si,
-      std::size_t num_s, std::size_t num_c) {
-  return si + 4*num_s*(num_c - 1);
+inline Eigen::Index indexCPT<ConnSide::csFront>(const SysParam& s, std::size_t si) {
+  return si + 4*s.numStacks()*(s.numCells() - 1);
 }
 
 
@@ -553,9 +520,8 @@ inline Eigen::Index indexCPT<ConnSide::csFront>(std::size_t si,
 
 
 template<>
-inline Eigen::Index indexCPB<ConnSide::csFront>(std::size_t si,
-      std::size_t num_s, std::size_t num_c) {
-  return si + (num_s - 1) + 4*num_s*(num_c - 1) + 1;
+inline Eigen::Index indexCPB<ConnSide::csFront>(const SysParam& s, std::size_t si) {
+  return si + (s.numStacks() - 1) + 4*s.numStacks()*(s.numCells() - 1) + 1;
 }
 
 
@@ -563,16 +529,14 @@ inline Eigen::Index indexCPB<ConnSide::csFront>(std::size_t si,
 
 
 template<>
-inline Eigen::Index indexCNT<ConnSide::csFront>(std::size_t si,
-      std::size_t num_s, std::size_t num_c) {
-  return si + 2*(num_s - 1) + 4*num_s*(num_c - 1);
+inline Eigen::Index indexCNT<ConnSide::csFront>(const SysParam& s, std::size_t si) {
+  return si + 2*(s.numStacks() - 1) + 4*s.numStacks()*(s.numCells() - 1);
 }
 
 
 template<>
-inline Eigen::Index indexCNT<ConnSide::csBack>(std::size_t si,
-      std::size_t num_s, std::size_t num_c) {
-  return si + 2*(num_s - 1) + 4*num_s*(num_c - 1) + 1;
+inline Eigen::Index indexCNT<ConnSide::csBack>(const SysParam& s, std::size_t si) {
+  return si + 2*(s.numStacks() - 1) + 4*s.numStacks()*(s.numCells() - 1) + 1;
 }
 
 
@@ -580,16 +544,14 @@ inline Eigen::Index indexCNT<ConnSide::csBack>(std::size_t si,
 
 
 template<>
-inline Eigen::Index indexCNB<ConnSide::csFront>(std::size_t si,
-      std::size_t num_s, std::size_t num_c) {
-  return si + 3*(num_s - 1) + 4*num_s*(num_c - 1) + 1;
+inline Eigen::Index indexCNB<ConnSide::csFront>(const SysParam& s, std::size_t si) {
+  return si + 3*(s.numStacks() - 1) + 4*s.numStacks()*(s.numCells() - 1) + 1;
 }
 
 
 template<>
-inline Eigen::Index indexCNB<ConnSide::csBack>(std::size_t si,
-      std::size_t num_s, std::size_t num_c) {
-  return si + 3*(num_s - 1) + 4*num_s*(num_c - 1);
+inline Eigen::Index indexCNB<ConnSide::csBack>(const SysParam& s, std::size_t si) {
+  return si + 3*(s.numStacks() - 1) + 4*s.numStacks()*(s.numCells() - 1);
 }
 
 
@@ -610,17 +572,16 @@ inline Eigen::Index indexCNB<ConnSide::csBack>(std::size_t si,
 
 
 template<>
-double getPosConnContri_Cell<ConnSide::csFront>(const Eigen::VectorXd& cv,
-      std::size_t si, std::size_t ci,
-      std::size_t num_s, std::size_t num_c) {
+double getPosConnContri_Cell<ConnSide::csFront>(const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t ci, std::size_t si) {
   double result = 0;
-  if (si > 0 && ci+1 < num_c) {
-    result += cv(indexCPT<ConnSide::csFront>(si, num_s, num_c));
-  } else if (si+1 < num_s && ci+1 == num_c) {
-    result += cv(indexCPT<ConnSide::csFront>(si, num_s, num_c) + 1);
+  if (si > 0 && ci+1 < s.numCells()) {
+    result += cv(indexCPT<ConnSide::csFront>(s, si));
+  } else if (si+1 < s.numStacks() && ci+1 == s.numCells()) {
+    result += cv(indexCPT<ConnSide::csFront>(s, si) + 1);
   }
-  if (si+1 < num_s) {
-    result += cv(indexCPB<ConnSide::csFront>(si, num_s, num_c));
+  if (si+1 < s.numStacks()) {
+    result += cv(indexCPB<ConnSide::csFront>(s, si));
   }
   return result;
 }
@@ -633,36 +594,32 @@ double getPosConnContri_Cell<ConnSide::csFront>(const Eigen::VectorXd& cv,
 
 
 template<>
-double getNegConnContri_Cell<ConnSide::csFront>(
-      const Eigen::VectorXd& cv,
-      std::size_t si, std::size_t ci,
-      std::size_t num_s, std::size_t num_c) {
+double getNegConnContri_Cell<ConnSide::csFront>(const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t ci, std::size_t si) {
   double result = 0;
   if (si > 0) {
-    result += cv(indexCNT<ConnSide::csFront>(si, num_s, num_c));
+    result += cv(indexCNT<ConnSide::csFront>(s, si));
   }
   if (si > 0 && ci == 0) {
-    result += cv(indexCNB<ConnSide::csFront>(si, num_s, num_c) - 1);
-  } else if (si+1 < num_s && ci > 0) {
-    result += cv(indexCNB<ConnSide::csFront>(si, num_s, num_c));
+    result += cv(indexCNB<ConnSide::csFront>(s, si) - 1);
+  } else if (si+1 < s.numStacks() && ci > 0) {
+    result += cv(indexCNB<ConnSide::csFront>(s, si));
   }
   return result;
 }
 
 
 template<>
-double getNegConnContri_Cell<ConnSide::csBack>(
-      const Eigen::VectorXd& cv,
-      std::size_t si, std::size_t ci,
-      std::size_t num_s, std::size_t num_c) {
+double getNegConnContri_Cell<ConnSide::csBack>(const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t ci, std::size_t si) {
   double result = 0;
   if (si > 0 && ci == 0) {
-    result += cv(indexCNT<ConnSide::csBack>(si, num_s, num_c) - 1);
-  } else if (si+1 < num_s && ci > 0) {
-    result += cv(indexCNT<ConnSide::csBack>(si, num_s, num_c));
+    result += cv(indexCNT<ConnSide::csBack>(s, si) - 1);
+  } else if (si+1 < s.numStacks() && ci > 0) {
+    result += cv(indexCNT<ConnSide::csBack>(s, si));
   }
   if (si > 0) {
-    result += cv(indexCNB<ConnSide::csBack>(si, num_s, num_c));
+    result += cv(indexCNB<ConnSide::csBack>(s, si));
   }
   return result;
 }
@@ -685,16 +642,15 @@ double getNegConnContri_Cell<ConnSide::csBack>(
 
 
 template<>
-double getConnContri_SSPT<ConnSide::csFront>(const Eigen::VectorXd& cv,
-      std::size_t si, std::size_t ci,
-      std::size_t num_s, std::size_t num_c) {
+double getConnContri_SSPT<ConnSide::csFront>(const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t ci, std::size_t si) {
   double result = 0;
-  if (ci+1 == num_c) {
+  if (ci+1 == s.numCells()) {
     if (si > 0) {
-      result -= cv(indexCPT<ConnSide::csFront>(si, num_s, num_c));
+      result -= cv(indexCPT<ConnSide::csFront>(s, si));
     }
-    if (si+1 < num_s) {
-      result += cv(indexCPT<ConnSide::csFront>(si, num_s, num_c) + 1);
+    if (si+1 < s.numStacks()) {
+      result += cv(indexCPT<ConnSide::csFront>(s, si) + 1);
     }
   }
   return result;
@@ -705,16 +661,15 @@ double getConnContri_SSPT<ConnSide::csFront>(const Eigen::VectorXd& cv,
 
 
 template<>
-double getConnContri_SSPB<ConnSide::csFront>(const Eigen::VectorXd& cv,
-      std::size_t si, std::size_t ci,
-      std::size_t num_s, std::size_t num_c) {
+double getConnContri_SSPB<ConnSide::csFront>(const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t ci, std::size_t si) {
   double result = 0;
   if (ci == 0) {
     if (si > 0) {
-      result -= cv(indexCPB<ConnSide::csFront>(si, num_s, num_c) - 1);
+      result -= cv(indexCPB<ConnSide::csFront>(s, si) - 1);
     }
-    if (si+1 < num_s) {
-      result += cv(indexCPB<ConnSide::csFront>(si, num_s, num_c));
+    if (si+1 < s.numStacks()) {
+      result += cv(indexCPB<ConnSide::csFront>(s, si));
     }
   }
   return result;
@@ -725,16 +680,15 @@ double getConnContri_SSPB<ConnSide::csFront>(const Eigen::VectorXd& cv,
 
 
 template<>
-double getConnContri_SSNT<ConnSide::csFront>(const Eigen::VectorXd& cv,
-      std::size_t si, std::size_t ci,
-      std::size_t num_s, std::size_t num_c) {
+double getConnContri_SSNT<ConnSide::csFront>(const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t ci, std::size_t si) {
   double result = 0;
-  if (ci+1 == num_c) {
+  if (ci+1 == s.numCells()) {
     if (si > 0) {
-      result -= cv(indexCNT<ConnSide::csFront>(si, num_s, num_c));
+      result -= cv(indexCNT<ConnSide::csFront>(s, si));
     }
-    if (si+1 < num_s) {
-      result += cv(indexCNT<ConnSide::csFront>(si, num_s, num_c) + 1);
+    if (si+1 < s.numStacks()) {
+      result += cv(indexCNT<ConnSide::csFront>(s, si) + 1);
     }
   }
   return result;
@@ -742,16 +696,15 @@ double getConnContri_SSNT<ConnSide::csFront>(const Eigen::VectorXd& cv,
 
 
 template<>
-double getConnContri_SSNT<ConnSide::csBack>(const Eigen::VectorXd& cv,
-      std::size_t si, std::size_t ci,
-      std::size_t num_s, std::size_t num_c) {
+double getConnContri_SSNT<ConnSide::csBack>(const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t ci, std::size_t si) {
   double result = 0;
   if (ci == 0) {
     if (si > 0) {
-      result -= cv(indexCNT<ConnSide::csBack>(si, num_s, num_c) - 1);
+      result -= cv(indexCNT<ConnSide::csBack>(s, si) - 1);
     }
-    if (si+1 < num_s) {
-      result += cv(indexCNT<ConnSide::csBack>(si, num_s, num_c));
+    if (si+1 < s.numStacks()) {
+      result += cv(indexCNT<ConnSide::csBack>(s, si));
     }
   }
   return result;
@@ -762,16 +715,15 @@ double getConnContri_SSNT<ConnSide::csBack>(const Eigen::VectorXd& cv,
 
 
 template<>
-double getConnContri_SSNB<ConnSide::csFront>(const Eigen::VectorXd& cv,
-      std::size_t si, std::size_t ci,
-      std::size_t num_s, std::size_t num_c) {
+double getConnContri_SSNB<ConnSide::csFront>(const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t ci, std::size_t si) {
   double result = 0;
   if (ci == 0) {
     if (si > 0) {
-      result -= cv(indexCNB<ConnSide::csFront>(si, num_s, num_c) - 1);
+      result -= cv(indexCNB<ConnSide::csFront>(s, si) - 1);
     }
-    if (si+1 < num_s) {
-      result += cv(indexCNB<ConnSide::csFront>(si, num_s, num_c));
+    if (si+1 < s.numStacks()) {
+      result += cv(indexCNB<ConnSide::csFront>(s, si));
     }
   }
   return result;
@@ -779,16 +731,15 @@ double getConnContri_SSNB<ConnSide::csFront>(const Eigen::VectorXd& cv,
 
 
 template<>
-double getConnContri_SSNB<ConnSide::csBack>(const Eigen::VectorXd& cv,
-      std::size_t si, std::size_t ci,
-      std::size_t num_s, std::size_t num_c) {
+double getConnContri_SSNB<ConnSide::csBack>(const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t ci, std::size_t si) {
   double result = 0;
-  if (ci+1 == num_c) {
+  if (ci+1 == s.numCells()) {
     if (si > 0) {
-      result -= cv(indexCNB<ConnSide::csBack>(si, num_s, num_c));
+      result -= cv(indexCNB<ConnSide::csBack>(s, si));
     }
-    if (si+1 < num_s) {
-      result += cv(indexCNB<ConnSide::csBack>(si, num_s, num_c) + 1);
+    if (si+1 < s.numStacks()) {
+      result += cv(indexCNB<ConnSide::csBack>(s, si) + 1);
     }
   }
   return result;
@@ -812,15 +763,14 @@ double getConnContri_SSNB<ConnSide::csBack>(const Eigen::VectorXd& cv,
 
 
 template<>
-double getCurrCSPT<ConnSide::csFront>(const Eigen::VectorXd& cv,
-      std::size_t si,
-      std::size_t num_s, std::size_t num_c) {
+double getCurrCSPT<ConnSide::csFront>(const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t si) {
   double result = 0;
-  if (si+1 < num_s) {
-    result += cv(indexCPT<ConnSide::csFront>(si, num_s, num_c) + 1);
+  if (si+1 < s.numStacks()) {
+    result += cv(indexCPT<ConnSide::csFront>(s, si) + 1);
   }
   if (si > 0) {
-    result -= cv(indexCPT<ConnSide::csFront>(si, num_s, num_c));
+    result -= cv(indexCPT<ConnSide::csFront>(s, si));
   }
   return result;
 }
@@ -830,15 +780,14 @@ double getCurrCSPT<ConnSide::csFront>(const Eigen::VectorXd& cv,
 
 
 template<>
-double getCurrCSPB<ConnSide::csFront>(const Eigen::VectorXd& cv,
-      std::size_t si,
-      std::size_t num_s, std::size_t num_c) {
+double getCurrCSPB<ConnSide::csFront>(const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t si) {
   double result = 0;
-  if (si+1 < num_s) {
-    result += cv(indexCPB<ConnSide::csFront>(si, num_s, num_c));
+  if (si+1 < s.numStacks()) {
+    result += cv(indexCPB<ConnSide::csFront>(s, si));
   }
   if (si > 0) {
-    result -= cv(indexCPB<ConnSide::csFront>(si, num_s, num_c) - 1);
+    result -= cv(indexCPB<ConnSide::csFront>(s, si) - 1);
   }
   return result;
 }
@@ -848,30 +797,28 @@ double getCurrCSPB<ConnSide::csFront>(const Eigen::VectorXd& cv,
 
 
 template<>
-double getCurrCSNT<ConnSide::csFront>(const Eigen::VectorXd& cv,
-      std::size_t si,
-      std::size_t num_s, std::size_t num_c) {
+double getCurrCSNT<ConnSide::csFront>(const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t si) {
   double result = 0;
-  if (si+1 < num_s) {
-    result += cv(indexCNT<ConnSide::csFront>(si, num_s, num_c) + 1);
+  if (si+1 < s.numStacks()) {
+    result += cv(indexCNT<ConnSide::csFront>(s, si) + 1);
   }
   if (si > 0) {
-    result -= cv(indexCNT<ConnSide::csFront>(si, num_s, num_c));
+    result -= cv(indexCNT<ConnSide::csFront>(s, si));
   }
   return result;
 }
 
 
 template<>
-double getCurrCSNT<ConnSide::csBack>(const Eigen::VectorXd& cv,
-      std::size_t si,
-      std::size_t num_s, std::size_t num_c) {
+double getCurrCSNT<ConnSide::csBack>(const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t si) {
   double result = 0;
-  if (si+1 < num_s) {
-    result += cv(indexCNT<ConnSide::csBack>(si, num_s, num_c));
+  if (si+1 < s.numStacks()) {
+    result += cv(indexCNT<ConnSide::csBack>(s, si));
   }
   if (si > 0) {
-    result -= cv(indexCNT<ConnSide::csBack>(si, num_s, num_c) - 1);
+    result -= cv(indexCNT<ConnSide::csBack>(s, si) - 1);
   }
   return result;
 }
@@ -881,30 +828,28 @@ double getCurrCSNT<ConnSide::csBack>(const Eigen::VectorXd& cv,
 
 
 template<>
-double getCurrCSNB<ConnSide::csFront>(const Eigen::VectorXd& cv,
-      std::size_t si,
-      std::size_t num_s, std::size_t num_c) {
+double getCurrCSNB<ConnSide::csFront>(const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t si) {
   double result = 0;
-  if (si+1 < num_s) {
-    result += cv(indexCNB<ConnSide::csFront>(si, num_s, num_c));
+  if (si+1 < s.numStacks()) {
+    result += cv(indexCNB<ConnSide::csFront>(s, si));
   }
   if (si > 0) {
-    result -= cv(indexCNB<ConnSide::csFront>(si, num_s, num_c) - 1);
+    result -= cv(indexCNB<ConnSide::csFront>(s, si) - 1);
   }
   return result;
 }
 
 
 template<>
-double getCurrCSNB<ConnSide::csBack>(const Eigen::VectorXd& cv,
-      std::size_t si,
-      std::size_t num_s, std::size_t num_c) {
+double getCurrCSNB<ConnSide::csBack>(const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t si) {
   double result = 0;
-  if (si+1 < num_s) {
-    result += cv(indexCNB<ConnSide::csBack>(si, num_s, num_c) + 1);
+  if (si+1 < s.numStacks()) {
+    result += cv(indexCNB<ConnSide::csBack>(s, si) + 1);
   }
   if (si > 0) {
-    result -= cv(indexCNB<ConnSide::csBack>(si, num_s, num_c));
+    result -= cv(indexCNB<ConnSide::csBack>(s, si));
   }
   return result;
 }
@@ -927,10 +872,9 @@ double getCurrCSNB<ConnSide::csBack>(const Eigen::VectorXd& cv,
 
 
 template<>
-double getCurrCMPT<ConnSide::csFront>(const Eigen::VectorXd& cv,
-      std::size_t si,
-      std::size_t num_s, std::size_t num_c) {
-  return (si+1 < num_s) ? -cv(indexCPT<ConnSide::csFront>(si, num_s, num_c) + 1) : 0;
+double getCurrCMPT<ConnSide::csFront>(const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t si) {
+  return (si+1 < s.numStacks()) ? -cv(indexCPT<ConnSide::csFront>(s, si) + 1) : 0;
 }
 
 
@@ -938,10 +882,9 @@ double getCurrCMPT<ConnSide::csFront>(const Eigen::VectorXd& cv,
 
 
 template<>
-double getCurrCMPB<ConnSide::csFront>(const Eigen::VectorXd& cv,
-      std::size_t si,
-      std::size_t num_s, std::size_t num_c) {
-  return (si+1 < num_s) ? -cv(indexCPB<ConnSide::csFront>(si, num_s, num_c)) : 0;
+double getCurrCMPB<ConnSide::csFront>(const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t si) {
+  return (si+1 < s.numStacks()) ? -cv(indexCPB<ConnSide::csFront>(s, si)) : 0;
 }
 
 
@@ -949,18 +892,16 @@ double getCurrCMPB<ConnSide::csFront>(const Eigen::VectorXd& cv,
 
 
 template<>
-double getCurrCMNT<ConnSide::csFront>(const Eigen::VectorXd& cv,
-      std::size_t si,
-      std::size_t num_s, std::size_t num_c) {
-  return (si+1 < num_s) ? -cv(indexCNT<ConnSide::csFront>(si, num_s, num_c) + 1) : 0;
+double getCurrCMNT<ConnSide::csFront>(const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t si) {
+  return (si+1 < s.numStacks()) ? -cv(indexCNT<ConnSide::csFront>(s, si) + 1) : 0;
 }
 
 
 template<>
-double getCurrCMNT<ConnSide::csBack>(const Eigen::VectorXd& cv,
-      std::size_t si,
-      std::size_t num_s, std::size_t num_c) {
-  return (si+1 < num_s) ? -cv(indexCNT<ConnSide::csBack>(si, num_s, num_c)) : 0;
+double getCurrCMNT<ConnSide::csBack>(const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t si) {
+  return (si+1 < s.numStacks()) ? -cv(indexCNT<ConnSide::csBack>(s, si)) : 0;
 }
 
 
@@ -968,18 +909,16 @@ double getCurrCMNT<ConnSide::csBack>(const Eigen::VectorXd& cv,
 
 
 template<>
-double getCurrCMNB<ConnSide::csFront>(const Eigen::VectorXd& cv,
-      std::size_t si,
-      std::size_t num_s, std::size_t num_c) {
-  return (si+1 < num_s) ? -cv(indexCNB<ConnSide::csFront>(si, num_s, num_c)) : 0;
+double getCurrCMNB<ConnSide::csFront>(const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t si) {
+  return (si+1 < s.numStacks()) ? -cv(indexCNB<ConnSide::csFront>(s, si)) : 0;
 }
 
 
 template<>
-double getCurrCMNB<ConnSide::csBack>(const Eigen::VectorXd& cv,
-      std::size_t si,
-      std::size_t num_s, std::size_t num_c) {
-  return (si+1 < num_s) ? -cv(indexCNB<ConnSide::csBack>(si, num_s, num_c) + 1) : 0;
+double getCurrCMNB<ConnSide::csBack>(const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t si) {
+  return (si+1 < s.numStacks()) ? -cv(indexCNB<ConnSide::csBack>(s, si) + 1) : 0;
 }
 
 
@@ -1002,10 +941,10 @@ double getCurrCMNB<ConnSide::csBack>(const Eigen::VectorXd& cv,
 template<>
 void addConnLoops<ConnSide::csFront, ConnSide::csFront>(Eigen::MatrixXd& m, const SCLSysParam& s) {
   for (std::size_t si = 0; si < s.numStacks(); ++si) {
-    Eigen::Index cpti = indexCPT<ConnSide::csFront>(si, s.numStacks(), s.numCells());
-    Eigen::Index cpbi = indexCPB<ConnSide::csFront>(si, s.numStacks(), s.numCells());
-    Eigen::Index cnti = indexCNT<ConnSide::csFront>(si, s.numStacks(), s.numCells());
-    Eigen::Index cnbi = indexCNB<ConnSide::csFront>(si, s.numStacks(), s.numCells());
+    Eigen::Index cpti = indexCPT<ConnSide::csFront>(s, si);
+    Eigen::Index cpbi = indexCPB<ConnSide::csFront>(s, si);
+    Eigen::Index cnti = indexCNT<ConnSide::csFront>(s, si);
+    Eigen::Index cnbi = indexCNB<ConnSide::csFront>(s, si);
 
     if (si > 0) {
       // :::: [ POSITIVE TOP CONN ] ::::
@@ -1229,10 +1168,10 @@ void addConnLoops<ConnSide::csFront, ConnSide::csFront>(Eigen::MatrixXd& m, cons
 template<>
 void addConnLoops<ConnSide::csFront, ConnSide::csBack>(Eigen::MatrixXd& m, const SCLSysParam& s) {
   for (std::size_t si = 0; si < s.numStacks(); ++si) {
-    Eigen::Index cpti = indexCPT<ConnSide::csFront>(si, s.numStacks(), s.numCells());
-    Eigen::Index cpbi = indexCPB<ConnSide::csFront>(si, s.numStacks(), s.numCells());
-    Eigen::Index cnti = indexCNT<ConnSide::csBack>(si, s.numStacks(), s.numCells());
-    Eigen::Index cnbi = indexCNB<ConnSide::csBack>(si, s.numStacks(), s.numCells());
+    Eigen::Index cpti = indexCPT<ConnSide::csFront>(s, si);
+    Eigen::Index cpbi = indexCPB<ConnSide::csFront>(s, si);
+    Eigen::Index cnti = indexCNT<ConnSide::csBack>(s, si);
+    Eigen::Index cnbi = indexCNB<ConnSide::csBack>(s, si);
 
     if (si > 0) {
       // :::: [ POSITIVE TOP CONN ] ::::
@@ -1467,13 +1406,13 @@ void addSysVolt(Eigen::VectorXd& v, const SCLSysParam& s, double chgVolt) {
   v(0) += chgVolt;
   for (std::size_t si = 0; si < s.numStacks(); ++si) {
     if (si > 0) {
-      v(indexCPT<ConnSide::csFront>(si, s.numStacks(), s.numCells())) -= s.numCells() * s.ocv();
-      v(indexCNT<ConnSide::csFront>(si, s.numStacks(), s.numCells())) -= s.numCells() * s.ocv();
+      v(indexCPT<ConnSide::csFront>(s, si)) -= s.numCells() * s.ocv();
+      v(indexCNT<ConnSide::csFront>(s, si)) -= s.numCells() * s.ocv();
     }
 
     if (si+1 < s.numStacks()) {
-      v(indexCPB<ConnSide::csFront>(si, s.numStacks(), s.numCells())) -= s.numCells() * s.ocv();
-      v(indexCNB<ConnSide::csFront>(si, s.numStacks(), s.numCells())) -= s.numCells() * s.ocv();
+      v(indexCPB<ConnSide::csFront>(s, si)) -= s.numCells() * s.ocv();
+      v(indexCNB<ConnSide::csFront>(s, si)) -= s.numCells() * s.ocv();
     }
 
     for (std::size_t ci = 0; ci < s.numCells(); ++ci) {
@@ -1537,30 +1476,30 @@ inline SCLReport* commLineCalc(const SCLSysParam& s, double chgVolt) {
     for (std::size_t ci = 0; ci < s.numCells(); ++ci) {
       clist.push_back(cv(0)
           + getStackContri_Cell(cv, s, ci, si)
-          + getPosConnContri_Cell<PS>(cv, si, ci, s.numStacks(), s.numCells())
-          + getNegConnContri_Cell<NS>(cv, si, ci, s.numStacks(), s.numCells()));
+          + getPosConnContri_Cell<PS>(cv, s, ci, si)
+          + getNegConnContri_Cell<NS>(cv, s, ci, si));
       sptlist.push_back(getStackContri_SSPT(cv, s, ci, si)
-          + getConnContri_SSPT<PS>(cv, si, ci, s.numStacks(), s.numCells()));
+          + getConnContri_SSPT<PS>(cv, s, ci, si));
       spblist.push_back(getStackContri_SSPB(cv, s, ci, si)
-          + getConnContri_SSPB<PS>(cv, si, ci, s.numStacks(), s.numCells()));
+          + getConnContri_SSPB<PS>(cv, s, ci, si));
       sntlist.push_back(getStackContri_SSNT(cv, s, ci, si)
-          + getConnContri_SSNT<NS>(cv, si, ci, s.numStacks(), s.numCells()));
+          + getConnContri_SSNT<NS>(cv, s, ci, si));
       snblist.push_back(getStackContri_SSNB(cv, s, ci, si)
-          + getConnContri_SSNB<NS>(cv, si, ci, s.numStacks(), s.numCells()));
+          + getConnContri_SSNB<NS>(cv, s, ci, si));
       mptlist.push_back(getCurrMPT(cv, s, ci, si));
       mpblist.push_back(getCurrMPB(cv, s, ci, si));
       mntlist.push_back(getCurrMNT(cv, s, ci, si));
       mnblist.push_back(getCurrMNB(cv, s, ci, si));
     }
 
-    csptlist.push_back(getCurrCSPT<PS>(cv, si, s.numStacks(), s.numCells()));
-    cspblist.push_back(getCurrCSPB<PS>(cv, si, s.numStacks(), s.numCells()));
-    csntlist.push_back(getCurrCSNT<NS>(cv, si, s.numStacks(), s.numCells()));
-    csnblist.push_back(getCurrCSNB<NS>(cv, si, s.numStacks(), s.numCells()));
-    cmptlist.push_back(getCurrCMPT<PS>(cv, si, s.numStacks(), s.numCells()));
-    cmpblist.push_back(getCurrCMPB<PS>(cv, si, s.numStacks(), s.numCells()));
-    cmntlist.push_back(getCurrCMNT<NS>(cv, si, s.numStacks(), s.numCells()));
-    cmnblist.push_back(getCurrCMNB<NS>(cv, si, s.numStacks(), s.numCells()));
+    csptlist.push_back(getCurrCSPT<PS>(cv, s, si));
+    cspblist.push_back(getCurrCSPB<PS>(cv, s, si));
+    csntlist.push_back(getCurrCSNT<NS>(cv, s, si));
+    csnblist.push_back(getCurrCSNB<NS>(cv, s, si));
+    cmptlist.push_back(getCurrCMPT<PS>(cv, s, si));
+    cmpblist.push_back(getCurrCMPB<PS>(cv, s, si));
+    cmntlist.push_back(getCurrCMNT<NS>(cv, s, si));
+    cmnblist.push_back(getCurrCMNB<NS>(cv, s, si));
   }
 
   double error = ((cm*cv) - vv).norm();
