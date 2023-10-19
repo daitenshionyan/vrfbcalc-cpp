@@ -202,7 +202,13 @@ double PCCReport::chargingCurr() const {
 
 
 double PCCReport::overVoltPowr() const {
-  return chargingPowr() - storedPowr();
+  double result = 0;
+  for (std::size_t i = 0; i < totCells(); ++i) {
+    result += (param().maxChgDen()*param().cellArea() < data->cellCurr(i))
+        ? (data->cellCurr(i) - param().maxChgDen()*param().cellArea()) * param().ocv()
+        : 0;
+  }
+  return result;
 }
 
 
