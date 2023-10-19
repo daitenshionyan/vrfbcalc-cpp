@@ -174,6 +174,12 @@ double getPosConnContri_Cell(const Eigen::VectorXd& cv, const SysParam& s,
       std::size_t ci, std::size_t si);
 
 
+template<ConnSide Side>
+double getPosConnContri_Cell(const Eigen::VectorXd& cv, const SysParam& s, std::size_t i) {
+  return getPosConnContri_Cell<Side>(cv, s, toci(i, s), tosi(i, s));
+}
+
+
 /**
  * Returns the NEGATIVE CONNECTOR current contribution to the specified cell,
  * given the calculated current vector.
@@ -187,6 +193,12 @@ double getPosConnContri_Cell(const Eigen::VectorXd& cv, const SysParam& s,
 template<ConnSide Side>
 double getNegConnContri_Cell(const Eigen::VectorXd& cv, const SysParam& s,
       std::size_t ci, std::size_t si);
+
+
+template<ConnSide Side>
+double getNegConnContri_Cell(const Eigen::VectorXd& cv, const SysParam& s, std::size_t i) {
+  return getNegConnContri_Cell<Side>(cv, s, toci(i, s), tosi(i, s));
+}
 
 
 
@@ -217,6 +229,13 @@ double getConnContri_SSPT(const Eigen::VectorXd& cv, const SysParam& s,
       std::size_t ci, std::size_t si);
 
 
+template<ConnSide Side>
+double getConnContri_SSPT(const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t i) {
+  return getConnContri_SSPT<Side>(cv, s, toci(i, s), tosi(i, s));
+}
+
+
 /**
  * Returns the CONNECTOR current contribution to the specified POSITIVE BOTTOM
  * STACK SHUNT, given the calculated current vector.
@@ -230,6 +249,13 @@ double getConnContri_SSPT(const Eigen::VectorXd& cv, const SysParam& s,
 template<ConnSide Side>
 double getConnContri_SSPB(const Eigen::VectorXd& cv, const SysParam& s,
       std::size_t ci, std::size_t si);
+
+
+template<ConnSide Side>
+double getConnContri_SSPB(const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t i) {
+  return getConnContri_SSPB<Side>(cv, s, toci(i, s), tosi(i, s));
+}
 
 
 /**
@@ -247,6 +273,13 @@ double getConnContri_SSNT(const Eigen::VectorXd& cv, const SysParam& s,
       std::size_t ci, std::size_t si);
 
 
+template<ConnSide Side>
+double getConnContri_SSNT(const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t i) {
+  return getConnContri_SSNT<Side>(cv, s, toci(i, s), tosi(i, s));
+}
+
+
 /**
  * Returns the CONNECTOR current contribution to the specified NEGATIVE BOTTOM
  * STACK SHUNT, given the calculated current vector.
@@ -260,6 +293,13 @@ double getConnContri_SSNT(const Eigen::VectorXd& cv, const SysParam& s,
 template<ConnSide Side>
 double getConnContri_SSNB(const Eigen::VectorXd& cv, const SysParam& s,
       std::size_t ci, std::size_t si);
+
+
+template<ConnSide Side>
+double getConnContri_SSNB(const Eigen::VectorXd& cv, const SysParam& s,
+      std::size_t i) {
+  return getConnContri_SSNB<Side>(cv, s, toci(i, s), tosi(i, s));
+}
 
 
 
@@ -1440,13 +1480,191 @@ void addSysVolt(Eigen::VectorXd& v, const SCLSysParam& s, double chgVolt) {
 
 /*
 ********************************************************************************
+**    PCCReportData class
+********************************************************************************
+*/
+
+
+class SCLReportData {
+  public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
+    SCLReportData() = default;
+    SCLReportData(const SCLReportData&) = default;
+    SCLReportData(SCLReportData&&) = default;
+
+    SCLReportData& operator=(const SCLReportData&) = default;
+    SCLReportData& operator=(SCLReportData&&) = default;
+
+    virtual ~SCLReportData() = default;
+
+
+  public: // ~~~~ accessors ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    virtual const SCLSysParam& param() const = 0;
+
+    virtual double chgCurr() const = 0;
+    virtual double cellCurr(std::size_t i) const = 0;
+
+    virtual double ssptCurr(std::size_t i) const = 0;
+    virtual double sspbCurr(std::size_t i) const = 0;
+    virtual double ssntCurr(std::size_t i) const = 0;
+    virtual double ssnbCurr(std::size_t i) const = 0;
+
+    virtual double smptCurr(std::size_t i) const = 0;
+    virtual double smpbCurr(std::size_t i) const = 0;
+    virtual double smntCurr(std::size_t i) const = 0;
+    virtual double smnbCurr(std::size_t i) const = 0;
+
+    virtual double csptCurr(std::size_t i) const = 0;
+    virtual double cspbCurr(std::size_t i) const = 0;
+    virtual double csntCurr(std::size_t i) const = 0;
+    virtual double csnbCurr(std::size_t i) const = 0;
+
+    virtual double cmptCurr(std::size_t i) const = 0;
+    virtual double cmpbCurr(std::size_t i) const = 0;
+    virtual double cmntCurr(std::size_t i) const = 0;
+    virtual double cmnbCurr(std::size_t i) const = 0;
+
+
+  public: // ~~~~ functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    virtual SCLReportData* copy() const = 0;
+};
+
+
+template<ConnSide PS, ConnSide NS>
+class SCLReportData_Impl : public SCLReportData {
+  public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
+    SCLReportData_Impl(const Eigen::VectorXd& currVec, const SCLSysParam& sys)
+        : cv{currVec}, s{sys} {}
+    SCLReportData_Impl(Eigen::VectorXd&& currVec, const SCLSysParam& sys)
+        : cv{std::move(currVec)}, s{sys} {}
+
+    SCLReportData_Impl() = delete;
+    SCLReportData_Impl(const SCLReportData_Impl&) = default;
+    SCLReportData_Impl(SCLReportData_Impl&&) = default;
+
+    SCLReportData_Impl& operator=(const SCLReportData_Impl&) = default;
+    SCLReportData_Impl& operator=(SCLReportData_Impl&&) = default;
+
+    ~SCLReportData_Impl() override = default;
+
+
+  public: // ~~~~ accessors ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    const SCLSysParam& param() const override {
+      return s;
+    }
+
+
+    double chgCurr() const override {
+      return cv(0);
+    }
+
+
+    double cellCurr(std::size_t i) const override {
+      return cv(0)
+          + getStackContri_Cell(cv, s, i)
+          + getPosConnContri_Cell<PS>(cv, s, i)
+          + getNegConnContri_Cell<NS>(cv, s, i);
+    }
+
+
+    double ssptCurr(std::size_t i) const override {
+      return getStackContri_SSPT(cv, s, i)
+          + getConnContri_SSPT<PS>(cv, s, i);
+    }
+
+    double sspbCurr(std::size_t i) const override {
+      return getStackContri_SSPB(cv, s, i)
+          + getConnContri_SSPB<PS>(cv, s, i);
+    }
+
+    double ssntCurr(std::size_t i) const override {
+      return getStackContri_SSNT(cv, s, i)
+          + getConnContri_SSNT<NS>(cv, s, i);
+    }
+
+    double ssnbCurr(std::size_t i) const override {
+      return getStackContri_SSNB(cv, s, i)
+          + getConnContri_SSNB<NS>(cv, s, i);
+    }
+
+
+    double smptCurr(std::size_t i) const override {
+      return getCurrMPT(cv, s, i);
+    }
+
+    double smpbCurr(std::size_t i) const override {
+      return getCurrMPB(cv, s, i);
+    }
+
+    double smntCurr(std::size_t i) const override {
+      return getCurrMNT(cv, s, i);
+    }
+
+    double smnbCurr(std::size_t i) const override {
+      return getCurrMNB(cv, s, i);
+    }
+
+
+    double csptCurr(std::size_t i) const override {
+      return getCurrCSPT<PS>(cv, s, i);
+    }
+
+    double cspbCurr(std::size_t i) const override {
+      return getCurrCSPB<PS>(cv, s, i);
+    }
+
+    double csntCurr(std::size_t i) const override {
+      return getCurrCSNT<NS>(cv, s, i);
+    }
+
+    double csnbCurr(std::size_t i) const override {
+      return getCurrCSNB<NS>(cv, s, i);
+    }
+
+
+    double cmptCurr(std::size_t i) const override {
+      return getCurrCMPT<PS>(cv, s, i);
+    }
+
+    double cmpbCurr(std::size_t i) const override {
+      return getCurrCMPB<PS>(cv, s, i);
+    }
+
+    double cmntCurr(std::size_t i) const override {
+      return getCurrCMNT<NS>(cv, s, i);
+    }
+
+    double cmnbCurr(std::size_t i) const override {
+      return getCurrCMNB<NS>(cv, s, i);
+    }
+
+
+  public: // ~~~~ functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    SCLReportData_Impl<PS, NS>* copy() const override {
+      return new SCLReportData_Impl<PS, NS>(*this);
+    }
+
+
+  private: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Eigen::VectorXd cv;
+    SCLSysParam s;
+};
+
+
+
+
+
+
+
+
+/*
+********************************************************************************
 **    commLineCalc Definitions
 ********************************************************************************
 */
 
 
 template<ConnSide PS, ConnSide NS>
-inline SCLReport* commLineCalc(const SCLSysParam& s, double chgVolt) {
+SCLReport* commLineCalc(const SCLSysParam& s, double chgVolt) {
   std::size_t size = matSize(s.numStacks(), s.numCells());
   Eigen::MatrixXd cm = Eigen::MatrixXd::Zero(size, size);   // current matrix
   addStackLoops(cm, s);
@@ -1455,62 +1673,9 @@ inline SCLReport* commLineCalc(const SCLSysParam& s, double chgVolt) {
   addSysVolt(vv, s, chgVolt);
   Eigen::VectorXd cv = cm.colPivHouseholderQr().solve(vv);  // current vector
 
-  std::vector<double> clist {};
-  std::vector<double> sptlist {};
-  std::vector<double> spblist {};
-  std::vector<double> sntlist {};
-  std::vector<double> snblist {};
-  std::vector<double> mptlist {};
-  std::vector<double> mpblist {};
-  std::vector<double> mntlist {};
-  std::vector<double> mnblist {};
-  std::vector<double> csptlist {};
-  std::vector<double> cspblist {};
-  std::vector<double> csntlist {};
-  std::vector<double> csnblist {};
-  std::vector<double> cmptlist {};
-  std::vector<double> cmpblist {};
-  std::vector<double> cmntlist {};
-  std::vector<double> cmnblist {};
-  for (std::size_t si = 0; si < s.numStacks(); ++si) {
-    for (std::size_t ci = 0; ci < s.numCells(); ++ci) {
-      clist.push_back(cv(0)
-          + getStackContri_Cell(cv, s, ci, si)
-          + getPosConnContri_Cell<PS>(cv, s, ci, si)
-          + getNegConnContri_Cell<NS>(cv, s, ci, si));
-      sptlist.push_back(getStackContri_SSPT(cv, s, ci, si)
-          + getConnContri_SSPT<PS>(cv, s, ci, si));
-      spblist.push_back(getStackContri_SSPB(cv, s, ci, si)
-          + getConnContri_SSPB<PS>(cv, s, ci, si));
-      sntlist.push_back(getStackContri_SSNT(cv, s, ci, si)
-          + getConnContri_SSNT<NS>(cv, s, ci, si));
-      snblist.push_back(getStackContri_SSNB(cv, s, ci, si)
-          + getConnContri_SSNB<NS>(cv, s, ci, si));
-      mptlist.push_back(getCurrMPT(cv, s, ci, si));
-      mpblist.push_back(getCurrMPB(cv, s, ci, si));
-      mntlist.push_back(getCurrMNT(cv, s, ci, si));
-      mnblist.push_back(getCurrMNB(cv, s, ci, si));
-    }
-
-    csptlist.push_back(getCurrCSPT<PS>(cv, s, si));
-    cspblist.push_back(getCurrCSPB<PS>(cv, s, si));
-    csntlist.push_back(getCurrCSNT<NS>(cv, s, si));
-    csnblist.push_back(getCurrCSNB<NS>(cv, s, si));
-    cmptlist.push_back(getCurrCMPT<PS>(cv, s, si));
-    cmpblist.push_back(getCurrCMPB<PS>(cv, s, si));
-    cmntlist.push_back(getCurrCMNT<NS>(cv, s, si));
-    cmnblist.push_back(getCurrCMNB<NS>(cv, s, si));
-  }
-
+  SCLReportData* data = new SCLReportData_Impl<PS, NS>(cv, s);
   double error = ((cm*cv) - vv).norm();
-
-  return new SCLReport(cv(0), chgVolt, s,
-      std::move(clist),
-      std::move(sptlist), std::move(spblist), std::move(sntlist), std::move(snblist),
-      std::move(mptlist), std::move(mpblist), std::move(mntlist), std::move(mnblist),
-      std::move(csptlist), std::move(cspblist), std::move(csntlist), std::move(csnblist),
-      std::move(cmptlist), std::move(cmpblist), std::move(cmntlist), std::move(cmnblist),
-      error, getArrName<PS, NS>());
+  return new SCLReport(data, chgVolt, getArrName<PS, NS>(), error);
 }
 
 
