@@ -332,6 +332,10 @@ class ShuntCalc {
     */
     virtual ShuntReport calculate(double chgVolt) const = 0;
 
+
+    virtual SysParam& param() = 0;
+    virtual const SysParam& param() const = 0;
+
     /**
      * Copies this instance of `ShuntCalc`.
     */
@@ -497,6 +501,9 @@ class SCLCalc : public ShuntCalc {
   public: // ~~~~ functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     ShuntReport calculate(double chgVolt) const override;
 
+    SCLSysParam& param() override {return sys;}
+    const SCLSysParam& param() const override {return sys;}
+
     SCLCalc* copy() const override {return new SCLCalc(*this);}
 
 
@@ -647,6 +654,7 @@ class PCCCalc : public ShuntCalc {
   public: // ~~~~ functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     ShuntReport calculate(double chgVolt) const override;
 
+    PCCSysParam& param() override {return sys;}
     PCCCalc* copy() const override {return new PCCCalc(*this);}
 
 
