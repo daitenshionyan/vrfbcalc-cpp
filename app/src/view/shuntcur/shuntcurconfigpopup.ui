@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>405</width>
-    <height>521</height>
+    <width>500</width>
+    <height>520</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -24,7 +24,7 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>368</width>
+        <width>463</width>
         <height>704</height>
        </rect>
       </property>
@@ -76,14 +76,14 @@
               <widget class="QLineEdit" name="nameField"/>
              </item>
              <item row="2" column="0">
-              <widget class="QLabel" name="chgVoltLabel">
+              <widget class="QLabel" name="inputLabel">
                <property name="text">
-                <string>Chg Volt</string>
+                <string>Input</string>
                </property>
               </widget>
              </item>
              <item row="2" column="1">
-              <widget class="QWidget" name="chgVoltBox" native="true">
+              <widget class="QWidget" name="inputBox" native="true">
                <layout class="QHBoxLayout" name="horizontalLayout">
                 <property name="spacing">
                  <number>5</number>
@@ -101,7 +101,26 @@
                  <number>0</number>
                 </property>
                 <item>
-                 <widget class="QDoubleSpinBox" name="chgVoltField">
+                 <widget class="QComboBox" name="inputComboBox">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>100</width>
+                    <height>0</height>
+                   </size>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QDoubleSpinBox" name="inputField">
+                  <property name="decimals">
+                   <number>9</number>
+                  </property>
                   <property name="maximum">
                    <double>9999999999.000000000000000</double>
                   </property>
@@ -111,7 +130,7 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLabel" name="chgVoltUnitLabel">
+                 <widget class="QLabel" name="inputUnitLabel">
                   <property name="sizePolicy">
                    <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
                     <horstretch>0</horstretch>
@@ -406,7 +425,7 @@
                    <double>9999999999.000000000000000</double>
                   </property>
                   <property name="value">
-                   <double>20.600000000000001</double>
+                   <double>0.160000000000000</double>
                   </property>
                  </widget>
                 </item>
@@ -946,7 +965,7 @@
                    <double>9999999999.000000000000000</double>
                   </property>
                   <property name="value">
-                   <double>100.000000000000000</double>
+                   <double>10000.000000000000000</double>
                   </property>
                  </widget>
                 </item>
@@ -1435,7 +1454,7 @@
   <tabstop>scrollArea</tabstop>
   <tabstop>nameField</tabstop>
   <tabstop>arrComboBox</tabstop>
-  <tabstop>chgVoltField</tabstop>
+  <tabstop>inputField</tabstop>
   <tabstop>resistivityField</tabstop>
   <tabstop>maxChgDenField</tabstop>
   <tabstop>numLineField</tabstop>

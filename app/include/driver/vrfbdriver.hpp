@@ -65,9 +65,11 @@ enum class SCArrType {
 
 
 struct ShuntJob {
-  ShuntJob(const std::string&, const vrfb::shuntcur::ShuntCalc&, double,
+  ShuntJob(const std::string&, const vrfb::shuntcur::ShuntCalc&,
+      const vrfb::shuntcur::ElecInput&,
       SCArrangement a = SCArrangement::scaSCLFB);
-  ShuntJob(const std::string&, vrfb::shuntcur::ShuntCalc*, double,
+  ShuntJob(const std::string&, vrfb::shuntcur::ShuntCalc*,
+      const vrfb::shuntcur::ElecInput&,
       SCArrangement a = SCArrangement::scaSCLFB);
 
   ShuntJob(const ShuntJob&);
@@ -80,7 +82,7 @@ struct ShuntJob {
 
   std::string name;
   vrfb::shuntcur::ShuntCalc* calc;
-  double chgVolt;
+  vrfb::shuntcur::ElecInput elecInput;
   SCArrangement arr;
 };
 

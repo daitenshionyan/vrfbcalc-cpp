@@ -47,8 +47,10 @@ ShuntReport ShuntCalc::calc(const ElecInput& elecInput) const {
           +  param().ocv());
       ShuntReport report = calculate(chgVolt);
       std::size_t iter = 0;
-      while (std::abs(report.sdata().chargingCurr() - elecInput.mag) > 1e-6
-            && iter < 100) {
+      while (std::abs(report.sdata().chargingCurr() - elecInput.mag) > 1e-6) {
+        if (iter >= 100) {
+          throw std::runtime_error("Failed to converge");
+        }
         chgVolt = elecInput.mag
             * (report.sdata().chargingVolt() / report.sdata().chargingCurr());
         report = calculate(chgVolt);

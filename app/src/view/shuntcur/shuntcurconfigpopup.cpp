@@ -10,6 +10,9 @@ SCConfigPopup::SCConfigPopup(QWidget* parent)
   ui->arrComboBox->insertItem(1, "SCL FF");
   ui->arrComboBox->insertItem(2, "SCL FB");
   ui->arrComboBox->insertItem(3, "PCC FB");
+
+  ui->inputComboBox->insertItem(1, "CV Chg");
+  ui->inputComboBox->insertItem(2, "CC Chg");
 }
 
 
@@ -120,6 +123,25 @@ vrfbdriver::ShuntJob SCConfigPopup::getJob() {
   return vrfbdriver::ShuntJob(
       ui->nameField->text().toStdString(),
       calc,
-      ui->chgVoltField->value(),
+      getElecInput(),
       arr);
+}
+
+
+vrfb::shuntcur::ElecInput SCConfigPopup::getElecInput() const {
+  return {
+      static_cast<vrfb::shuntcur::ElecInput::Mode>(ui->inputComboBox->currentIndex()),
+      ui->inputField->value()};
+}
+
+
+void SCConfigPopup::on_inputComboBox_currentIndexChanged(int index) {
+  switch (static_cast<vrfb::shuntcur::ElecInput::Mode>(index)) {
+    case vrfb::shuntcur::ElecInput::Mode::mConstCurr:
+      ui->inputUnitLabel->setText("A");
+      break;
+    case vrfb::shuntcur::ElecInput::Mode::mConstVolt:
+      ui->inputUnitLabel->setText("V");
+      break;
+  }
 }
