@@ -435,3 +435,13 @@ TEST(vrfbShuntCurrPCC, calculateFB) {
   auto actual = calc.calculate(shunttest_pcc::kTestChgVolt);
   checkShuntPerf(actual.data<vrfb::shuntcur::pcc::PCCReport>());
 }
+
+
+TEST(vrfbShuntCurrPCC, calculateConstCurr) {
+  vrfb::shuntcur::pcc::PCCCalc calc {
+      shunttest_pcc::kTestSysParam,
+      vrfb::shuntcur::pcc::PCCCalc::ConnType::ctFB};
+  auto actual = calc.calc(
+      vrfb::shuntcur::ElecInput {vrfb::shuntcur::ElecInput::Mode::mConstCurr, 20.139580222});
+  checkShuntPerf(actual.data<vrfb::shuntcur::pcc::PCCReport>());
+}

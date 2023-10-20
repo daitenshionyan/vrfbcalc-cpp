@@ -152,6 +152,18 @@ comutils::Table calcPerf(const double area, const std::vector<Data>& datas);
 namespace shuntcur {
 
 
+struct ElecInput {
+  enum class Mode {
+    mConstVolt,
+    mConstCurr,
+    mDChg
+  };
+
+  Mode mode;
+  double mag=0;       // Magnitude
+};
+
+
 /**
  * Structure contianing the parameters of the stacks in a system.
 */
@@ -303,6 +315,8 @@ class ShuntReport {
     template<typename T>
     const T& data() const {return *dynamic_cast<T*>(data_p);}
 
+    const ShuntReportData& sdata() const {return *data_p;}
+
 
   private:
     ShuntReportData* data_p;
@@ -331,6 +345,7 @@ class ShuntCalc {
      * @param chgVolt The charging voltage (V).
     */
     virtual ShuntReport calculate(double chgVolt) const = 0;
+    virtual ShuntReport calc(const ElecInput& elecInput) const;
 
 
     virtual SysParam& param() = 0;

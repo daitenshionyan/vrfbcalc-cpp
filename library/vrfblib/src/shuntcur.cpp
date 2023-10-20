@@ -36,6 +36,32 @@ ShuntReport& ShuntReport::operator=(ShuntReport&& o) {
 }
 
 
+ShuntReport ShuntCalc::calc(const ElecInput& elecInput) const {
+  switch (elecInput.mode) {
+    case ElecInput::Mode::mConstVolt: {
+      return calculate(elecInput.mag);
+    }
+    case ElecInput::Mode::mConstCurr: {
+      double chgVolt = param().numStacks*param().numCells
+          * (param().cellR() / param().numLines
+          +  param().ocv());
+      ShuntReport report = calculate(chgVolt);
+      std::size_t iter = 0;
+      while (std::abs(report.sdata().chargingCurr() - elecInput.mag) > 1e-6
+            && iter < 100) {
+        chgVolt = elecInput.mag
+            * (report.sdata().chargingVolt() / report.sdata().chargingCurr());
+        report = calculate(chgVolt);
+        ++iter;
+      }
+      return report;
+    }
+    default:
+      throw std::runtime_error("Unknown input mode");
+  }
+}
+
+
 
 
 
