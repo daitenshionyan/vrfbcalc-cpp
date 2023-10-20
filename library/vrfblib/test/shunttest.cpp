@@ -47,10 +47,19 @@ void checkMatrix(const Eigen::MatrixXd& expected, const Eigen::MatrixXd& actual)
 }
 
 
-void checkShuntPerf(const vrfb::shuntcur::scl::SCLReport& expected, const vrfb::shuntcur::scl::SCLReport& actual) {
-  bool is_same_size = expected.totCells() == actual.totCells();
+void checkShuntPerf(const vrfb::shuntcur::scl::SCLReport& actual,
+      const std::vector<double>& exCurrList,
+      const std::vector<double>& exSSPT, const std::vector<double>& exSSPB,
+      const std::vector<double>& exSSNT, const std::vector<double>& exSSNB,
+      const std::vector<double>& exSMPT, const std::vector<double>& exSMPB,
+      const std::vector<double>& exSMNT, const std::vector<double>& exSMNB,
+      const std::vector<double>& exCSPT, const std::vector<double>& exCSPB,
+      const std::vector<double>& exCSNT, const std::vector<double>& exCSNB,
+      const std::vector<double>& exCMPT, const std::vector<double>& exCMPB,
+      const std::vector<double>& exCMNT, const std::vector<double>& exCMNB) {
+  bool is_same_size = exCurrList.size() == actual.totCells();
   ASSERT_TRUE(is_same_size) << "Wrong size"
-      << " - Expected size: " << expected.totCells()
+      << " - Expected size: " << exCurrList.size()
       << " | Actual size: " << actual.totCells();
 
   bool is_same = true;
@@ -71,116 +80,116 @@ void checkShuntPerf(const vrfb::shuntcur::scl::SCLReport& expected, const vrfb::
   std::stringstream cmpbdiff {};
   std::stringstream cmntdiff {};
   std::stringstream cmnbdiff {};
-  for (std::size_t i = 0; i < expected.totCells(); ++i) {
+  for (std::size_t i = 0; i < exCurrList.size(); ++i) {
     // STACK :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-    if (std::abs(actual.cellCurr(i) - expected.cellCurr(i)) > threshold) {
+    if (std::abs(actual.cellCurr(i) - exCurrList[i]) > threshold) {
       is_same = false;
       celldiff << "At (" << i << ")"
-        << " - Expected: " <<  expected.cellCurr(i)
+        << " - Expected: " <<  exCurrList[i]
         << " | Actual: " << actual.cellCurr(i) << "\n";
     }
 
-    if (std::abs(actual.sptCurr(i) - expected.sptCurr(i)) > threshold) {
+    if (std::abs(actual.ssptCurr(i) - exSSPT[i]) > threshold) {
       is_same = false;
       sptdiff << "At (" << i << ")"
-        << " - Expected: " <<  expected.sptCurr(i)
-        << " | Actual: " << actual.sptCurr(i) << "\n";
+        << " - Expected: " <<  exSSPT[i]
+        << " | Actual: " << actual.ssptCurr(i) << "\n";
     }
-    if (std::abs(actual.spbCurr(i) - expected.spbCurr(i)) > threshold) {
+    if (std::abs(actual.sspbCurr(i) - exSSPB[i]) > threshold) {
       is_same = false;
       spbdiff << "At (" << i << ")"
-        << " - Expected: " <<  expected.spbCurr(i)
-        << " | Actual: " << actual.spbCurr(i) << "\n";
+        << " - Expected: " <<  exSSPB[i]
+        << " | Actual: " << actual.sspbCurr(i) << "\n";
     }
-    if (std::abs(actual.sntCurr(i) - expected.sntCurr(i)) > threshold) {
+    if (std::abs(actual.ssntCurr(i) - exSSNT[i]) > threshold) {
       is_same = false;
       sntdiff << "At (" << i << ")"
-        << " - Expected: " <<  expected.sntCurr(i)
-        << " | Actual: " << actual.sntCurr(i) << "\n";
+        << " - Expected: " <<  exSSNT[i]
+        << " | Actual: " << actual.ssntCurr(i) << "\n";
     }
-    if (std::abs(actual.snbCurr(i) - expected.snbCurr(i)) > threshold) {
+    if (std::abs(actual.ssnbCurr(i) - exSSNB[i]) > threshold) {
       is_same = false;
       snbdiff << "At (" << i << ")"
-        << " - Expected: " <<  expected.snbCurr(i)
-        << " | Actual: " << actual.snbCurr(i) << "\n";
+        << " - Expected: " <<  exSSNB[i]
+        << " | Actual: " << actual.ssnbCurr(i) << "\n";
     }
 
-    if (std::abs(actual.mptCurr(i) - expected.mptCurr(i)) > threshold) {
+    if (std::abs(actual.smptCurr(i) - exSMPT[i]) > threshold) {
       is_same = false;
       mptdiff << "At (" << i << ")"
-        << " - Expected: " <<  expected.mptCurr(i)
-        << " | Actual: " << actual.mptCurr(i) << "\n";
+        << " - Expected: " <<  exSMPT[i]
+        << " | Actual: " << actual.smptCurr(i) << "\n";
     }
-    if (std::abs(actual.mpbCurr(i) - expected.mpbCurr(i)) > threshold) {
+    if (std::abs(actual.smpbCurr(i) - exSMPB[i]) > threshold) {
       is_same = false;
       mpbdiff << "At (" << i << ")"
-        << " - Expected: " <<  expected.mpbCurr(i)
-        << " | Actual: " << actual.mpbCurr(i) << "\n";
+        << " - Expected: " <<  exSMPB[i]
+        << " | Actual: " << actual.smpbCurr(i) << "\n";
     }
-    if (std::abs(actual.mntCurr(i) - expected.mntCurr(i)) > threshold) {
+    if (std::abs(actual.smntCurr(i) - exSMNT[i]) > threshold) {
       is_same = false;
       mntdiff << "At (" << i << ")"
-        << " - Expected: " <<  expected.mntCurr(i)
-        << " | Actual: " << actual.mntCurr(i) << "\n";
+        << " - Expected: " <<  exSMNT[i]
+        << " | Actual: " << actual.smntCurr(i) << "\n";
     }
-    if (std::abs(actual.mnbCurr(i) - expected.mnbCurr(i)) > threshold) {
+    if (std::abs(actual.smnbCurr(i) - exSMNB[i]) > threshold) {
       is_same = false;
       mnbdiff << "At (" << i << ")"
-        << " - Expected: " <<  expected.mnbCurr(i)
-        << " | Actual: " << actual.mnbCurr(i) << "\n";
+        << " - Expected: " <<  exSMNB[i]
+        << " | Actual: " << actual.smnbCurr(i) << "\n";
     }
   }
 
-  for (std::size_t i = 0; i < expected.numStacks(); ++i) {
+  for (std::size_t i = 0; i < exCSPT.size(); ++i) {
   // CONNECTOR :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-    if (std::abs(actual.csptCurr(i) - expected.csptCurr(i)) > threshold) {
+    if (std::abs(actual.csptCurr(i) - exCSPT[i]) > threshold) {
       is_same = false;
       csptdiff << "At (" << i << ")"
-        << " - Expected: " <<  expected.csptCurr(i)
+        << " - Expected: " <<  exCSPT[i]
         << " | Actual: " << actual.csptCurr(i) << "\n";
     }
-    if (std::abs(actual.cspbCurr(i) - expected.cspbCurr(i)) > threshold) {
+    if (std::abs(actual.cspbCurr(i) - exCSPB[i]) > threshold) {
       is_same = false;
       cspbdiff << "At (" << i << ")"
-        << " - Expected: " <<  expected.cspbCurr(i)
+        << " - Expected: " <<  exCSPB[i]
         << " | Actual: " << actual.cspbCurr(i) << "\n";
     }
-    if (std::abs(actual.csntCurr(i) - expected.csntCurr(i)) > threshold) {
+    if (std::abs(actual.csntCurr(i) - exCSNT[i]) > threshold) {
       is_same = false;
       csntdiff << "At (" << i << ")"
-        << " - Expected: " <<  expected.csntCurr(i)
+        << " - Expected: " <<  exCSNT[i]
         << " | Actual: " << actual.csntCurr(i) << "\n";
     }
-    if (std::abs(actual.csnbCurr(i) - expected.csnbCurr(i)) > threshold) {
+    if (std::abs(actual.csnbCurr(i) - exCSNB[i]) > threshold) {
       is_same = false;
       csnbdiff << "At (" << i << ")"
-        << " - Expected: " <<  expected.csnbCurr(i)
+        << " - Expected: " <<  exCSNB[i]
         << " | Actual: " << actual.csnbCurr(i) << "\n";
     }
 
-    if (std::abs(actual.cmptCurr(i) - expected.cmptCurr(i)) > threshold) {
+    if (std::abs(actual.cmptCurr(i) - exCMPT[i]) > threshold) {
       is_same = false;
       cmptdiff << "At (" << i << ")"
-        << " - Expected: " <<  expected.cmptCurr(i)
+        << " - Expected: " <<  exCMPT[i]
         << " | Actual: " << actual.cmptCurr(i) << "\n";
     }
-    if (std::abs(actual.cmpbCurr(i) - expected.cmpbCurr(i)) > threshold) {
+    if (std::abs(actual.cmpbCurr(i) - exCMPB[i]) > threshold) {
       is_same = false;
       cmpbdiff << "At (" << i << ")"
-        << " - Expected: " <<  expected.cmpbCurr(i)
+        << " - Expected: " <<  exCMPB[i]
         << " | Actual: " << actual.cmpbCurr(i) << "\n";
     }
-    if (std::abs(actual.cmntCurr(i) - expected.cmntCurr(i)) > threshold) {
+    if (std::abs(actual.cmntCurr(i) - exCMNT[i]) > threshold) {
       is_same = false;
       cmntdiff << "At (" << i << ")"
-        << " - Expected: " <<  expected.cmntCurr(i)
+        << " - Expected: " <<  exCMNT[i]
         << " | Actual: " << actual.cmntCurr(i) << "\n";
     }
-    if (std::abs(actual.cmnbCurr(i) - expected.cmnbCurr(i)) > threshold) {
+    if (std::abs(actual.cmnbCurr(i) - exCMNB[i]) > threshold) {
       is_same = false;
       cmnbdiff << "At (" << i << ")"
-        << " - Expected: " <<  expected.cmnbCurr(i)
+        << " - Expected: " <<  exCMNB[i]
         << " | Actual: " << actual.cmnbCurr(i) << "\n";
     }
   }
@@ -358,7 +367,12 @@ TEST(vrfbShuntCurrSCL, calculateFF) {
       shunttest::kTestSysParam,
       vrfb::shuntcur::scl::SCLCalc::ConnType::ctFF};
   auto actual = calc.calculate(shunttest::kTestChgVolt);
-  checkShuntPerf(shunttest::kExShuntPerf_5S_FF, actual.data<vrfb::shuntcur::scl::SCLReport>());
+  checkShuntPerf(actual.data<vrfb::shuntcur::scl::SCLReport>(),
+      shunttest::kExCellCurr_FF,
+      shunttest::kExSSPT_FF, shunttest::kExSSPB_FF, shunttest::kExSSNT_FF, shunttest::kExSSNB_FF,
+      shunttest::kExSMPT_FF, shunttest::kExSMPB_FF, shunttest::kExSMNT_FF, shunttest::kExSMNB_FF,
+      shunttest::kExCSPT_FF, shunttest::kExCSPB_FF, shunttest::kExCSNT_FF, shunttest::kExCSNB_FF,
+      shunttest::kExCMPT_FF, shunttest::kExCMPB_FF, shunttest::kExCMNT_FF, shunttest::kExCMNB_FF);
 }
 
 
@@ -367,7 +381,12 @@ TEST(vrfbShuntCurrSCL, calculateFB) {
       shunttest::kTestSysParam,
       vrfb::shuntcur::scl::SCLCalc::ConnType::ctFB};
   auto actual = calc.calculate(shunttest::kTestChgVolt);
-  checkShuntPerf(shunttest::kExShuntPerf_5S_FB, actual.data<vrfb::shuntcur::scl::SCLReport>());
+  checkShuntPerf(actual.data<vrfb::shuntcur::scl::SCLReport>(),
+      shunttest::kExCellCurr_FB,
+      shunttest::kExSSPT_FB, shunttest::kExSSPB_FB, shunttest::kExSSNT_FB, shunttest::kExSSNB_FB,
+      shunttest::kExSMPT_FB, shunttest::kExSMPB_FB, shunttest::kExSMNT_FB, shunttest::kExSMNB_FB,
+      shunttest::kExCSPT_FB, shunttest::kExCSPB_FB, shunttest::kExCSNT_FB, shunttest::kExCSNB_FB,
+      shunttest::kExCMPT_FB, shunttest::kExCMPB_FB, shunttest::kExCMNT_FB, shunttest::kExCMNB_FB);
 }
 
 

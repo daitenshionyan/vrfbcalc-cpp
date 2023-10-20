@@ -39,8 +39,8 @@ bool SCReportPopup::exportImages(logger::Logger& l) {
 
 void SCReportPopup::initSummary(const vrfb::shuntcur::ShuntReportData& r) {
   ui->arrField->setText(QString::fromStdString(r.arrName()));
-  ui->tempField->setText(QString::fromStdString(std::to_string(r.param().temperature() - 273.15)));
-  ui->socField->setText(QString::fromStdString(std::to_string(r.param().soc() * 100)));
+  ui->tempField->setText(QString::fromStdString(std::to_string(r.param().temperature - 273.15)));
+  ui->socField->setText(QString::fromStdString(std::to_string(r.param().soc * 100)));
   ui->chgVoltField->setText(QString::fromStdString(std::to_string(r.chargingVolt())));
   ui->chgCurrField->setText(QString::fromStdString(std::to_string(r.chargingCurr())));
   ui->chgPowrField->setText(QString::fromStdString(std::to_string(r.chargingPowr())));
@@ -95,43 +95,43 @@ SCReportPopup::getPlotConfig<vrfb::shuntcur::scl::SCLReport>() {
       {
         "SPT current",
         IndexingType::itCell,
-        &vrfb::shuntcur::scl::SCLReport::sptCurr
+        &vrfb::shuntcur::scl::SCLReport::ssptCurr
       },
       {
         "SPB current",
         IndexingType::itCell,
-        &vrfb::shuntcur::scl::SCLReport::spbCurr
+        &vrfb::shuntcur::scl::SCLReport::sspbCurr
       },
       {
         "SNT current",
         IndexingType::itCell,
-        &vrfb::shuntcur::scl::SCLReport::sntCurr
+        &vrfb::shuntcur::scl::SCLReport::ssntCurr
       },
       {
         "SNB current",
         IndexingType::itCell,
-        &vrfb::shuntcur::scl::SCLReport::snbCurr
+        &vrfb::shuntcur::scl::SCLReport::ssnbCurr
       },
       // stack manifold ------------------------------------
       {
         "MPT current",
         IndexingType::itCell,
-        &vrfb::shuntcur::scl::SCLReport::mptCurr
+        &vrfb::shuntcur::scl::SCLReport::smptCurr
       },
       {
         "MPB current",
         IndexingType::itCell,
-        &vrfb::shuntcur::scl::SCLReport::mpbCurr
+        &vrfb::shuntcur::scl::SCLReport::smpbCurr
       },
       {
         "MNT current",
         IndexingType::itCell,
-        &vrfb::shuntcur::scl::SCLReport::mntCurr
+        &vrfb::shuntcur::scl::SCLReport::smntCurr
       },
       {
         "MNB current",
         IndexingType::itCell,
-        &vrfb::shuntcur::scl::SCLReport::mnbCurr
+        &vrfb::shuntcur::scl::SCLReport::smnbCurr
       },
       // connector shunts ----------------------------------
       {
