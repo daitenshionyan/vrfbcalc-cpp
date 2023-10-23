@@ -254,7 +254,7 @@ ShuntJob& ShuntJob::operator=(ShuntJob&& o) {
 
 ShuntRes calcShuntPerf(const ShuntJob& j, logger::Logger& l) {
   auto beg = std::chrono::high_resolution_clock::now();
-  vrfb::shuntcur::ShuntReport report = j.calc->calc(j.elecInput);
+  vrfb::shuntcur::ShuntReport report = j.calc->calculate(j.elecInput);
   std::filesystem::path path = std::filesystem::u8path<std::string>("output/" + j.name + ".xlsx");
   SCArrType arrType;
   switch (j.arr) {

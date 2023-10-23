@@ -41,9 +41,10 @@ enum class ConnSide {
  * @param s System parameters.
 */
 inline std::size_t matSize(const SysParam& s) {
-  return s.numLines
-      + 4 * s.numLines * s.numStacks * (s.numCells -1)
-      + 4 * s.numLines * (s.numStacks - 1);
+  return s.numLines                                         // from parallel lines
+      + 4 * s.numLines * s.numStacks * (s.numCells -1)      // from stack loops
+      + 4 * s.numLines * (s.numStacks - 1)                  // from connector loops
+      + 2;                                                  // from charging current and voltage
 }
 
 
@@ -371,7 +372,8 @@ inline Eigen::Index indexCPT<ConnSide::csFront>(const SysParam& s,
   return s.numLines
       + 4*s.numLines*s.numStacks*(s.numCells - 1)
       + li*(s.numStacks - 1)
-      + si - 1;
+      + si - 1
+      + 2;
 }
 
 
@@ -385,7 +387,8 @@ inline Eigen::Index indexCPB<ConnSide::csFront>(const SysParam& s,
       + 4*s.numLines*s.numStacks*(s.numCells - 1)
       + s.numLines*(s.numStacks - 1)
       + li*(s.numStacks - 1)
-      + si;
+      + si
+      + 2;
 }
 
 
@@ -399,7 +402,8 @@ inline Eigen::Index indexCNT<ConnSide::csBack>(const SysParam& s,
       + 4*s.numLines*s.numStacks*(s.numCells - 1)
       + 2*s.numLines*(s.numStacks - 1)
       + li*(s.numStacks - 1)
-      + si;
+      + si
+      + 2;
 }
 
 
@@ -413,7 +417,8 @@ inline Eigen::Index indexCNB<ConnSide::csBack>(const SysParam& s,
       + 4*s.numLines*s.numStacks*(s.numCells - 1)
       + 3*s.numLines*(s.numStacks - 1)
       + li*(s.numStacks - 1)
-      + si - 1;
+      + si - 1
+      + 2;
 }
 
 

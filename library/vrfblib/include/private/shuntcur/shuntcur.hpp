@@ -47,6 +47,16 @@ void addStackLoops(Eigen::MatrixXd& m, const SysParam& s);
 */
 
 
+constexpr Eigen::Index kchgCurrIndex = 0;
+constexpr Eigen::Index kchgVoltIndex = 0;
+
+
+inline Eigen::Index indexLine(const SysParam& s,
+    std::size_t li) {
+  return li + 2;
+}
+
+
 /**
  * Retruns the index of STACK POSITIVE TOP coefficent with the matrix or vector.
  * Returned index is only valid for all cell indexes other than the last within
@@ -62,7 +72,8 @@ inline Eigen::Index indexSPT(const SysParam& s,
   return s.numLines
       + li*s.numStacks*(s.numCells - 1)
       + si*(s.numCells - 1)
-      + ci;
+      + ci
+      + 2;
 }
 
 
@@ -82,7 +93,8 @@ inline Eigen::Index indexSPB(const SysParam& s,
       + s.numLines*s.numStacks*(s.numCells - 1)
       + li*s.numStacks*(s.numCells - 1)
       + si*(s.numCells - 1)
-      + ci;
+      + ci
+      + 2;
 }
 
 
@@ -102,7 +114,8 @@ inline Eigen::Index indexSNT(const SysParam& s,
       + 2*s.numLines*s.numStacks*(s.numCells - 1)
       + li*s.numStacks*(s.numCells - 1)
       + si*(s.numCells - 1)
-      + ci - 1;
+      + ci - 1
+      + 2;
 }
 
 
@@ -122,7 +135,8 @@ inline Eigen::Index indexSNB(const SysParam& s,
       + 3*s.numLines*s.numStacks*(s.numCells - 1)
       + li*s.numStacks*(s.numCells - 1)
       + si*(s.numCells - 1)
-      + ci - 1;
+      + ci - 1
+      + 2;
 }
 
 
@@ -611,7 +625,8 @@ double getStackContri_SSNB(const Eigen::VectorXd& cv, const SysParam& s,
 
 void addStackLoops(Eigen::MatrixXd& m, const SysParam& s) {
   for (std::size_t li = 0; li < s.numLines; ++li) {
-    m(li, li) += s.numCells * s.numStacks * s.cellR();
+    Eigen::Index lci = indexLine(s, li);
+    m(lci, lci) += s.numCells * s.numStacks * s.cellR();
 
     for (std::size_t si = 0; si < s.numStacks; ++si) {
       for (std::size_t ci = 0; ci < s.numCells; ++ci) {
@@ -623,10 +638,10 @@ void addStackLoops(Eigen::MatrixXd& m, const SysParam& s) {
         // :::: [ POSITIVE LOOPS ] ::::
         if (ci+1 < s.numCells) {
           // line contribution
-          m(li, pti) += s.cellR();
-          m(pti, li) += s.cellR();
-          m(li, pbi) += s.cellR();
-          m(pbi, li) += s.cellR();
+          m(lci, pti) += s.cellR();
+          m(pti, lci) += s.cellR();
+          m(lci, pbi) += s.cellR();
+          m(pbi, lci) += s.cellR();
           if (ci > 0) {
             // previous loop contribution
             m(pti, pti-1) -= s.stackShuntR();
@@ -653,10 +668,10 @@ void addStackLoops(Eigen::MatrixXd& m, const SysParam& s) {
         // :::: [ NEGATIVE LOOPS ] ::::
         if (ci > 0) {
           // line contribution
-          m(li, nti) += s.cellR();
-          m(nti, li) += s.cellR();
-          m(li, nbi) += s.cellR();
-          m(nbi, li) += s.cellR();
+          m(lci, nti) += s.cellR();
+          m(nti, lci) += s.cellR();
+          m(lci, nbi) += s.cellR();
+          m(nbi, lci) += s.cellR();
           if (ci > 1) {
             // previous loop contribution
             m(nti, nti-1) -= s.stackShuntR();
