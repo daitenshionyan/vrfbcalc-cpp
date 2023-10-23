@@ -48,7 +48,9 @@ void addStackLoops(Eigen::MatrixXd& m, const SysParam& s);
 
 
 constexpr Eigen::Index kchgCurrIndex = 0;
-constexpr Eigen::Index kchgVoltIndex = 0;
+constexpr Eigen::Index kchgVoltIndex = 1;
+constexpr Eigen::Index kMagRowIndex = 0;
+constexpr Eigen::Index kSumRowIndex = 1;
 
 
 inline Eigen::Index indexLine(const SysParam& s,
