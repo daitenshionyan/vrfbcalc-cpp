@@ -258,13 +258,11 @@ ShuntRes calcShuntPerf(const ShuntJob& j, logger::Logger& l) {
   std::filesystem::path path = std::filesystem::u8path<std::string>("output/" + j.name + ".xlsx");
   SCArrType arrType;
   switch (j.arr) {
-    case SCArrangement::scaSCLFF:
-    case SCArrangement::scaSCLFB:
-      arrType = SCArrType::scatSCL;
-      break;
     case SCArrangement::scaPCCFB:
       arrType = SCArrType::scatPCC;
       break;
+    default:
+      throw std::runtime_error("Unsupported arrangement");
   }
   auto dur = std::chrono::duration_cast<std::chrono::microseconds>(
             std::chrono::high_resolution_clock::now() - beg);
