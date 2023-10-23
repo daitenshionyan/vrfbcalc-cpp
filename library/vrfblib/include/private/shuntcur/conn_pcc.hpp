@@ -73,8 +73,8 @@ void addConnLoops(Eigen::MatrixXd& m, const PCCSysParam& s);
 void addVolt(Eigen::VectorXd& v, const PCCSysParam& s, double chgVolt);
 
 
-template<ConnSide PS, ConnSide NS>
-PCCReport* calculate_pcc(const PCCSysParam& s, double chgVolt);
+template<ElecInput::Mode M, ConnSide PS, ConnSide NS>
+PCCReport* calculate_pcc(const PCCSysParam& s, double mag);
 
 
 
@@ -873,160 +873,96 @@ void addVolt(Eigen::VectorXd& v, const PCCSysParam& s, double chgVolt) {
 
 
 
-/*
-********************************************************************************
-**    PCCReportData class
-********************************************************************************
-*/
-
-
-class PCCReportData {
-  public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
-    PCCReportData() = default;
-    PCCReportData(const PCCReportData&) = default;
-    PCCReportData(PCCReportData&&) = default;
-
-    PCCReportData& operator=(const PCCReportData&) = default;
-    PCCReportData& operator=(PCCReportData&&) = default;
-
-    virtual ~PCCReportData() = default;
-
-
-  public: // ~~~~ accessors ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    virtual const PCCSysParam& param() const = 0;
-
-    virtual double lineCurr(std::size_t i) const = 0;
-    virtual double cellCurr(std::size_t i) const = 0;
-
-    virtual double ssptCurr(std::size_t i) const = 0;
-    virtual double sspbCurr(std::size_t i) const = 0;
-    virtual double ssntCurr(std::size_t i) const = 0;
-    virtual double ssnbCurr(std::size_t i) const = 0;
-
-    virtual double smptCurr(std::size_t i) const = 0;
-    virtual double smpbCurr(std::size_t i) const = 0;
-    virtual double smntCurr(std::size_t i) const = 0;
-    virtual double smnbCurr(std::size_t i) const = 0;
-
-
-  public: // ~~~~ functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    virtual PCCReportData* copy() const = 0;
-};
-
 
 template<ConnSide PS, ConnSide NS>
-class PCCReportData_Impl : public PCCReportData {
+class PCCReport_Impl : PCCReport {
   public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
-    PCCReportData_Impl(const Eigen::VectorXd& currVec, const PCCSysParam& sys)
-        : cv{currVec}, s{sys} {}
-    PCCReportData_Impl(Eigen::VectorXd&& currVec, const PCCSysParam& sys)
-        : cv{std::move(currVec)}, s{sys} {}
+    PCCReport_Impl(const Eigen::VectorXd& rv, const PCCSysParam& sys, double err)
+        : resVec{rv}, s{sys}, error{err} {}
 
-    PCCReportData_Impl() = delete;
-    PCCReportData_Impl(const PCCReportData_Impl&) = default;
-    PCCReportData_Impl(PCCReportData_Impl&&) = default;
+    PCCReport_Impl() = delete;
+    PCCReport_Impl(const PCCReport_Impl&) = default;
+    PCCReport_Impl(PCCReport_Impl&&) = default;
 
-    PCCReportData_Impl& operator=(const PCCReportData_Impl&) = default;
-    PCCReportData_Impl& operator=(PCCReportData_Impl&&) = default;
+    PCCReport_Impl& operator=(const PCCReport_Impl&) = default;
+    PCCReport_Impl& operator=(PCCReport_Impl&&) = default;
 
-    ~PCCReportData_Impl() = default;
+    ~PCCReport_Impl() = default;
 
 
   public: // ~~~~ accessors ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    const PCCSysParam& param() const {
-      return s;
+    double err() const override {return error;}
+    std::string arrName() const override {return getArrName<PS, NS>();}
+    const PCCSysParam& param() const override {return s;}
+
+    double chargingVolt() const {
+      resVec(resVec.rows()-1);
+    }
+
+    double chargingCurr() const {
+      resVec(resVec.rows()-2);
     }
 
 
     double lineCurr(std::size_t i) const override {
-      return cv(i);
+      return resVec(i);
     }
 
     double cellCurr(std::size_t i) const override {
-      return cv(toli(i, s))
-          + getStackContri_Cell(cv, s, i)
-          + getPosConnContri_Cell<PS>(cv, s, i)
-          + getNegConnContri_Cell<NS>(cv, s, i);
+      return resVec(toli(i, s))
+          + getStackContri_Cell(resVec, s, i)
+          + getPosConnContri_Cell<PS>(resVec, s, i)
+          + getNegConnContri_Cell<NS>(resVec, s, i);
     }
 
 
     double ssptCurr(std::size_t i) const override {
-      return getStackContri_SSPT(cv, s, i)
-          + getConnContri_SSPT<PS>(cv, s, i);
+      return getStackContri_SSPT(resVec, s, i)
+          + getConnContri_SSPT<PS>(resVec, s, i);
     }
 
     double sspbCurr(std::size_t i) const override {
-      return getStackContri_SSPB(cv, s, i)
-          + getConnContri_SSPB<PS>(cv, s, i);
+      return getStackContri_SSPB(resVec, s, i)
+          + getConnContri_SSPB<PS>(resVec, s, i);
     }
 
     double ssntCurr(std::size_t i) const override {
-      return getStackContri_SSNT(cv, s, i)
-          + getConnContri_SSNT<NS>(cv, s, i);
+      return getStackContri_SSNT(resVec, s, i)
+          + getConnContri_SSNT<NS>(resVec, s, i);
     }
 
     double ssnbCurr(std::size_t i) const override {
-      return getStackContri_SSNB(cv, s, i)
-          + getConnContri_SSNB<NS>(cv, s, i);
+      return getStackContri_SSNB(resVec, s, i)
+          + getConnContri_SSNB<NS>(resVec, s, i);
     }
 
 
     double smptCurr(std::size_t i) const override {
-      return getCurrMPT(cv, s, i);
+      return getCurrMPT(resVec, s, i);
     }
 
     double smpbCurr(std::size_t i) const override {
-      return getCurrMPB(cv, s, i);
+      return getCurrMPB(resVec, s, i);
     }
 
     double smntCurr(std::size_t i) const override {
-      return getCurrMNT(cv, s, i);
+      return getCurrMNT(resVec, s, i);
     }
 
     double smnbCurr(std::size_t i) const override {
-      return getCurrMNB(cv, s, i);
+      return getCurrMNB(resVec, s, i);
     }
 
 
   public: // ~~~~ functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    PCCReportData_Impl<PS, NS>* copy() const override {
-      return new PCCReportData_Impl<PS, NS>(*this);
-    }
+    PCCReport_Impl* copy() const override {return new PCCReport_Impl(*this);}
 
 
   private: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    Eigen::VectorXd cv;
+    Eigen::VectorXd resVec;
     PCCSysParam s;
+    double error;
 };
-
-
-
-
-
-
-
-
-/*
-********************************************************************************
-**    calculate Definitions
-********************************************************************************
-*/
-
-
-template<ConnSide PS, ConnSide NS>
-PCCReport* calculate_pcc(const PCCSysParam& s, double chgVolt) {
-  std::size_t size = matSize(s);
-  Eigen::MatrixXd rm = Eigen::MatrixXd::Zero(size, size);     // Resistance matrix
-  addStackLoops(rm, s);
-  addConnLoops<PS, NS>(rm, s);
-  Eigen::VectorXd vv = Eigen::VectorXd::Zero(size);           // Voltage vector
-  addVolt(vv, s, chgVolt);
-  Eigen::VectorXd cv = rm.colPivHouseholderQr().solve(vv);    // Current vector
-
-  PCCReportData* data = new PCCReportData_Impl<PS, NS>(cv, s);
-  double error = ((rm*cv) - vv).norm();
-  return new PCCReport(data, chgVolt, getArrName<PS, NS>(), error);
-}
 
 
 }

@@ -238,13 +238,7 @@ class ShuntReportData {
     virtual std::size_t totCells() const {return numLines()*numStacks()*numCells();}
 
     virtual double chargingVolt() const = 0;
-    virtual double chargingCurr() const {
-      double result = 0;
-      for (std::size_t i = 0; i < numLines(); ++i) {
-        result += lineCurr(i);
-      }
-      return result;
-    }
+    virtual double chargingCurr() const = 0;
     virtual double chargingPowr() const {return chargingVolt() * chargingCurr();}
     virtual double overVoltPowr() const {
       double result = 0;
@@ -339,13 +333,7 @@ class ShuntCalc {
     virtual ~ShuntCalc() = default;
 
   public: // ~~~~ functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    /**
-     * Calculates shunt current performance of the specified system.
-     *
-     * @param chgVolt The charging voltage (V).
-    */
-    virtual ShuntReport calculate(double chgVolt) const = 0;
-    virtual ShuntReport calc(const ElecInput& elecInput) const;
+    virtual ShuntReport calculate(const ElecInput& elecInput) const = 0;
 
 
     virtual SysParam& param() = 0;
@@ -418,55 +406,16 @@ struct PCCSysParam : public SysParam {
 };
 
 
-class PCCReportData;
-
-
 class PCCReport : public ShuntReportData {
   public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
-    PCCReport(PCCReportData* d, double cv,
-        const std::string arrName, double err)
-        : data{d}, chgVolt{cv}, arrangementName{arrName}, error{err} {}
+    PCCReport() = default;
+    PCCReport(const PCCReport&) = default;
+    PCCReport(PCCReport&&) = default;
 
-    PCCReport() = delete;
-    PCCReport(const PCCReport&);
-    PCCReport(PCCReport&&);
+    PCCReport& operator=(const PCCReport&) = default;
+    PCCReport& operator=(PCCReport&&) = default;
 
-    PCCReport& operator=(const PCCReport&);
-    PCCReport& operator=(PCCReport&&);
-
-    ~PCCReport() override;
-
-
-  public: // ~~~~ accessors ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    double err() const override {return error;}
-    std::string arrName() const override {return arrangementName;}
-    const PCCSysParam& param() const override;
-
-    double chargingVolt() const override {return chgVolt;}
-
-    double lineCurr(std::size_t i) const override;
-    double cellCurr(std::size_t i) const override;
-
-    double ssptCurr(std::size_t i) const override;
-    double sspbCurr(std::size_t i) const override;
-    double ssntCurr(std::size_t i) const override;
-    double ssnbCurr(std::size_t i) const override;
-
-    double smptCurr(std::size_t i) const override;
-    double smpbCurr(std::size_t i) const override;
-    double smntCurr(std::size_t i) const override;
-    double smnbCurr(std::size_t i) const override;
-
-
-  public: // ~~~~ functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    PCCReport* copy() const override {return new PCCReport(*this);}
-
-
-  private: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    PCCReportData* data;
-    std::string arrangementName;
-    double chgVolt;
-    double error;
+    ~PCCReport() override = default;
 };
 
 
@@ -494,7 +443,7 @@ class PCCCalc : public ShuntCalc {
 
 
   public: // ~~~~ functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    ShuntReport calculate(double chgVolt) const override;
+    ShuntReport calculate(const ElecInput& elecInput) const override;
 
     PCCSysParam& param() override {return sys;}
     const PCCSysParam& param() const override {return sys;}
