@@ -162,3 +162,12 @@ TEST(vrfbShuntCurrPCC, addStackLoops) {
   vrfb::shuntcur::addStackLoops(actual, shunttest_pcc::kTestSysParam);
   checkMatrix(shunttest_pcc::kExResistMat_NoConn, actual);
 }
+
+
+TEST(vrfbShuntCurrPCC, addConnLoopsFB) {
+  Eigen::MatrixXd actual = Eigen::MatrixXd::Zero(175, 175);
+  vrfb::shuntcur::pcc::addConnLoops
+      <vrfb::shuntcur::pcc::ConnSide::csFront, vrfb::shuntcur::pcc::ConnSide::csBack>
+      (actual, shunttest_pcc::kTestSysParam);
+  checkMatrix(shunttest_pcc::kExResistMat_WithConn, actual);
+}
