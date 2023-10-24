@@ -589,6 +589,7 @@ void addConnLoops<ConnSide::csFront, ConnSide::csBack>(Eigen::MatrixXd& m, const
   double stackR = s.numCells*s.cellR() + 2*s.stackShuntR() + 2*s.connSubShuntR();
 
   for (std::size_t li = 0; li < s.numLines; ++li) {
+    Eigen::Index lci = indexLine(s, li);
     double fullConnShuntR = (s.numLines-li-1)*s.connSubManiR() + s.connMainShuntR();
 
     for (std::size_t si = 0; si < s.numStacks; ++ si) {
@@ -600,8 +601,8 @@ void addConnLoops<ConnSide::csFront, ConnSide::csBack>(Eigen::MatrixXd& m, const
       if (si > 0) {
         // :::: [ POSITIVE TOP CONN ] ::::
         // >>> LINE
-        m(cpti, li) += s.numCells * s.cellR();
-        m(li, cpti) += s.numCells * s.cellR();
+        m(cpti, lci) += s.numCells * s.cellR();
+        m(lci, cpti) += s.numCells * s.cellR();
         // >>> POSITIVE BOT CONN
         m(cpti, cpbi-1) += s.cellR();
         if (si+1 < s.numStacks) {
@@ -620,8 +621,8 @@ void addConnLoops<ConnSide::csFront, ConnSide::csBack>(Eigen::MatrixXd& m, const
 
         // :::: [ NEGATIVE BOTTOM CONN ] ::::
         // >>> LINE
-        m(cnbi, li) += s.numCells * s.cellR();
-        m(li, cnbi) += s.numCells * s.cellR();
+        m(cnbi, lci) += s.numCells * s.cellR();
+        m(lci, cnbi) += s.numCells * s.cellR();
         // >>> POSITIVE TOP CONN
         m(cnbi, cpti) += (s.numCells-1) * s.cellR();
         if (si+1 < s.numStacks) {
@@ -664,8 +665,8 @@ void addConnLoops<ConnSide::csFront, ConnSide::csBack>(Eigen::MatrixXd& m, const
       if (si+1 < s.numStacks) {
         // :::: [ POSITIVE BOT CONN ] ::::
         // >>> MAIN LOOP
-        m(cpbi, li) += s.numCells * s.cellR();
-        m(li, cpbi) += s.numCells * s.cellR();
+        m(cpbi, lci) += s.numCells * s.cellR();
+        m(lci, cpbi) += s.numCells * s.cellR();
         // >>> POSITIVE TOP CONN
         m(cpbi, cpti+1) += s.cellR();
         if (si > 0) {
@@ -683,8 +684,8 @@ void addConnLoops<ConnSide::csFront, ConnSide::csBack>(Eigen::MatrixXd& m, const
 
         // :::: [ NEGATIVE TOP CONN ] ::::
         // >>> MAIN LOOP
-        m(cnti, li) += s.numCells * s.cellR();
-        m(li, cnti) += s.numCells * s.cellR();
+        m(cnti, lci) += s.numCells * s.cellR();
+        m(lci, cnti) += s.numCells * s.cellR();
         // >>> POSITIVE TOP CONN
         m(cnti, cpti+1) += 2*s.cellR();
         if (si > 0) {
@@ -901,11 +902,11 @@ class PCCReport_Impl : PCCReport {
     const PCCSysParam& param() const override {return s;}
 
     double chargingVolt() const {
-      resVec(resVec.rows()-1);
+      resVec(kchgVoltIndex);
     }
 
     double chargingCurr() const {
-      resVec(resVec.rows()-2);
+      resVec(kchgCurrIndex);
     }
 
 

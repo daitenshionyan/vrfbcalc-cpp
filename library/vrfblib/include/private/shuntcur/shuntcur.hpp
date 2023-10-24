@@ -24,7 +24,7 @@ namespace shuntcur {
 
 
 template<ElecInput::Mode M>
-void addGovEqn(Eigen::MatrixXd& m, const SysParam& s, double mag);
+void addGovEqn(Eigen::MatrixXd& m, const SysParam& s);
 
 
 /**
@@ -36,6 +36,9 @@ void addGovEqn(Eigen::MatrixXd& m, const SysParam& s, double mag);
  * @param s System parameter.
 */
 void addStackLoops(Eigen::MatrixXd& m, const SysParam& s);
+
+
+void addStackLoops_V(Eigen::VectorXd& v, const SysParam& s, double mag);
 
 
 
@@ -630,8 +633,18 @@ double getStackContri_SSNB(const Eigen::VectorXd& cv, const SysParam& s,
 
 
 template<>
-void addGovEqn<ElecInput::Mode::mConstVolt>(Eigen::MatrixXd& m, const SysParam& s, double mag) {
+void addGovEqn<ElecInput::Mode::mConstVolt>(Eigen::MatrixXd& m, const SysParam& s) {
   m(kMagRowIndex, kchgVoltIndex) = 1;
+  m(kSumRowIndex, kchgCurrIndex) = 1;
+  for (std::size_t li = 0; li < s.numLines; ++li) {
+    m(kSumRowIndex, indexLine(s, li)) = -1;
+  }
+}
+
+
+template<>
+void addGovEqn<ElecInput::Mode::mConstCurr>(Eigen::MatrixXd& m, const SysParam& s) {
+  m(kMagRowIndex, kchgCurrIndex) = 1;
   m(kSumRowIndex, kchgCurrIndex) = 1;
   for (std::size_t li = 0; li < s.numLines; ++li) {
     m(kSumRowIndex, indexLine(s, li)) = -1;
@@ -654,10 +667,10 @@ void addGovEqn<ElecInput::Mode::mConstVolt>(Eigen::MatrixXd& m, const SysParam& 
 
 
 void addStackLoops(Eigen::MatrixXd& m, const SysParam& s) {
-  m(indexLine(s, 0), kchgVoltIndex) = -1;
   for (std::size_t li = 0; li < s.numLines; ++li) {
     Eigen::Index lci = indexLine(s, li);
     m(lci, lci) += s.numCells * s.numStacks * s.cellR();
+    m(lci, kchgVoltIndex) -= 1;
 
     for (std::size_t si = 0; si < s.numStacks; ++si) {
       for (std::size_t ci = 0; ci < s.numCells; ++ci) {
@@ -724,6 +737,41 @@ void addStackLoops(Eigen::MatrixXd& m, const SysParam& s) {
             m(nbi, pti) += s.cellR();
             m(nbi, pbi) += s.cellR();
           }
+        }
+      }
+    }
+  }
+}
+
+
+
+
+
+
+
+
+
+/*
+********************************************************************************
+**    addStackLoops_V Definition
+********************************************************************************
+*/
+
+
+void addStackLoops_V(Eigen::VectorXd& v, const SysParam& s, double mag) {
+  v(kMagRowIndex) += mag;
+  for (std::size_t li = 0; li < s.numLines; ++li) {
+    for (std::size_t si = 0; si < s.numLines; ++si) {
+      for (std::size_t ci = 0; ci < s.numCells; ++ci) {
+        if (ci+1 < s.numStacks) {
+          // positive cell loops
+          v(indexSPT(s, ci, si, li)) -= s.ocv();
+          v(indexSPB(s, ci, si, li)) -= s.ocv();
+        }
+        if (ci > 0) {
+          // negative cell loops
+          v(indexSNT(s, ci, si, li)) -= s.ocv();
+          v(indexSNB(s, ci, si, li)) -= s.ocv();
         }
       }
     }

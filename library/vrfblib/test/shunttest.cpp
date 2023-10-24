@@ -165,7 +165,8 @@ TEST(vrfbShuntCurrPCC, addStackLoops) {
 
 
 TEST(vrfbShuntCurrPCC, addConnLoopsFB) {
-  Eigen::MatrixXd actual = Eigen::MatrixXd::Zero(175, 175);
+  Eigen::MatrixXd actual = Eigen::MatrixXd::Zero(173, 173);
+  vrfb::shuntcur::addStackLoops(actual, shunttest_pcc::kTestSysParam);
   vrfb::shuntcur::pcc::addConnLoops
       <vrfb::shuntcur::pcc::ConnSide::csFront, vrfb::shuntcur::pcc::ConnSide::csBack>
       (actual, shunttest_pcc::kTestSysParam);
