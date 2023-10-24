@@ -38,7 +38,7 @@ void addGovEqn(Eigen::MatrixXd& m, const SysParam& s);
 void addStackLoops(Eigen::MatrixXd& m, const SysParam& s);
 
 
-void addStackLoops_V(Eigen::VectorXd& v, const SysParam& s, double mag);
+void addStackLoops(Eigen::VectorXd& v, const SysParam& s, double mag);
 
 
 
@@ -753,17 +753,17 @@ void addStackLoops(Eigen::MatrixXd& m, const SysParam& s) {
 
 /*
 ********************************************************************************
-**    addStackLoops_V Definition
+**    addStackLoops Definition
 ********************************************************************************
 */
 
 
-void addStackLoops_V(Eigen::VectorXd& v, const SysParam& s, double mag) {
+void addStackLoops(Eigen::VectorXd& v, const SysParam& s, double mag) {
   v(kMagRowIndex) += mag;
   for (std::size_t li = 0; li < s.numLines; ++li) {
     for (std::size_t si = 0; si < s.numLines; ++si) {
       for (std::size_t ci = 0; ci < s.numCells; ++ci) {
-        if (ci+1 < s.numStacks) {
+        if (ci+1 < s.numCells) {
           // positive cell loops
           v(indexSPT(s, ci, si, li)) -= s.ocv();
           v(indexSPB(s, ci, si, li)) -= s.ocv();
