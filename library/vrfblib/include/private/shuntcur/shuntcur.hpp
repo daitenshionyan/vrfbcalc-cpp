@@ -23,6 +23,10 @@ namespace vrfb {
 namespace shuntcur {
 
 
+template<ElecInput::Mode M>
+void addGovEqn(Eigen::MatrixXd& m, const SysParam& s, double mag);
+
+
 /**
  * Adds stack and parallel line loop contribution to the given resistance
  * matrix. The size of the given resistance matrix will have to be at least an
@@ -620,12 +624,37 @@ double getStackContri_SSNB(const Eigen::VectorXd& cv, const SysParam& s,
 
 /*
 ********************************************************************************
+**    addGovEqn Definition
+********************************************************************************
+*/
+
+
+template<>
+void addGovEqn<ElecInput::Mode::mConstVolt>(Eigen::MatrixXd& m, const SysParam& s, double mag) {
+  m(kMagRowIndex, kchgVoltIndex) = 1;
+  m(kSumRowIndex, kchgCurrIndex) = 1;
+  for (std::size_t li = 0; li < s.numLines; ++li) {
+    m(kSumRowIndex, indexLine(s, li)) = -1;
+  }
+}
+
+
+
+
+
+
+
+
+
+/*
+********************************************************************************
 **    addStackLoops Definition
 ********************************************************************************
 */
 
 
 void addStackLoops(Eigen::MatrixXd& m, const SysParam& s) {
+  m(indexLine(s, 0), kchgVoltIndex) = -1;
   for (std::size_t li = 0; li < s.numLines; ++li) {
     Eigen::Index lci = indexLine(s, li);
     m(lci, lci) += s.numCells * s.numStacks * s.cellR();
