@@ -62,6 +62,12 @@ void checkShuntPerf(const vrfb::shuntcur::pcc::PCCReport& actual) {
         << " - Expected: " << shunttest_pcc::kTestChgCurr
         << " | Actual: " << actual.chargingCurr() << "\n";
   }
+  if (std::abs(actual.chargingVolt() - shunttest_pcc::kTestChgVolt) > threshold) {
+    is_same = false;
+    miscdiff << "Charging voltage"
+        << " - Expected: " << shunttest_pcc::kTestChgVolt
+        << " | Actual: " << actual.chargingVolt() << "\n";
+  }
   std::stringstream celldiff {};
   std::stringstream sptdiff {};
   std::stringstream spbdiff {};
@@ -190,5 +196,15 @@ TEST(vrfbShuntCurrPCC, calculateCVFB) {
       vrfb::shuntcur::pcc::PCCCalc::ConnType::ctFB};
   vrfb::shuntcur::ShuntReport actual = calc.calculate(
       shunttest_pcc::kTestCVInput);
+  checkShuntPerf(actual.data<vrfb::shuntcur::pcc::PCCReport>());
+}
+
+
+TEST(vrfbShuntCurrPCC, calculateCCFB) {
+  vrfb::shuntcur::pcc::PCCCalc calc {
+      shunttest_pcc::kTestSysParam,
+      vrfb::shuntcur::pcc::PCCCalc::ConnType::ctFB};
+  vrfb::shuntcur::ShuntReport actual = calc.calculate(
+        shunttest_pcc::kTestCCInput);
   checkShuntPerf(actual.data<vrfb::shuntcur::pcc::PCCReport>());
 }

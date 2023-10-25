@@ -75,17 +75,33 @@ namespace pcc {
 */
 
 
+namespace {
 
+
+template<ElecInput::Mode M>
+ShuntReport calculate_modeImpl(PCCCalc::ConnType ct, const PCCSysParam& sys, double mag) {
+  switch (ct) {
+    case PCCCalc::ConnType::ctFB:
+      return calculate_pcc
+          <M, ConnSide::csFront, ConnSide::csBack>
+          (sys, mag);
+    default:
+      throw std::runtime_error("Unknown connection type");
+  }
+}
+
+
+}
 
 
 ShuntReport PCCCalc::calculate(const ElecInput& input) const {
-  switch (connType) {
-    case ConnType::ctFB:
-      return calculate_pcc
-          <ElecInput::Mode::mConstVolt, ConnSide::csFront, ConnSide::csBack>
-          (sys, input.mag);
-    default:
-      throw std::runtime_error("Unknown connection type");
+  switch (input.mode) {
+    case ElecInput::Mode::mConstVolt:
+      return calculate_modeImpl<ElecInput::Mode::mConstVolt>(
+          connType, sys, input.mag);
+    case ElecInput::Mode::mConstCurr:
+      return calculate_modeImpl<ElecInput::Mode::mConstCurr>(
+          connType, sys, input.mag);
   }
 }
 
