@@ -56,10 +56,10 @@ void checkShuntPerf(const vrfb::shuntcur::pcc::PCCReport& actual) {
 
   bool is_same = true;
   std::stringstream miscdiff {};
-  if (std::abs(actual.chargingCurr() - shunttest_pcc::kExChgCurr) > threshold) {
+  if (std::abs(actual.chargingCurr() - shunttest_pcc::kTestChgCurr) > threshold) {
     is_same = false;
     miscdiff << "Charging current"
-        << " - Expected: " << shunttest_pcc::kExChgCurr
+        << " - Expected: " << shunttest_pcc::kTestChgCurr
         << " | Actual: " << actual.chargingCurr() << "\n";
   }
   std::stringstream celldiff {};
@@ -170,7 +170,7 @@ TEST(vrfbShuntCurrPCC, addConnLoopsFB) {
   vrfb::shuntcur::pcc::addConnCoeff
       <vrfb::shuntcur::pcc::ConnSide::csFront, vrfb::shuntcur::pcc::ConnSide::csBack>
       (actual, shunttest_pcc::kTestSysParam);
-  checkMatrix(shunttest_pcc::kExResistMat_WithConn, actual);
+  checkMatrix(shunttest_pcc::kExLHSMat_WithConn, actual);
 }
 
 
@@ -184,12 +184,11 @@ TEST(vrfbShuntCurrPCC, addConnValue) {
 }
 
 
-TEST(vrfbShuntCurrPCC, calculateFB) {
+TEST(vrfbShuntCurrPCC, calculateCVFB) {
   vrfb::shuntcur::pcc::PCCCalc calc {
       shunttest_pcc::kTestSysParam,
       vrfb::shuntcur::pcc::PCCCalc::ConnType::ctFB};
-  vrfb::shuntcur::ShuntReport actual = calc.calculate({
-      vrfb::shuntcur::ElecInput::Mode::mConstVolt,
-      shunttest_pcc::kTestChgVolt});
+  vrfb::shuntcur::ShuntReport actual = calc.calculate(
+      shunttest_pcc::kTestCVInput);
   checkShuntPerf(actual.data<vrfb::shuntcur::pcc::PCCReport>());
 }
