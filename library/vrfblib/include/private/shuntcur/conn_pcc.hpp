@@ -5,6 +5,8 @@
 #include "vrfblib/vrfblib.hpp"
 #include "shuntcur/shuntcur.hpp"
 
+#include <fstream>
+
 
 /*
 ================================================================================
@@ -857,7 +859,7 @@ void addConnLoops(Eigen::VectorXd& v, const PCCSysParam& s) {
 
 
 template<ConnSide PS, ConnSide NS>
-class PCCReport_Impl : PCCReport {
+class PCCReport_Impl : public PCCReport {
   public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
     PCCReport_Impl(const Eigen::VectorXd& rv, const PCCSysParam& sys, double err)
         : resVec{rv}, s{sys}, error{err} {}
@@ -878,20 +880,20 @@ class PCCReport_Impl : PCCReport {
     const PCCSysParam& param() const override {return s;}
 
     double chargingVolt() const {
-      resVec(kchgVoltIndex);
+      return resVec(kchgVoltIndex);
     }
 
     double chargingCurr() const {
-      resVec(kchgCurrIndex);
+      return resVec(kchgCurrIndex);
     }
 
 
     double lineCurr(std::size_t i) const override {
-      return resVec(i);
+      return resVec(indexLine(s, toli(i, s)));
     }
 
     double cellCurr(std::size_t i) const override {
-      return resVec(toli(i, s))
+      return resVec(indexLine(s, toli(i, s)))
           + getStackContri_Cell(resVec, s, i)
           + getPosConnContri_Cell<PS>(resVec, s, i)
           + getNegConnContri_Cell<NS>(resVec, s, i);
@@ -945,6 +947,43 @@ class PCCReport_Impl : PCCReport {
     PCCSysParam s;
     double error;
 };
+
+
+
+
+
+
+
+
+/*
+********************************************************************************
+**    addVolt Definitions
+********************************************************************************
+*/
+
+
+template<ElecInput::Mode M, ConnSide PS, ConnSide NS>
+PCCReport* calculate_pcc(const PCCSysParam& s, double mag) {
+  std::size_t size = matSize(s);
+  Eigen::MatrixXd rm = Eigen::MatrixXd::Zero(size, size);
+  addGovEqn<M>(rm, s);
+  addStackLoops(rm, s);
+  addConnLoops<PS, NS>(rm, s);
+  Eigen::VectorXd vv = Eigen::VectorXd::Zero(size);
+  addStackLoops(vv, s, mag);
+  addConnLoops(vv, s);
+  Eigen::VectorXd resVec = rm.colPivHouseholderQr().solve(vv);
+
+  std::ofstream ifs_rm {"RM.txt"};
+  std::ofstream ifs_vv {"VV.txt"};
+  std::ofstream ifs_rv {"RV.txt"};
+  ifs_rm << rm << std::endl;
+  ifs_vv << vv << std::endl;
+  ifs_rv << resVec << std::endl;
+
+  double error = ((rm*resVec) - vv).norm();
+  return new PCCReport_Impl<PS, NS>(resVec, s, error);
+}
 
 
 }

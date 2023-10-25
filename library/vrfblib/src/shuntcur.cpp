@@ -80,6 +80,10 @@ namespace pcc {
 
 ShuntReport PCCCalc::calculate(const ElecInput& input) const {
   switch (connType) {
+    case ConnType::ctFB:
+      return calculate_pcc
+          <ElecInput::Mode::mConstVolt, ConnSide::csFront, ConnSide::csBack>
+          (sys, input.mag);
     default:
       throw std::runtime_error("Unknown connection type");
   }

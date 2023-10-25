@@ -761,7 +761,8 @@ void addStackLoops(Eigen::MatrixXd& m, const SysParam& s) {
 void addStackLoops(Eigen::VectorXd& v, const SysParam& s, double mag) {
   v(kMagRowIndex) += mag;
   for (std::size_t li = 0; li < s.numLines; ++li) {
-    for (std::size_t si = 0; si < s.numLines; ++si) {
+    v(indexLine(s, li)) -= s.numStacks*s.numCells*s.ocv();
+    for (std::size_t si = 0; si < s.numStacks; ++si) {
       for (std::size_t ci = 0; ci < s.numCells; ++ci) {
         if (ci+1 < s.numCells) {
           // positive cell loops

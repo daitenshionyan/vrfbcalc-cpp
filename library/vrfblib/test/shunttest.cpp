@@ -182,3 +182,14 @@ TEST(vrfbShuntCurrPCC, addConnLoops) {
       actual, shunttest_pcc::kTestSysParam);
   checkMatrix(shunttest_pcc::kExRHSVector, actual);
 }
+
+
+TEST(vrfbShuntCurrPCC, calculateFB) {
+  vrfb::shuntcur::pcc::PCCCalc calc {
+      shunttest_pcc::kTestSysParam,
+      vrfb::shuntcur::pcc::PCCCalc::ConnType::ctFB};
+  vrfb::shuntcur::ShuntReport actual = calc.calculate({
+      vrfb::shuntcur::ElecInput::Mode::mConstVolt,
+      shunttest_pcc::kTestChgVolt});
+  checkShuntPerf(actual.data<vrfb::shuntcur::pcc::PCCReport>());
+}
