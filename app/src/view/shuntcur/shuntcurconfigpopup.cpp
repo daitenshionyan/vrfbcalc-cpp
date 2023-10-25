@@ -7,9 +7,7 @@
 SCConfigPopup::SCConfigPopup(QWidget* parent)
     : QDialog(parent), ui(new Ui::SCConfigPopup) {
   ui->setupUi(this);
-  ui->arrComboBox->insertItem(1, "SCL FF");
-  ui->arrComboBox->insertItem(2, "SCL FB");
-  ui->arrComboBox->insertItem(3, "PCC FB");
+  ui->arrComboBox->insertItem(1, "PCC FB");
 
   ui->inputComboBox->insertItem(1, "CV Chg");
   ui->inputComboBox->insertItem(2, "CC Chg");
@@ -38,58 +36,6 @@ vrfbdriver::ShuntJob SCConfigPopup::getJob() {
   vrfbdriver::SCArrangement arr = static_cast<vrfbdriver::SCArrangement>(ui->arrComboBox->currentIndex());
   vrfb::shuntcur::ShuntCalc* calc = nullptr;
   switch (arr) {
-    case vrfbdriver::SCArrangement::scaSCLFF:
-      calc = new vrfb::shuntcur::scl::SCLCalc(
-          vrfb::shuntcur::scl::SCLSysParam {
-              vrfb::shuntcur::SysParam {
-                  vrfb::shuntcur::StackParam {
-                        ui->asrField->value() / 10000,
-                        ui->cellAreaField->value() / 10000,
-                        ui->shuntLenField->value() / 100,
-                        ui->shuntAreaField->value() / 10000,
-                        ui->maniLenField->value() / 100,
-                        ui->maniAreaField->value() / 10000},
-                  ui->resistivityField->value(),
-                  ui->maxChgDenField->value() * 10,
-                  (std::size_t) ui->numCellField->value(),
-                  (std::size_t) ui->numStackField->value(),
-                  1,
-                  ui->socField->value() / 100,
-                  ui->tempField->value() + 273.15},
-              vrfb::shuntcur::scl::ConnParam {
-                  ui->connShuntLenField->value() / 100,
-                  ui->connShuntAreaField->value() / 10000,
-                  ui->connManiLenField->value() / 100,
-                  ui->connManiAreaField->value() / 10000}},
-          vrfb::shuntcur::scl::SCLCalc::ConnType::ctFF
-      );
-      break;
-    case vrfbdriver::SCArrangement::scaSCLFB:
-      calc = new vrfb::shuntcur::scl::SCLCalc(
-          vrfb::shuntcur::scl::SCLSysParam {
-              vrfb::shuntcur::SysParam {
-                  vrfb::shuntcur::StackParam {
-                        ui->asrField->value() / 10000,
-                        ui->cellAreaField->value() / 10000,
-                        ui->shuntLenField->value() / 100,
-                        ui->shuntAreaField->value() / 10000,
-                        ui->maniLenField->value() / 100,
-                        ui->maniAreaField->value() / 10000},
-                  ui->resistivityField->value(),
-                  ui->maxChgDenField->value() * 10,
-                  (std::size_t) ui->numCellField->value(),
-                  (std::size_t) ui->numStackField->value(),
-                  1,
-                  ui->socField->value() / 100,
-                  ui->tempField->value() + 273.15},
-              vrfb::shuntcur::scl::ConnParam {
-                  ui->connShuntLenField->value() / 100,
-                  ui->connShuntAreaField->value() / 10000,
-                  ui->connManiLenField->value() / 100,
-                  ui->connManiAreaField->value() / 10000}},
-          vrfb::shuntcur::scl::SCLCalc::ConnType::ctFB
-      );
-      break;
     case vrfbdriver::SCArrangement::scaPCCFB:
       calc = new vrfb::shuntcur::pcc::PCCCalc(
           vrfb::shuntcur::pcc::PCCSysParam {
@@ -119,6 +65,8 @@ vrfbdriver::ShuntJob SCConfigPopup::getJob() {
                   ui->mConnManiAreaField->value() / 10000}},
           vrfb::shuntcur::pcc::PCCCalc::ConnType::ctFB);
       break;
+    default:
+      throw std::runtime_error("Unsupported arrangement");
   }
   return vrfbdriver::ShuntJob(
       ui->nameField->text().toStdString(),

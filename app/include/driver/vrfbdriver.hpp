@@ -52,25 +52,22 @@ std::vector<PerformanceEntry_CE> readPerformance_CE(const std::vector<std::strin
 
 
 enum class SCArrangement {
-  scaSCLFF = 0,
-  scaSCLFB,
-  scaPCCFB
+  scaPCCFB=0
 };
 
 
 enum class SCArrType {
-  scatSCL = 0,
-  scatPCC
+  scatPCC=0
 };
 
 
 struct ShuntJob {
   ShuntJob(const std::string&, const vrfb::shuntcur::ShuntCalc&,
       const vrfb::shuntcur::ElecInput&,
-      SCArrangement a = SCArrangement::scaSCLFB);
+      SCArrangement);
   ShuntJob(const std::string&, vrfb::shuntcur::ShuntCalc*,
       const vrfb::shuntcur::ElecInput&,
-      SCArrangement a = SCArrangement::scaSCLFB);
+      SCArrangement);
 
   ShuntJob(const ShuntJob&);
   ShuntJob(ShuntJob&&);
