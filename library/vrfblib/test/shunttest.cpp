@@ -157,28 +157,28 @@ void checkShuntPerf(const vrfb::shuntcur::pcc::PCCReport& actual) {
 */
 
 
-TEST(vrfbShuntCurrPCC, addStackLoops) {
+TEST(vrfbShuntCurrPCC, addStackCoeff) {
   Eigen::MatrixXd actual = Eigen::MatrixXd::Zero(149, 149);
-  vrfb::shuntcur::addStackLoops(actual, shunttest_pcc::kTestSysParam);
+  vrfb::shuntcur::addStackCoeff(actual, shunttest_pcc::kTestSysParam);
   checkMatrix(shunttest_pcc::kExResistMat_NoConn, actual);
 }
 
 
 TEST(vrfbShuntCurrPCC, addConnLoopsFB) {
   Eigen::MatrixXd actual = Eigen::MatrixXd::Zero(173, 173);
-  vrfb::shuntcur::addStackLoops(actual, shunttest_pcc::kTestSysParam);
-  vrfb::shuntcur::pcc::addConnLoops
+  vrfb::shuntcur::addStackCoeff(actual, shunttest_pcc::kTestSysParam);
+  vrfb::shuntcur::pcc::addConnCoeff
       <vrfb::shuntcur::pcc::ConnSide::csFront, vrfb::shuntcur::pcc::ConnSide::csBack>
       (actual, shunttest_pcc::kTestSysParam);
   checkMatrix(shunttest_pcc::kExResistMat_WithConn, actual);
 }
 
 
-TEST(vrfbShuntCurrPCC, addConnLoops) {
+TEST(vrfbShuntCurrPCC, addConnValue) {
   Eigen::VectorXd actual = Eigen::VectorXd::Zero(173);
-  vrfb::shuntcur::addStackLoops(
+  vrfb::shuntcur::addStackValue(
       actual, shunttest_pcc::kTestSysParam, shunttest_pcc::kTestChgVolt);
-  vrfb::shuntcur::pcc::addConnLoops(
+  vrfb::shuntcur::pcc::addConnValue(
       actual, shunttest_pcc::kTestSysParam);
   checkMatrix(shunttest_pcc::kExRHSVector, actual);
 }

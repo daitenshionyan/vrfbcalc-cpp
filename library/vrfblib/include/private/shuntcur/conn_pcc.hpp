@@ -5,8 +5,6 @@
 #include "vrfblib/vrfblib.hpp"
 #include "shuntcur/shuntcur.hpp"
 
-#include <fstream>
-
 
 /*
 ================================================================================
@@ -51,22 +49,36 @@ inline std::size_t matSize(const SysParam& s) {
 
 
 /**
- * Adds stack connector loop contributions coefficients to the given matrix. The
- * size of the given matrix will have to be at least an N by N matrix where
- * `N = pcc::matSize(s)`.
+ * Adds the LHS coefficients of loop equations, for connectors, to the given
+ * matrix.
  *
- * @param <PS> Positive side connection side.
- * @param <NS> Negative side connection side.
- * @param m Matrix to add connector contribution coefficients to.
- * @param s SCL system parameter.
+ * @param <PS> Positive electrolyte input side.
+ * @param <NS> Negative electrolyte input side.
+ * @param m LHS matrix.
+ * @param s PCC system paramter.
 */
 template<ConnSide PS, ConnSide NS>
-void addConnLoops(Eigen::MatrixXd& m, const PCCSysParam& s);
+void addConnCoeff(Eigen::MatrixXd& m, const PCCSysParam& s);
 
 
-void addConnLoops(Eigen::VectorXd& v, const PCCSysParam& s);
+/**
+ * Adds the RHS value of loop equations, for connectors, to the given matrix.
+ *
+ * @param v RHS vector.
+ * @param s PCC system parameter.
+*/
+void addConnValue(Eigen::VectorXd& v, const PCCSysParam& s);
 
 
+/**
+ * Calculates the shunt performance for a PCC system.
+ *
+ * @param <M> Electrical input mode.
+ * @param <PS> Positive electrolyte input side.
+ * @param <NS> Negative electrolyte input side.
+ * @param s PCC system parameters.
+ * @param mag Input magnitude.
+*/
 template<ElecInput::Mode M, ConnSide PS, ConnSide NS>
 PCCReport* calculate_pcc(const PCCSysParam& s, double mag);
 
@@ -84,22 +96,54 @@ PCCReport* calculate_pcc(const PCCSysParam& s, double mag);
 */
 
 
-template<ConnSide>
+/**
+ * Returns the index of CONNECTOR POSITIVE TOP within the matrix or vector.
+ *
+ * @param <PS> Positive electrolyte input side.
+ * @param s System parameters.
+ * @param si Stack index within line.
+ * @param li Line index.
+*/
+template<ConnSide PS>
 Eigen::Index indexCPT(const SysParam& s,
       std::size_t si, std::size_t li);
 
 
-template<ConnSide>
+/**
+ * Returns the index of CONNECTOR POSITIVE BOTTOM within the matrix or vector.
+ *
+ * @param <PS> Positive electrolyte input side.
+ * @param s System parameters.
+ * @param si Stack index within line.
+ * @param li Line index.
+*/
+template<ConnSide PS>
 Eigen::Index indexCPB(const SysParam& s,
       std::size_t si, std::size_t li);
 
 
-template<ConnSide>
+/**
+ * Returns the index of CONNECTOR NEGATIVE TOP within the matrix or vector.
+ *
+ * @param <NS> Negative electrolyte input side.
+ * @param s System parameters.
+ * @param si Stack index within line.
+ * @param li Line index.
+*/
+template<ConnSide NS>
 Eigen::Index indexCNT(const SysParam& s,
       std::size_t si, std::size_t li);
 
 
-template<ConnSide>
+/**
+ * Returns the index of CONNECTOR NEGATIVE BOTTOM within the matrix or vector.
+ *
+ * @param <NS> Negative electrolyte input side.
+ * @param s System parameters.
+ * @param si Stack index within line.
+ * @param li Line index.
+*/
+template<ConnSide NS>
 Eigen::Index indexCNB(const SysParam& s,
       std::size_t si, std::size_t li);
 
@@ -121,15 +165,15 @@ Eigen::Index indexCNB(const SysParam& s,
  * Returns the POSITIVE CONNECTOR current contribution to the specified cell,
  * given the calculated current vector.
  *
- * @param <Side> Inlet connection side.
- * @param cv Current vector.
+ * @param <PS> Positive electrolyte input side.
+ * @param rv Result vector.
  * @param s System parameters.
  * @param ci Cell index within stack.
  * @param si Stack index within line.
  * @param li Line index.
 */
-template<ConnSide Side>
-double getPosConnContri_Cell(const Eigen::VectorXd& cv, const SysParam& s,
+template<ConnSide PS>
+double getPosConnContri_Cell(const Eigen::VectorXd& rv, const SysParam& s,
       std::size_t ci, std::size_t si, std::size_t li);
 
 
@@ -137,31 +181,33 @@ double getPosConnContri_Cell(const Eigen::VectorXd& cv, const SysParam& s,
  * Returns the POSITIVE CONNECTOR current contribution to the specified cell,
  * given the calculated current vector.
  *
- * @param <Side> Inlet connection side.
- * @param cv Current vector.
+ * @param <PS> Positive electrolyte input side.
+ * @param rv Result vector.
  * @param s System parameters.
  * @param i Cell index from the first cell in the system.
 */
-template<ConnSide Side>
-double getPosConnContri_Cell(const Eigen::VectorXd& cv, const SysParam& s,
+template<ConnSide PS>
+double getPosConnContri_Cell(const Eigen::VectorXd& rv, const SysParam& s,
       std::size_t i) {
-  return getPosConnContri_Cell<Side>(cv, s, toci(i, s), tosi(i, s), toli(i, s));
+  return getPosConnContri_Cell<PS>(rv, s, toci(i, s), tosi(i, s), toli(i, s));
 }
+
+
 
 
 /**
  * Returns the NEGATIVE CONNECTOR current contribution to the specified cell,
  * given the calculated current vector.
  *
- * @param <Side> Inlet connection side.
- * @param cv Current vector.
+ * @param <NS> Negative electrolyte input side.
+ * @param rv Result vector.
  * @param s System parameters.
  * @param ci Cell index within stack.
  * @param si Stack index within line.
  * @param li Line index.
 */
-template<ConnSide Side>
-double getNegConnContri_Cell(const Eigen::VectorXd& cv, const SysParam& s,
+template<ConnSide NS>
+double getNegConnContri_Cell(const Eigen::VectorXd& rv, const SysParam& s,
       std::size_t ci, std::size_t si, std::size_t li);
 
 
@@ -169,15 +215,15 @@ double getNegConnContri_Cell(const Eigen::VectorXd& cv, const SysParam& s,
  * Returns the NEGATIVE CONNECTOR current contribution to the specified cell,
  * given the calculated current vector.
  *
- * @param <Side> Inlet connection side.
- * @param cv Current vector.
+ * @param <NS> Negative electrolyte input side.
+ * @param rv Result vector.
  * @param s System parameters.
  * @param i Cell index from the first cell in the system.
 */
-template<ConnSide Side>
-double getNegConnContri_Cell(const Eigen::VectorXd& cv, const SysParam& s,
+template<ConnSide NS>
+double getNegConnContri_Cell(const Eigen::VectorXd& rv, const SysParam& s,
       std::size_t i) {
-  return getNegConnContri_Cell<Side>(cv, s, toci(i, s), tosi(i, s), toli(i, s));
+  return getNegConnContri_Cell<NS>(rv, s, toci(i, s), tosi(i, s), toli(i, s));
 }
 
 
@@ -194,57 +240,137 @@ double getNegConnContri_Cell(const Eigen::VectorXd& cv, const SysParam& s,
 */
 
 
-template<ConnSide Side>
-double getConnContri_SSPT(const Eigen::VectorXd& cv, const SysParam& s,
+/**
+ * Returns the CONNECTOR current contribution to STACK SHUNT POSITIVE TOP
+ * current.
+ *
+ * @param <PS> Positive electrolyte input side.
+ * @param rv Result vector.
+ * @param s System parameters.
+ * @param ci Cell index within stack.
+ * @param si Stack index within line.
+ * @param li Line index.
+*/
+template<ConnSide PS>
+double getConnContri_SSPT(const Eigen::VectorXd& rv, const SysParam& s,
       std::size_t ci, std::size_t si, std::size_t li);
 
 
-template<ConnSide Side>
-double getConnContri_SSPT(const Eigen::VectorXd& cv, const SysParam& s,
+/**
+ * Returns the CONNECTOR current contribution to STACK SHUNT POSITIVE TOP
+ * current.
+ *
+ * @param <PS> Positive electrolyte input side.
+ * @param rv Result vector.
+ * @param s System parameters.
+ * @param i Cell index within system.
+*/
+template<ConnSide PS>
+double getConnContri_SSPT(const Eigen::VectorXd& rv, const SysParam& s,
       std::size_t i) {
-  return getConnContri_SSPT<Side>(cv, s, toci(i, s), tosi(i, s), toli(i, s));
+  return getConnContri_SSPT<PS>(rv, s, toci(i, s), tosi(i, s), toli(i, s));
 }
 
 
 
 
-template<ConnSide Side>
-double getConnContri_SSPB(const Eigen::VectorXd& cv, const SysParam& s,
+/**
+ * Returns the CONNECTOR current contribution to STACK SHUNT POSITIVE BOTTOM
+ * current.
+ *
+ * @param <PS> Positive electrolyte input side.
+ * @param rv Result vector.
+ * @param s System parameters.
+ * @param ci Cell index within stack.
+ * @param si Stack index within line.
+ * @param li Line index.
+*/
+template<ConnSide PS>
+double getConnContri_SSPB(const Eigen::VectorXd& rv, const SysParam& s,
       std::size_t ci, std::size_t si, std::size_t li);
 
 
-template<ConnSide Side>
-double getConnContri_SSPB(const Eigen::VectorXd& cv, const SysParam& s,
+/**
+ * Returns the CONNECTOR current contribution to STACK SHUNT POSITIVE BOTTOM
+ * current.
+ *
+ * @param <PS> Positive electrolyte input side.
+ * @param rv Result vector.
+ * @param s System parameters.
+ * @param i Cell index within system.
+*/
+template<ConnSide PS>
+double getConnContri_SSPB(const Eigen::VectorXd& rv, const SysParam& s,
       std::size_t i) {
-  return getConnContri_SSPB<Side>(cv, s, toci(i, s), tosi(i, s), toli(i, s));
+  return getConnContri_SSPB<PS>(rv, s, toci(i, s), tosi(i, s), toli(i, s));
 }
 
 
 
 
-template<ConnSide Side>
-double getConnContri_SSNT(const Eigen::VectorXd& cv, const SysParam& s,
+/**
+ * Returns the CONNECTOR current contribution to STACK SHUNT NEGATIVE TOP
+ * current.
+ *
+ * @param <NS> Negative electrolyte input side.
+ * @param rv Result vector.
+ * @param s System parameters.
+ * @param ci Cell index within stack.
+ * @param si Stack index within line.
+ * @param li Line index.
+*/
+template<ConnSide NS>
+double getConnContri_SSNT(const Eigen::VectorXd& rv, const SysParam& s,
       std::size_t ci, std::size_t si, std::size_t li);
 
 
-template<ConnSide Side>
-double getConnContri_SSNT(const Eigen::VectorXd& cv, const SysParam& s,
+/**
+ * Returns the CONNECTOR current contribution to STACK SHUNT NEGATIVE TOP
+ * current.
+ *
+ * @param <NS> Negative electrolyte input side.
+ * @param rv Result vector.
+ * @param s System parameters.
+ * @param i Cell index within system.
+*/
+template<ConnSide NS>
+double getConnContri_SSNT(const Eigen::VectorXd& rv, const SysParam& s,
       std::size_t i) {
-  return getConnContri_SSNT<Side>(cv, s, toci(i, s), tosi(i, s), toli(i, s));
+  return getConnContri_SSNT<NS>(rv, s, toci(i, s), tosi(i, s), toli(i, s));
 }
 
 
 
 
-template<ConnSide Side>
-double getConnContri_SSNB(const Eigen::VectorXd& cv, const SysParam& s,
+/**
+ * Returns the CONNECTOR current contribution to STACK SHUNT NEGATIVE BOTTOM
+ * current.
+ *
+ * @param <NS> Negative electrolyte input side.
+ * @param rv Result vector.
+ * @param s System parameters.
+ * @param ci Cell index within stack.
+ * @param si Stack index within line.
+ * @param li Line index.
+*/
+template<ConnSide NS>
+double getConnContri_SSNB(const Eigen::VectorXd& rv, const SysParam& s,
       std::size_t ci, std::size_t si, std::size_t li);
 
 
-template<ConnSide Side>
-double getConnContri_SSNB(const Eigen::VectorXd& cv, const SysParam& s,
+/**
+ * Returns the CONNECTOR current contribution to STACK SHUNT NEGATIVE BOTTOM
+ * current.
+ *
+ * @param <NS> Negative electrolyte input side.
+ * @param rv Result vector.
+ * @param s System parameters.
+ * @param i Cell index within system.
+*/
+template<ConnSide NS>
+double getConnContri_SSNB(const Eigen::VectorXd& rv, const SysParam& s,
       std::size_t i) {
-  return getConnContri_SSNB<Side>(cv, s, toci(i, s), tosi(i, s), toli(i, s));
+  return getConnContri_SSNB<NS>(rv, s, toci(i, s), tosi(i, s), toli(i, s));
 }
 
 
@@ -433,16 +559,16 @@ inline Eigen::Index indexCNB<ConnSide::csBack>(const SysParam& s,
 
 template<>
 double getPosConnContri_Cell<ConnSide::csFront>(
-      const Eigen::VectorXd& cv, const SysParam& s,
+      const Eigen::VectorXd& rv, const SysParam& s,
       std::size_t ci, std::size_t si, std::size_t li) {
   double result = 0;
   if (si > 0 && ci+1 < s.numCells) {
-    result += cv(indexCPT<ConnSide::csFront>(s, si, li));
+    result += rv(indexCPT<ConnSide::csFront>(s, si, li));
   } else if (si+1 < s.numStacks && ci+1 == s.numCells) {
-    result += cv(indexCPT<ConnSide::csFront>(s, si, li) + 1);
+    result += rv(indexCPT<ConnSide::csFront>(s, si, li) + 1);
   }
   if (si+1 < s.numStacks) {
-    result += cv(indexCPB<ConnSide::csFront>(s, si, li));
+    result += rv(indexCPB<ConnSide::csFront>(s, si, li));
   }
   return result;
 }
@@ -456,16 +582,16 @@ double getPosConnContri_Cell<ConnSide::csFront>(
 
 template<>
 double getNegConnContri_Cell<ConnSide::csBack>(
-      const Eigen::VectorXd& cv, const SysParam& s,
+      const Eigen::VectorXd& rv, const SysParam& s,
       std::size_t ci, std::size_t si, std::size_t li) {
   double result = 0;
   if (si+1 < s.numStacks && ci > 0) {
-    result += cv(indexCNT<ConnSide::csBack>(s, si, li));
+    result += rv(indexCNT<ConnSide::csBack>(s, si, li));
   } else if (si > 0 && ci == 0) {
-    result += cv(indexCNT<ConnSide::csBack>(s, si, li) - 1);
+    result += rv(indexCNT<ConnSide::csBack>(s, si, li) - 1);
   }
   if (si > 0) {
-    result += cv(indexCNB<ConnSide::csBack>(s, si, li));
+    result += rv(indexCNB<ConnSide::csBack>(s, si, li));
   }
   return result;
 }
@@ -489,15 +615,15 @@ double getNegConnContri_Cell<ConnSide::csBack>(
 
 template<>
 double getConnContri_SSPT<ConnSide::csFront>(
-      const Eigen::VectorXd& cv, const SysParam& s,
+      const Eigen::VectorXd& rv, const SysParam& s,
       std::size_t ci, std::size_t si, std::size_t li) {
   double result = 0;
   if (ci+1 == s.numCells) {
     if (si > 0) {
-      result -= cv(indexCPT<ConnSide::csFront>(s, si, li));
+      result -= rv(indexCPT<ConnSide::csFront>(s, si, li));
     }
     if (si+1 < s.numStacks) {
-      result += cv(indexCPT<ConnSide::csFront>(s, si, li) + 1);
+      result += rv(indexCPT<ConnSide::csFront>(s, si, li) + 1);
     }
   }
   return result;
@@ -509,15 +635,15 @@ double getConnContri_SSPT<ConnSide::csFront>(
 
 template<>
 double getConnContri_SSPB<ConnSide::csFront>(
-      const Eigen::VectorXd& cv, const SysParam& s,
+      const Eigen::VectorXd& rv, const SysParam& s,
       std::size_t ci, std::size_t si, std::size_t li) {
   double result = 0;
   if (ci == 0) {
     if (si > 0) {
-      result -= cv(indexCPB<ConnSide::csFront>(s, si, li) - 1);
+      result -= rv(indexCPB<ConnSide::csFront>(s, si, li) - 1);
     }
     if (si+1 < s.numStacks) {
-      result += cv(indexCPB<ConnSide::csFront>(s, si, li));
+      result += rv(indexCPB<ConnSide::csFront>(s, si, li));
     }
   }
   return result;
@@ -529,15 +655,15 @@ double getConnContri_SSPB<ConnSide::csFront>(
 
 template<>
 double getConnContri_SSNT<ConnSide::csBack>(
-      const Eigen::VectorXd& cv, const SysParam& s,
+      const Eigen::VectorXd& rv, const SysParam& s,
       std::size_t ci, std::size_t si, std::size_t li) {
   double result = 0;
   if (ci == 0) {
     if (si > 0) {
-      result -= cv(indexCNT<ConnSide::csBack>(s, si, li) - 1);
+      result -= rv(indexCNT<ConnSide::csBack>(s, si, li) - 1);
     }
     if (si+1 < s.numStacks) {
-      result += cv(indexCNT<ConnSide::csBack>(s, si, li));
+      result += rv(indexCNT<ConnSide::csBack>(s, si, li));
     }
   }
   return result;
@@ -549,15 +675,15 @@ double getConnContri_SSNT<ConnSide::csBack>(
 
 template<>
 double getConnContri_SSNB<ConnSide::csBack>(
-      const Eigen::VectorXd& cv, const SysParam& s,
+      const Eigen::VectorXd& rv, const SysParam& s,
       std::size_t ci, std::size_t si, std::size_t li) {
   double result = 0;
   if (ci+1 == s.numCells) {
     if (si > 0) {
-      result -= cv(indexCNB<ConnSide::csBack>(s, si, li));
+      result -= rv(indexCNB<ConnSide::csBack>(s, si, li));
     }
     if (si+1 < s.numStacks) {
-      result += cv(indexCNB<ConnSide::csBack>(s, si, li) + 1);
+      result += rv(indexCNB<ConnSide::csBack>(s, si, li) + 1);
     }
   }
   return result;
@@ -572,13 +698,13 @@ double getConnContri_SSNB<ConnSide::csBack>(
 
 /*
 ********************************************************************************
-**    addConnLoops Definitions
+**    addConnCoeff Definitions
 ********************************************************************************
 */
 
 
 template<>
-void addConnLoops<ConnSide::csFront, ConnSide::csBack>(Eigen::MatrixXd& m, const PCCSysParam&s ) {
+void addConnCoeff<ConnSide::csFront, ConnSide::csBack>(Eigen::MatrixXd& m, const PCCSysParam&s ) {
   double stackR = s.numCells*s.cellR() + 2*s.stackShuntR() + 2*s.connSubShuntR();
 
   for (std::size_t li = 0; li < s.numLines; ++li) {
@@ -830,12 +956,12 @@ void addConnLoops<ConnSide::csFront, ConnSide::csBack>(Eigen::MatrixXd& m, const
 
 /*
 ********************************************************************************
-**    addConnLoops Definitions
+**    addConnValue Definitions
 ********************************************************************************
 */
 
 
-void addConnLoops(Eigen::VectorXd& v, const PCCSysParam& s) {
+void addConnValue(Eigen::VectorXd& v, const PCCSysParam& s) {
   for (std::size_t li = 0; li < s.numLines; ++li) {
     for (std::size_t si = 0; si < s.numStacks; ++si) {
       if (si > 0) {
@@ -856,6 +982,12 @@ void addConnLoops(Eigen::VectorXd& v, const PCCSysParam& s) {
 
 
 
+
+/*
+********************************************************************************
+**    PCCReport_Impl Definitions
+********************************************************************************
+*/
 
 
 template<ConnSide PS, ConnSide NS>
@@ -880,11 +1012,11 @@ class PCCReport_Impl : public PCCReport {
     const PCCSysParam& param() const override {return s;}
 
     double chargingVolt() const {
-      return resVec(kchgVoltIndex);
+      return resVec(kChgVoltIndex);
     }
 
     double chargingCurr() const {
-      return resVec(kchgCurrIndex);
+      return resVec(kChgCurrIndex);
     }
 
 
@@ -965,23 +1097,16 @@ class PCCReport_Impl : public PCCReport {
 template<ElecInput::Mode M, ConnSide PS, ConnSide NS>
 PCCReport* calculate_pcc(const PCCSysParam& s, double mag) {
   std::size_t size = matSize(s);
-  Eigen::MatrixXd rm = Eigen::MatrixXd::Zero(size, size);
-  addGovEqn<M>(rm, s);
-  addStackLoops(rm, s);
-  addConnLoops<PS, NS>(rm, s);
-  Eigen::VectorXd vv = Eigen::VectorXd::Zero(size);
-  addStackLoops(vv, s, mag);
-  addConnLoops(vv, s);
-  Eigen::VectorXd resVec = rm.colPivHouseholderQr().solve(vv);
+  Eigen::MatrixXd lhsM = Eigen::MatrixXd::Zero(size, size);
+  addSysCoeff<M>(lhsM, s);
+  addStackCoeff(lhsM, s);
+  addConnCoeff<PS, NS>(lhsM, s);
+  Eigen::VectorXd rhsV = Eigen::VectorXd::Zero(size);
+  addStackValue(rhsV, s, mag);
+  addConnValue(rhsV, s);
+  Eigen::VectorXd resVec = lhsM.colPivHouseholderQr().solve(rhsV);
 
-  std::ofstream ifs_rm {"RM.txt"};
-  std::ofstream ifs_vv {"VV.txt"};
-  std::ofstream ifs_rv {"RV.txt"};
-  ifs_rm << rm << std::endl;
-  ifs_vv << vv << std::endl;
-  ifs_rv << resVec << std::endl;
-
-  double error = ((rm*resVec) - vv).norm();
+  double error = ((lhsM*resVec) - rhsV).norm();
   return new PCCReport_Impl<PS, NS>(resVec, s, error);
 }
 
