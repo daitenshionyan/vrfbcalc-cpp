@@ -155,8 +155,7 @@ namespace shuntcur {
 struct ElecInput {
   enum class Mode {
     mConstVolt,
-    mConstCurr,
-    mDChg
+    mConstCurr
   };
 
   Mode mode;

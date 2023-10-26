@@ -48,24 +48,30 @@ void checkMatrix(const Eigen::MatrixXd& expected, const Eigen::MatrixXd& actual)
 
 
 
-void checkShuntPerf(const vrfb::shuntcur::pcc::PCCReport& actual) {
-  bool is_same_size = shunttest_pcc::kExCurrList.size() == actual.totCells();
+void checkShuntPerf(const vrfb::shuntcur::pcc::PCCReport& actual,
+      double exChgCurr, double exChgVolt,
+      const std::vector<double>& exCurrList,
+      const std::vector<double>& exSSPTList, const std::vector<double>& exSSPBList,
+      const std::vector<double>& exSSNTList, const std::vector<double>& exSSNBList,
+      const std::vector<double>& exSMPTList, const std::vector<double>& exSMPBList,
+      const std::vector<double>& exSMNTList, const std::vector<double>& exSMNBList) {
+  bool is_same_size = exCurrList.size() == actual.totCells();
   ASSERT_TRUE(is_same_size) << "Wrong size"
-      << " - Expected size: " << shunttest_pcc::kExCurrList.size()
+      << " - Expected size: " << exCurrList.size()
       << " | Actual size: " << actual.totCells();
 
   bool is_same = true;
   std::stringstream miscdiff {};
-  if (std::abs(actual.chargingCurr() - shunttest_pcc::kTestChgCurr) > threshold) {
+  if (std::abs(actual.chargingCurr() - exChgCurr) > threshold) {
     is_same = false;
     miscdiff << "Charging current"
-        << " - Expected: " << shunttest_pcc::kTestChgCurr
+        << " - Expected: " << exChgCurr
         << " | Actual: " << actual.chargingCurr() << "\n";
   }
-  if (std::abs(actual.chargingVolt() - shunttest_pcc::kTestChgVolt) > threshold) {
+  if (std::abs(actual.chargingVolt() - exChgVolt) > threshold) {
     is_same = false;
     miscdiff << "Charging voltage"
-        << " - Expected: " << shunttest_pcc::kTestChgVolt
+        << " - Expected: " << exChgVolt
         << " | Actual: " << actual.chargingVolt() << "\n";
   }
   std::stringstream celldiff {};
@@ -77,62 +83,62 @@ void checkShuntPerf(const vrfb::shuntcur::pcc::PCCReport& actual) {
   std::stringstream mpbdiff {};
   std::stringstream mntdiff {};
   std::stringstream mnbdiff {};
-  for (std::size_t i = 0; i < shunttest_pcc::kExCurrList.size(); ++i) {
+  for (std::size_t i = 0; i < exCurrList.size(); ++i) {
     // STACK :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-    if (std::abs(actual.cellCurr(i) - shunttest_pcc::kExCurrList[i]) > threshold) {
+    if (std::abs(actual.cellCurr(i) - exCurrList[i]) > threshold) {
       is_same = false;
       celldiff << "At (" << i << ")"
-        << " - Expected: " <<  shunttest_pcc::kExCurrList[i]
+        << " - Expected: " <<  exCurrList[i]
         << " | Actual: " << actual.cellCurr(i) << "\n";
     }
 
-    if (std::abs(actual.ssptCurr(i) - shunttest_pcc::kExSSPTList[i]) > threshold) {
+    if (std::abs(actual.ssptCurr(i) - exSSPTList[i]) > threshold) {
       is_same = false;
       sptdiff << "At (" << i << ")"
-        << " - Expected: " <<  shunttest_pcc::kExSSPTList[i]
+        << " - Expected: " <<  exSSPTList[i]
         << " | Actual: " << actual.ssptCurr(i) << "\n";
     }
-    if (std::abs(actual.sspbCurr(i) - shunttest_pcc::kExSSPBList[i]) > threshold) {
+    if (std::abs(actual.sspbCurr(i) - exSSPBList[i]) > threshold) {
       is_same = false;
       spbdiff << "At (" << i << ")"
-        << " - Expected: " <<  shunttest_pcc::kExSSPBList[i]
+        << " - Expected: " <<  exSSPBList[i]
         << " | Actual: " << actual.sspbCurr(i) << "\n";
     }
-    if (std::abs(actual.ssntCurr(i) - shunttest_pcc::kExSSNTList[i]) > threshold) {
+    if (std::abs(actual.ssntCurr(i) - exSSNTList[i]) > threshold) {
       is_same = false;
       sntdiff << "At (" << i << ")"
-        << " - Expected: " <<  shunttest_pcc::kExSSNTList[i]
+        << " - Expected: " <<  exSSNTList[i]
         << " | Actual: " << actual.ssntCurr(i) << "\n";
     }
-    if (std::abs(actual.ssnbCurr(i) - shunttest_pcc::kExSSNBList[i]) > threshold) {
+    if (std::abs(actual.ssnbCurr(i) - exSSNBList[i]) > threshold) {
       is_same = false;
       snbdiff << "At (" << i << ")"
-        << " - Expected: " <<  shunttest_pcc::kExSSNBList[i]
+        << " - Expected: " <<  exSSNBList[i]
         << " | Actual: " << actual.ssnbCurr(i) << "\n";
     }
 
-    if (std::abs(actual.smptCurr(i) - shunttest_pcc::kExSMPTList[i]) > threshold) {
+    if (std::abs(actual.smptCurr(i) - exSMPTList[i]) > threshold) {
       is_same = false;
       mptdiff << "At (" << i << ")"
-        << " - Expected: " <<  shunttest_pcc::kExSMPTList[i]
+        << " - Expected: " <<  exSMPTList[i]
         << " | Actual: " << actual.smptCurr(i) << "\n";
     }
-    if (std::abs(actual.smpbCurr(i) - shunttest_pcc::kExSMPBList[i]) > threshold) {
+    if (std::abs(actual.smpbCurr(i) - exSMPBList[i]) > threshold) {
       is_same = false;
       mpbdiff << "At (" << i << ")"
-        << " - Expected: " <<  shunttest_pcc::kExSMPBList[i]
+        << " - Expected: " <<  exSMPBList[i]
         << " | Actual: " << actual.smpbCurr(i) << "\n";
     }
-    if (std::abs(actual.smntCurr(i) - shunttest_pcc::kExSMNTList[i]) > threshold) {
+    if (std::abs(actual.smntCurr(i) - exSMNTList[i]) > threshold) {
       is_same = false;
       mntdiff << "At (" << i << ")"
-        << " - Expected: " <<  shunttest_pcc::kExSMNTList[i]
+        << " - Expected: " <<  exSMNTList[i]
         << " | Actual: " << actual.smntCurr(i) << "\n";
     }
-    if (std::abs(actual.smnbCurr(i) - shunttest_pcc::kExSMNBList[i]) > threshold) {
+    if (std::abs(actual.smnbCurr(i) - exSMNBList[i]) > threshold) {
       is_same = false;
       mnbdiff << "At (" << i << ")"
-        << " - Expected: " <<  shunttest_pcc::kExSMNBList[i]
+        << " - Expected: " <<  exSMNBList[i]
         << " | Actual: " << actual.smnbCurr(i) << "\n";
     }
   }
@@ -196,7 +202,13 @@ TEST(vrfbShuntCurrPCC, calculateCVFB) {
       vrfb::shuntcur::pcc::PCCCalc::ConnType::ctFB};
   vrfb::shuntcur::ShuntReport actual = calc.calculate(
       shunttest_pcc::kTestCVInput);
-  checkShuntPerf(actual.data<vrfb::shuntcur::pcc::PCCReport>());
+  checkShuntPerf(actual.data<vrfb::shuntcur::pcc::PCCReport>(),
+      shunttest_pcc::kTestChgCurr, shunttest_pcc::kTestChgVolt,
+      shunttest_pcc::kExCurrList,
+      shunttest_pcc::kExSSPTList, shunttest_pcc::kExSSPBList,
+      shunttest_pcc::kExSSNTList, shunttest_pcc::kExSSNBList,
+      shunttest_pcc::kExSMPTList, shunttest_pcc::kExSMPBList,
+      shunttest_pcc::kExSMNTList, shunttest_pcc::kExSMNBList);
 }
 
 
@@ -206,5 +218,27 @@ TEST(vrfbShuntCurrPCC, calculateCCFB) {
       vrfb::shuntcur::pcc::PCCCalc::ConnType::ctFB};
   vrfb::shuntcur::ShuntReport actual = calc.calculate(
         shunttest_pcc::kTestCCInput);
-  checkShuntPerf(actual.data<vrfb::shuntcur::pcc::PCCReport>());
+  checkShuntPerf(actual.data<vrfb::shuntcur::pcc::PCCReport>(),
+      shunttest_pcc::kTestChgCurr, shunttest_pcc::kTestChgVolt,
+      shunttest_pcc::kExCurrList,
+      shunttest_pcc::kExSSPTList, shunttest_pcc::kExSSPBList,
+      shunttest_pcc::kExSSNTList, shunttest_pcc::kExSSNBList,
+      shunttest_pcc::kExSMPTList, shunttest_pcc::kExSMPBList,
+      shunttest_pcc::kExSMNTList, shunttest_pcc::kExSMNBList);
+}
+
+
+TEST(vrfbShuntCurrPCC, calculateDChgFB) {
+  vrfb::shuntcur::pcc::PCCCalc calc {
+      shunttest_pcc::kTestSysParam,
+      vrfb::shuntcur::pcc::PCCCalc::ConnType::ctFB};
+  vrfb::shuntcur::ShuntReport actual = calc.calculate(
+      shunttest_pcc::kTestDVInput);
+  checkShuntPerf(actual.data<vrfb::shuntcur::pcc::PCCReport>(),
+      shunttest_pcc::kTestDChgCurr, shunttest_pcc::kTestDChgVolt,
+      shunttest_pcc::kExCurrList_DChg,
+      shunttest_pcc::kExSSPTList_DChg, shunttest_pcc::kExSSPBList_DChg,
+      shunttest_pcc::kExSSNTList_DChg, shunttest_pcc::kExSSNBList_DChg,
+      shunttest_pcc::kExSMPTList_DChg, shunttest_pcc::kExSMPBList_DChg,
+      shunttest_pcc::kExSMNTList_DChg, shunttest_pcc::kExSMNBList_DChg);
 }

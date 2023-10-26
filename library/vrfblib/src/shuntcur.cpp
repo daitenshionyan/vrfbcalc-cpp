@@ -102,6 +102,8 @@ ShuntReport PCCCalc::calculate(const ElecInput& input) const {
     case ElecInput::Mode::mConstCurr:
       return calculate_modeImpl<ElecInput::Mode::mConstCurr>(
           connType, sys, input.mag);
+    default:
+      throw std::runtime_error("Unknwon input mode");
   }
 }
 
