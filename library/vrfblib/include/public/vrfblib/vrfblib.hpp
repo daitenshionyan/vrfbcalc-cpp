@@ -152,6 +152,18 @@ comutils::Table calcPerf(const double area, const std::vector<Data>& datas);
 namespace shuntcur {
 
 
+struct ElecInput {
+  enum class Mode {
+    mConstVolt,
+    mConstCurr,
+    mDChg
+  };
+
+  Mode mode;
+  double mag=0;       // Magnitude
+};
+
+
 /**
  * Structure contianing the parameters of the stacks in a system.
 */
@@ -226,13 +238,7 @@ class ShuntReportData {
     virtual std::size_t totCells() const {return numLines()*numStacks()*numCells();}
 
     virtual double chargingVolt() const = 0;
-    virtual double chargingCurr() const {
-      double result = 0;
-      for (std::size_t i = 0; i < numLines(); ++i) {
-        result += lineCurr(i);
-      }
-      return result;
-    }
+    virtual double chargingCurr() const = 0;
     virtual double chargingPowr() const {return chargingVolt() * chargingCurr();}
     virtual double overVoltPowr() const {
       double result = 0;
@@ -303,6 +309,8 @@ class ShuntReport {
     template<typename T>
     const T& data() const {return *dynamic_cast<T*>(data_p);}
 
+    const ShuntReportData& sdata() const {return *data_p;}
+
 
   private:
     ShuntReportData* data_p;
@@ -325,12 +333,7 @@ class ShuntCalc {
     virtual ~ShuntCalc() = default;
 
   public: // ~~~~ functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    /**
-     * Calculates shunt current performance of the specified system.
-     *
-     * @param chgVolt The charging voltage (V).
-    */
-    virtual ShuntReport calculate(double chgVolt) const = 0;
+    virtual ShuntReport calculate(const ElecInput& elecInput) const = 0;
 
 
     virtual SysParam& param() = 0;
@@ -341,179 +344,6 @@ class ShuntCalc {
     */
     virtual ShuntCalc* copy() const = 0;
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/** Series Common Line */
-namespace scl {
-
-
-/**
- * Structure containing the parameters of the stack connectors in a SCL system.
-*/
-struct ConnParam {
-  double sl;      // Shunt length (m)
-  double sa;      // Shunt cross sectional area (m2)
-  double ml;      // Manifold length (m)
-  double ma;      // Manifold cross sectional area (m2)
-};
-
-
-/**
- * System parameters for an SCL arrangement system.
-*/
-struct SCLSysParam : public SysParam {
-  public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
-    SCLSysParam(const SysParam& sys, const ConnParam& conn)
-        : SysParam{sys}, c{conn} {}
-
-    SCLSysParam() = default;
-    SCLSysParam(const SCLSysParam&) = default;
-    SCLSysParam(SCLSysParam&&) = default;
-
-    SCLSysParam& operator=(const SCLSysParam&) = default;
-    SCLSysParam& operator=(SCLSysParam&&) = default;
-
-    ~SCLSysParam() = default;
-
-
-  public: // ~~~~ accessors ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    inline double connShuntR() const {return resistivity * c.sl / c.sa;}
-    inline double connManiR() const {return resistivity * c.ml / c.ma;}
-
-
-  public: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    ConnParam c;
-};
-
-
-class SCLReportData;
-
-
-class SCLReport : public ShuntReportData {
-  public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
-    SCLReport(SCLReportData* d, double cv,
-        const std::string arrName, double err)
-        : data{d}, chgVolt{cv}, arrangementName{arrName}, error{err} {}
-
-    SCLReport() = delete;
-    SCLReport(const SCLReport&);
-    SCLReport(SCLReport&&);
-
-    SCLReport& operator=(const SCLReport&);
-    SCLReport& operator=(SCLReport&&);
-
-    ~SCLReport() override;
-
-
-  public: // ~~~~ accessors ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    double err() const override {return error;}
-    std::string arrName() const override {return arrangementName;}
-    const SCLSysParam& param() const override;
-
-    double chargingVolt() const override {return chgVolt;}
-
-    double lineCurr(std::size_t i=0) const override;
-    double cellCurr(std::size_t i) const override;
-
-    double ssptCurr(std::size_t i) const;
-    double sspbCurr(std::size_t i) const;
-    double ssntCurr(std::size_t i) const;
-    double ssnbCurr(std::size_t i) const;
-
-    double smptCurr(std::size_t i) const;
-    double smpbCurr(std::size_t i) const;
-    double smntCurr(std::size_t i) const;
-    double smnbCurr(std::size_t i) const;
-
-    double csptCurr(std::size_t i) const;
-    double cspbCurr(std::size_t i) const;
-    double csntCurr(std::size_t i) const;
-    double csnbCurr(std::size_t i) const;
-    double csptPowr(std::size_t i) const {return csptCurr(i)*param().connShuntR();}
-    double cspbPowr(std::size_t i) const {return cspbCurr(i)*param().connShuntR();}
-    double csntPowr(std::size_t i) const {return csntCurr(i)*param().connShuntR();}
-    double csnbPowr(std::size_t i) const {return csnbCurr(i)*param().connShuntR();}
-
-    double cmptCurr(std::size_t i) const;
-    double cmpbCurr(std::size_t i) const;
-    double cmntCurr(std::size_t i) const;
-    double cmnbCurr(std::size_t i) const;
-    double cmptPowr(std::size_t i) const {return cmptCurr(i)*param().connManiR();}
-    double cmpbPowr(std::size_t i) const {return cmpbCurr(i)*param().connManiR();}
-    double cmntPowr(std::size_t i) const {return cmntCurr(i)*param().connManiR();}
-    double cmnbPowr(std::size_t i) const {return cmnbCurr(i)*param().connManiR();}
-
-
-  public: // ~~~~ functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    SCLReport* copy() const override {return new SCLReport(*this);}
-
-
-  private: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    SCLReportData* data;
-    std::string arrangementName;
-    double chgVolt;
-    double error;
-};
-
-
-/**
- * Calculator to calculate shunt performance for series common line electrolyte
- * arrangement.
-*/
-class SCLCalc : public ShuntCalc {
-  public: // ~~~~ types ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    /** Enum representing stack connection type. */
-    enum class ConnType {
-      /** Positive front, negative front. */
-      ctFF,
-      /** Positive front, negative back. */
-      ctFB
-    };
-
-
-  public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
-    SCLCalc(const SCLSysParam& s, ConnType ct = ConnType::ctFB)
-        : sys{s}, connType{ct} {}
-
-    SCLCalc(const SCLCalc&) = default;
-    SCLCalc(SCLCalc&&) = default;
-
-    SCLCalc& operator=(const SCLCalc&) = default;
-    SCLCalc& operator=(SCLCalc&&) = default;
-
-    ~SCLCalc() override = default;
-
-
-  public: // ~~~~ functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    ShuntReport calculate(double chgVolt) const override;
-
-    SCLSysParam& param() override {return sys;}
-    const SCLSysParam& param() const override {return sys;}
-
-    SCLCalc* copy() const override {return new SCLCalc(*this);}
-
-
-  private: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    SCLSysParam sys;
-    ConnType connType;
-};
-
-
-} // namespace <vrfb::shuntcur::scl>
 
 
 
@@ -576,55 +406,16 @@ struct PCCSysParam : public SysParam {
 };
 
 
-class PCCReportData;
-
-
 class PCCReport : public ShuntReportData {
   public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
-    PCCReport(PCCReportData* d, double cv,
-        const std::string arrName, double err)
-        : data{d}, chgVolt{cv}, arrangementName{arrName}, error{err} {}
+    PCCReport() = default;
+    PCCReport(const PCCReport&) = default;
+    PCCReport(PCCReport&&) = default;
 
-    PCCReport() = delete;
-    PCCReport(const PCCReport&);
-    PCCReport(PCCReport&&);
+    PCCReport& operator=(const PCCReport&) = default;
+    PCCReport& operator=(PCCReport&&) = default;
 
-    PCCReport& operator=(const PCCReport&);
-    PCCReport& operator=(PCCReport&&);
-
-    ~PCCReport() override;
-
-
-  public: // ~~~~ accessors ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    double err() const override {return error;}
-    std::string arrName() const override {return arrangementName;}
-    const PCCSysParam& param() const override;
-
-    double chargingVolt() const override {return chgVolt;}
-
-    double lineCurr(std::size_t i) const override;
-    double cellCurr(std::size_t i) const override;
-
-    double ssptCurr(std::size_t i) const override;
-    double sspbCurr(std::size_t i) const override;
-    double ssntCurr(std::size_t i) const override;
-    double ssnbCurr(std::size_t i) const override;
-
-    double smptCurr(std::size_t i) const override;
-    double smpbCurr(std::size_t i) const override;
-    double smntCurr(std::size_t i) const override;
-    double smnbCurr(std::size_t i) const override;
-
-
-  public: // ~~~~ functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    PCCReport* copy() const override {return new PCCReport(*this);}
-
-
-  private: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    PCCReportData* data;
-    std::string arrangementName;
-    double chgVolt;
-    double error;
+    ~PCCReport() override = default;
 };
 
 
@@ -652,7 +443,7 @@ class PCCCalc : public ShuntCalc {
 
 
   public: // ~~~~ functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    ShuntReport calculate(double chgVolt) const override;
+    ShuntReport calculate(const ElecInput& elecInput) const override;
 
     PCCSysParam& param() override {return sys;}
     const PCCSysParam& param() const override {return sys;}

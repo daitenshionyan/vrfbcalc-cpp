@@ -183,9 +183,6 @@ void MainWindow::displayPerformanceView_SC(const vrfbdriver::ShuntRes& r) {
   SCReportPopup* rp = new SCReportPopup(r.name, this);
   try {
     switch (r.arrType) {
-      case vrfbdriver::SCArrType::scatSCL:
-        rp->plotGraphs(r.perf.data<vrfb::shuntcur::scl::SCLReport>());
-        break;
       case vrfbdriver::SCArrType::scatPCC:
         rp->plotGraphs(r.perf.data<vrfb::shuntcur::pcc::PCCReport>());
         break;

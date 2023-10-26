@@ -207,22 +207,24 @@ std::vector<PerformanceEntry_CE> readPerformance_CE(
 // ==== [ ShuntCalc Definition ] ===============================================
 
 
-ShuntJob::ShuntJob(const std::string& n, const vrfb::shuntcur::ShuntCalc& sc, double cv,
+ShuntJob::ShuntJob(const std::string& n, const vrfb::shuntcur::ShuntCalc& sc,
+    const vrfb::shuntcur::ElecInput& input,
     SCArrangement a)
-    : name{n}, calc{sc.copy()}, chgVolt{cv}, arr{a} {}
+    : name{n}, calc{sc.copy()}, elecInput{input}, arr{a} {}
 
 
-ShuntJob::ShuntJob(const std::string& n, vrfb::shuntcur::ShuntCalc* scp, double cv,
+ShuntJob::ShuntJob(const std::string& n, vrfb::shuntcur::ShuntCalc* scp,
+    const vrfb::shuntcur::ElecInput& input,
     SCArrangement a)
-    : name{n}, calc{scp}, chgVolt{cv}, arr{a} {}
+    : name{n}, calc{scp}, elecInput{input}, arr{a} {}
 
 
 ShuntJob::ShuntJob(const ShuntJob& o)
-    : name{o.name}, calc{o.calc->copy()}, chgVolt{o.chgVolt} {}
+    : name{o.name}, calc{o.calc->copy()}, elecInput{o.elecInput}, arr{o.arr} {}
 
 
 ShuntJob::ShuntJob(ShuntJob&& o)
-    : name{std::move(o.name)}, calc{o.calc}, chgVolt{o.chgVolt} {
+    : name{std::move(o.name)}, calc{o.calc}, elecInput{o.elecInput}, arr{o.arr} {
   o.calc = nullptr;
 }
 
@@ -231,7 +233,8 @@ ShuntJob& ShuntJob::operator=(const ShuntJob& o) {
   name = o.name;
   delete calc;
   calc = o.calc->copy();
-  chgVolt = o.chgVolt;
+  elecInput = o.elecInput;
+  arr = o.arr;
   return *this;
 }
 
@@ -240,7 +243,8 @@ ShuntJob& ShuntJob::operator=(ShuntJob&& o) {
   name = std::move(o.name);
   calc = o.calc;
   o.calc = nullptr;
-  chgVolt = o.chgVolt;
+  elecInput = o.elecInput;
+  arr = o.arr;
   return *this;
 }
 
@@ -250,17 +254,15 @@ ShuntJob& ShuntJob::operator=(ShuntJob&& o) {
 
 ShuntRes calcShuntPerf(const ShuntJob& j, logger::Logger& l) {
   auto beg = std::chrono::high_resolution_clock::now();
-  vrfb::shuntcur::ShuntReport report = j.calc->calculate(j.chgVolt);
+  vrfb::shuntcur::ShuntReport report = j.calc->calculate(j.elecInput);
   std::filesystem::path path = std::filesystem::u8path<std::string>("output/" + j.name + ".xlsx");
   SCArrType arrType;
   switch (j.arr) {
-    case SCArrangement::scaSCLFF:
-    case SCArrangement::scaSCLFB:
-      arrType = SCArrType::scatSCL;
-      break;
     case SCArrangement::scaPCCFB:
       arrType = SCArrType::scatPCC;
       break;
+    default:
+      throw std::runtime_error("Unsupported arrangement");
   }
   auto dur = std::chrono::duration_cast<std::chrono::microseconds>(
             std::chrono::high_resolution_clock::now() - beg);
