@@ -273,4 +273,163 @@ ShuntRes calcShuntPerf(const ShuntJob& j, logger::Logger& l) {
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+********************************************************************************
+**        ShuntSimJob Definition
+********************************************************************************
+*/
+
+
+ShuntSimJob::ShuntSimJob(const ShuntSimJob& o)
+      : name{o.name}, calc{o.calc->copy()},
+        elecVol{o.elecVol}, elecCon{o.elecCon},
+        chgInput{o.chgInput}, dchgInput{o.dchgInput},
+        begSOC{o.begSOC}, endSOC{o.endSOC},
+        arr{o.arr} {}
+
+
+ShuntSimJob::ShuntSimJob(ShuntSimJob&& o)
+      : name{o.name}, calc{o.calc},
+        elecVol{o.elecVol}, elecCon{o.elecCon},
+        chgInput{o.chgInput}, dchgInput{o.dchgInput},
+        begSOC{o.begSOC}, endSOC{o.endSOC},
+        arr{o.arr} {
+  o.calc = nullptr;
+}
+
+
+ShuntSimJob& ShuntSimJob::operator=(const ShuntSimJob& o) {
+  name = o.name;
+  calc = o.calc->copy();
+  elecVol = o.elecVol;
+  elecCon = o.elecCon;
+  chgInput = o.chgInput;
+  dchgInput = o.dchgInput;
+  begSOC = o.begSOC;
+  endSOC = o.endSOC;
+  arr = o.arr;
+  return *this;
+}
+
+
+ShuntSimJob& ShuntSimJob::operator=(ShuntSimJob&& o) {
+  std::swap(name, o.name);
+  calc = o.calc;
+  o.calc = nullptr;
+  elecVol = o.elecVol;
+  elecCon = o.elecCon;
+  std::swap(chgInput, o.chgInput);
+  std::swap(dchgInput, o.dchgInput);
+  begSOC = o.begSOC;
+  endSOC = o.endSOC;
+  arr = o.arr;
+  return *this;
+}
+
+
+ShuntSimJob::~ShuntSimJob() {
+  delete calc;
+}
+
+
+
+
+
+
+
+
+/*
+********************************************************************************
+**        simulateShunt Definition
+********************************************************************************
+*/
+
+
+namespace {
+
+
+constexpr double kDeltaTime = 1;
+
+
+template<typename T>
+void simShumt_Step(
+      const vrfb::shuntcur::ElecInput& input,
+      vrfb::shuntcur::ShuntCalc* calc,
+      const ShuntSimJob& j,
+      ShuntSimReporter& rpter,
+      logger::Logger& l) {
+  vrfb::shuntcur::ShuntReport rpt = calc->calculate(input);
+  calc->param().soc += (rpt.data<T>().chargingCurr() * kDeltaTime)
+      / (j.elecVol * j.elecCon * 96485.3321);
+  rpter.addShuntReport(rpt);
+}
+
+
+template<typename T>
+void simShunt_Chg(const ShuntSimJob& j, ShuntSimReporter& rpter, logger::Logger& l) {
+  vrfb::shuntcur::ShuntCalc* calc = j.calc->copy();
+  calc->param().soc = j.begSOC;
+  while (calc->param().soc < j.endSOC) {
+    simShumt_Step<T>(j.chgInput, calc, j, rpter, l);
+  }
+}
+
+
+template<typename T>
+void simShunt_DChg(const ShuntSimJob& j, ShuntSimReporter& rpter, logger::Logger& l) {
+  vrfb::shuntcur::ShuntCalc* calc = j.calc->copy();
+  calc->param().soc = j.endSOC;
+  while (calc->param().soc > j.begSOC) {
+    simShumt_Step<T>(j.dchgInput, calc, j, rpter, l);
+  }
+}
+
+
+}
+
+
+void simulateShunt(const ShuntSimJob& j, ShuntSimReporter& rpter, logger::Logger& l) {
+  switch (j.arr) {
+    case SCArrangement::scaPCCFB:
+      simShunt_Chg<vrfb::shuntcur::pcc::PCCReport>(j, rpter, l);
+      simShunt_DChg<vrfb::shuntcur::pcc::PCCReport>(j, rpter, l);
+      break;
+  }
+}
+
+
 } // END OF NAMESPACE <vrfbdriver> ---------------------------------------------

@@ -94,4 +94,66 @@ struct ShuntRes {
 ShuntRes calcShuntPerf(const ShuntJob&, logger::Logger&);
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+class ShuntSimReporter {
+  public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
+    ShuntSimReporter() = default;
+    ShuntSimReporter(const ShuntSimReporter&) = default;
+    ShuntSimReporter(ShuntSimReporter&&) = default;
+
+    ShuntSimReporter& operator=(const ShuntSimReporter&) = default;
+    ShuntSimReporter& operator=(ShuntSimReporter&&) = default;
+
+    virtual ~ShuntSimReporter() = default;
+
+
+  public: // ~~~~ functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    virtual void addShuntReport(const vrfb::shuntcur::ShuntReport&) const = 0;
+};
+
+
+struct ShuntSimJob {
+  public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
+    ShuntSimJob() = delete;
+    ShuntSimJob(const ShuntSimJob&);
+    ShuntSimJob(ShuntSimJob&&);
+
+    ShuntSimJob& operator=(const ShuntSimJob&);
+    ShuntSimJob& operator=(ShuntSimJob&&);
+
+    ~ShuntSimJob();
+
+
+  public: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    std::string name;
+    vrfb::shuntcur::ShuntCalc* calc;
+
+    double elecVol;
+    double elecCon;
+
+    vrfb::shuntcur::ElecInput chgInput;
+    vrfb::shuntcur::ElecInput dchgInput;
+
+    double begSOC;
+    double endSOC;
+
+    SCArrangement arr;
+};
+
+
+void simulateShunt(const ShuntSimJob&, ShuntSimReporter&, logger::Logger&);
+
+
 }
