@@ -390,6 +390,7 @@ QScrollBar::add-line:horizontal {
     <addaction name="actionCEAnalysis"/>
     <addaction name="separator"/>
     <addaction name="actionSCCalculations"/>
+    <addaction name="actionSCSimulate"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuRun"/>
@@ -412,6 +413,11 @@ QScrollBar::add-line:horizontal {
   <action name="actionSCCalculations">
    <property name="text">
     <string>SC Calculations</string>
+   </property>
+  </action>
+  <action name="actionSCSimulate">
+   <property name="text">
+    <string>SC Simulate</string>
    </property>
   </action>
  </widget>

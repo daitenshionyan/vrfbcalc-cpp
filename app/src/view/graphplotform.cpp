@@ -364,17 +364,34 @@ void GraphPlotForm::setupPlot(
   }
 
   // set up fields
-  setupXFields(min_x, max_x);
-  setupYFields(min_y, max_y);
+  if (!series_x.empty()) {
+    setupXFields(min_x, max_x);
+    setupYFields(min_y, max_y);
+  }
 
   // set initial range
-  ui->plot->xAxis->setRange(min_x, max_x);
-  ui->plot->yAxis->setRange(min_y, max_y);
-  // adjustAxisRange(ui->plot->xAxis);
-  // adjustAxisRange(ui->plot->yAxis);
   ui->plot->xAxis->setLabel(QString::fromStdString(name_x));
   ui->plot->yAxis->setLabel(QString::fromStdString(name_y));
   ui->plot->replot();
+}
+
+
+void GraphPlotForm::addPoint(double x, double y) {
+  if (ui->plot->graphCount() == 0) {
+    ui->plot->addGraph();
+  }
+  auto graph = ui->plot->graph(0);
+  graph->addData(x, y);
+  graph->rescaleAxes();
+  ui->plot->replot();
+}
+
+
+int GraphPlotForm::dataCount() const {
+  if (ui->plot->graphCount() == 0) {
+    return 0;
+  }
+  return ui->plot->graph(0)->dataCount();
 }
 
 

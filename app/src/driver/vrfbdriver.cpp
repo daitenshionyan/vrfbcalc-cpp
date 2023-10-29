@@ -314,6 +314,18 @@ ShuntRes calcShuntPerf(const ShuntJob& j, logger::Logger& l) {
 */
 
 
+ShuntSimJob::ShuntSimJob(const std::string& n, vrfb::shuntcur::ShuntCalc* c,
+      double elec_v, double elec_c,
+      const vrfb::shuntcur::ElecInput& e_in, const vrfb::shuntcur::ElecInput& e_out,
+      double soc_b, double soc_e,
+      SCArrangement a)
+      : name{n}, calc{c},
+        elecVol{elec_v}, elecCon{elec_c},
+        chgInput{e_in}, dchgInput{e_out},
+        begSOC{soc_b}, endSOC{soc_e},
+        arr{a} {}
+
+
 ShuntSimJob::ShuntSimJob(const ShuntSimJob& o)
       : name{o.name}, calc{o.calc->copy()},
         elecVol{o.elecVol}, elecCon{o.elecCon},
@@ -390,31 +402,30 @@ void simShumt_Step(
       const vrfb::shuntcur::ElecInput& input,
       vrfb::shuntcur::ShuntCalc* calc,
       const ShuntSimJob& j,
-      ShuntSimReporter& rpter,
-      logger::Logger& l) {
+      ShuntSimReporter& rpter) {
   vrfb::shuntcur::ShuntReport rpt = calc->calculate(input);
-  calc->param().soc += (rpt.data<T>().chargingCurr() * kDeltaTime)
+  calc->param().soc += (rpt.data<T>().storedCurr() * kDeltaTime)
       / (j.elecVol * j.elecCon * 96485.3321);
   rpter.addShuntReport(rpt);
 }
 
 
 template<typename T>
-void simShunt_Chg(const ShuntSimJob& j, ShuntSimReporter& rpter, logger::Logger& l) {
+void simShunt_Chg(const ShuntSimJob& j, ShuntSimReporter& rpter) {
   vrfb::shuntcur::ShuntCalc* calc = j.calc->copy();
   calc->param().soc = j.begSOC;
   while (calc->param().soc < j.endSOC) {
-    simShumt_Step<T>(j.chgInput, calc, j, rpter, l);
+    simShumt_Step<T>(j.chgInput, calc, j, rpter);
   }
 }
 
 
 template<typename T>
-void simShunt_DChg(const ShuntSimJob& j, ShuntSimReporter& rpter, logger::Logger& l) {
+void simShunt_DChg(const ShuntSimJob& j, ShuntSimReporter& rpter) {
   vrfb::shuntcur::ShuntCalc* calc = j.calc->copy();
   calc->param().soc = j.endSOC;
   while (calc->param().soc > j.begSOC) {
-    simShumt_Step<T>(j.dchgInput, calc, j, rpter, l);
+    simShumt_Step<T>(j.dchgInput, calc, j, rpter);
   }
 }
 
@@ -422,11 +433,11 @@ void simShunt_DChg(const ShuntSimJob& j, ShuntSimReporter& rpter, logger::Logger
 }
 
 
-void simulateShunt(const ShuntSimJob& j, ShuntSimReporter& rpter, logger::Logger& l) {
+void simulateShunt(const ShuntSimJob& j, ShuntSimReporter& rpter) {
   switch (j.arr) {
     case SCArrangement::scaPCCFB:
-      simShunt_Chg<vrfb::shuntcur::pcc::PCCReport>(j, rpter, l);
-      simShunt_DChg<vrfb::shuntcur::pcc::PCCReport>(j, rpter, l);
+      simShunt_Chg<vrfb::shuntcur::pcc::PCCReport>(j, rpter);
+      simShunt_DChg<vrfb::shuntcur::pcc::PCCReport>(j, rpter);
       break;
   }
 }

@@ -120,12 +120,18 @@ class ShuntSimReporter {
 
 
   public: // ~~~~ functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    virtual void addShuntReport(const vrfb::shuntcur::ShuntReport&) const = 0;
+    virtual void addShuntReport(const vrfb::shuntcur::ShuntReport&) = 0;
 };
 
 
 struct ShuntSimJob {
   public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
+    ShuntSimJob(const std::string&, vrfb::shuntcur::ShuntCalc*,
+        double, double,
+        const vrfb::shuntcur::ElecInput&, const vrfb::shuntcur::ElecInput&,
+        double, double,
+        SCArrangement);
+
     ShuntSimJob() = delete;
     ShuntSimJob(const ShuntSimJob&);
     ShuntSimJob(ShuntSimJob&&);
@@ -153,7 +159,7 @@ struct ShuntSimJob {
 };
 
 
-void simulateShunt(const ShuntSimJob&, ShuntSimReporter&, logger::Logger&);
+void simulateShunt(const ShuntSimJob&, ShuntSimReporter&);
 
 
 }

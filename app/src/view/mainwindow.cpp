@@ -37,7 +37,8 @@ MainWindow::MainWindow(QWidget* parent)
       : QMainWindow(parent),
         ui(new Ui::MainWindow),
         popup_ce(new CEConfigPopup(this)),
-        popup_se(new SCConfigPopup(this)) {
+        popup_se(new SCConfigPopup(this)),
+        popup_scsim(new SCSimConfigPopup(this)) {
   ui->setupUi(this);
   ui->outputArea->appendHtml(
       QString("<p style=\"color:grey;white-space:pre\">")
@@ -54,6 +55,8 @@ MainWindow::MainWindow(QWidget* parent)
       this, &MainWindow::startCalc_CE);
   connect(popup_se, &SCConfigPopup::accepted,
       this, &MainWindow::startCalc_SC);
+  connect(popup_scsim, &SCSimConfigPopup::accepted,
+      this, &MainWindow::startSim_SC);
   connect(&watcher, &QFutureWatcher<logger::LogMsg>::resultReadyAt,
       this, &MainWindow::logMsgAt);
   connect(&watcher, &QFutureWatcher<logger::LogMsg>::started,
@@ -67,6 +70,9 @@ MainWindow::MainWindow(QWidget* parent)
       Qt::ConnectionType::QueuedConnection);
   connect(this, &MainWindow::completedSCCalc,
       this, &MainWindow::displayPerformanceView_SC,
+      Qt::ConnectionType::QueuedConnection);
+  connect(this, &MainWindow::jobReadySCSim,
+      this, &MainWindow::displayReport_SCSim,
       Qt::ConnectionType::QueuedConnection);
 }
 
@@ -99,6 +105,23 @@ void MainWindow::startCalc_SC() {
         } catch (std::exception& ex) {
           w.fail(comutils::string::format_string("Error while calculating shunt performance: %s",
               ex.what()));
+          return;
+        }
+      }
+  ));
+}
+
+
+void MainWindow::startSim_SC() {
+  watcher.setFuture(QtConcurrent::run(
+      &pool,
+      [&](QPromise<logger::LogMsg>& p) {
+        auto w = PromLogger{p};
+        try {
+          auto job = popup_scsim->getJob();
+          emit jobReadySCSim(job);
+        } catch (...) {
+          w.fail("Simulation failed");
           return;
         }
       }
@@ -263,6 +286,19 @@ void MainWindow::exportSCReport(SCReportPopup* rv) {
 }
 
 
+void MainWindow::displayReport_SCSim(const vrfbdriver::ShuntSimJob& j) {
+  SCSimReportPopup* popup = new SCSimReportPopup(this);
+  try {
+    popup->show();
+    popup->start(j);
+  } catch (...) {
+    fail("Failed to simulate");
+    delete popup;
+    return;
+  }
+}
+
+
 // ---- < SLOTS > --------------------------------------------------------------
 
 
@@ -318,4 +354,9 @@ void MainWindow::on_actionCEAnalysis_triggered(bool) {
 
 void MainWindow::on_actionSCCalculations_triggered(bool) {
   popup_se->open();
+}
+
+
+void MainWindow::on_actionSCSimulate_triggered(bool) {
+  popup_scsim->open();
 }

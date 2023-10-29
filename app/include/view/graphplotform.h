@@ -42,6 +42,9 @@ class GraphPlotForm : public QWidget {
         const std::string& name_x, const std::string& name_y);
     bool savePng(const QString&);
 
+    void addPoint(double, double);
+    int dataCount() const;
+
 
   protected:
     void setupXFields(double min, double max);

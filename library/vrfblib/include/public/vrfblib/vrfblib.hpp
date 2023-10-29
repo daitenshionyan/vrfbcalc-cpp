@@ -248,6 +248,15 @@ class ShuntReportData {
       }
       return result;
     }
+    virtual double storedCurr() const {
+      double result = 0;
+      for (std::size_t i = 0; i < totCells(); ++i) {
+        result += (param().maxCD*param().s.cellArea < cellCurr(i))
+            ? param().maxCD*param().s.cellArea
+            : cellCurr(i);
+      }
+      return result;
+    }
     virtual double storedPowr() const {
       double result = 0;
       for (std::size_t i = 0; i < totCells(); ++i) {
