@@ -24,6 +24,19 @@ class SCSimConfigPopup : public QDialog {
     vrfbdriver::ShuntSimJob getJob();
 
 
+  private: // ~~~~ accessors ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    vrfb::shuntcur::ShuntCalc* getCalc() const;
+    vrfb::shuntcur::ElecInput getChgInput() const;
+    vrfb::shuntcur::ElecInput getDChgInput() const;
+
+
+  private slots:
+    void on_chgModeComboBox_currentIndexChanged(int);
+    void on_dchgModeComboBox_currentIndexChanged(int);
+    void on_begSOCField_valueChanged(double);
+    void on_endSOCField_valueChanged(double);
+
+
   private: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     Ui::SCSimConfigPopup* ui;
 };
