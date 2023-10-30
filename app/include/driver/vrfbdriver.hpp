@@ -155,6 +155,28 @@ struct ShuntSimStep {
 };
 
 
+struct ShuntSimReport {
+  template<typename T>
+  void update(const ShuntSimStep& s, double dt) {
+    switch (s.step) {
+      case ShuntSimStep::Step::sChg:
+        inputEnergy += s.report.data<T>().chargingPowr() * dt;
+        break;
+      case ShuntSimStep::Step::sDChg:
+        outputEnergy -= s.report.data<T>().chargingPowr() * dt;
+        break;
+    }
+  }
+
+  double energyEff() const {
+    return outputEnergy / inputEnergy;
+  }
+
+  double inputEnergy = 0;
+  double outputEnergy = 0;
+};
+
+
 void simulateShunt(
       const ShuntSimJob&, double,
       comutils::concurrent::BasePromise<ShuntSimStep>&);

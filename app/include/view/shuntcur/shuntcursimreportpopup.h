@@ -28,11 +28,15 @@ class SCSimReportPopup : public QDialog {
 
   private:
     void reportReadyAt(int);
+    void displayReport();
+
     void deleteSelf(int) {delete this;}
 
 
   private: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     Ui::SCSimReportPopup* ui;
+
+    vrfbdriver::ShuntSimReport report;
 
     QFutureWatcher<vrfbdriver::ShuntSimStep> watcher;
     QThreadPool pool;

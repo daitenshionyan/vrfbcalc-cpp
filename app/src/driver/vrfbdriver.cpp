@@ -425,7 +425,7 @@ double simShunt_Chg(
     time += dt;
     p.setProgressValueAndText(
         (int) (100*(calc->param().soc - j.begSOC)) + 1,
-        comutils::string::format_string("Charging : SOC=%.2f Time=%.2fs",
+        comutils::string::format_string("Charging : SOC=%.2f%% Time=%.2fs",
             calc->param().soc * 100,
             time));
   }
@@ -445,7 +445,7 @@ double simShunt_DChg(
     time += dt;
     p.setProgressValueAndText(
         (int) (100*(2*j.endSOC - 2*j.begSOC - calc->param().soc)) + 2,
-        comutils::string::format_string("Discharging : SOC=%.2f Time=%.2fs",
+        comutils::string::format_string("Discharging : SOC=%.2f%% Time=%.2fs",
             calc->param().soc * 100,
             time));
   }

@@ -6,6 +6,7 @@
 #include <QtConcurrent/qtconcurrentrun.h>
 
 #include "utillib/concur.hpp"
+#include "utillib/utils.hpp"
 #include "util/qtutilities.hpp"
 
 
@@ -24,17 +25,23 @@ SCSimReportPopup::SCSimReportPopup(QWidget* parent)
 
   ui->voltPlot->setupPlot({}, {}, "Time", "Voltage");
 
+  connect(this, &QDialog::finished,
+      this, &SCSimReportPopup::deleteSelf);
   connect(&watcher, &QFutureWatcher<vrfbdriver::ShuntSimStep>::resultReadyAt,
       this, &SCSimReportPopup::reportReadyAt,
       Qt::ConnectionType::QueuedConnection);
-  connect(this, &QDialog::finished,
-      this, &SCSimReportPopup::deleteSelf);
   connect(&watcher, &QFutureWatcher<vrfbdriver::ShuntSimStep>::progressValueChanged,
-      ui->progressBar, &QProgressBar::setValue);
+      ui->progressBar, &QProgressBar::setValue,
+      Qt::ConnectionType::QueuedConnection);
   connect(&watcher, &QFutureWatcher<vrfbdriver::ShuntSimJob>::progressRangeChanged,
-      ui->progressBar, &QProgressBar::setRange);
+      ui->progressBar, &QProgressBar::setRange,
+      Qt::ConnectionType::QueuedConnection);
   connect(&watcher, &QFutureWatcher<vrfbdriver::ShuntSimStep>::progressTextChanged,
-      ui->msgLabel, &QLabel::setText);
+      ui->msgLabel, &QLabel::setText,
+      Qt::ConnectionType::QueuedConnection);
+  connect(&watcher, &QFutureWatcher<vrfbdriver::ShuntSimStep>::finished,
+      this, &SCSimReportPopup::displayReport,
+      Qt::ConnectionType::QueuedConnection);
 }
 
 
@@ -63,4 +70,12 @@ void SCSimReportPopup::reportReadyAt(int i) {
   ui->voltPlot->addPoint(
       ui->voltPlot->dataCount(),
       step.report.data<vrfb::shuntcur::pcc::PCCReport>().chargingVolt());
+  report.update<vrfb::shuntcur::pcc::PCCReport>(step, kTimeStep);
+}
+
+
+void SCSimReportPopup::displayReport() {
+  ui->msgLabel->setText(QString::fromStdString(comutils::string::format_string(
+      "Completed : EE=%.2f%%",
+      report.energyEff() * 100)));
 }
