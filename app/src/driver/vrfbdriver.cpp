@@ -421,7 +421,11 @@ double simShunt_Chg(
   double time = startTime;
   calc->param().soc = j.begSOC;
   while (calc->param().soc < j.endSOC) {
+    double oldSOC = calc->param().soc;
     simShumt_Step<T, ShuntSimStep::Step::sChg>(j.chgInput, calc, j, time, dt, p);
+    if (oldSOC > calc->param().soc) {
+      throw std::runtime_error("Discharging while charging");
+    }
     time += dt;
     p.setProgressValueAndText(
         (int) (100*(calc->param().soc - j.begSOC)) + 1,
@@ -441,7 +445,11 @@ double simShunt_DChg(
   double time = startTime;
   calc->param().soc = j.endSOC;
   while (calc->param().soc > j.begSOC) {
+    double oldSOC = calc->param().soc;
     simShumt_Step<T, ShuntSimStep::Step::sDChg>(j.dchgInput, calc, j, time, dt, p);
+    if (oldSOC < calc->param().soc) {
+      throw std::runtime_error("Charging while discharging");
+    }
     time += dt;
     p.setProgressValueAndText(
         (int) (100*(2*j.endSOC - 2*j.begSOC - calc->param().soc)) + 2,

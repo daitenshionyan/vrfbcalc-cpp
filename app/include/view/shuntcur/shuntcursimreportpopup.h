@@ -26,9 +26,14 @@ class SCSimReportPopup : public QDialog {
     void start(const vrfbdriver::ShuntSimJob&);
 
 
+  signals:
+    void simulationFailed(const std::string& msg);
+
+
   private:
     void reportReadyAt(int);
     void displayReport();
+    void displayFailed(const std::string& msg);
 
     void deleteSelf(int) {delete this;}
 

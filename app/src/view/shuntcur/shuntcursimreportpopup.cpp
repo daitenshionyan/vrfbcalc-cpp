@@ -28,8 +28,7 @@ SCSimReportPopup::SCSimReportPopup(QWidget* parent)
   connect(this, &QDialog::finished,
       this, &SCSimReportPopup::deleteSelf);
   connect(&watcher, &QFutureWatcher<vrfbdriver::ShuntSimStep>::resultReadyAt,
-      this, &SCSimReportPopup::reportReadyAt,
-      Qt::ConnectionType::QueuedConnection);
+      this, &SCSimReportPopup::reportReadyAt);
   connect(&watcher, &QFutureWatcher<vrfbdriver::ShuntSimStep>::progressValueChanged,
       ui->progressBar, &QProgressBar::setValue,
       Qt::ConnectionType::QueuedConnection);
@@ -42,6 +41,9 @@ SCSimReportPopup::SCSimReportPopup(QWidget* parent)
   connect(&watcher, &QFutureWatcher<vrfbdriver::ShuntSimStep>::finished,
       this, &SCSimReportPopup::displayReport,
       Qt::ConnectionType::QueuedConnection);
+  connect(this, &SCSimReportPopup::simulationFailed,
+      this, &SCSimReportPopup::displayFailed,
+      Qt::ConnectionType::QueuedConnection);
 }
 
 
@@ -51,14 +53,14 @@ SCSimReportPopup::~SCSimReportPopup() {
 
 
 void SCSimReportPopup::start(const vrfbdriver::ShuntSimJob& j) {
-  watcher.setFuture(QtConcurrent::run(
+  watcher.setFuture(QtConcurrent::run<vrfbdriver::ShuntSimStep>(
       &pool,
       [j](QPromise<vrfbdriver::ShuntSimStep>& p) {
         auto rpter = vrfbutils::BasePromise_Qt<vrfbdriver::ShuntSimStep>{&p};
         try {
           vrfbdriver::simulateShunt(j, kTimeStep, rpter);
-        } catch (...) {
-          return;
+        } catch (const std::exception& e) {
+          return; // todo
         }
       }
   ));
@@ -78,4 +80,11 @@ void SCSimReportPopup::displayReport() {
   ui->msgLabel->setText(QString::fromStdString(comutils::string::format_string(
       "Completed : EE=%.2f%%",
       report.energyEff() * 100)));
+}
+
+
+void SCSimReportPopup::displayFailed(const std::string& msg) {
+  ui->msgLabel->setText(QString::fromStdString(comutils::string::format_string(
+      "Simulation Failed - %s",
+      msg.c_str())));
 }
