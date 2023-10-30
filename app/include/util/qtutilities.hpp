@@ -1,6 +1,6 @@
 #pragma once
 
-
+#include <QException>
 #include <QPromise>
 
 #include "utillib/concur.hpp"
@@ -66,6 +66,26 @@ class BasePromise_Qt : public comutils::concurrent::BasePromise<T> {
 
   private:
     QPromise<T>* prom_p;
+};
+
+
+
+
+
+
+
+class StdQException : public QException {
+  public:
+    StdQException(const std::exception& ex) : e(ex) {}
+
+    void raise() const override {throw *this;}
+    QException* clone() const override {return new StdQException(*this);}
+
+    const std::exception& error() const {return e;}
+
+
+  private:
+    std::exception e;
 };
 
 

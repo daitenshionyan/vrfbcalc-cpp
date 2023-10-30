@@ -55,12 +55,16 @@ SCSimReportPopup::~SCSimReportPopup() {
 void SCSimReportPopup::start(const vrfbdriver::ShuntSimJob& j) {
   watcher.setFuture(QtConcurrent::run<vrfbdriver::ShuntSimStep>(
       &pool,
-      [j](QPromise<vrfbdriver::ShuntSimStep>& p) {
+      [&, j](QPromise<vrfbdriver::ShuntSimStep>& p) {
         auto rpter = vrfbutils::BasePromise_Qt<vrfbdriver::ShuntSimStep>{&p};
         try {
           vrfbdriver::simulateShunt(j, kTimeStep, rpter);
-        } catch (const std::exception& e) {
-          return; // todo
+        } catch (const std::exception& ex) {
+          emit simulationFailed(ex.what());
+          throw vrfbutils::StdQException(ex);
+        } catch (...) {
+          emit simulationFailed("Unknown exception occured");
+          throw vrfbutils::StdQException(std::runtime_error("Unknown exception occured"));
         }
       }
   ));
@@ -77,6 +81,9 @@ void SCSimReportPopup::reportReadyAt(int i) {
 
 
 void SCSimReportPopup::displayReport() {
+  if (watcher.isCanceled()) {
+    return;
+  }
   ui->msgLabel->setText(QString::fromStdString(comutils::string::format_string(
       "Completed : EE=%.2f%%",
       report.energyEff() * 100)));
