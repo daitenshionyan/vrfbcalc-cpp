@@ -30,8 +30,8 @@ SCSimReportPopup::~SCSimReportPopup() {
 void SCSimReportPopup::start(const vrfbdriver::ShuntSimJob& j) {
   watcher.setFuture(QtConcurrent::run(
       &pool,
-      [j](QPromise<vrfb::shuntcur::ShuntReport>& p) {
-        auto rpter = vrfbutils::BasePromise_Qt<vrfb::shuntcur::ShuntReport>{&p};
+      [j](QPromise<vrfbdriver::ShuntSimStep>& p) {
+        auto rpter = vrfbutils::BasePromise_Qt<vrfbdriver::ShuntSimStep>{&p};
         try {
           vrfbdriver::simulateShunt(j, rpter);
         } catch (...) {
@@ -43,8 +43,8 @@ void SCSimReportPopup::start(const vrfbdriver::ShuntSimJob& j) {
 
 
 void SCSimReportPopup::reportReadyAt(int i) {
-  auto rpt = watcher.future().resultAt(i);
+  auto step = watcher.future().resultAt(i);
   ui->voltPlot->addPoint(
       ui->voltPlot->dataCount(),
-      rpt.data<vrfb::shuntcur::pcc::PCCReport>().chargingVolt());
+      step.report.data<vrfb::shuntcur::pcc::PCCReport>().chargingVolt());
 }

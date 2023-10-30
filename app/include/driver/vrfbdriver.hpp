@@ -154,7 +154,7 @@ struct ShuntSimStep {
 
 void simulateShunt(
       const ShuntSimJob&,
-      comutils::concurrent::BasePromise<vrfb::shuntcur::ShuntReport>&);
+      comutils::concurrent::BasePromise<ShuntSimStep>&);
 
 
 }
