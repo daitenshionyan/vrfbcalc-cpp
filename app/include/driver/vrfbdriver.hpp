@@ -146,9 +146,12 @@ struct ShuntSimJob {
 
 
 struct ShuntSimStep {
+  enum class Step {sChg, sDChg};
+
   vrfb::shuntcur::ShuntReport report;
   double soc;
   double time;
+  Step step;
 };
 
 

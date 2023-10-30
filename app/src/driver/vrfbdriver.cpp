@@ -400,7 +400,7 @@ using SimStepFunc =
           comutils::concurrent::BasePromise<ShuntSimStep>&);
 
 
-template<typename T>
+template<typename T, ShuntSimStep::Step STEP>
 void simShumt_Step(
       const vrfb::shuntcur::ElecInput& input,
       vrfb::shuntcur::ShuntCalc* calc,
@@ -409,7 +409,7 @@ void simShumt_Step(
   vrfb::shuntcur::ShuntReport rpt = calc->calculate(input);
   calc->param().soc += (rpt.data<T>().storedCurr() * dt)
       / (j.elecVol * j.elecCon * 96485.3321);
-  p.addResult({rpt, calc->param().soc, time});
+  p.addResult({rpt, calc->param().soc, time, STEP});
 }
 
 
@@ -421,7 +421,7 @@ double simShunt_Chg(
   double time = startTime;
   calc->param().soc = j.begSOC;
   while (calc->param().soc < j.endSOC) {
-    simShumt_Step<T>(j.chgInput, calc, j, time, dt, p);
+    simShumt_Step<T, ShuntSimStep::Step::sChg>(j.chgInput, calc, j, time, dt, p);
     time += dt;
     p.setProgressValueAndText(
         (int) (100*(calc->param().soc - j.begSOC)) + 1,
@@ -441,7 +441,7 @@ double simShunt_DChg(
   double time = startTime;
   calc->param().soc = j.endSOC;
   while (calc->param().soc > j.begSOC) {
-    simShumt_Step<T>(j.dchgInput, calc, j, time, dt, p);
+    simShumt_Step<T, ShuntSimStep::Step::sDChg>(j.dchgInput, calc, j, time, dt, p);
     time += dt;
     p.setProgressValueAndText(
         (int) (100*(2*j.endSOC - 2*j.begSOC - calc->param().soc)) + 2,
