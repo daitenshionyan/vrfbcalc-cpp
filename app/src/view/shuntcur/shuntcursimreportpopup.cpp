@@ -1,39 +1,12 @@
 #include "view/shuntcur/shuntcursimreportpopup.h"
 #include "./ui_shuntcursimreportpopup.h"
 
+#include <utility>
+
 #include <QtConcurrent/qtconcurrentrun.h>
 
-
-namespace {
-
-
-class ShuntSimReporter_Impl : public vrfbdriver::ShuntSimReporter {
-  public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
-    ShuntSimReporter_Impl(QPromise<vrfb::shuntcur::ShuntReport>* p)
-          : prom_p{p} {}
-
-    ShuntSimReporter_Impl() = delete;
-    ShuntSimReporter_Impl(const ShuntSimReporter_Impl&) = delete;
-    ShuntSimReporter_Impl(ShuntSimReporter_Impl&&) = default;
-
-    ShuntSimReporter_Impl& operator=(const ShuntSimReporter_Impl&) = delete;
-    ShuntSimReporter_Impl& operator=(ShuntSimReporter_Impl&&) = default;
-
-    ~ShuntSimReporter_Impl() = default;
-
-
-  public: // ~~~~ functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    void addShuntReport(const vrfb::shuntcur::ShuntReport& r) override {
-      prom_p->addResult(r);
-    }
-
-
-  private: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    QPromise<vrfb::shuntcur::ShuntReport>* prom_p;
-};
-
-
-}
+#include "utillib/concur.hpp"
+#include "util/qtutilities.hpp"
 
 
 SCSimReportPopup::SCSimReportPopup(QWidget* parent)
@@ -58,7 +31,7 @@ void SCSimReportPopup::start(const vrfbdriver::ShuntSimJob& j) {
   watcher.setFuture(QtConcurrent::run(
       &pool,
       [j](QPromise<vrfb::shuntcur::ShuntReport>& p) {
-        auto rpter = ShuntSimReporter_Impl{&p};
+        auto rpter = vrfbutils::BasePromise_Qt<vrfb::shuntcur::ShuntReport>{&p};
         try {
           vrfbdriver::simulateShunt(j, rpter);
         } catch (...) {

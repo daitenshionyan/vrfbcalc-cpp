@@ -34,6 +34,8 @@ add_executable(vrfbcalc-cpp WIN32
     include/driver/vrfbdriver_io.hpp
     src/driver/vrfbdriver_io.cpp
 
+    include/util/qtutilities.hpp
+
     resource/resource.qrc
 
     include/view/mainwindow.h

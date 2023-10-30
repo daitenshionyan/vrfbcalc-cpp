@@ -3,6 +3,7 @@
 #include <functional>
 #include <string>
 
+#include "utillib/concur.hpp"
 #include "logger.hpp"
 #include "vrfblib/vrfblib.hpp"
 
@@ -107,21 +108,6 @@ ShuntRes calcShuntPerf(const ShuntJob&, logger::Logger&);
 
 
 
-class ShuntSimReporter {
-  public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
-    ShuntSimReporter() = default;
-    ShuntSimReporter(const ShuntSimReporter&) = default;
-    ShuntSimReporter(ShuntSimReporter&&) = default;
-
-    ShuntSimReporter& operator=(const ShuntSimReporter&) = default;
-    ShuntSimReporter& operator=(ShuntSimReporter&&) = default;
-
-    virtual ~ShuntSimReporter() = default;
-
-
-  public: // ~~~~ functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    virtual void addShuntReport(const vrfb::shuntcur::ShuntReport&) = 0;
-};
 
 
 struct ShuntSimJob {
@@ -159,7 +145,16 @@ struct ShuntSimJob {
 };
 
 
-void simulateShunt(const ShuntSimJob&, ShuntSimReporter&);
+struct ShuntSimStep {
+  vrfb::shuntcur::ShuntReport report;
+  double soc;
+  double time;
+};
+
+
+void simulateShunt(
+      const ShuntSimJob&,
+      comutils::concurrent::BasePromise<vrfb::shuntcur::ShuntReport>&);
 
 
 }

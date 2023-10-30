@@ -402,30 +402,34 @@ void simShumt_Step(
       const vrfb::shuntcur::ElecInput& input,
       vrfb::shuntcur::ShuntCalc* calc,
       const ShuntSimJob& j,
-      ShuntSimReporter& rpter) {
+      comutils::concurrent::BasePromise<vrfb::shuntcur::ShuntReport>& p) {
   vrfb::shuntcur::ShuntReport rpt = calc->calculate(input);
   calc->param().soc += (rpt.data<T>().storedCurr() * kDeltaTime)
       / (j.elecVol * j.elecCon * 96485.3321);
-  rpter.addShuntReport(rpt);
+  p.addResult(rpt);
 }
 
 
 template<typename T>
-void simShunt_Chg(const ShuntSimJob& j, ShuntSimReporter& rpter) {
+void simShunt_Chg(
+      const ShuntSimJob& j,
+      comutils::concurrent::BasePromise<vrfb::shuntcur::ShuntReport>& p) {
   vrfb::shuntcur::ShuntCalc* calc = j.calc->copy();
   calc->param().soc = j.begSOC;
   while (calc->param().soc < j.endSOC) {
-    simShumt_Step<T>(j.chgInput, calc, j, rpter);
+    simShumt_Step<T>(j.chgInput, calc, j, p);
   }
 }
 
 
 template<typename T>
-void simShunt_DChg(const ShuntSimJob& j, ShuntSimReporter& rpter) {
+void simShunt_DChg(
+      const ShuntSimJob& j,
+      comutils::concurrent::BasePromise<vrfb::shuntcur::ShuntReport>& p) {
   vrfb::shuntcur::ShuntCalc* calc = j.calc->copy();
   calc->param().soc = j.endSOC;
   while (calc->param().soc > j.begSOC) {
-    simShumt_Step<T>(j.dchgInput, calc, j, rpter);
+    simShumt_Step<T>(j.dchgInput, calc, j, p);
   }
 }
 
@@ -433,11 +437,13 @@ void simShunt_DChg(const ShuntSimJob& j, ShuntSimReporter& rpter) {
 }
 
 
-void simulateShunt(const ShuntSimJob& j, ShuntSimReporter& rpter) {
+void simulateShunt(
+      const ShuntSimJob& j,
+      comutils::concurrent::BasePromise<vrfb::shuntcur::ShuntReport>& p) {
   switch (j.arr) {
     case SCArrangement::scaPCCFB:
-      simShunt_Chg<vrfb::shuntcur::pcc::PCCReport>(j, rpter);
-      simShunt_DChg<vrfb::shuntcur::pcc::PCCReport>(j, rpter);
+      simShunt_Chg<vrfb::shuntcur::pcc::PCCReport>(j, p);
+      simShunt_DChg<vrfb::shuntcur::pcc::PCCReport>(j, p);
       break;
   }
 }
