@@ -425,6 +425,11 @@ double simShunt_Chg(
   while (calc->param().soc < j.endSOC) {
     simShumt_Step<T>(j.chgInput, calc, j, time, p);
     time += kDeltaTime;
+    p.setProgressValueAndText(
+        (int) (100*(calc->param().soc - j.begSOC)) + 1,
+        comutils::string::format_string("Charging : SOC=%.2f Time=%.2fs",
+            calc->param().soc * 100,
+            time));
   }
   return time;
 }
@@ -440,6 +445,11 @@ double simShunt_DChg(
   while (calc->param().soc > j.begSOC) {
     simShumt_Step<T>(j.dchgInput, calc, j, time, p);
     time += kDeltaTime;
+    p.setProgressValueAndText(
+        (int) (100*(2*j.endSOC - 2*j.begSOC - calc->param().soc)) + 2,
+        comutils::string::format_string("Discharging : SOC=%.2f Time=%.2fs",
+            calc->param().soc * 100,
+            time));
   }
   return time;
 }
@@ -451,6 +461,7 @@ double simShunt_DChg(
 void simulateShunt(
       const ShuntSimJob& j,
       comutils::concurrent::BasePromise<ShuntSimStep>& p) {
+  p.setProgressRange(0, ((int) (2*100*(j.endSOC - j.begSOC))));
   SimStepFunc chgFunc;
   SimStepFunc dchgFunc;
   switch (j.arr) {
@@ -464,6 +475,7 @@ void simulateShunt(
   double time = 0;
   time = chgFunc(j, time, p);
   time = dchgFunc(j, time, p);
+  p.setProgressValue(((int) (2*100*(j.endSOC - j.begSOC))));
 }
 
 

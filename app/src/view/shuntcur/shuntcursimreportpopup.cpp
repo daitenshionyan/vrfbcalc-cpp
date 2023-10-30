@@ -15,10 +15,17 @@ SCSimReportPopup::SCSimReportPopup(QWidget* parent)
 
   ui->voltPlot->setupPlot({}, {}, "Time", "Voltage");
 
-  connect(&watcher, &QFutureWatcher<vrfb::shuntcur::ShuntReport>::resultReadyAt,
-      this, &SCSimReportPopup::reportReadyAt);
+  connect(&watcher, &QFutureWatcher<vrfbdriver::ShuntSimStep>::resultReadyAt,
+      this, &SCSimReportPopup::reportReadyAt,
+      Qt::ConnectionType::QueuedConnection);
   connect(this, &QDialog::finished,
       this, &SCSimReportPopup::deleteSelf);
+  connect(&watcher, &QFutureWatcher<vrfbdriver::ShuntSimStep>::progressValueChanged,
+      ui->progressBar, &QProgressBar::setValue);
+  connect(&watcher, &QFutureWatcher<vrfbdriver::ShuntSimJob>::progressRangeChanged,
+      ui->progressBar, &QProgressBar::setRange);
+  connect(&watcher, &QFutureWatcher<vrfbdriver::ShuntSimStep>::progressTextChanged,
+      ui->msgLabel, &QLabel::setText);
 }
 
 
