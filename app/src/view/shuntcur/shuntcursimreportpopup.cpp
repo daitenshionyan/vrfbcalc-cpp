@@ -9,6 +9,15 @@
 #include "util/qtutilities.hpp"
 
 
+namespace {
+
+
+constexpr double kTimeStep = 1;
+
+
+}
+
+
 SCSimReportPopup::SCSimReportPopup(QWidget* parent)
       : QDialog(parent), ui(new Ui::SCSimReportPopup) {
   ui->setupUi(this);
@@ -40,7 +49,7 @@ void SCSimReportPopup::start(const vrfbdriver::ShuntSimJob& j) {
       [j](QPromise<vrfbdriver::ShuntSimStep>& p) {
         auto rpter = vrfbutils::BasePromise_Qt<vrfbdriver::ShuntSimStep>{&p};
         try {
-          vrfbdriver::simulateShunt(j, rpter);
+          vrfbdriver::simulateShunt(j, kTimeStep, rpter);
         } catch (...) {
           return;
         }

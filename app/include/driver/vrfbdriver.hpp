@@ -153,7 +153,7 @@ struct ShuntSimStep {
 
 
 void simulateShunt(
-      const ShuntSimJob&,
+      const ShuntSimJob&, double,
       comutils::concurrent::BasePromise<ShuntSimStep>&);
 
 

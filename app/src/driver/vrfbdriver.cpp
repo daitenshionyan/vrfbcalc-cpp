@@ -396,20 +396,18 @@ namespace {
 using SimStepFunc =
     double (*)(
           const ShuntSimJob&,
-          double,
+          double, double,
           comutils::concurrent::BasePromise<ShuntSimStep>&);
-
-constexpr double kDeltaTime = 1;
 
 
 template<typename T>
 void simShumt_Step(
       const vrfb::shuntcur::ElecInput& input,
       vrfb::shuntcur::ShuntCalc* calc,
-      const ShuntSimJob& j, double time,
+      const ShuntSimJob& j, double time, double dt,
       comutils::concurrent::BasePromise<ShuntSimStep>& p) {
   vrfb::shuntcur::ShuntReport rpt = calc->calculate(input);
-  calc->param().soc += (rpt.data<T>().storedCurr() * kDeltaTime)
+  calc->param().soc += (rpt.data<T>().storedCurr() * dt)
       / (j.elecVol * j.elecCon * 96485.3321);
   p.addResult({rpt, calc->param().soc, time});
 }
@@ -417,14 +415,14 @@ void simShumt_Step(
 
 template<typename T>
 double simShunt_Chg(
-      const ShuntSimJob& j, double startTime,
+      const ShuntSimJob& j, double startTime, double dt,
       comutils::concurrent::BasePromise<ShuntSimStep>& p) {
   vrfb::shuntcur::ShuntCalc* calc = j.calc->copy();
   double time = startTime;
   calc->param().soc = j.begSOC;
   while (calc->param().soc < j.endSOC) {
-    simShumt_Step<T>(j.chgInput, calc, j, time, p);
-    time += kDeltaTime;
+    simShumt_Step<T>(j.chgInput, calc, j, time, dt, p);
+    time += dt;
     p.setProgressValueAndText(
         (int) (100*(calc->param().soc - j.begSOC)) + 1,
         comutils::string::format_string("Charging : SOC=%.2f Time=%.2fs",
@@ -437,14 +435,14 @@ double simShunt_Chg(
 
 template<typename T>
 double simShunt_DChg(
-      const ShuntSimJob& j, double startTime,
+      const ShuntSimJob& j, double startTime, double dt,
       comutils::concurrent::BasePromise<ShuntSimStep>& p) {
   vrfb::shuntcur::ShuntCalc* calc = j.calc->copy();
   double time = startTime;
   calc->param().soc = j.endSOC;
   while (calc->param().soc > j.begSOC) {
-    simShumt_Step<T>(j.dchgInput, calc, j, time, p);
-    time += kDeltaTime;
+    simShumt_Step<T>(j.dchgInput, calc, j, time, dt, p);
+    time += dt;
     p.setProgressValueAndText(
         (int) (100*(2*j.endSOC - 2*j.begSOC - calc->param().soc)) + 2,
         comutils::string::format_string("Discharging : SOC=%.2f Time=%.2fs",
@@ -459,7 +457,7 @@ double simShunt_DChg(
 
 
 void simulateShunt(
-      const ShuntSimJob& j,
+      const ShuntSimJob& j, double dt,
       comutils::concurrent::BasePromise<ShuntSimStep>& p) {
   p.setProgressRange(0, ((int) (2*100*(j.endSOC - j.begSOC))));
   SimStepFunc chgFunc;
@@ -473,8 +471,8 @@ void simulateShunt(
       throw std::runtime_error("Unknown arrangement");
   }
   double time = 0;
-  time = chgFunc(j, time, p);
-  time = dchgFunc(j, time, p);
+  time = chgFunc(j, time, dt, p);
+  time = dchgFunc(j, time, dt, p);
   p.setProgressValue(((int) (2*100*(j.endSOC - j.begSOC))));
 }
 
