@@ -23,7 +23,7 @@ SCSimReportPopup::SCSimReportPopup(QWidget* parent)
       : QDialog(parent), ui(new Ui::SCSimReportPopup) {
   ui->setupUi(this);
 
-  ui->voltPlot->setupPlot({}, {}, "Time", "Voltage");
+  ui->voltPlot->setupPlot("Time (s)", "Voltage (V)", "Current (A)");
 
   connect(this, &QDialog::finished,
       this, &SCSimReportPopup::deleteSelf);
@@ -73,9 +73,12 @@ void SCSimReportPopup::start(const vrfbdriver::ShuntSimJob& j) {
 
 void SCSimReportPopup::reportReadyAt(int i) {
   auto step = watcher.future().resultAt(i);
-  ui->voltPlot->addPoint(
-      ui->voltPlot->dataCount(),
+  ui->voltPlot->addPoint<1>(
+      step.time,
       step.report.data<vrfb::shuntcur::pcc::PCCReport>().chargingVolt());
+  ui->voltPlot->addPoint<2>(
+      step.time,
+      step.report.data<vrfb::shuntcur::pcc::PCCReport>().chargingCurr());
   report.update<vrfb::shuntcur::pcc::PCCReport>(step, kTimeStep);
 }
 
