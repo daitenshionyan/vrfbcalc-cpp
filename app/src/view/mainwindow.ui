@@ -326,7 +326,25 @@ QScrollBar::add-line:horizontal {
 
  QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
      background: none;
- }</string>
+ }
+
+
+
+
+
+QProgressBar {
+	border-color: #606680;
+	border-radius: 5px;
+	border-style: solid;
+	border-width: 2px;
+	text-align: center;
+}
+
+
+QProgressBar::chunk {
+	background: #05B8CC;
+	border-radius: 3px;
+}</string>
   </property>
   <widget class="QWidget" name="windowBackground">
    <layout class="QVBoxLayout" name="verticalLayout">

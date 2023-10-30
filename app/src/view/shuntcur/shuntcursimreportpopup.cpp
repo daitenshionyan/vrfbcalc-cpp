@@ -91,6 +91,9 @@ void SCSimReportPopup::displayReport() {
 
 
 void SCSimReportPopup::displayFailed(const std::string& msg) {
+  ui->progressBar->setStyleSheet(
+      "QProgressBar { background: #FC3B3B; }"
+      "QProgressBar::chunk { background: #FC3B3B; }");
   ui->msgLabel->setText(QString::fromStdString(comutils::string::format_string(
       "Simulation Failed - %s",
       msg.c_str())));
