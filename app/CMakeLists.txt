@@ -34,11 +34,17 @@ add_executable(vrfbcalc-cpp WIN32
     include/driver/vrfbdriver_io.hpp
     src/driver/vrfbdriver_io.cpp
 
+    include/util/qtutilities.hpp
+
     resource/resource.qrc
 
     include/view/mainwindow.h
     src/view/mainwindow.ui
     src/view/mainwindow.cpp
+
+    include/view/plotpanel.h
+    src/view/plotpanel.ui
+    src/view/plotpanel.cpp
 
     include/view/graphplotform.h
     src/view/graphplotform.ui
@@ -83,6 +89,14 @@ add_executable(vrfbcalc-cpp WIN32
     include/view/shuntcur/shuntcurreportpopup.h
     src/view/shuntcur/shuntcurreportpopup.ui
     src/view/shuntcur/shuntcurreportpopup.cpp
+
+    include/view/shuntcur/shuntcursimconfigpopup.h
+    src/view/shuntcur/shuntcursimconfigpopup.ui
+    src/view/shuntcur/shuntcursimconfigpopup.cpp
+
+    include/view/shuntcur/shuntcursimreportpopup.h
+    src/view/shuntcur/shuntcursimreportpopup.ui
+    src/view/shuntcur/shuntcursimreportpopup.cpp
 
     resource/app.o          # executable icon
 )

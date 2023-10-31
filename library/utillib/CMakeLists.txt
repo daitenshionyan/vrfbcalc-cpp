@@ -14,6 +14,7 @@ set(CMAKE_AUTORCC off)
 
 add_library(utillib SHARED
     include/public/utillib/utils.hpp
+    include/public/utillib/concur.hpp
 
     src/table.cpp
     src/strutils.cpp

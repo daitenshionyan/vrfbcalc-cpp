@@ -40,7 +40,13 @@ class GraphPlotForm : public QWidget {
         const std::vector<double>& series_x,
         const std::vector<double>& series_y,
         const std::string& name_x, const std::string& name_y);
+    void setupPlot(const std::string& name_x,
+        const std::string& name_y1, const std::string& name_y2);
     bool savePng(const QString&);
+
+    template<int Ax=1>
+    void addPoint(double, double);
+    int dataCount() const;
 
 
   protected:
