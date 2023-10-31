@@ -34,14 +34,11 @@ SCSimReportPopup::SCSimReportPopup(QWidget* parent)
   connect(&watcher, &QFutureWatcher<vrfbdriver::ShuntSimStep>::resultReadyAt,
       this, &SCSimReportPopup::reportReadyAt);
   connect(&watcher, &QFutureWatcher<vrfbdriver::ShuntSimStep>::progressValueChanged,
-      ui->progressBar, &QProgressBar::setValue,
-      Qt::ConnectionType::QueuedConnection);
+      ui->progressBar, &QProgressBar::setValue);
   connect(&watcher, &QFutureWatcher<vrfbdriver::ShuntSimJob>::progressRangeChanged,
-      ui->progressBar, &QProgressBar::setRange,
-      Qt::ConnectionType::QueuedConnection);
+      ui->progressBar, &QProgressBar::setRange);
   connect(&watcher, &QFutureWatcher<vrfbdriver::ShuntSimStep>::progressTextChanged,
-      ui->msgLabel, &QLabel::setText,
-      Qt::ConnectionType::QueuedConnection);
+      ui->msgLabel, &QLabel::setText);
   connect(&watcher, &QFutureWatcher<vrfbdriver::ShuntSimStep>::finished,
       this, &SCSimReportPopup::displayReport,
       Qt::ConnectionType::QueuedConnection);

@@ -41,6 +41,67 @@ ShuntReport& ShuntReport::operator=(ShuntReport&& o) {
 
 
 
+namespace {
+
+
+constexpr int kIterationThreshold = 100;
+constexpr double kPowrDiffThreshold = 1e-3;
+
+
+template<typename T>
+ShuntReport calculate_CP(const ShuntCalc& calc, const ElecInput& input) {
+  double lowerVolt = 0.1 * calc.param().ocv()
+      * calc.param().numCells * calc.param().numStacks;
+  double upperVolt = 2 * calc.param().ocv()
+      * calc.param().numCells * calc.param().numStacks;
+  ShuntReport rpt;
+  for (int i = 0; i < kIterationThreshold; ++i) {
+    // lower check
+    rpt = calc.calculate({ElecInput::Mode::mConstVolt, lowerVolt});
+    double lowerPowr = rpt.data<T>().chargingPowr();
+    if (std::abs(lowerPowr-input.mag) < kPowrDiffThreshold) {
+      return rpt;
+    } else if (lowerPowr > input.mag) {
+      double temp = lowerVolt;
+      lowerVolt /= 2;
+      upperVolt = temp;
+      continue;
+    }
+    // upper check
+    rpt = calc.calculate({ElecInput::Mode::mConstVolt, upperVolt});
+    double upperPowr = rpt.data<T>().chargingPowr();
+    if (std::abs(upperPowr-input.mag) < kPowrDiffThreshold) {
+      return rpt;
+    } else if (upperPowr < input.mag) {
+      double temp = upperVolt;
+      upperVolt *= 2;
+      lowerVolt = temp;
+    }
+    // mid check
+    double midVolt = (lowerVolt + upperVolt) / 2;
+    rpt = calc.calculate({ElecInput::Mode::mConstVolt, midVolt});
+    double midPowr = rpt.data<T>().chargingPowr();
+    if (std::abs(midPowr-input.mag) < kPowrDiffThreshold) {
+      return rpt;
+    } else if (midPowr < input.mag) {
+      lowerVolt = midVolt;
+    } else {
+      upperVolt = midVolt;
+    }
+  }
+  throw std::runtime_error("Failed to converge");
+}
+
+
+}
+
+
+
+
+
+
+
+
 
 
 
@@ -102,6 +163,8 @@ ShuntReport PCCCalc::calculate(const ElecInput& input) const {
     case ElecInput::Mode::mConstCurr:
       return calculate_modeImpl<ElecInput::Mode::mConstCurr>(
           connType, sys, input.mag);
+    case ElecInput::Mode::mConstPowr:
+      return calculate_CP<PCCReport>(*this, input);
     default:
       throw std::runtime_error("Unknwon input mode");
   }
