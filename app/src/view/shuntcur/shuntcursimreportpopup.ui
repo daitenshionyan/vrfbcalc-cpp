@@ -48,7 +48,7 @@
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_2">
           <item>
-           <widget class="GraphPlotForm" name="voltPlot" native="true"/>
+           <widget class="PlotPanel" name="voltPlot" native="true"/>
           </item>
           <item>
            <spacer name="verticalSpacer">
@@ -131,9 +131,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>GraphPlotForm</class>
+   <class>PlotPanel</class>
    <extends>QWidget</extends>
-   <header>view/graphplotform.h</header>
+   <header>view/plotpanel.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

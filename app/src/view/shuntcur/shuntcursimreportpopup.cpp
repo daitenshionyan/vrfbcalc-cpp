@@ -8,6 +8,7 @@
 #include "utillib/concur.hpp"
 #include "utillib/utils.hpp"
 #include "util/qtutilities.hpp"
+#include "view/plotpanel.h"
 
 
 namespace {
@@ -23,7 +24,10 @@ SCSimReportPopup::SCSimReportPopup(QWidget* parent)
       : QDialog(parent), ui(new Ui::SCSimReportPopup) {
   ui->setupUi(this);
 
-  ui->voltPlot->setupPlot("Time (s)", "Voltage (V)", "Current (A)");
+  ui->voltPlot->setupPlot(
+      "Time (s)",
+      "Voltage (V)", std::vector<std::string> {"Voltage"},
+      "Current (A)", std::vector<std::string> {"Current"});
 
   connect(this, &QDialog::finished,
       this, &SCSimReportPopup::deleteSelf);
@@ -73,10 +77,10 @@ void SCSimReportPopup::start(const vrfbdriver::ShuntSimJob& j) {
 
 void SCSimReportPopup::reportReadyAt(int i) {
   auto step = watcher.future().resultAt(i);
-  ui->voltPlot->addPoint<1>(
+  ui->voltPlot->addPoint<PlotPanel::Axis::axMain>(
       step.time,
       step.report.data<vrfb::shuntcur::pcc::PCCReport>().chargingVolt());
-  ui->voltPlot->addPoint<2>(
+  ui->voltPlot->addPoint<PlotPanel::Axis::axSub>(
       step.time,
       step.report.data<vrfb::shuntcur::pcc::PCCReport>().chargingCurr());
   report.update<vrfb::shuntcur::pcc::PCCReport>(step, kTimeStep);

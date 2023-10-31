@@ -42,6 +42,10 @@ add_executable(vrfbcalc-cpp WIN32
     src/view/mainwindow.ui
     src/view/mainwindow.cpp
 
+    include/view/plotpanel.h
+    src/view/plotpanel.ui
+    src/view/plotpanel.cpp
+
     include/view/graphplotform.h
     src/view/graphplotform.ui
     src/view/graphplotform.cpp
