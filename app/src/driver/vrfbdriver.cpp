@@ -429,12 +429,16 @@ double simulateShunt_Chg(
   InputEndPoint* ep = j.chgEndPoint->initialise(*calc);
   ShuntSimStep stepRpt {{}, calc->param().soc, time, ShuntSimStep::Step::sChg};
   do {
+    p.suspendIfRequested();
+    if (p.isCancelled()) {
+      break;
+    }
+    time += dt;
     double oldSOC = stepRpt.soc;
     stepRpt = iterateShunt_Input<T, ShuntSimStep::Step::sChg>(calc, j.chgInput, j, time, dt);
     if (stepRpt.soc < oldSOC) {
       throw std::runtime_error("Discharging while charging");
     }
-    time += dt;
     p.addResult(stepRpt);
     p.setProgressValueAndText(
         100*iter + ep->progress(stepRpt),
@@ -442,6 +446,7 @@ double simulateShunt_Chg(
             stepRpt.soc * 100,
             time));
   } while (!ep->isEnd(stepRpt) && stepRpt.soc < j.upperLimitSOC);
+  delete ep;
   return time;
 }
 
@@ -455,12 +460,16 @@ double simulateShunt_DChg(
   InputEndPoint* ep = j.dchgEndPoint->initialise(*calc);
   ShuntSimStep stepRpt {{}, calc->param().soc, time, ShuntSimStep::Step::sDChg};
   do {
+    p.suspendIfRequested();
+    if (p.isCancelled()) {
+      break;
+    }
+    time += dt;
     double oldSOC = stepRpt.soc;
     stepRpt = iterateShunt_Input<T, ShuntSimStep::Step::sDChg>(calc, j.dchgInput, j, time, dt);
     if (stepRpt.soc > oldSOC) {
       throw std::runtime_error("Charging while discharging");
     }
-    time += dt;
     p.addResult(stepRpt);
     p.setProgressValueAndText(
         100*iter + ep->progress(stepRpt),
@@ -468,6 +477,7 @@ double simulateShunt_DChg(
             stepRpt.soc * 100,
             time));
   } while (!ep->isEnd(stepRpt) && stepRpt.soc > j.lowerLimitSOC);
+  delete ep;
   return time;
 }
 
@@ -482,6 +492,7 @@ void simulateShunt_Impl(
   calc->param().soc = j.lowerLimitSOC;
   time = simulateShunt_Chg<T>(0, calc, j, time, dt, p);
   time = simulateShunt_DChg<T>(1, calc, j, time, dt, p);
+  delete calc;
 }
 
 

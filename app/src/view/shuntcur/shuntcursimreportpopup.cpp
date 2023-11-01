@@ -102,3 +102,10 @@ void SCSimReportPopup::displayFailed(const std::string& msg) {
       "Simulation Failed - %s",
       msg.c_str())));
 }
+
+
+void SCSimReportPopup::deleteSelf(int) {
+  watcher.cancel();
+  watcher.waitForFinished();
+  delete this;
+}
