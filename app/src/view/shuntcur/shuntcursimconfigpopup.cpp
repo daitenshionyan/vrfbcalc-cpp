@@ -42,6 +42,10 @@ vrfbdriver::ShuntSimJob SCSimConfigPopup::getJob() {
     ui->concField->value(),
     getChgInput(),
     getDChgInput(),
+    new vrfbdriver::EndPointSOC<vrfbdriver::InputEndPoint::LimitType::ltUpper>(
+        ui->endSOCField->value() / 100),
+    new vrfbdriver::EndPointSOC<vrfbdriver::InputEndPoint::LimitType::ltLower>(
+        ui->begSOCField->value() / 100),
     ui->begSOCField->value() / 100,
     ui->endSOCField->value() / 100,
     static_cast<vrfbdriver::SCArrangement>(ui->arrComboBox->currentIndex())
