@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>GraphPlotForm</class>
- <widget class="QWidget" name="GraphPlotForm">
+ <class>PlotPanel</class>
+ <widget class="QWidget" name="PlotPanel">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
     <width>620</width>
-    <height>533</height>
+    <height>558</height>
    </rect>
   </property>
   <property name="windowTitle">

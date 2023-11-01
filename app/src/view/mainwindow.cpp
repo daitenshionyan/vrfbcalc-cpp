@@ -12,9 +12,6 @@
 #include "vrfbcalccfg.hpp"
 #include "driver/vrfbdriver_io.hpp"
 
-#include "view/shuntcur/shuntcurresultview.h"
-#include "view/shuntcur/shuntcurresultviewpcc.h"
-
 
 namespace {
 
@@ -40,7 +37,8 @@ MainWindow::MainWindow(QWidget* parent)
       : QMainWindow(parent),
         ui(new Ui::MainWindow),
         popup_ce(new CEConfigPopup(this)),
-        popup_se(new SCConfigPopup(this)) {
+        popup_se(new SCConfigPopup(this)),
+        popup_scsim(new SCSimConfigPopup(this)) {
   ui->setupUi(this);
   ui->outputArea->appendHtml(
       QString("<p style=\"color:grey;white-space:pre\">")
@@ -57,6 +55,8 @@ MainWindow::MainWindow(QWidget* parent)
       this, &MainWindow::startCalc_CE);
   connect(popup_se, &SCConfigPopup::accepted,
       this, &MainWindow::startCalc_SC);
+  connect(popup_scsim, &SCSimConfigPopup::accepted,
+      this, &MainWindow::startSim_SC);
   connect(&watcher, &QFutureWatcher<logger::LogMsg>::resultReadyAt,
       this, &MainWindow::logMsgAt);
   connect(&watcher, &QFutureWatcher<logger::LogMsg>::started,
@@ -70,6 +70,9 @@ MainWindow::MainWindow(QWidget* parent)
       Qt::ConnectionType::QueuedConnection);
   connect(this, &MainWindow::completedSCCalc,
       this, &MainWindow::displayPerformanceView_SC,
+      Qt::ConnectionType::QueuedConnection);
+  connect(this, &MainWindow::jobReadySCSim,
+      this, &MainWindow::displayReport_SCSim,
       Qt::ConnectionType::QueuedConnection);
 }
 
@@ -102,6 +105,23 @@ void MainWindow::startCalc_SC() {
         } catch (std::exception& ex) {
           w.fail(comutils::string::format_string("Error while calculating shunt performance: %s",
               ex.what()));
+          return;
+        }
+      }
+  ));
+}
+
+
+void MainWindow::startSim_SC() {
+  watcher.setFuture(QtConcurrent::run(
+      &pool,
+      [&](QPromise<logger::LogMsg>& p) {
+        auto w = PromLogger{p};
+        try {
+          auto job = popup_scsim->getJob();
+          emit jobReadySCSim(job);
+        } catch (...) {
+          w.fail("Simulation failed");
           return;
         }
       }
@@ -183,38 +203,23 @@ void MainWindow::displayPerformanceView(
 
 
 void MainWindow::displayPerformanceView_SC(const vrfbdriver::ShuntRes& r) {
-  switch (r.arrType) {
-    case vrfbdriver::SCArrType::scatSCL: {
-      SCResultView* rv = new SCResultView(this, r.name);
-      try {
-        rv->plotGraphs(r.perf.data<vrfb::shuntcur::scl::SCLReport>());
-      } catch (std::exception& ex) {
-        fail(comutils::string::format_string("Failed to plot graphs due to - %s",
-            ex.what()));
-        delete rv;
-        return;
-      }
-      connect(rv, &SCResultView::exportRequested,
-          this, &MainWindow::exportSEPerformance);
-      rv->open();
-      break;
+  SCReportPopup* rp = new SCReportPopup(r.name, this);
+  try {
+    switch (r.arrType) {
+      case vrfbdriver::SCArrType::scatPCC:
+        rp->plotGraphs(r.perf.data<vrfb::shuntcur::pcc::PCCReport>());
+        break;
     }
-    case vrfbdriver::SCArrType::scatPCC: {
-      SCResultView_PCC* rv = new SCResultView_PCC(this, r.name);
-      try {
-        rv->plotGraphs(r.perf.data<vrfb::shuntcur::pcc::PCCReport>());
-      } catch (std::exception& ex) {
-        fail(comutils::string::format_string("Failed to plot graphs due to - %s",
-            ex.what()));
-        delete rv;
-        return;
-      }
-      connect(rv, &SCResultView_PCC::exportRequested,
-          this, &MainWindow::exportSEPerformance);
-      rv->open();
-      break;
-    }
+  } catch (std::exception& ex) {
+    fail(comutils::string::format_string(
+        "Failed to plot graphs due to - %s",
+        ex.what()));
+    delete rp;
+    return;
   }
+  connect(rp, &SCReportPopup::exportRequested,
+      this, &MainWindow::exportSCReport);
+  rp->open();
 }
 
 
@@ -257,6 +262,40 @@ void MainWindow::exportSEPerformance(SCDataView* rv) {
         }
       }
   ));
+}
+
+
+void MainWindow::exportSCReport(SCReportPopup* rv) {
+  if (watcher.isRunning()) {
+    warn("Cannot export as another process is already running");
+    return;
+  }
+  rv->hide();
+  watcher.setFuture(QtConcurrent::run(
+      &pool,
+      [&, rv](QPromise<logger::LogMsg>& p) {
+        auto l = PromLogger{p};
+        bool is_success = rv->exportImages(l);
+        if (is_success) {
+          rv->done(QDialog::Accepted);
+        } else {
+          rv->show();
+        }
+      }
+  ));
+}
+
+
+void MainWindow::displayReport_SCSim(const vrfbdriver::ShuntSimJob& j) {
+  SCSimReportPopup* popup = new SCSimReportPopup(this);
+  try {
+    popup->show();
+    popup->start(j);
+  } catch (...) {
+    fail("Failed to simulate");
+    delete popup;
+    return;
+  }
 }
 
 
@@ -315,4 +354,9 @@ void MainWindow::on_actionCEAnalysis_triggered(bool) {
 
 void MainWindow::on_actionSCCalculations_triggered(bool) {
   popup_se->open();
+}
+
+
+void MainWindow::on_actionSCSimulate_triggered(bool) {
+  popup_scsim->open();
 }

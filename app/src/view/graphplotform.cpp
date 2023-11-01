@@ -192,8 +192,8 @@ class GraphPlotForm::SignalHandler : public QObject {
 
 
   private:
-    double xDiffThreshold = 1;
-    double yDiffThreshold = 1;
+    double xDiffThreshold = 1e-9;
+    double yDiffThreshold = 1e-9;
 
     Ui::GraphPlotForm* ui;
 };  // END OF CLASS <GraphPlotForm::SignalHandler> -----------------------------
@@ -363,18 +363,77 @@ void GraphPlotForm::setupPlot(
     max_y = (max_y < y) ? y : max_y;
   }
 
-  // set up fields
-  setupXFields(min_x, max_x);
-  setupYFields(min_y, max_y);
-
   // set initial range
-  ui->plot->xAxis->setRange(min_x, max_x);
-  ui->plot->yAxis->setRange(min_y, max_y);
-  // adjustAxisRange(ui->plot->xAxis);
-  // adjustAxisRange(ui->plot->yAxis);
   ui->plot->xAxis->setLabel(QString::fromStdString(name_x));
   ui->plot->yAxis->setLabel(QString::fromStdString(name_y));
   ui->plot->replot();
+}
+
+
+void GraphPlotForm::setupPlot(const std::string& name_x,
+      const std::string& name_y1, const std::string& name_y2) {
+  ui->plotWidthField->setValue(ui->plot->width());
+  ui->plotHeightField->setValue(ui->plot->height());
+
+  ui->plot->yAxis->setVisible(true);
+  ui->plot->yAxis2->setVisible(true);
+
+  ui->plot->addGraph(ui->plot->xAxis, ui->plot->yAxis);
+  ui->plot->graph(0)->setPen(QPen(Qt::red));
+  ui->plot->graph(0)->setName(QString::fromStdString(name_y1));
+  ui->plot->addGraph(ui->plot->xAxis, ui->plot->yAxis2);
+  ui->plot->graph(1)->setPen(QPen(Qt::blue));
+  ui->plot->graph(1)->setName(QString::fromStdString(name_y2));
+
+  QCPLayoutGrid *subLayout = new QCPLayoutGrid;
+  ui->plot->plotLayout()->addElement(0, 1, subLayout);
+  ui->plot->plotLayout()->addElement(0, 2, new QCPLayoutElement);
+  subLayout->addElement(0, 0, new QCPLayoutElement);
+  subLayout->addElement(1, 1, ui->plot->legend);
+  subLayout->setRowStretchFactor(1, 0.001);
+  subLayout->addElement(2, 2, new QCPLayoutElement);
+  ui->plot->plotLayout()->setColumnStretchFactor(1, 0.001);
+  ui->plot->plotLayout()->setColumnStretchFactor(2, 0.001);
+  ui->plot->legend->setVisible(true);
+
+  ui->plot->xAxis->setLabel(QString::fromStdString(name_x));
+  ui->plot->yAxis->setLabel(QString::fromStdString(name_y1));
+  ui->plot->yAxis2->setLabel(QString::fromStdString(name_y2));
+  ui->plot->replot();
+}
+
+
+template<>
+void GraphPlotForm::addPoint<1>(double x, double y) {
+  if (ui->plot->graphCount() == 0) {
+    ui->plot->addGraph();
+  }
+  auto graph = ui->plot->graph(0);
+  graph->addData(x, y);
+  graph->rescaleAxes();
+  ui->plot->replot();
+}
+template void GraphPlotForm::addPoint<1>(double x, double y);
+
+
+template<>
+void GraphPlotForm::addPoint<2>(double x, double y) {
+  while (ui->plot->graphCount() < 2) {
+    ui->plot->addGraph();
+  }
+  auto graph = ui->plot->graph(1);
+  graph->addData(x, y);
+  graph->rescaleAxes();
+  ui->plot->replot();
+}
+template void GraphPlotForm::addPoint<2>(double x, double y);
+
+
+int GraphPlotForm::dataCount() const {
+  if (ui->plot->graphCount() == 0) {
+    return 0;
+  }
+  return ui->plot->graph(0)->dataCount();
 }
 
 

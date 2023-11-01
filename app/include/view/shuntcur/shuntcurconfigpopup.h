@@ -23,6 +23,14 @@ class SCConfigPopup : public QDialog {
     vrfbdriver::ShuntJob getJob();
 
 
+  public slots:
+    void on_inputComboBox_currentIndexChanged(int);
+
+
+  private:
+    vrfb::shuntcur::ElecInput getElecInput() const;
+
+
   private:
     Ui::SCConfigPopup* ui;
 };

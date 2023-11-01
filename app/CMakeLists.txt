@@ -22,7 +22,7 @@ find_package(Qt6 REQUIRED COMPONENTS
     Charts
 )
 
-set(VRFBCALC-CPP_VERSION "0.3.1")
+set(VRFBCALC-CPP_VERSION "0.3.2")
 configure_file(include/vrfbcalccfg.hpp.in include/vrfbcalccfg.hpp)
 
 add_executable(vrfbcalc-cpp WIN32
@@ -34,11 +34,17 @@ add_executable(vrfbcalc-cpp WIN32
     include/driver/vrfbdriver_io.hpp
     src/driver/vrfbdriver_io.cpp
 
+    include/util/qtutilities.hpp
+
     resource/resource.qrc
 
     include/view/mainwindow.h
     src/view/mainwindow.ui
     src/view/mainwindow.cpp
+
+    include/view/plotpanel.h
+    src/view/plotpanel.ui
+    src/view/plotpanel.cpp
 
     include/view/graphplotform.h
     src/view/graphplotform.ui
@@ -80,13 +86,17 @@ add_executable(vrfbcalc-cpp WIN32
     src/view/shuntcur/shuntcurconfigpopup.ui
     src/view/shuntcur/shuntcurconfigpopup.cpp
 
-    include/view/shuntcur/shuntcurresultview.h
-    src/view/shuntcur/shuntcurresultview.ui
-    src/view/shuntcur/shuntcurresultview.cpp
+    include/view/shuntcur/shuntcurreportpopup.h
+    src/view/shuntcur/shuntcurreportpopup.ui
+    src/view/shuntcur/shuntcurreportpopup.cpp
 
-    include/view/shuntcur/shuntcurresultviewpcc.h
-    src/view/shuntcur/shuntcurresultviewpcc.ui
-    src/view/shuntcur/shuntcurresultviewpcc.cpp
+    include/view/shuntcur/shuntcursimconfigpopup.h
+    src/view/shuntcur/shuntcursimconfigpopup.ui
+    src/view/shuntcur/shuntcursimconfigpopup.cpp
+
+    include/view/shuntcur/shuntcursimreportpopup.h
+    src/view/shuntcur/shuntcursimreportpopup.ui
+    src/view/shuntcur/shuntcursimreportpopup.cpp
 
     resource/app.o          # executable icon
 )
