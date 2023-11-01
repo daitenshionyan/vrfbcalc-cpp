@@ -152,6 +152,9 @@ void SCSimConfigPopup::on_chgModeComboBox_currentIndexChanged(int index) {
     case vrfb::shuntcur::ElecInput::Mode::mConstCurr:
       ui->chgInputMagUnitLabel->setText("A");
       break;
+    case vrfb::shuntcur::ElecInput::Mode::mConstPowr:
+      ui->chgInputMagUnitLabel->setText("W");
+      break;
     default:
       ui->chgInputMagUnitLabel->setText("");
       break;
