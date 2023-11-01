@@ -88,6 +88,9 @@ void SCSimReportPopup::displayReport() {
   if (watcher.isCanceled()) {
     return;
   }
+  ui->progressBar->setStyleSheet(
+      "QProgressBar { background: #75F281; }"
+      "QProgressBar::chunk { background: #75F281; }");
   ui->msgLabel->setText(QString::fromStdString(comutils::string::format_string(
       "Completed : EE=%.2f%%",
       report.energyEff() * 100)));
@@ -96,8 +99,8 @@ void SCSimReportPopup::displayReport() {
 
 void SCSimReportPopup::displayFailed(const std::string& msg) {
   ui->progressBar->setStyleSheet(
-      "QProgressBar { background: #FC3B3B; }"
-      "QProgressBar::chunk { background: #FC3B3B; }");
+      "QProgressBar { background: #2DF041; }"
+      "QProgressBar::chunk { background: #2DF041; }");
   ui->msgLabel->setText(QString::fromStdString(comutils::string::format_string(
       "Simulation Failed - %s",
       msg.c_str())));
