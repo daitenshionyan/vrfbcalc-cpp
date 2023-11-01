@@ -35,7 +35,7 @@ class SCSimReportPopup : public QDialog {
     void displayReport();
     void displayFailed(const std::string& msg);
 
-    void deleteSelf(int) {delete this;}
+    void deleteSelf(int);
 
 
   private: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

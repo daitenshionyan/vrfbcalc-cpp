@@ -317,12 +317,14 @@ ShuntRes calcShuntPerf(const ShuntJob& j, logger::Logger& l) {
 ShuntSimJob::ShuntSimJob(const std::string& n, vrfb::shuntcur::ShuntCalc* c,
       double elec_v, double elec_c,
       const vrfb::shuntcur::ElecInput& e_in, const vrfb::shuntcur::ElecInput& e_out,
+      const InputEndPoint* ep_in, const InputEndPoint* ep_out,
       double soc_b, double soc_e,
       SCArrangement a)
       : name{n}, calc{c},
         elecVol{elec_v}, elecCon{elec_c},
         chgInput{e_in}, dchgInput{e_out},
-        begSOC{soc_b}, endSOC{soc_e},
+        chgEndPoint{ep_in}, dchgEndPoint{ep_out},
+        lowerLimitSOC{soc_b}, upperLimitSOC{soc_e},
         arr{a} {}
 
 
@@ -330,7 +332,8 @@ ShuntSimJob::ShuntSimJob(const ShuntSimJob& o)
       : name{o.name}, calc{o.calc->copy()},
         elecVol{o.elecVol}, elecCon{o.elecCon},
         chgInput{o.chgInput}, dchgInput{o.dchgInput},
-        begSOC{o.begSOC}, endSOC{o.endSOC},
+        chgEndPoint{o.chgEndPoint->clone()}, dchgEndPoint{o.dchgEndPoint->clone()},
+        lowerLimitSOC{o.lowerLimitSOC}, upperLimitSOC{o.upperLimitSOC},
         arr{o.arr} {}
 
 
@@ -338,7 +341,8 @@ ShuntSimJob::ShuntSimJob(ShuntSimJob&& o)
       : name{o.name}, calc{o.calc},
         elecVol{o.elecVol}, elecCon{o.elecCon},
         chgInput{o.chgInput}, dchgInput{o.dchgInput},
-        begSOC{o.begSOC}, endSOC{o.endSOC},
+        chgEndPoint{o.chgEndPoint}, dchgEndPoint{o.dchgEndPoint},
+        lowerLimitSOC{o.lowerLimitSOC}, upperLimitSOC{o.upperLimitSOC},
         arr{o.arr} {
   o.calc = nullptr;
 }
@@ -351,8 +355,10 @@ ShuntSimJob& ShuntSimJob::operator=(const ShuntSimJob& o) {
   elecCon = o.elecCon;
   chgInput = o.chgInput;
   dchgInput = o.dchgInput;
-  begSOC = o.begSOC;
-  endSOC = o.endSOC;
+  chgEndPoint = o.chgEndPoint->clone();
+  dchgEndPoint = o.dchgEndPoint->clone();
+  lowerLimitSOC = o.lowerLimitSOC;
+  upperLimitSOC = o.upperLimitSOC;
   arr = o.arr;
   return *this;
 }
@@ -366,8 +372,14 @@ ShuntSimJob& ShuntSimJob::operator=(ShuntSimJob&& o) {
   elecCon = o.elecCon;
   std::swap(chgInput, o.chgInput);
   std::swap(dchgInput, o.dchgInput);
-  begSOC = o.begSOC;
-  endSOC = o.endSOC;
+  delete chgEndPoint;
+  chgEndPoint = o.chgEndPoint;
+  o.chgEndPoint = nullptr;
+  delete dchgEndPoint;
+  dchgEndPoint = o.dchgEndPoint;
+  o.dchgEndPoint = nullptr;
+  lowerLimitSOC = o.lowerLimitSOC;
+  upperLimitSOC = o.upperLimitSOC;
   arr = o.arr;
   return *this;
 }
@@ -375,6 +387,8 @@ ShuntSimJob& ShuntSimJob::operator=(ShuntSimJob&& o) {
 
 ShuntSimJob::~ShuntSimJob() {
   delete calc;
+  delete chgEndPoint;
+  delete dchgEndPoint;
 }
 
 
@@ -393,71 +407,92 @@ ShuntSimJob::~ShuntSimJob() {
 
 namespace {
 
-using SimStepFunc =
-    double (*)(
-          const ShuntSimJob&,
-          double, double,
-          comutils::concurrent::BasePromise<ShuntSimStep>&);
-
 
 template<typename T, ShuntSimStep::Step STEP>
-void simShumt_Step(
-      const vrfb::shuntcur::ElecInput& input,
+ShuntSimStep iterateShunt_Input(
       vrfb::shuntcur::ShuntCalc* calc,
-      const ShuntSimJob& j, double time, double dt,
-      comutils::concurrent::BasePromise<ShuntSimStep>& p) {
+      const vrfb::shuntcur::ElecInput& input,
+      const ShuntSimJob& j, double time, double dt) {
   vrfb::shuntcur::ShuntReport rpt = calc->calculate(input);
   calc->param().soc += (rpt.data<T>().storedCurr() * dt)
       / (j.elecVol * j.elecCon * 96485.3321);
-  p.addResult({rpt, calc->param().soc, time, STEP});
+  return {rpt, calc->param().soc, time, STEP};
 }
 
 
 template<typename T>
-double simShunt_Chg(
+double simulateShunt_Chg(
+      int iter, vrfb::shuntcur::ShuntCalc* calc,
       const ShuntSimJob& j, double startTime, double dt,
       comutils::concurrent::BasePromise<ShuntSimStep>& p) {
-  vrfb::shuntcur::ShuntCalc* calc = j.calc->copy();
   double time = startTime;
-  calc->param().soc = j.begSOC;
-  while (calc->param().soc < j.endSOC) {
-    double oldSOC = calc->param().soc;
-    simShumt_Step<T, ShuntSimStep::Step::sChg>(j.chgInput, calc, j, time, dt, p);
-    if (oldSOC > calc->param().soc) {
+  InputEndPoint* ep = j.chgEndPoint->initialise(*calc);
+  ShuntSimStep stepRpt {{}, calc->param().soc, time, ShuntSimStep::Step::sChg};
+  do {
+    p.suspendIfRequested();
+    if (p.isCancelled()) {
+      break;
+    }
+    time += dt;
+    double oldSOC = stepRpt.soc;
+    stepRpt = iterateShunt_Input<T, ShuntSimStep::Step::sChg>(calc, j.chgInput, j, time, dt);
+    if (stepRpt.soc < oldSOC) {
       throw std::runtime_error("Discharging while charging");
     }
-    time += dt;
+    p.addResult(stepRpt);
     p.setProgressValueAndText(
-        (int) (100*(calc->param().soc - j.begSOC)) + 1,
+        100*iter + ep->progress(stepRpt),
         comutils::string::format_string("Charging : SOC=%.2f%% Time=%.2fs",
-            calc->param().soc * 100,
+            stepRpt.soc * 100,
             time));
-  }
+  } while (!ep->isEnd(stepRpt) && stepRpt.soc < j.upperLimitSOC);
+  delete ep;
   return time;
 }
 
 
 template<typename T>
-double simShunt_DChg(
+double simulateShunt_DChg(
+      int iter, vrfb::shuntcur::ShuntCalc* calc,
       const ShuntSimJob& j, double startTime, double dt,
       comutils::concurrent::BasePromise<ShuntSimStep>& p) {
-  vrfb::shuntcur::ShuntCalc* calc = j.calc->copy();
   double time = startTime;
-  calc->param().soc = j.endSOC;
-  while (calc->param().soc > j.begSOC) {
-    double oldSOC = calc->param().soc;
-    simShumt_Step<T, ShuntSimStep::Step::sDChg>(j.dchgInput, calc, j, time, dt, p);
-    if (oldSOC < calc->param().soc) {
-      throw std::runtime_error("Charging while discharging");
+  InputEndPoint* ep = j.dchgEndPoint->initialise(*calc);
+  ShuntSimStep stepRpt {{}, calc->param().soc, time, ShuntSimStep::Step::sDChg};
+  do {
+    p.suspendIfRequested();
+    if (p.isCancelled()) {
+      break;
     }
     time += dt;
+    double oldSOC = stepRpt.soc;
+    stepRpt = iterateShunt_Input<T, ShuntSimStep::Step::sDChg>(calc, j.dchgInput, j, time, dt);
+    if (stepRpt.soc > oldSOC) {
+      throw std::runtime_error("Charging while discharging");
+    }
+    p.addResult(stepRpt);
     p.setProgressValueAndText(
-        (int) (100*(2*j.endSOC - 2*j.begSOC - calc->param().soc)) + 2,
+        100*iter + ep->progress(stepRpt),
         comutils::string::format_string("Discharging : SOC=%.2f%% Time=%.2fs",
-            calc->param().soc * 100,
+            stepRpt.soc * 100,
             time));
-  }
+  } while (!ep->isEnd(stepRpt) && stepRpt.soc > j.lowerLimitSOC);
+  delete ep;
   return time;
+}
+
+
+template<typename T>
+void simulateShunt_Impl(
+      const ShuntSimJob& j, double dt,
+      comutils::concurrent::BasePromise<ShuntSimStep>& p) {
+  p.setProgressRange(0, 200);
+  double time = 0;
+  vrfb::shuntcur::ShuntCalc* calc = j.calc->copy();
+  calc->param().soc = j.lowerLimitSOC;
+  time = simulateShunt_Chg<T>(0, calc, j, time, dt, p);
+  time = simulateShunt_DChg<T>(1, calc, j, time, dt, p);
+  delete calc;
 }
 
 
@@ -467,21 +502,13 @@ double simShunt_DChg(
 void simulateShunt(
       const ShuntSimJob& j, double dt,
       comutils::concurrent::BasePromise<ShuntSimStep>& p) {
-  p.setProgressRange(0, ((int) (2*100*(j.endSOC - j.begSOC))));
-  SimStepFunc chgFunc;
-  SimStepFunc dchgFunc;
   switch (j.arr) {
     case SCArrangement::scaPCCFB:
-      chgFunc = &simShunt_Chg<vrfb::shuntcur::pcc::PCCReport>;
-      dchgFunc = &simShunt_DChg<vrfb::shuntcur::pcc::PCCReport>;
+      simulateShunt_Impl<vrfb::shuntcur::pcc::PCCReport>(j, dt, p);
       break;
     default:
       throw std::runtime_error("Unknown arrangement");
   }
-  double time = 0;
-  time = chgFunc(j, time, dt, p);
-  time = dchgFunc(j, time, dt, p);
-  p.setProgressValue(((int) (2*100*(j.endSOC - j.begSOC))));
 }
 
 

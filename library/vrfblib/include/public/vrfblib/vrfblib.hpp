@@ -155,7 +155,8 @@ namespace shuntcur {
 struct ElecInput {
   enum class Mode {
     mConstVolt,
-    mConstCurr
+    mConstCurr,
+    mConstPowr
   };
 
   Mode mode;
@@ -321,7 +322,7 @@ class ShuntReport {
 
 
   private:
-    ShuntReportData* data_p;
+    ShuntReportData* data_p = nullptr;
 };
 
 

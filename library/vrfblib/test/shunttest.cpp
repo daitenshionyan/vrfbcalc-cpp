@@ -228,6 +228,22 @@ TEST(vrfbShuntCurrPCC, calculateCCFB) {
 }
 
 
+TEST(vrfbShuntCurrPCC, calculateCPFB) {
+  vrfb::shuntcur::pcc::PCCCalc calc {
+      shunttest_pcc::kTestSysParam,
+      vrfb::shuntcur::pcc::PCCCalc::ConnType::ctFB};
+  vrfb::shuntcur::ShuntReport actual = calc.calculate(
+        shunttest_pcc::kTestCPInput);
+  checkShuntPerf(actual.data<vrfb::shuntcur::pcc::PCCReport>(),
+      shunttest_pcc::kTestChgCurr, shunttest_pcc::kTestChgVolt,
+      shunttest_pcc::kExCurrList,
+      shunttest_pcc::kExSSPTList, shunttest_pcc::kExSSPBList,
+      shunttest_pcc::kExSSNTList, shunttest_pcc::kExSSNBList,
+      shunttest_pcc::kExSMPTList, shunttest_pcc::kExSMPBList,
+      shunttest_pcc::kExSMNTList, shunttest_pcc::kExSMNBList);
+}
+
+
 TEST(vrfbShuntCurrPCC, calculateDVFB) {
   vrfb::shuntcur::pcc::PCCCalc calc {
       shunttest_pcc::kTestSysParam,
@@ -250,6 +266,22 @@ TEST(vrfbShuntCurrPCC, calculateDCFB) {
       vrfb::shuntcur::pcc::PCCCalc::ConnType::ctFB};
   vrfb::shuntcur::ShuntReport actual = calc.calculate(
       shunttest_pcc::kTestDCInput);
+  checkShuntPerf(actual.data<vrfb::shuntcur::pcc::PCCReport>(),
+      shunttest_pcc::kTestDChgCurr, shunttest_pcc::kTestDChgVolt,
+      shunttest_pcc::kExCurrList_DChg,
+      shunttest_pcc::kExSSPTList_DChg, shunttest_pcc::kExSSPBList_DChg,
+      shunttest_pcc::kExSSNTList_DChg, shunttest_pcc::kExSSNBList_DChg,
+      shunttest_pcc::kExSMPTList_DChg, shunttest_pcc::kExSMPBList_DChg,
+      shunttest_pcc::kExSMNTList_DChg, shunttest_pcc::kExSMNBList_DChg);
+}
+
+
+TEST(vrfbShuntCurrPCC, calculateDPFB) {
+  vrfb::shuntcur::pcc::PCCCalc calc {
+      shunttest_pcc::kTestSysParam,
+      vrfb::shuntcur::pcc::PCCCalc::ConnType::ctFB};
+  vrfb::shuntcur::ShuntReport actual = calc.calculate(
+      shunttest_pcc::kTestDPInput);
   checkShuntPerf(actual.data<vrfb::shuntcur::pcc::PCCReport>(),
       shunttest_pcc::kTestDChgCurr, shunttest_pcc::kTestDChgVolt,
       shunttest_pcc::kExCurrList_DChg,

@@ -24,9 +24,11 @@ constexpr double kTestConMainManiResist = 7;
 
 constexpr double kTestChgVolt = 60;
 constexpr double kTestChgCurr = 20.139580222;
+constexpr double kTestChgPowr = kTestChgVolt * kTestChgCurr;
 
 constexpr double kTestDChgVolt = 9.984091282;
 constexpr double kTestDChgCurr = -0.099840913;
+constexpr double kTestDChgPowr = kTestDChgVolt * kTestDChgCurr;
 
 
 const vrfb::shuntcur::ElecInput kTestCVInput {
@@ -39,6 +41,14 @@ const vrfb::shuntcur::ElecInput kTestCCInput {
   kTestChgCurr
 };
 
+const vrfb::shuntcur::ElecInput kTestCPInput {
+  vrfb::shuntcur::ElecInput::Mode::mConstPowr,
+  kTestChgPowr
+};
+
+
+
+
 const vrfb::shuntcur::ElecInput kTestDVInput {
   vrfb::shuntcur::ElecInput::Mode::mConstVolt,
   kTestDChgVolt
@@ -47,6 +57,11 @@ const vrfb::shuntcur::ElecInput kTestDVInput {
 const vrfb::shuntcur::ElecInput kTestDCInput {
   vrfb::shuntcur::ElecInput::Mode::mConstCurr,
   kTestDChgCurr
+};
+
+const vrfb::shuntcur::ElecInput kTestDPInput {
+  vrfb::shuntcur::ElecInput::Mode::mConstPowr,
+  kTestDChgPowr
 };
 
 

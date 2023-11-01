@@ -11,8 +11,10 @@ SCSimConfigPopup::SCSimConfigPopup(QWidget* parent)
   // add values to elec input mode combo box
   ui->chgModeComboBox->insertItem(1, "Const Volt");
   ui->chgModeComboBox->insertItem(2, "Const Curr");
+  ui->chgModeComboBox->insertItem(3, "Const Powr");
   ui->dchgModeComboBox->insertItem(1, "Const Volt");
   ui->dchgModeComboBox->insertItem(2, "Const Curr");
+  ui->dchgModeComboBox->insertItem(3, "Const Powr");
 }
 
 
@@ -42,6 +44,10 @@ vrfbdriver::ShuntSimJob SCSimConfigPopup::getJob() {
     ui->concField->value(),
     getChgInput(),
     getDChgInput(),
+    new vrfbdriver::EndPointSOC<vrfbdriver::InputEndPoint::LimitType::ltUpper>(
+        ui->endSOCField->value() / 100),
+    new vrfbdriver::EndPointSOC<vrfbdriver::InputEndPoint::LimitType::ltLower>(
+        ui->begSOCField->value() / 100),
     ui->begSOCField->value() / 100,
     ui->endSOCField->value() / 100,
     static_cast<vrfbdriver::SCArrangement>(ui->arrComboBox->currentIndex())
@@ -146,6 +152,9 @@ void SCSimConfigPopup::on_chgModeComboBox_currentIndexChanged(int index) {
     case vrfb::shuntcur::ElecInput::Mode::mConstCurr:
       ui->chgInputMagUnitLabel->setText("A");
       break;
+    case vrfb::shuntcur::ElecInput::Mode::mConstPowr:
+      ui->chgInputMagUnitLabel->setText("W");
+      break;
     default:
       ui->chgInputMagUnitLabel->setText("");
       break;
@@ -160,6 +169,9 @@ void SCSimConfigPopup::on_dchgModeComboBox_currentIndexChanged(int index) {
       break;
     case vrfb::shuntcur::ElecInput::Mode::mConstCurr:
       ui->dchgInputMagUnitLabel->setText("A");
+      break;
+    case vrfb::shuntcur::ElecInput::Mode::mConstPowr:
+      ui->dchgInputMagUnitLabel->setText("W");
       break;
     default:
       ui->dchgInputMagUnitLabel->setText("");
