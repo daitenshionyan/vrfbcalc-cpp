@@ -26,7 +26,7 @@ class PlotPanel : public QWidget {
 
 
   public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
-    PlotPanel(QWidget* parent = nullptr);
+    PlotPanel(QWidget* parent=nullptr, const std::string& plotName="");
     ~PlotPanel();
 
 
@@ -37,9 +37,17 @@ class PlotPanel : public QWidget {
           const std::string& name_y2="", const std::vector<std::string>& slist_2={});
 
 
+
   public: // ~~~~ accessors / adders ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     template<Axis Ax=Axis::axMain>
     void addPoint(double x, double y, int i=0);
+
+    template<Axis Ax=Axis::axMain>
+    void addPoint(const std::vector<std::pair<double, double>>& points, int i=0);
+
+
+  public: // ~~~~ functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    bool savePng(const std::string& dirPath, const std::string& prefix="");
 
 
   private:
@@ -49,6 +57,8 @@ class PlotPanel : public QWidget {
   private: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     Ui::PlotPanel* ui;
     SignalHandler* handler;
+
+    std::string name;
 
     std::vector<int> ilist_1;       // graph indexes using main y axis
     std::vector<int> ilist_2;       // graph indexes using sub y axis
