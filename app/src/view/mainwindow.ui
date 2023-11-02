@@ -407,7 +407,6 @@ QProgressBar::chunk {
     <addaction name="actionCECalculations"/>
     <addaction name="actionCEAnalysis"/>
     <addaction name="separator"/>
-    <addaction name="actionSCCalculations"/>
     <addaction name="actionSCSimulate"/>
    </widget>
    <addaction name="menuFile"/>

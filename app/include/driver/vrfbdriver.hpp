@@ -71,39 +71,6 @@ enum class SCArrType {
 };
 
 
-struct ShuntJob {
-  ShuntJob(const std::string&, const vrfb::shuntcur::ShuntCalc&,
-      const vrfb::shuntcur::ElecInput&,
-      SCArrangement);
-  ShuntJob(const std::string&, vrfb::shuntcur::ShuntCalc*,
-      const vrfb::shuntcur::ElecInput&,
-      SCArrangement);
-
-  ShuntJob(const ShuntJob&);
-  ShuntJob(ShuntJob&&);
-
-  ShuntJob& operator=(const ShuntJob&);
-  ShuntJob& operator=(ShuntJob&&);
-
-  ~ShuntJob() {delete calc;}
-
-  std::string name;
-  vrfb::shuntcur::ShuntCalc* calc;
-  vrfb::shuntcur::ElecInput elecInput;
-  SCArrangement arr;
-};
-
-
-struct ShuntRes {
-  std::string name;
-  SCArrType arrType;
-  vrfb::shuntcur::ShuntReport perf;
-};
-
-
-ShuntRes calcShuntPerf(const ShuntJob&, logger::Logger&);
-
-
 
 
 

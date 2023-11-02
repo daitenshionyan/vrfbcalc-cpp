@@ -7,8 +7,6 @@
 
 #include "view/celleff/celleffconfigpopup.h"
 #include "view/celleff/celleffresultview.h"
-#include "view/shuntcur/shuntcurconfigpopup.h"
-#include "view/shuntcur/shuntcurreportpopup.h"
 #include "view/shuntcur/shuntcursimconfigpopup.h"
 #include "view/shuntcur/shuntcursimreportpopup.h"
 #include "driver/vrfbdriver.hpp"
@@ -41,16 +39,12 @@ class MainWindow : public QMainWindow, private logger::Logger {
 
   signals:
     void availableLogMsg(const logger::LogMsg&);
-  signals:
     void completedPerformanceReading(const std::vector<vrfbdriver::PerformanceEntry_CE>&);
-  signals:
-    void completedSCCalc(const vrfbdriver::shuntcur::ShuntRes&);
     void jobReadySCSim(const vrfbdriver::shuntcur::ShuntSimJob&);
 
 
   private:
     void startCalc_CE();
-    void startCalc_SC();
     void startSim_SC();
     void log(const logger::LogMsg&) override;
     void logMsg(const logger::LogMsg&);
@@ -63,16 +57,11 @@ class MainWindow : public QMainWindow, private logger::Logger {
     void displayPerformanceView(const std::vector<vrfbdriver::PerformanceEntry_CE>&);
     void exportCEPerformance(CEResultView*);
 
-    void displayPerformanceView_SC(const vrfbdriver::shuntcur::ShuntRes&);
-    void exportSEPerformance(SCDataView*);
-    void exportSCReport(SCReportPopup*);
-
     void displayReport_SCSim(const vrfbdriver::shuntcur::ShuntSimJob&);
 
 
     Ui::MainWindow* ui;
     CEConfigPopup* popup_ce;
-    SCConfigPopup* popup_se;
     SCSimConfigPopup* popup_scsim;
 
     QFutureWatcher<logger::LogMsg> watcher;
@@ -83,8 +72,6 @@ class MainWindow : public QMainWindow, private logger::Logger {
     void on_action_openOutput_triggered(bool);
     void on_actionCECalculations_triggered(bool);
     void on_actionCEAnalysis_triggered(bool);
-
-    void on_actionSCCalculations_triggered(bool);
 
     void on_actionSCSimulate_triggered(bool);
 };

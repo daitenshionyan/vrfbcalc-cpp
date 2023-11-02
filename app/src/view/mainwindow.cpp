@@ -37,7 +37,6 @@ MainWindow::MainWindow(QWidget* parent)
       : QMainWindow(parent),
         ui(new Ui::MainWindow),
         popup_ce(new CEConfigPopup(this)),
-        popup_se(new SCConfigPopup(this)),
         popup_scsim(new SCSimConfigPopup(this)) {
   ui->setupUi(this);
   ui->outputArea->appendHtml(
@@ -53,8 +52,6 @@ MainWindow::MainWindow(QWidget* parent)
       this, &MainWindow::logMsg);
   connect(popup_ce, &CEConfigPopup::accepted,
       this, &MainWindow::startCalc_CE);
-  connect(popup_se, &SCConfigPopup::accepted,
-      this, &MainWindow::startCalc_SC);
   connect(popup_scsim, &SCSimConfigPopup::accepted,
       this, &MainWindow::startSim_SC);
   connect(&watcher, &QFutureWatcher<logger::LogMsg>::resultReadyAt,
@@ -68,9 +65,6 @@ MainWindow::MainWindow(QWidget* parent)
   connect(this, &MainWindow::completedPerformanceReading,
       this, &MainWindow::displayPerformanceView,
       Qt::ConnectionType::QueuedConnection);
-  connect(this, &MainWindow::completedSCCalc,
-      this, &MainWindow::displayPerformanceView_SC,
-      Qt::ConnectionType::QueuedConnection);
   connect(this, &MainWindow::jobReadySCSim,
       this, &MainWindow::displayReport_SCSim,
       Qt::ConnectionType::QueuedConnection);
@@ -79,7 +73,7 @@ MainWindow::MainWindow(QWidget* parent)
 
 MainWindow::~MainWindow() {
   delete popup_ce;
-  delete popup_se;
+  delete popup_scsim;
   delete ui;
 }
 
@@ -91,24 +85,6 @@ void MainWindow::startCalc_CE() {
         auto w = PromLogger{p};
         vrfbdriver::calcCellEff(popup_ce->getSetSupplierMap(), w);
       }));
-}
-
-
-void MainWindow::startCalc_SC() {
-  watcher.setFuture(QtConcurrent::run(
-      &pool,
-      [&](QPromise<logger::LogMsg>& p) {
-        auto w = PromLogger{p};
-        try {
-          auto res = vrfbdriver::shuntcur::calcShuntPerf(popup_se->getJob(), w);
-          emit completedSCCalc(res);
-        } catch (std::exception& ex) {
-          w.fail(comutils::string::format_string("Error while calculating shunt performance: %s",
-              ex.what()));
-          return;
-        }
-      }
-  ));
 }
 
 
@@ -202,70 +178,7 @@ void MainWindow::displayPerformanceView(
 }
 
 
-void MainWindow::displayPerformanceView_SC(const vrfbdriver::shuntcur::ShuntRes& r) {
-  SCReportPopup* rp = new SCReportPopup(r.name, this);
-  try {
-    switch (r.arrType) {
-      case vrfbdriver::shuntcur::SCArrType::scatPCC:
-        rp->plotGraphs(r.perf.data<vrfb::shuntcur::pcc::PCCReport>());
-        break;
-    }
-  } catch (std::exception& ex) {
-    fail(comutils::string::format_string(
-        "Failed to plot graphs due to - %s",
-        ex.what()));
-    delete rp;
-    return;
-  }
-  connect(rp, &SCReportPopup::exportRequested,
-      this, &MainWindow::exportSCReport);
-  rp->open();
-}
-
-
 void MainWindow::exportCEPerformance(CEResultView* rv) {
-  if (watcher.isRunning()) {
-    warn("Cannot export as another process is already running");
-    return;
-  }
-  rv->hide();
-  watcher.setFuture(QtConcurrent::run(
-      &pool,
-      [&, rv](QPromise<logger::LogMsg>& p) {
-        auto l = PromLogger{p};
-        bool is_success = rv->exportImages(l);
-        if (is_success) {
-          rv->done(QDialog::Accepted);
-        } else {
-          rv->show();
-        }
-      }
-  ));
-}
-
-
-void MainWindow::exportSEPerformance(SCDataView* rv) {
-  if (watcher.isRunning()) {
-    warn("Cannot export as another process is already running");
-    return;
-  }
-  rv->hide();
-  watcher.setFuture(QtConcurrent::run(
-      &pool,
-      [&, rv](QPromise<logger::LogMsg>& p) {
-        auto l = PromLogger{p};
-        bool is_success = rv->exportImages(l);
-        if (is_success) {
-          rv->done(QDialog::Accepted);
-        } else {
-          rv->show();
-        }
-      }
-  ));
-}
-
-
-void MainWindow::exportSCReport(SCReportPopup* rv) {
   if (watcher.isRunning()) {
     warn("Cannot export as another process is already running");
     return;
@@ -349,11 +262,6 @@ void MainWindow::on_actionCEAnalysis_triggered(bool) {
         }
         emit completedPerformanceReading(vrfbdriver::readPerformance_CE(strPaths, l));
       }));
-}
-
-
-void MainWindow::on_actionSCCalculations_triggered(bool) {
-  popup_se->open();
 }
 
 

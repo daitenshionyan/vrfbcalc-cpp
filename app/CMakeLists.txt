@@ -50,10 +50,6 @@ add_executable(vrfbcalc-cpp WIN32
     src/view/graphplotform.ui
     src/view/graphplotform.cpp
 
-    include/view/graphplotformtitled.h
-    src/view/graphplotformtitled.ui
-    src/view/graphplotformtitled.cpp
-
     # :::: Cell Efficiency ::::::::::::::::::::::::::::::::::::::::::::::::::: #
 
     include/view/celleff/celleffconfigpopup.h
@@ -81,14 +77,6 @@ add_executable(vrfbcalc-cpp WIN32
     src/view/celleff/celleffresultview.cpp
 
     # :::: Shunt Current ::::::::::::::::::::::::::::::::::::::::::::::::::::: #
-
-    include/view/shuntcur/shuntcurconfigpopup.h
-    src/view/shuntcur/shuntcurconfigpopup.ui
-    src/view/shuntcur/shuntcurconfigpopup.cpp
-
-    include/view/shuntcur/shuntcurreportpopup.h
-    src/view/shuntcur/shuntcurreportpopup.ui
-    src/view/shuntcur/shuntcurreportpopup.cpp
 
     include/view/shuntcur/shuntcursimconfigpopup.h
     src/view/shuntcur/shuntcursimconfigpopup.ui
