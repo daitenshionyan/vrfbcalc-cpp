@@ -45,7 +45,7 @@
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <property name="spacing">
-        <number>10</number>
+        <number>5</number>
        </property>
        <property name="leftMargin">
         <number>10</number>
@@ -59,152 +59,6 @@
        <property name="bottomMargin">
         <number>10</number>
        </property>
-       <item>
-        <widget class="QLabel" name="ceTitleLabel">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="font">
-          <font>
-           <pointsize>16</pointsize>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>Coulombic Efficiency</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="GraphPlotForm" name="ceCycPlot" native="true"/>
-       </item>
-       <item>
-        <widget class="GraphPlotForm" name="ceTimePlot" native="true"/>
-       </item>
-       <item>
-        <widget class="QLabel" name="eeTitleLabel">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="font">
-          <font>
-           <pointsize>16</pointsize>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>Energy Efficiency</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="GraphPlotForm" name="eeCycPlot" native="true"/>
-       </item>
-       <item>
-        <widget class="GraphPlotForm" name="eeTimePlot" native="true"/>
-       </item>
-       <item>
-        <widget class="QLabel" name="veTitleLabel">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="font">
-          <font>
-           <pointsize>16</pointsize>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>Voltage Efficiency</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="GraphPlotForm" name="veCycPlot" native="true"/>
-       </item>
-       <item>
-        <widget class="GraphPlotForm" name="veTimePlot" native="true"/>
-       </item>
-       <item>
-        <widget class="QLabel" name="asrTitleLabel">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="font">
-          <font>
-           <pointsize>16</pointsize>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>ASR</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="GraphPlotForm" name="asrCycPlot" native="true"/>
-       </item>
-       <item>
-        <widget class="GraphPlotForm" name="asrTimePlot" native="true"/>
-       </item>
-       <item>
-        <widget class="QLabel" name="timeTitleLabel">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="font">
-          <font>
-           <pointsize>16</pointsize>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>Time</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="GraphPlotForm" name="totalTimeCycPlot" native="true"/>
-       </item>
-       <item>
-        <widget class="GraphPlotForm" name="cycTimeCycPlot" native="true"/>
-       </item>
-       <item>
-        <widget class="GraphPlotForm" name="chgTimeCycPlot" native="true"/>
-       </item>
-       <item>
-        <widget class="GraphPlotForm" name="dchgTimeCycPlot" native="true"/>
-       </item>
       </layout>
      </widget>
     </widget>
@@ -249,14 +103,6 @@
    </item>
   </layout>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>GraphPlotForm</class>
-   <extends>QWidget</extends>
-   <header>view/graphplotform.h</header>
-   <container>1</container>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections/>
 </ui>

@@ -448,7 +448,7 @@ template<>
 void PlotPanel::addPoint<PlotPanel::Axis::axMain>(double x, double y, int i) {
   auto graph = ui->plot->graph(ilist_1.at(i));
   graph->addData(x, y);
-  graph->rescaleAxes();
+  ui->plot->rescaleAxes();
   ui->plot->replot();
 }
 
@@ -457,7 +457,7 @@ template<>
 void PlotPanel::addPoint<PlotPanel::Axis::axSub>(double x, double y, int i) {
   auto graph = ui->plot->graph(ilist_2.at(i));
   graph->addData(x, y);
-  graph->rescaleAxes();
+  ui->plot->rescaleAxes();
   ui->plot->replot();
 }
 
@@ -471,7 +471,7 @@ void PlotPanel::addPoint<PlotPanel::Axis::axMain>(
   for (const auto& p : points) {
     graph->addData(p.first, p.second);
   }
-  graph->rescaleAxes();
+  ui->plot->rescaleAxes();
   ui->plot->replot();
 }
 
@@ -483,7 +483,7 @@ void PlotPanel::addPoint<PlotPanel::Axis::axSub>(
   for (const auto& p : points) {
     graph->addData(p.first, p.second);
   }
-  graph->rescaleAxes();
+  ui->plot->rescaleAxes();
   ui->plot->replot();
 }
 
@@ -509,7 +509,7 @@ bool PlotPanel::savePng(const std::string& dirPath, const std::string& prefix) {
   if (prefix.empty()) {
     fileName += name;
   } else if (!name.empty()) {
-    fileName += "-" + name;
+    fileName += " - " + name;
   }
   return ui->plot->savePng(
       QString::fromStdString(dirPath + "/" + fileName + ".png"));

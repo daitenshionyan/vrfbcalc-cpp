@@ -46,10 +46,6 @@ add_executable(vrfbcalc-cpp WIN32
     src/view/plotpanel.ui
     src/view/plotpanel.cpp
 
-    include/view/graphplotform.h
-    src/view/graphplotform.ui
-    src/view/graphplotform.cpp
-
     # :::: Cell Efficiency ::::::::::::::::::::::::::::::::::::::::::::::::::: #
 
     include/view/celleff/celleffconfigpopup.h

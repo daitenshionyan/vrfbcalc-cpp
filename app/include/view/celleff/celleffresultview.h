@@ -1,18 +1,14 @@
 #pragma once
 
-
-#include <vector>
-
 #include <QDialog>
-
-#include "logger.hpp"
-#include "driver/vrfbdriver.hpp"
 
 #include <string>
 #include <utility>
 #include <vector>
 
-#include "view/graphplotform.h"
+#include "logger.hpp"
+#include "driver/vrfbdriver.hpp"
+#include "view/plotpanel.h"
 
 
 QT_BEGIN_NAMESPACE
@@ -25,30 +21,37 @@ QT_END_NAMESPACE
 class CEResultView : public QDialog {
   Q_OBJECT
 
-  struct PlotFormData {
-    std::string title;
-    std::string name;
-    std::string xHdr;
-    std::string yHdr;
-    GraphPlotForm* plot;
-  };
 
-  public:
+  public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
     CEResultView(QWidget*);
     ~CEResultView();
 
-    void plotGraphs(const std::vector<vrfbdriver::PerformanceEntry_CE>&);
-    bool exportImages(logger::Logger&);
 
   signals:
     void exportRequested(CEResultView*);
 
 
+  public: // ~~~~ functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    void plotGraphs(const std::vector<vrfbdriver::PerformanceEntry_CE>&);
+    bool exportImages(logger::Logger&);
+
+
   private:
     void deleteSelf(int) {delete this;}
 
+
+  private: // ~~~~ types ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    struct PlotConfig {
+      std::string title;
+      std::string xHdr;
+      std::string yHdr;
+      PlotPanel* panel=nullptr;
+    };
+
+
+  private: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     Ui::CEResultView* ui;
-    std::vector<PlotFormData> plotForms;
+    std::vector<PlotConfig> plotCfgs;
 
 
   private slots:
