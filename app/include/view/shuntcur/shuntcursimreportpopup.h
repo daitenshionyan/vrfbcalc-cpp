@@ -23,7 +23,7 @@ class SCSimReportPopup : public QDialog {
 
 
   public: // ~~~~ functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    void start(const vrfbdriver::ShuntSimJob&);
+    void start(const vrfbdriver::shuntcur::ShuntSimJob&);
 
 
   signals:
@@ -41,8 +41,8 @@ class SCSimReportPopup : public QDialog {
   private: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     Ui::SCSimReportPopup* ui;
 
-    vrfbdriver::ShuntSimReport report;
+    vrfbdriver::shuntcur::ShuntSimReport report;
 
-    QFutureWatcher<vrfbdriver::ShuntSimStep> watcher;
+    QFutureWatcher<vrfbdriver::shuntcur::ShuntSimStep> watcher;
     QThreadPool pool;
 };

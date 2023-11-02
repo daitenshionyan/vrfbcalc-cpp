@@ -100,7 +100,7 @@ void MainWindow::startCalc_SC() {
       [&](QPromise<logger::LogMsg>& p) {
         auto w = PromLogger{p};
         try {
-          auto res = vrfbdriver::calcShuntPerf(popup_se->getJob(), w);
+          auto res = vrfbdriver::shuntcur::calcShuntPerf(popup_se->getJob(), w);
           emit completedSCCalc(res);
         } catch (std::exception& ex) {
           w.fail(comutils::string::format_string("Error while calculating shunt performance: %s",
@@ -202,11 +202,11 @@ void MainWindow::displayPerformanceView(
 }
 
 
-void MainWindow::displayPerformanceView_SC(const vrfbdriver::ShuntRes& r) {
+void MainWindow::displayPerformanceView_SC(const vrfbdriver::shuntcur::ShuntRes& r) {
   SCReportPopup* rp = new SCReportPopup(r.name, this);
   try {
     switch (r.arrType) {
-      case vrfbdriver::SCArrType::scatPCC:
+      case vrfbdriver::shuntcur::SCArrType::scatPCC:
         rp->plotGraphs(r.perf.data<vrfb::shuntcur::pcc::PCCReport>());
         break;
     }
@@ -286,7 +286,7 @@ void MainWindow::exportSCReport(SCReportPopup* rv) {
 }
 
 
-void MainWindow::displayReport_SCSim(const vrfbdriver::ShuntSimJob& j) {
+void MainWindow::displayReport_SCSim(const vrfbdriver::shuntcur::ShuntSimJob& j) {
   SCSimReportPopup* popup = new SCSimReportPopup(this);
   try {
     popup->show();

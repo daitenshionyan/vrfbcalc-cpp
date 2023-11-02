@@ -45,11 +45,20 @@ std::vector<PerformanceEntry_CE> readPerformance_CE(const std::vector<std::strin
 
 
 
+
+
 /*
 ================================================================================
-        Shunt Current
+================================================================================
+==
+==        SHUNT CURRENT
+==
+================================================================================
 ================================================================================
 */
+
+
+namespace shuntcur {
 
 
 enum class SCArrangement {
@@ -292,6 +301,9 @@ struct ShuntSimJob {
 void simulateShunt(
       const ShuntSimJob&, double,
       comutils::concurrent::BasePromise<ShuntSimStep>&);
+
+
+} // namespace <vrfbdriver::shuntcur>
 
 
 }

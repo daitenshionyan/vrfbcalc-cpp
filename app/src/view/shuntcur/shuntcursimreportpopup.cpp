@@ -31,15 +31,15 @@ SCSimReportPopup::SCSimReportPopup(QWidget* parent)
 
   connect(this, &QDialog::finished,
       this, &SCSimReportPopup::deleteSelf);
-  connect(&watcher, &QFutureWatcher<vrfbdriver::ShuntSimStep>::resultReadyAt,
+  connect(&watcher, &QFutureWatcher<vrfbdriver::shuntcur::ShuntSimStep>::resultReadyAt,
       this, &SCSimReportPopup::reportReadyAt);
-  connect(&watcher, &QFutureWatcher<vrfbdriver::ShuntSimStep>::progressValueChanged,
+  connect(&watcher, &QFutureWatcher<vrfbdriver::shuntcur::ShuntSimStep>::progressValueChanged,
       ui->progressBar, &QProgressBar::setValue);
-  connect(&watcher, &QFutureWatcher<vrfbdriver::ShuntSimJob>::progressRangeChanged,
+  connect(&watcher, &QFutureWatcher<vrfbdriver::shuntcur::ShuntSimJob>::progressRangeChanged,
       ui->progressBar, &QProgressBar::setRange);
-  connect(&watcher, &QFutureWatcher<vrfbdriver::ShuntSimStep>::progressTextChanged,
+  connect(&watcher, &QFutureWatcher<vrfbdriver::shuntcur::ShuntSimStep>::progressTextChanged,
       ui->msgLabel, &QLabel::setText);
-  connect(&watcher, &QFutureWatcher<vrfbdriver::ShuntSimStep>::finished,
+  connect(&watcher, &QFutureWatcher<vrfbdriver::shuntcur::ShuntSimStep>::finished,
       this, &SCSimReportPopup::displayReport,
       Qt::ConnectionType::QueuedConnection);
   connect(this, &SCSimReportPopup::simulationFailed,
@@ -53,13 +53,13 @@ SCSimReportPopup::~SCSimReportPopup() {
 }
 
 
-void SCSimReportPopup::start(const vrfbdriver::ShuntSimJob& j) {
-  watcher.setFuture(QtConcurrent::run<vrfbdriver::ShuntSimStep>(
+void SCSimReportPopup::start(const vrfbdriver::shuntcur::ShuntSimJob& j) {
+  watcher.setFuture(QtConcurrent::run<vrfbdriver::shuntcur::ShuntSimStep>(
       &pool,
-      [&, j](QPromise<vrfbdriver::ShuntSimStep>& p) {
-        auto rpter = vrfbutils::BasePromise_Qt<vrfbdriver::ShuntSimStep>{&p};
+      [&, j](QPromise<vrfbdriver::shuntcur::ShuntSimStep>& p) {
+        auto rpter = vrfbutils::BasePromise_Qt<vrfbdriver::shuntcur::ShuntSimStep>{&p};
         try {
-          vrfbdriver::simulateShunt(j, kTimeStep, rpter);
+          vrfbdriver::shuntcur::simulateShunt(j, kTimeStep, rpter);
         } catch (const std::exception& ex) {
           emit simulationFailed(ex.what());
           throw vrfbutils::StdQException(ex);

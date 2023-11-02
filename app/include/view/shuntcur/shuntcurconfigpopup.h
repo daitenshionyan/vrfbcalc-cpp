@@ -20,7 +20,7 @@ class SCConfigPopup : public QDialog {
     SCConfigPopup(QWidget* parent);
     ~SCConfigPopup();
 
-    vrfbdriver::ShuntJob getJob();
+    vrfbdriver::shuntcur::ShuntJob getJob();
 
 
   public slots:

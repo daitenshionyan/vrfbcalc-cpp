@@ -19,7 +19,7 @@ SCConfigPopup::~SCConfigPopup() {
 }
 
 
-vrfbdriver::ShuntJob SCConfigPopup::getJob() {
+vrfbdriver::shuntcur::ShuntJob SCConfigPopup::getJob() {
   if (ui->nameField->text().isEmpty()) {
     throw std::runtime_error("Blank name");
   }
@@ -33,10 +33,10 @@ vrfbdriver::ShuntJob SCConfigPopup::getJob() {
     throw std::runtime_error("Arrange not set");
   }
 
-  vrfbdriver::SCArrangement arr = static_cast<vrfbdriver::SCArrangement>(ui->arrComboBox->currentIndex());
+  vrfbdriver::shuntcur::SCArrangement arr = static_cast<vrfbdriver::shuntcur::SCArrangement>(ui->arrComboBox->currentIndex());
   vrfb::shuntcur::ShuntCalc* calc = nullptr;
   switch (arr) {
-    case vrfbdriver::SCArrangement::scaPCCFB:
+    case vrfbdriver::shuntcur::SCArrangement::scaPCCFB:
       calc = new vrfb::shuntcur::pcc::PCCCalc(
           vrfb::shuntcur::pcc::PCCSysParam {
               vrfb::shuntcur::SysParam {
@@ -68,7 +68,7 @@ vrfbdriver::ShuntJob SCConfigPopup::getJob() {
     default:
       throw std::runtime_error("Unsupported arrangement");
   }
-  return vrfbdriver::ShuntJob(
+  return vrfbdriver::shuntcur::ShuntJob(
       ui->nameField->text().toStdString(),
       calc,
       getElecInput(),
