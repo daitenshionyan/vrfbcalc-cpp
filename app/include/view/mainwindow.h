@@ -34,29 +34,14 @@ class MainWindow : public QMainWindow {
     void jobReadySCSim(const vrfbdriver::shuntcur::ShuntSimJob&);
 
 
-  private:
-    void startCalc_CE();
-    void startSim_SC();
-    void disableActions();
-    void enableActions();
-
-    void displayPerformanceView(const std::vector<vrfbdriver::PerformanceEntry_CE>&);
-    void exportCEPerformance(CEResultView*);
-
-    void displayReport_SCSim(const vrfbdriver::shuntcur::ShuntSimJob&);
-
-
   private: // ~~~~ types ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     class AppLogger;
+    class AppDriver;
 
 
     Ui::MainWindow* ui;
     AppLogger* logger;
-    CEConfigPopup* popup_ce;
-    SCSimConfigPopup* popup_scsim;
-
-    QFutureWatcher<logger::LogMsg> watcher;
-    QThreadPool pool;
+    AppDriver* driver;
 
 
   private slots:

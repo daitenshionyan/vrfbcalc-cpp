@@ -13,6 +13,9 @@
 #include "vrfbcalccfg.hpp"
 #include "driver/vrfbdriver_io.hpp"
 
+#include "view/celleff/celleffconfigpopup.h"
+#include "view/shuntcur/shuntcursimconfigpopup.h"
+
 
 /*
 ================================================================================
@@ -102,6 +105,226 @@ class MainWindow::AppLogger
 
 
 
+/*
+================================================================================
+================================================================================
+==
+==        AppDriver
+==
+================================================================================
+================================================================================
+*/
+
+
+class MainWindow::AppDriver : public QObject {
+  public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
+    AppDriver(MainWindow* mainWindow)
+          : mw(mainWindow) {
+      connect(&watcher, &QFutureWatcher<void>::started,
+          this, &AppDriver::disableActions);
+      connect(&watcher, &QFutureWatcher<void>::canceled,
+          this, &AppDriver::enableActions);
+      connect(&watcher, &QFutureWatcher<void>::finished,
+          this, &AppDriver::enableActions);
+      connect(mw, &MainWindow::completedPerformanceReading,
+          this, &AppDriver::displayPerformanceView,
+          Qt::ConnectionType::QueuedConnection);
+      connect(mw, &MainWindow::jobReadySCSim,
+          this, &AppDriver::displayReport_SCSim,
+          Qt::ConnectionType::QueuedConnection);
+    }
+
+    AppDriver() = default;
+    AppDriver(const AppDriver&) = default;
+    AppDriver(AppDriver&&) = default;
+
+    AppDriver& operator=(const AppDriver&) = default;
+    AppDriver& operator=(AppDriver&&) = default;
+
+    ~AppDriver() {
+      delete config_ce;
+      delete config_scSim;
+    }
+
+
+
+
+  public: // ~~~~ functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    void enableActions() {
+      mw->ui->menuRun->setDisabled(true);
+    }
+
+
+    void disableActions() {
+      mw->ui->menuRun->setDisabled(true);
+    }
+
+
+
+
+  public: // ~~~~ cell efficiency functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    void showConfigPopup_CE() {
+      if (watcher.isRunning()) {
+        mw->logger->warn("Another process is already running");
+        return;
+      }
+      if (config_ce == nullptr) {
+        constructConfigPopup_CE();
+      }
+      config_ce->show();
+    }
+
+
+    void analyseResults_CE() {
+      if (watcher.isRunning()) {
+        mw->logger->warn("Another process is already running");
+        return;
+      }
+      QString openPath = "output";
+      if (!std::filesystem::exists(openPath.toStdString())) {
+        openPath = QString();
+      }
+      QStringList qstrPaths = QFileDialog::getOpenFileNames(
+          mw,
+          "Select one or more performance files to open",
+          openPath,
+          "XLSX Files (*.xlsx)"
+      );
+      watcher.setFuture(QtConcurrent::run(
+          &pool,
+          [&, qstrPaths](QPromise<void>& p) {
+            std::vector<std::string> strPaths {};
+            for (const QString& qstrPath : qstrPaths) {
+              strPaths.push_back(qstrPath.toStdString());
+            }
+            emit mw->completedPerformanceReading(
+                vrfbdriver::readPerformance_CE(strPaths, *(mw->logger)));
+          }));
+    }
+
+
+  private:
+    void constructConfigPopup_CE() {
+      config_ce = new CEConfigPopup(mw);
+      connect(config_ce, &QDialog::accepted,
+          this, &AppDriver::startCalc_CE);
+    }
+
+
+    void startCalc_CE() {
+      watcher.setFuture(QtConcurrent::run(
+        &pool,
+        [&](QPromise<void>& p) {
+          vrfbdriver::calcCellEff(config_ce->getSetSupplierMap(), *(mw->logger));
+        }));
+    }
+
+
+    void displayPerformanceView(const std::vector<vrfbdriver::PerformanceEntry_CE>& entries) {
+      if (entries.empty()) {
+        return;
+      }
+      CEResultView* rv = new CEResultView(mw);
+      try {
+        rv->plotGraphs(entries);
+      } catch (std::exception& ex) {
+        mw->logger->fail(comutils::string::format_string("Failed to plot graphs due to - %s",
+            ex.what()));
+        delete rv;
+        return;
+      }
+      connect(rv, &CEResultView::exportRequested,
+          this, &AppDriver::exportCEPerformance);
+      rv->open();
+    }
+
+
+    void exportCEPerformance(CEResultView* rv) {
+      if (watcher.isRunning()) {
+        mw->logger->warn("Cannot export as another process is already running");
+        return;
+      }
+      rv->hide();
+      watcher.setFuture(QtConcurrent::run(
+          &pool,
+          [&, rv](QPromise<void>& p) {
+            bool is_success = rv->exportImages(*(mw->logger));
+            if (is_success) {
+              rv->done(QDialog::Accepted);
+            } else {
+              rv->show();
+            }
+          }
+      ));
+    }
+
+
+
+
+  public: // ~~~~ shunt current functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    void showConfigPopup_SE() {
+      if (config_scSim == nullptr) {
+        constructConfigPopup_SC();
+      }
+      config_scSim->show();
+    }
+
+
+  private:
+    void constructConfigPopup_SC() {
+      config_scSim = new SCSimConfigPopup(mw);
+      connect(config_scSim, &QDialog::accepted,
+          this, &AppDriver::startSim_SC);
+    }
+
+
+    void startSim_SC() {
+      watcher.setFuture(QtConcurrent::run(
+          &pool,
+          [&](QPromise<void>& p) {
+            try {
+              auto job = config_scSim->getJob();
+              emit mw->jobReadySCSim(job);
+            } catch (...) {
+              mw->logger->fail("Simulation failed");
+              return;
+            }
+          }
+      ));
+    }
+
+
+    void displayReport_SCSim(const vrfbdriver::shuntcur::ShuntSimJob& j) {
+      SCSimReportPopup* popup = new SCSimReportPopup(mw);
+      try {
+        popup->show();
+        popup->start(j);
+      } catch (...) {
+        mw->logger->fail("Failed to simulate");
+        delete popup;
+        return;
+      }
+    }
+
+
+
+
+  private: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    MainWindow* mw;
+    CEConfigPopup* config_ce = nullptr;
+    SCSimConfigPopup* config_scSim = nullptr;
+
+    QFutureWatcher<void> watcher;
+    QThreadPool pool;
+};
+
+
+
+
+
+
+
+
 
 
 
@@ -113,8 +336,7 @@ MainWindow::MainWindow(QWidget* parent)
       : QMainWindow(parent),
         ui(new Ui::MainWindow),
         logger(new MainWindow::AppLogger(this)),
-        popup_ce(new CEConfigPopup(this)),
-        popup_scsim(new SCSimConfigPopup(this)) {
+        driver(new MainWindow::AppDriver(this)) {
   ui->setupUi(this);
   ui->outputArea->appendHtml(
       QString("<p style=\"color:grey;white-space:pre\">")
@@ -125,118 +347,13 @@ MainWindow::MainWindow(QWidget* parent)
                 vrfbcfg::licence_notice,
                 "================================================================================"))
       + QString("</p>"));
-  connect(popup_ce, &CEConfigPopup::accepted,
-      this, &MainWindow::startCalc_CE);
-  connect(popup_scsim, &SCSimConfigPopup::accepted,
-      this, &MainWindow::startSim_SC);
-  connect(&watcher, &QFutureWatcher<logger::LogMsg>::started,
-      this, &MainWindow::disableActions);
-  connect(&watcher, &QFutureWatcher<logger::LogMsg>::canceled,
-      this, &MainWindow::enableActions);
-  connect(&watcher, &QFutureWatcher<logger::LogMsg>::finished,
-      this, &MainWindow::enableActions);
-  connect(this, &MainWindow::completedPerformanceReading,
-      this, &MainWindow::displayPerformanceView,
-      Qt::ConnectionType::QueuedConnection);
-  connect(this, &MainWindow::jobReadySCSim,
-      this, &MainWindow::displayReport_SCSim,
-      Qt::ConnectionType::QueuedConnection);
 }
 
 
 MainWindow::~MainWindow() {
+  delete driver;
   delete logger;
-  delete popup_ce;
-  delete popup_scsim;
   delete ui;
-}
-
-
-void MainWindow::startCalc_CE() {
-  watcher.setFuture(QtConcurrent::run(
-      &pool,
-      [&](QPromise<logger::LogMsg>& p) {
-        vrfbdriver::calcCellEff(popup_ce->getSetSupplierMap(), *logger);
-      }));
-}
-
-
-void MainWindow::startSim_SC() {
-  watcher.setFuture(QtConcurrent::run(
-      &pool,
-      [&](QPromise<logger::LogMsg>& p) {
-        try {
-          auto job = popup_scsim->getJob();
-          emit jobReadySCSim(job);
-        } catch (...) {
-          logger->fail("Simulation failed");
-          return;
-        }
-      }
-  ));
-}
-
-
-void MainWindow::disableActions() {
-  ui->menuRun->setDisabled(true);
-}
-
-
-void MainWindow::enableActions() {
-  ui->menuRun->setDisabled(false);
-}
-
-
-void MainWindow::displayPerformanceView(
-      const std::vector<vrfbdriver::PerformanceEntry_CE>& entries) {
-  if (entries.empty()) {
-    return;
-  }
-  CEResultView* rv = new CEResultView(this);
-  try {
-    rv->plotGraphs(entries);
-  } catch (std::exception& ex) {
-    logger->fail(comutils::string::format_string("Failed to plot graphs due to - %s",
-        ex.what()));
-    delete rv;
-    return;
-  }
-  connect(rv, &CEResultView::exportRequested,
-      this, &MainWindow::exportCEPerformance);
-  rv->open();
-}
-
-
-void MainWindow::exportCEPerformance(CEResultView* rv) {
-  if (watcher.isRunning()) {
-    logger->warn("Cannot export as another process is already running");
-    return;
-  }
-  rv->hide();
-  watcher.setFuture(QtConcurrent::run(
-      &pool,
-      [&, rv](QPromise<logger::LogMsg>& p) {
-        bool is_success = rv->exportImages(*logger);
-        if (is_success) {
-          rv->done(QDialog::Accepted);
-        } else {
-          rv->show();
-        }
-      }
-  ));
-}
-
-
-void MainWindow::displayReport_SCSim(const vrfbdriver::shuntcur::ShuntSimJob& j) {
-  SCSimReportPopup* popup = new SCSimReportPopup(this);
-  try {
-    popup->show();
-    popup->start(j);
-  } catch (...) {
-    logger->fail("Failed to simulate");
-    delete popup;
-    return;
-  }
 }
 
 
@@ -257,41 +374,15 @@ void MainWindow::on_action_openOutput_triggered(bool) {
 
 
 void MainWindow::on_actionCECalculations_triggered(bool) {
-  if (watcher.isRunning()) {
-    logger->warn("Cannot perform calculations as another process is already running");
-    return;
-  }
-  popup_ce->exec();
+  driver->showConfigPopup_CE();
 }
 
 
 void MainWindow::on_actionCEAnalysis_triggered(bool) {
-  if (watcher.isRunning()) {
-    logger->warn("Cannot analyse data as another process is already running");
-    return;
-  }
-  QString openPath = "output";
-  if (!std::filesystem::exists(openPath.toStdString())) {
-    openPath = QString();
-  }
-  QStringList qstrPaths = QFileDialog::getOpenFileNames(
-      this,
-      "Select one or more performance files to open",
-      openPath,
-      "XLSX Files (*.xlsx)"
-  );
-  watcher.setFuture(QtConcurrent::run(
-      &pool,
-      [&, qstrPaths](QPromise<logger::LogMsg>& p) {
-        std::vector<std::string> strPaths {};
-        for (const QString& qstrPath : qstrPaths) {
-          strPaths.push_back(qstrPath.toStdString());
-        }
-        emit completedPerformanceReading(vrfbdriver::readPerformance_CE(strPaths, *logger));
-      }));
+  driver->analyseResults_CE();
 }
 
 
 void MainWindow::on_actionSCSimulate_triggered(bool) {
-  popup_scsim->open();
+  driver->showConfigPopup_SE();
 }
