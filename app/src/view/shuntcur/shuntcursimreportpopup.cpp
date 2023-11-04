@@ -39,7 +39,7 @@ SCSimReportPopup::SCSimReportPopup(QWidget* parent)
       ui->progressBar, &QProgressBar::setRange);
   connect(&watcher, &QFutureWatcher<vrfbdriver::shuntcur::ShuntSimStep>::progressTextChanged,
       ui->msgLabel, &QLabel::setText);
-  connect(&watcher, &QFutureWatcher<vrfbdriver::shuntcur::ShuntSimStep>::finished,
+  connect(this, &SCSimReportPopup::simulationSuccess,
       this, &SCSimReportPopup::displayReport,
       Qt::ConnectionType::QueuedConnection);
   connect(this, &SCSimReportPopup::simulationFailed,
@@ -62,11 +62,12 @@ void SCSimReportPopup::start(const vrfbdriver::shuntcur::ShuntSimJob& j) {
           vrfbdriver::shuntcur::simulateShunt(j, kTimeStep, rpter);
         } catch (const std::exception& ex) {
           emit simulationFailed(ex.what());
-          throw vrfbutils::StdQException(ex);
+          return;
         } catch (...) {
           emit simulationFailed("Unknown exception occured");
-          throw vrfbutils::StdQException(std::runtime_error("Unknown exception occured"));
+          return;
         }
+        emit simulationSuccess();
       }
   ));
 }
@@ -85,9 +86,6 @@ void SCSimReportPopup::reportReadyAt(int i) {
 
 
 void SCSimReportPopup::displayReport() {
-  if (watcher.isCanceled()) {
-    return;
-  }
   ui->progressBar->setStyleSheet(
       "QProgressBar { background: #75F281; }"
       "QProgressBar::chunk { background: #75F281; }");
@@ -99,8 +97,8 @@ void SCSimReportPopup::displayReport() {
 
 void SCSimReportPopup::displayFailed(const std::string& msg) {
   ui->progressBar->setStyleSheet(
-      "QProgressBar { background: #2DF041; }"
-      "QProgressBar::chunk { background: #2DF041; }");
+      "QProgressBar { background: #F25771; }"
+      "QProgressBar::chunk { background: #F25771; }");
   ui->msgLabel->setText(QString::fromStdString(comutils::string::format_string(
       "Simulation Failed - %s",
       msg.c_str())));
