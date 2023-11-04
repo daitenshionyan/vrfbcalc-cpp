@@ -10,7 +10,6 @@
 #include "view/shuntcur/shuntcursimconfigpopup.h"
 #include "view/shuntcur/shuntcursimreportpopup.h"
 #include "driver/vrfbdriver.hpp"
-#include "logger.hpp"
 
 
 QT_BEGIN_NAMESPACE
@@ -20,7 +19,7 @@ namespace Ui {
 QT_END_NAMESPACE
 
 
-class MainWindow : public QMainWindow, private logger::Logger {
+class MainWindow : public QMainWindow {
   Q_OBJECT
 
 
@@ -38,11 +37,6 @@ class MainWindow : public QMainWindow, private logger::Logger {
   private:
     void startCalc_CE();
     void startSim_SC();
-    void log(const logger::LogMsg&) override;
-    void logMsg(const logger::LogMsg&);
-    inline void logMsgAt(int index) {
-      log(watcher.future().resultAt(index));
-    }
     void disableActions();
     void enableActions();
 
@@ -52,7 +46,12 @@ class MainWindow : public QMainWindow, private logger::Logger {
     void displayReport_SCSim(const vrfbdriver::shuntcur::ShuntSimJob&);
 
 
+  private: // ~~~~ types ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    class AppLogger;
+
+
     Ui::MainWindow* ui;
+    AppLogger* logger;
     CEConfigPopup* popup_ce;
     SCSimConfigPopup* popup_scsim;
 

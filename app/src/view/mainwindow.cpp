@@ -8,34 +8,111 @@
 #include <QDesktopServices>
 #include <QFileDialog>
 
+#include "logger.hpp"
 #include "utillib/utils.hpp"
 #include "vrfbcalccfg.hpp"
 #include "driver/vrfbdriver_io.hpp"
 
 
-namespace {
+/*
+================================================================================
+================================================================================
+==
+==        AppLogger
+==
+================================================================================
+================================================================================
+*/
 
 
-class PromLogger : public logger::Logger {
-  public:
-    PromLogger(QPromise<logger::LogMsg>& prom) : prom_p{&prom} {}
+class MainWindow::AppLogger
+      : public QObject, public logger::Logger {
+  public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
+    AppLogger(MainWindow* mainWindow)
+          : mw(mainWindow) {
+      connect(mw, &MainWindow::availableLogMsg,
+          this, &AppLogger::writeLogMsg,
+          Qt::ConnectionType::QueuedConnection);
+    }
 
-    void log(const logger::LogMsg& lm) {
-      prom_p->addResult(lm);
+    AppLogger() = default;
+    AppLogger(const AppLogger&) = default;
+    AppLogger(AppLogger&&) = default;
+
+    AppLogger& operator=(const AppLogger&) = default;
+    AppLogger& operator=(AppLogger&&) = default;
+
+    ~AppLogger() = default;
+
+
+  public: // ~~~~ functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    void log(const logger::LogMsg& msg) override {
+      emit mw->availableLogMsg(msg);
     }
 
 
   private:
-    QPromise<logger::LogMsg>* prom_p;
+    void writeLogMsg(const logger::LogMsg& lm) {
+      std::string color = "black";
+      std::string lvlTxt = "";
+      switch (lm.lvl) {
+        case logger::Level::kFine:
+          color = "#A0A0A0";
+          lvlTxt = "FINE";
+          break;
+        case logger::Level::kInfo:
+          color = "white";
+          lvlTxt = "INFO";
+          break;
+        case logger::Level::kWarn:
+          color = "#FF9933";
+          lvlTxt = "WARN";
+          break;
+        case logger::Level::kFail:
+          color = "#FF3333";
+          lvlTxt = "FAIL";
+          break;
+        case logger::Level::kSucc:
+          color = "#33FF33";
+          lvlTxt = "SUCC";
+      }
+      QString outText = QString::fromStdString(
+          comutils::string::format_string("[%s] [%s] %s",
+              comutils::time::getftime().c_str(),
+              lvlTxt.c_str(),
+              lm.msg.c_str()))
+          .toHtmlEscaped();
+      mw->ui->outputArea->appendHtml(
+          QString::fromStdString(
+              comutils::string::format_string(
+                  "<p style=\"color:%s;white-space:pre\">",
+                  color.c_str()))
+          + outText + "</p>");
+    }
+
+
+  private: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    MainWindow* mw;
 };
 
 
-}
+
+
+
+
+
+
+
+
+
+
+
 
 
 MainWindow::MainWindow(QWidget* parent)
       : QMainWindow(parent),
         ui(new Ui::MainWindow),
+        logger(new MainWindow::AppLogger(this)),
         popup_ce(new CEConfigPopup(this)),
         popup_scsim(new SCSimConfigPopup(this)) {
   ui->setupUi(this);
@@ -48,14 +125,10 @@ MainWindow::MainWindow(QWidget* parent)
                 vrfbcfg::licence_notice,
                 "================================================================================"))
       + QString("</p>"));
-  connect(this, &MainWindow::availableLogMsg,
-      this, &MainWindow::logMsg);
   connect(popup_ce, &CEConfigPopup::accepted,
       this, &MainWindow::startCalc_CE);
   connect(popup_scsim, &SCSimConfigPopup::accepted,
       this, &MainWindow::startSim_SC);
-  connect(&watcher, &QFutureWatcher<logger::LogMsg>::resultReadyAt,
-      this, &MainWindow::logMsgAt);
   connect(&watcher, &QFutureWatcher<logger::LogMsg>::started,
       this, &MainWindow::disableActions);
   connect(&watcher, &QFutureWatcher<logger::LogMsg>::canceled,
@@ -72,6 +145,7 @@ MainWindow::MainWindow(QWidget* parent)
 
 
 MainWindow::~MainWindow() {
+  delete logger;
   delete popup_ce;
   delete popup_scsim;
   delete ui;
@@ -82,8 +156,7 @@ void MainWindow::startCalc_CE() {
   watcher.setFuture(QtConcurrent::run(
       &pool,
       [&](QPromise<logger::LogMsg>& p) {
-        auto w = PromLogger{p};
-        vrfbdriver::calcCellEff(popup_ce->getSetSupplierMap(), w);
+        vrfbdriver::calcCellEff(popup_ce->getSetSupplierMap(), *logger);
       }));
 }
 
@@ -92,59 +165,15 @@ void MainWindow::startSim_SC() {
   watcher.setFuture(QtConcurrent::run(
       &pool,
       [&](QPromise<logger::LogMsg>& p) {
-        auto w = PromLogger{p};
         try {
           auto job = popup_scsim->getJob();
           emit jobReadySCSim(job);
         } catch (...) {
-          w.fail("Simulation failed");
+          logger->fail("Simulation failed");
           return;
         }
       }
   ));
-}
-
-
-void MainWindow::log(const logger::LogMsg& lm) {
-  emit availableLogMsg(lm);
-}
-
-
-void MainWindow::logMsg(const logger::LogMsg& lm) {
-  std::string color = "black";
-  std::string lvlTxt = "";
-  switch (lm.lvl) {
-    case logger::Level::kFine:
-      color = "#A0A0A0";
-      lvlTxt = "FINE";
-      break;
-    case logger::Level::kInfo:
-      color = "white";
-      lvlTxt = "INFO";
-      break;
-    case logger::Level::kWarn:
-      color = "#FF9933";
-      lvlTxt = "WARN";
-      break;
-    case logger::Level::kFail:
-      color = "#FF3333";
-      lvlTxt = "FAIL";
-      break;
-    case logger::Level::kSucc:
-      color = "#33FF33";
-      lvlTxt = "SUCC";
-  }
-  QString outText = QString::fromStdString(
-      comutils::string::format_string("[%s] [%s] %s",
-          comutils::time::getftime().c_str(),
-          lvlTxt.c_str(),
-          lm.msg.c_str()))
-      .toHtmlEscaped();
-  ui->outputArea->appendHtml(
-      QString::fromStdString(
-          comutils::string::format_string("<p style=\"color:%s;white-space:pre\">",
-              color.c_str()))
-      + outText + "</p>");
 }
 
 
@@ -167,7 +196,7 @@ void MainWindow::displayPerformanceView(
   try {
     rv->plotGraphs(entries);
   } catch (std::exception& ex) {
-    fail(comutils::string::format_string("Failed to plot graphs due to - %s",
+    logger->fail(comutils::string::format_string("Failed to plot graphs due to - %s",
         ex.what()));
     delete rv;
     return;
@@ -180,15 +209,14 @@ void MainWindow::displayPerformanceView(
 
 void MainWindow::exportCEPerformance(CEResultView* rv) {
   if (watcher.isRunning()) {
-    warn("Cannot export as another process is already running");
+    logger->warn("Cannot export as another process is already running");
     return;
   }
   rv->hide();
   watcher.setFuture(QtConcurrent::run(
       &pool,
       [&, rv](QPromise<logger::LogMsg>& p) {
-        auto l = PromLogger{p};
-        bool is_success = rv->exportImages(l);
+        bool is_success = rv->exportImages(*logger);
         if (is_success) {
           rv->done(QDialog::Accepted);
         } else {
@@ -205,7 +233,7 @@ void MainWindow::displayReport_SCSim(const vrfbdriver::shuntcur::ShuntSimJob& j)
     popup->show();
     popup->start(j);
   } catch (...) {
-    fail("Failed to simulate");
+    logger->fail("Failed to simulate");
     delete popup;
     return;
   }
@@ -218,10 +246,10 @@ void MainWindow::displayReport_SCSim(const vrfbdriver::shuntcur::ShuntSimJob& j)
 void MainWindow::on_action_openOutput_triggered(bool) {
   std::filesystem::path output_path {"output"};
   if (!std::filesystem::exists(output_path)) {
-    fail("Output folder does not exist yet");
+    logger->fail("Output folder does not exist yet");
     return;
   } else if (!std::filesystem::is_directory(output_path)) {
-    fail("The file 'output' exists but it is not a directory");
+    logger->fail("The file 'output' exists but it is not a directory");
     return;
   }
   QDesktopServices::openUrl(QUrl::fromLocalFile("output"));
@@ -230,7 +258,7 @@ void MainWindow::on_action_openOutput_triggered(bool) {
 
 void MainWindow::on_actionCECalculations_triggered(bool) {
   if (watcher.isRunning()) {
-    warn("Cannot perform calculations as another process is already running");
+    logger->warn("Cannot perform calculations as another process is already running");
     return;
   }
   popup_ce->exec();
@@ -239,7 +267,7 @@ void MainWindow::on_actionCECalculations_triggered(bool) {
 
 void MainWindow::on_actionCEAnalysis_triggered(bool) {
   if (watcher.isRunning()) {
-    warn("Cannot analyse data as another process is already running");
+    logger->warn("Cannot analyse data as another process is already running");
     return;
   }
   QString openPath = "output";
@@ -255,12 +283,11 @@ void MainWindow::on_actionCEAnalysis_triggered(bool) {
   watcher.setFuture(QtConcurrent::run(
       &pool,
       [&, qstrPaths](QPromise<logger::LogMsg>& p) {
-        auto l = PromLogger{p};
         std::vector<std::string> strPaths {};
         for (const QString& qstrPath : qstrPaths) {
           strPaths.push_back(qstrPath.toStdString());
         }
-        emit completedPerformanceReading(vrfbdriver::readPerformance_CE(strPaths, l));
+        emit completedPerformanceReading(vrfbdriver::readPerformance_CE(strPaths, *logger));
       }));
 }
 
