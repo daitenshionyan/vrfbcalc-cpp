@@ -61,15 +61,16 @@ class MainWindow::LoggerManager
       : public QObject, public logger::Logger {
   Q_OBJECT
 
+
   public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
     LoggerManager(Ui::MainWindow* uip);
 
     LoggerManager() = delete;
     LoggerManager(const LoggerManager&) = delete;
-    LoggerManager(LoggerManager&&) = default;
+    LoggerManager(LoggerManager&&) = delete;
 
     LoggerManager& operator=(const LoggerManager&) = delete;
-    LoggerManager& operator=(LoggerManager&&) = default;
+    LoggerManager& operator=(LoggerManager&&) = delete;
 
     ~LoggerManager() = default;
 
@@ -147,10 +148,10 @@ class MainWindow::DriverManager : public QObject {
 
     DriverManager() = delete;
     DriverManager(const DriverManager&) = delete;
-    DriverManager(DriverManager&&) = default;
+    DriverManager(DriverManager&&) = delete;
 
     DriverManager& operator=(const DriverManager&) = delete;
-    DriverManager& operator=(DriverManager&&) = default;
+    DriverManager& operator=(DriverManager&&) = delete;
 
     ~DriverManager();
 
