@@ -30,19 +30,14 @@ class MainWindow : public QMainWindow {
     ~MainWindow();
 
 
-  signals:
-    void completedPerformanceReading(const std::vector<vrfbdriver::PerformanceEntry_CE>&);
-    void jobReadySCSim(const vrfbdriver::shuntcur::ShuntSimJob&);
-
-
   public: // ~~~~ types ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     class LoggerManager;
-    class AppDriver;
+    class DriverManager;
 
 
     Ui::MainWindow* ui;
     LoggerManager* logger;
-    AppDriver* driver;
+    DriverManager* driver;
 
 
   private slots:
