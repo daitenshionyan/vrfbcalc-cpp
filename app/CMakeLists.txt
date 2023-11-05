@@ -39,8 +39,10 @@ add_executable(vrfbcalc-cpp WIN32
     resource/resource.qrc
 
     include/view/mainwindow.h
+    include/view/mainwindow_impl.h
     src/view/mainwindow.ui
     src/view/mainwindow.cpp
+    src/view/mainwindow_impl.cpp
 
     include/view/plotpanel.h
     src/view/plotpanel.ui

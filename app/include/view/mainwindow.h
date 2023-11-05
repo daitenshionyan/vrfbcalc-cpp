@@ -19,6 +19,8 @@ namespace Ui {
 QT_END_NAMESPACE
 
 
+
+
 class MainWindow : public QMainWindow {
   Q_OBJECT
 
@@ -29,18 +31,17 @@ class MainWindow : public QMainWindow {
 
 
   signals:
-    void availableLogMsg(const logger::LogMsg&);
     void completedPerformanceReading(const std::vector<vrfbdriver::PerformanceEntry_CE>&);
     void jobReadySCSim(const vrfbdriver::shuntcur::ShuntSimJob&);
 
 
-  private: // ~~~~ types ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    class AppLogger;
+  public: // ~~~~ types ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    class LoggerManager;
     class AppDriver;
 
 
     Ui::MainWindow* ui;
-    AppLogger* logger;
+    LoggerManager* logger;
     AppDriver* driver;
 
 

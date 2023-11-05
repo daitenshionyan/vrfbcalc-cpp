@@ -1,5 +1,6 @@
 #include "view/mainwindow.h"
 #include "./ui_mainwindow.h"
+#include "view/mainwindow_impl.h"
 
 #include <filesystem>
 
@@ -13,90 +14,9 @@
 #include "vrfbcalccfg.hpp"
 #include "driver/vrfbdriver_io.hpp"
 
+
 #include "view/celleff/celleffconfigpopup.h"
 #include "view/shuntcur/shuntcursimconfigpopup.h"
-
-
-/*
-================================================================================
-================================================================================
-==
-==        AppLogger
-==
-================================================================================
-================================================================================
-*/
-
-
-class MainWindow::AppLogger
-      : public QObject, public logger::Logger {
-  public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
-    AppLogger(MainWindow* mainWindow)
-          : mw(mainWindow) {
-      connect(mw, &MainWindow::availableLogMsg,
-          this, &AppLogger::writeLogMsg,
-          Qt::ConnectionType::QueuedConnection);
-    }
-
-    AppLogger() = default;
-    AppLogger(const AppLogger&) = default;
-    AppLogger(AppLogger&&) = default;
-
-    AppLogger& operator=(const AppLogger&) = default;
-    AppLogger& operator=(AppLogger&&) = default;
-
-    ~AppLogger() = default;
-
-
-  public: // ~~~~ functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    void log(const logger::LogMsg& msg) override {
-      emit mw->availableLogMsg(msg);
-    }
-
-
-  private:
-    void writeLogMsg(const logger::LogMsg& lm) {
-      std::string color = "black";
-      std::string lvlTxt = "";
-      switch (lm.lvl) {
-        case logger::Level::kFine:
-          color = "#A0A0A0";
-          lvlTxt = "FINE";
-          break;
-        case logger::Level::kInfo:
-          color = "white";
-          lvlTxt = "INFO";
-          break;
-        case logger::Level::kWarn:
-          color = "#FF9933";
-          lvlTxt = "WARN";
-          break;
-        case logger::Level::kFail:
-          color = "#FF3333";
-          lvlTxt = "FAIL";
-          break;
-        case logger::Level::kSucc:
-          color = "#33FF33";
-          lvlTxt = "SUCC";
-      }
-      QString outText = QString::fromStdString(
-          comutils::string::format_string("[%s] [%s] %s",
-              comutils::time::getftime().c_str(),
-              lvlTxt.c_str(),
-              lm.msg.c_str()))
-          .toHtmlEscaped();
-      mw->ui->outputArea->appendHtml(
-          QString::fromStdString(
-              comutils::string::format_string(
-                  "<p style=\"color:%s;white-space:pre\">",
-                  color.c_str()))
-          + outText + "</p>");
-    }
-
-
-  private: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    MainWindow* mw;
-};
 
 
 
@@ -335,7 +255,7 @@ class MainWindow::AppDriver : public QObject {
 MainWindow::MainWindow(QWidget* parent)
       : QMainWindow(parent),
         ui(new Ui::MainWindow),
-        logger(new MainWindow::AppLogger(this)),
+        logger(new LoggerManager(ui)),
         driver(new MainWindow::AppDriver(this)) {
   ui->setupUi(this);
   ui->outputArea->appendHtml(
