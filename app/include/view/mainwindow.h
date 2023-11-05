@@ -1,15 +1,7 @@
 #pragma once
 
-#include <string>
-
 #include <QtCore/qfuturewatcher.h>
 #include <QMainWindow>
-
-#include "view/celleff/celleffconfigpopup.h"
-#include "view/celleff/celleffresultview.h"
-#include "view/shuntcur/shuntcursimconfigpopup.h"
-#include "view/shuntcur/shuntcursimreportpopup.h"
-#include "driver/vrfbdriver.hpp"
 
 
 QT_BEGIN_NAMESPACE

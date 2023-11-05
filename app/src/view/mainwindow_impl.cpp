@@ -6,7 +6,10 @@
 #include <QDesktopServices>
 #include <QFileDialog>
 
+#include <string>
 #include <utility>
+
+#include "view/shuntcur/shuntcursimreportpopup.h"
 
 
 

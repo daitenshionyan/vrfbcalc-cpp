@@ -2,21 +2,13 @@
 #include "./ui_mainwindow.h"
 #include "view/mainwindow_impl.h"
 
-#include <filesystem>
-
-#include <QtCore/qpromise.h>
-#include <QtConcurrent/qtconcurrentrun.h>
 #include <QDesktopServices>
 #include <QFileDialog>
 
-#include "logger.hpp"
+#include <filesystem>
+
 #include "utillib/utils.hpp"
 #include "vrfbcalccfg.hpp"
-#include "driver/vrfbdriver_io.hpp"
-
-
-#include "view/celleff/celleffconfigpopup.h"
-#include "view/shuntcur/shuntcursimconfigpopup.h"
 
 
 
@@ -25,11 +17,11 @@
 
 
 
-
-
-
-
-
+/*
+********************************************************************************
+**        Constructor / Assignment / Destructor
+********************************************************************************
+*/
 
 
 MainWindow::MainWindow(QWidget* parent)
@@ -57,7 +49,17 @@ MainWindow::~MainWindow() {
 }
 
 
-// ---- < SLOTS > --------------------------------------------------------------
+
+
+
+
+
+
+/*
+********************************************************************************
+**        Slots
+********************************************************************************
+*/
 
 
 void MainWindow::on_action_openOutput_triggered(bool) {
