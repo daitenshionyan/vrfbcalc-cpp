@@ -180,7 +180,6 @@ class MainWindow::DriverManager : public QObject {
     void constructConfigPopup_CE();
     void startCalc_CE();
     void displayPerformanceView(const std::vector<vrfbdriver::PerformanceEntry_CE>&);
-    void exportCEPerformance(CEResultView*);
 
 
 

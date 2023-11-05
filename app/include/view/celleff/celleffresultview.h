@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QtCore/qfuturewatcher.h>
 #include <QDialog>
 
 #include <string>
@@ -23,21 +24,32 @@ class CEResultView : public QDialog {
 
 
   public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
-    CEResultView(QWidget*);
+    CEResultView(logger::Logger* logger, QWidget* parent=nullptr);
     ~CEResultView();
 
 
+
+
   signals:
-    void exportRequested(CEResultView*);
+    void exportRequest();
+    void exportSuccess();
+    void exportFailure();
+
+
 
 
   public: // ~~~~ functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     void plotGraphs(const std::vector<vrfbdriver::PerformanceEntry_CE>&);
-    bool exportImages(logger::Logger&);
+    bool exportGraphs(logger::Logger&);
 
 
   private:
+    void handleExportRequest();
+    void handleExportSuccess();
+    void handleExportFailure();
     void deleteSelf(int) {delete this;}
+
+
 
 
   private: // ~~~~ types ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -49,9 +61,16 @@ class CEResultView : public QDialog {
     };
 
 
+
+
   private: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     Ui::CEResultView* ui;
+
+    logger::Logger* l;
     std::vector<PlotConfig> plotCfgs;
+
+    QFutureWatcher<void> watcher;
+    QThreadPool pool;
 
 
   private slots:

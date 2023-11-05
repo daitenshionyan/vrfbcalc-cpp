@@ -262,7 +262,7 @@ void MainWindow::DriverManager::displayPerformanceView(
   if (entries.empty()) {
     return;
   }
-  CEResultView* rv = new CEResultView(p);
+  CEResultView* rv = new CEResultView(l, p);
   try {
     rv->plotGraphs(entries);
   } catch (std::exception& ex) {
@@ -271,29 +271,7 @@ void MainWindow::DriverManager::displayPerformanceView(
     delete rv;
     return;
   }
-  connect(rv, &CEResultView::exportRequested,
-      this, &MainWindow::DriverManager::exportCEPerformance);
   rv->open();
-}
-
-
-void MainWindow::DriverManager::exportCEPerformance(CEResultView* rv) {
-  if (watcher.isRunning()) {
-    l->warn("Cannot export as another process is already running");
-    return;
-  }
-  rv->hide();
-  watcher.setFuture(QtConcurrent::run(
-      &pool,
-      [&, rv](QPromise<void>& p) {
-        bool is_success = rv->exportImages(*l);
-        if (is_success) {
-          rv->done(QDialog::Accepted);
-        } else {
-          rv->show();
-        }
-      }
-  ));
 }
 
 

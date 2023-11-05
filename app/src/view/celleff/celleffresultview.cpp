@@ -1,16 +1,30 @@
 #include "view/celleff/celleffresultview.h"
 #include "./ui_celleffresultview.h"
 
+#include <QtCore/qpromise.h>
+#include <QtConcurrent/qtconcurrentrun.h>
+
 #include <filesystem>
 
 #include "utillib/utils.hpp"
 #include "vrfblib/vrfblib.hpp"
 
 
-CEResultView::CEResultView(QWidget* parent)
-      : QDialog(parent), ui(new Ui::CEResultView) {
+CEResultView::CEResultView(logger::Logger* logger, QWidget* parent)
+      : QDialog(parent),
+        l(logger), ui(new Ui::CEResultView) {
   ui->setupUi(this);
-  connect(this, &QDialog::finished, this, &CEResultView::deleteSelf);
+  connect(this, &QDialog::finished,
+      this, &CEResultView::deleteSelf);
+  connect(this, &CEResultView::exportRequest,
+      this, &CEResultView::handleExportRequest,
+      Qt::QueuedConnection);
+  connect(this, &CEResultView::exportSuccess,
+      this, &CEResultView::handleExportSuccess,
+      Qt::QueuedConnection);
+  connect(this, &CEResultView::exportFailure,
+      this, &CEResultView::handleExportFailure,
+      Qt::QueuedConnection);
   // Cell efficiency
   plotCfgs.push_back({"CE vs Cycle number",
       std::string(vrfb::celleff::kCycleNumberHdr),
@@ -55,6 +69,11 @@ CEResultView::CEResultView(QWidget* parent)
 }
 
 
+CEResultView::~CEResultView() {
+  delete ui;
+}
+
+
 void CEResultView::plotGraphs(
       const std::vector<vrfbdriver::PerformanceEntry_CE>& entries) {
   // get series names
@@ -82,23 +101,36 @@ void CEResultView::plotGraphs(
 }
 
 
-bool CEResultView::exportImages(logger::Logger& l) {
+bool CEResultView::exportGraphs(logger::Logger& logger) {
   std::string prefix = ui->prefixNameField->text().toStdString();
   if (!comutils::io::isValidFileName(prefix)) {
-    l.warn(comutils::string::format_string(
+    logger.warn(comutils::string::format_string(
         "Prefix field may contain illegal file characters '%s'",
         prefix.c_str()));
   }
   std::filesystem::create_directories("output/images");
   bool is_success = true;
   for (const auto& cfg : plotCfgs) {
-    bool is_saved = cfg.panel->savePng("output/images", prefix);
+    bool is_saved = false;
+    try {
+      is_saved = cfg.panel->savePng("output/images", prefix);
+    } catch (const std::exception& ex) {
+      is_success = false;
+      logger.fail(comutils::string::format_string("Failed to export '%s' : %s",
+          cfg.title.c_str(), ex.what()));
+      continue;
+    } catch (...) {
+      is_success = false;
+      logger.fail(comutils::string::format_string("Failed to export '%s'",
+          cfg.title.c_str()));
+      continue;
+    }
     if (is_saved) {
-      l.info(comutils::string::format_string("Successfully exported '%s'",
+      logger.info(comutils::string::format_string("Successfully exported '%s'",
           cfg.title.c_str()));
     } else {
       is_success = false;
-      l.fail(comutils::string::format_string("Failed to export '%s'",
+      logger.fail(comutils::string::format_string("Failed to export '%s'",
           cfg.title.c_str()));
     }
   }
@@ -106,11 +138,36 @@ bool CEResultView::exportImages(logger::Logger& l) {
 }
 
 
-CEResultView::~CEResultView() {
-  delete ui;
+void CEResultView::handleExportRequest() {
+  if (watcher.isRunning()) {
+    l->warn("Already exporting");
+    return;
+  }
+  hide();
+  watcher.setFuture(QtConcurrent::run(
+      &pool,
+      [&](QPromise<void>& p) {
+        bool is_success = exportGraphs(*l);
+        if (is_success) {
+          emit exportSuccess();
+        } else {
+          emit exportFailure();
+        }
+      }
+  ));
+}
+
+
+void CEResultView::handleExportSuccess() {
+  done(QDialog::Accepted);
+}
+
+
+void CEResultView::handleExportFailure() {
+  show();
 }
 
 
 void CEResultView::on_exportBtn_clicked() {
-  emit exportRequested(this);
+  emit exportRequest();
 }
