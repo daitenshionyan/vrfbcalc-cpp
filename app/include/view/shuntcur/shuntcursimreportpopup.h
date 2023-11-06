@@ -7,6 +7,8 @@
 #include "logger.hpp"
 
 
+
+
 QT_BEGIN_NAMESPACE
 namespace Ui {
   class SCSimReportPopup;
@@ -14,6 +16,11 @@ namespace Ui {
 QT_END_NAMESPACE
 
 
+
+
+/**
+ * `QDialog` to present shunt simulation data as it is being simulated.
+*/
 class SCSimReportPopup : public QDialog {
   Q_OBJECT
 
@@ -23,11 +30,17 @@ class SCSimReportPopup : public QDialog {
 
 
   public: // ~~~~ functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    void start(const vrfbdriver::ShuntSimJob&);
+    /**
+     * Starts the given job.
+     *
+     * @param j Job to start and track.
+    */
+    void start(const vrfbdriver::shuntcur::ShuntSimJob& j);
 
 
   signals:
-    void simulationFailed(const std::string& msg);
+    void simulationSuccess();                           // Emitted when simulation completed successfully.
+    void simulationFailed(const std::string& msg);      // Emitted when an error occured during simulation.
 
 
   private:
@@ -38,11 +51,11 @@ class SCSimReportPopup : public QDialog {
     void deleteSelf(int);
 
 
-  private: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  private: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     Ui::SCSimReportPopup* ui;
 
-    vrfbdriver::ShuntSimReport report;
+    vrfbdriver::shuntcur::ShuntSimReport report;
 
-    QFutureWatcher<vrfbdriver::ShuntSimStep> watcher;
+    QFutureWatcher<vrfbdriver::shuntcur::ShuntSimStep> watcher;
     QThreadPool pool;
 };

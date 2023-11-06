@@ -9,6 +9,12 @@
 namespace vrfbutils {
 
 
+/**
+ * Implementation of `BasePromise<T>` that encapsulates a `QPromise<T>`.
+ * The responsibility of deletion the encapsulated `QPromise` is NOT handed over.
+ *
+ * @param <T> Task return type.
+*/
 template<typename T>
 class BasePromise_Qt : public comutils::concurrent::BasePromise<T> {
   public: // ~~~~ constructor / assignment / destructor ~~~~
@@ -65,6 +71,7 @@ class BasePromise_Qt : public comutils::concurrent::BasePromise<T> {
 
 
   private:
+    /** Encapsulated `QPromise` pointer. DO NOT DELETE!! */
     QPromise<T>* prom_p;
 };
 

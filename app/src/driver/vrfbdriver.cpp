@@ -195,116 +195,26 @@ std::vector<PerformanceEntry_CE> readPerformance_CE(
 }
 
 
+
+
+
+
+
+
+
+
 /*
-********************************************************************************
-**
-**    Shunt current
-**
-********************************************************************************
+================================================================================
+================================================================================
+==
+==        SHUNT CURRENT
+==
+================================================================================
+================================================================================
 */
 
 
-// ==== [ ShuntCalc Definition ] ===============================================
-
-
-ShuntJob::ShuntJob(const std::string& n, const vrfb::shuntcur::ShuntCalc& sc,
-    const vrfb::shuntcur::ElecInput& input,
-    SCArrangement a)
-    : name{n}, calc{sc.copy()}, elecInput{input}, arr{a} {}
-
-
-ShuntJob::ShuntJob(const std::string& n, vrfb::shuntcur::ShuntCalc* scp,
-    const vrfb::shuntcur::ElecInput& input,
-    SCArrangement a)
-    : name{n}, calc{scp}, elecInput{input}, arr{a} {}
-
-
-ShuntJob::ShuntJob(const ShuntJob& o)
-    : name{o.name}, calc{o.calc->copy()}, elecInput{o.elecInput}, arr{o.arr} {}
-
-
-ShuntJob::ShuntJob(ShuntJob&& o)
-    : name{std::move(o.name)}, calc{o.calc}, elecInput{o.elecInput}, arr{o.arr} {
-  o.calc = nullptr;
-}
-
-
-ShuntJob& ShuntJob::operator=(const ShuntJob& o) {
-  name = o.name;
-  delete calc;
-  calc = o.calc->copy();
-  elecInput = o.elecInput;
-  arr = o.arr;
-  return *this;
-}
-
-
-ShuntJob& ShuntJob::operator=(ShuntJob&& o) {
-  name = std::move(o.name);
-  calc = o.calc;
-  o.calc = nullptr;
-  elecInput = o.elecInput;
-  arr = o.arr;
-  return *this;
-}
-
-
-// ==== [ calcShuntPerf Definition ] ===========================================
-
-
-ShuntRes calcShuntPerf(const ShuntJob& j, logger::Logger& l) {
-  auto beg = std::chrono::high_resolution_clock::now();
-  vrfb::shuntcur::ShuntReport report = j.calc->calculate(j.elecInput);
-  std::filesystem::path path = std::filesystem::u8path<std::string>("output/" + j.name + ".xlsx");
-  SCArrType arrType;
-  switch (j.arr) {
-    case SCArrangement::scaPCCFB:
-      arrType = SCArrType::scatPCC;
-      break;
-    default:
-      throw std::runtime_error("Unsupported arrangement");
-  }
-  auto dur = std::chrono::duration_cast<std::chrono::microseconds>(
-            std::chrono::high_resolution_clock::now() - beg);
-  l.info(comutils::string::format_string(
-      "Shunt performance calculation completed in %.3fms",
-      dur.count() / 1000.));
-  return {j.name, arrType, report};
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+namespace shuntcur {
 
 
 /*
@@ -496,7 +406,7 @@ void simulateShunt_Impl(
 }
 
 
-}
+} // namespace <vrfbdriver::shuntcur::UNNAMED>
 
 
 void simulateShunt(
@@ -512,4 +422,5 @@ void simulateShunt(
 }
 
 
-} // END OF NAMESPACE <vrfbdriver> ---------------------------------------------
+} // namespace <vrfbdriver::shuntcur>
+} // namespace <vrfbdriver>

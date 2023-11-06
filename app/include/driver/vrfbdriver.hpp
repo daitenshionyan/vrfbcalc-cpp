@@ -45,54 +45,36 @@ std::vector<PerformanceEntry_CE> readPerformance_CE(const std::vector<std::strin
 
 
 
+
+
 /*
 ================================================================================
-        Shunt Current
+================================================================================
+==
+==        SHUNT CURRENT
+==
+================================================================================
 ================================================================================
 */
 
 
+namespace shuntcur {
+
+
+/** Enum representing a specific system arrangement. */
 enum class SCArrangement {
+  /** Parallel Criss Cross Front Back */
   scaPCCFB=0
 };
 
 
+/** Enum representing the type of the system arrangement. */
 enum class SCArrType {
+  /** Parallel Criss Cross */
   scatPCC=0
 };
 
 
-struct ShuntJob {
-  ShuntJob(const std::string&, const vrfb::shuntcur::ShuntCalc&,
-      const vrfb::shuntcur::ElecInput&,
-      SCArrangement);
-  ShuntJob(const std::string&, vrfb::shuntcur::ShuntCalc*,
-      const vrfb::shuntcur::ElecInput&,
-      SCArrangement);
-
-  ShuntJob(const ShuntJob&);
-  ShuntJob(ShuntJob&&);
-
-  ShuntJob& operator=(const ShuntJob&);
-  ShuntJob& operator=(ShuntJob&&);
-
-  ~ShuntJob() {delete calc;}
-
-  std::string name;
-  vrfb::shuntcur::ShuntCalc* calc;
-  vrfb::shuntcur::ElecInput elecInput;
-  SCArrangement arr;
-};
-
-
-struct ShuntRes {
-  std::string name;
-  SCArrType arrType;
-  vrfb::shuntcur::ShuntReport perf;
-};
-
-
-ShuntRes calcShuntPerf(const ShuntJob&, logger::Logger&);
 
 
 
@@ -107,19 +89,30 @@ ShuntRes calcShuntPerf(const ShuntJob&, logger::Logger&);
 
 
 
-
-
+/** Structure containing data of a shunt simulation step. */
 struct ShuntSimStep {
+  /** Enum representing the step type. */
   enum class Step {sChg, sDChg};
 
-  vrfb::shuntcur::ShuntReport report;
-  double soc;
-  double time;
-  Step step;
+  vrfb::shuntcur::ShuntReport report;   // `ShuntReport` of step.
+  double soc;                           // End SOC of step.
+  double time;                          // End time of step.
+  Step step;                            // Step type.
 };
 
 
+
+
+/**
+ * Structure that manages the generated step data from a simulation.
+*/
 struct ShuntSimReport {
+  /**
+   * Updates the report by appending the given `ShuntSimStep` data.
+   *
+   * @param s Simulation step data to add.
+   * @param dt Change in time from the last added step data.
+  */
   template<typename T>
   void update(const ShuntSimStep& s, double dt) {
     switch (s.step) {
@@ -132,12 +125,15 @@ struct ShuntSimReport {
     }
   }
 
+  /**
+   * Returns the energy efficiency.
+  */
   double energyEff() const {
     return outputEnergy / inputEnergy;
   }
 
-  double inputEnergy = 0;
-  double outputEnergy = 0;
+  double inputEnergy = 0;         // Total energy inputted into the system (J).
+  double outputEnergy = 0;        // Total energy discharged from the system (J).
 };
 
 
@@ -146,6 +142,9 @@ struct ShuntSimReport {
 
 
 
+/**
+ * Interface responsible for defining an end point of a simulation step.
+*/
 class InputEndPoint {
   public:
     enum class LimitType {
@@ -165,13 +164,47 @@ class InputEndPoint {
 
 
   public: // ~~~~ function ~~~~
-    virtual InputEndPoint* initialise(const vrfb::shuntcur::ShuntCalc&) const = 0;
-    virtual bool isEnd(const ShuntSimStep&) const = 0;
-    virtual int progress(const ShuntSimStep&) const = 0;
+    /**
+     * Initialises end point.
+     *
+     * @param c Initial `vrfb::shuntcur::ShuntCalc` just before the step begins.
+     * @returns A pointer to the newly generated and initialized end point.
+     *    Caller is responsible for deletion of returned pointer.
+    */
+    virtual InputEndPoint* initialise(const vrfb::shuntcur::ShuntCalc& c) const = 0;
+
+    /**
+     * Returns `true` if the end point has been reached and `false` otherwise.
+     *
+     * @param s Latest generated step data of step.
+    */
+    virtual bool isEnd(const ShuntSimStep& s) const = 0;
+
+    /**
+     * Returns the progress value (between 0 to 100 inclusive) to completion
+     * based on the state of the given `ShuntSimStep`.
+     *
+     * @param s Latest generated step data of step.
+    */
+    virtual int progress(const ShuntSimStep& s) const = 0;
+
+    /**
+     * Clones this instance of `InputEndPoint`.
+     *
+     * @return Pointer to newly created `InputEndPoint` that has the samve value
+     *    as this.
+    */
     virtual InputEndPoint* clone() const = 0;
 };
 
 
+
+
+/**
+ * An `InputEndPoint` defined based on a upper or lower limit SOC.
+ *
+ * @param <LT> Limit type.
+*/
 template<InputEndPoint::LimitType LT>
 class EndPointSOC : public InputEndPoint {
   public: // ~~~~ constructor / assignment / destructor ~~~~
@@ -247,6 +280,12 @@ inline int EndPointSOC<InputEndPoint::LimitType::ltUpper>
 
 
 
+
+
+
+/**
+ * Structure containing parameters for a shunt simulation job.
+*/
 struct ShuntSimJob {
   public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
     ShuntSimJob(const std::string& n, vrfb::shuntcur::ShuntCalc* c,
@@ -267,31 +306,42 @@ struct ShuntSimJob {
 
 
   public: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    std::string name;
-    vrfb::shuntcur::ShuntCalc* calc;
+    std::string name;                       // Name of simulation job
+    vrfb::shuntcur::ShuntCalc* calc;        // Pointer to `ShuntCalc`
 
-    double elecVol;
-    double elecCon;
+    double elecVol;                         // Electrolyte volume (L)
+    double elecCon;                         // Electrolyte concentration (M)
 
-    vrfb::shuntcur::ElecInput chgInput;
-    vrfb::shuntcur::ElecInput dchgInput;
+    vrfb::shuntcur::ElecInput chgInput;     // Charging electrical input
+    vrfb::shuntcur::ElecInput dchgInput;    // Discharging electrical input
 
-    const InputEndPoint* chgEndPoint;
-    const InputEndPoint* dchgEndPoint;
+    const InputEndPoint* chgEndPoint;       // Charging `InputEndPoint`
+    const InputEndPoint* dchgEndPoint;      // Discharging `InputEndPoint`
 
-    double lowerLimitSOC;
-    double upperLimitSOC;
+    double lowerLimitSOC;                   // Lower SOC limit (starting SOC)
+    double upperLimitSOC;                   // Upper SOC limit
 
-    SCArrangement arr;
+    SCArrangement arr;                      // Specific system arrangement
 };
 
 
 
 
 
+
+/**
+ * Start the given shunt simulation job.
+ *
+ * @param j Simulation job to perform.
+ * @param dt Time step (s)
+ * @param p Promise to output `ShuntSimStep` data to.
+*/
 void simulateShunt(
-      const ShuntSimJob&, double,
-      comutils::concurrent::BasePromise<ShuntSimStep>&);
+      const ShuntSimJob& j, double dt,
+      comutils::concurrent::BasePromise<ShuntSimStep>& p);
+
+
+} // namespace <vrfbdriver::shuntcur>
 
 
 }

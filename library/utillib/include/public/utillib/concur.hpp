@@ -7,6 +7,12 @@ namespace comutils {
 namespace concurrent {
 
 
+/**
+ * Promise interface to provide a form of communication between caller and
+ * concurrent task.
+ *
+ * @param <T> Task result type.
+*/
 template<typename T>
 class BasePromise {
   public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~

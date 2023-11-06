@@ -1,18 +1,7 @@
 #pragma once
 
-#include <string>
-
 #include <QtCore/qfuturewatcher.h>
 #include <QMainWindow>
-
-#include "view/celleff/celleffconfigpopup.h"
-#include "view/celleff/celleffresultview.h"
-#include "view/shuntcur/shuntcurconfigpopup.h"
-#include "view/shuntcur/shuntcurreportpopup.h"
-#include "view/shuntcur/shuntcursimconfigpopup.h"
-#include "view/shuntcur/shuntcursimreportpopup.h"
-#include "driver/vrfbdriver.hpp"
-#include "logger.hpp"
 
 
 QT_BEGIN_NAMESPACE
@@ -22,16 +11,10 @@ namespace Ui {
 QT_END_NAMESPACE
 
 
-class MainWindow : public QMainWindow, private logger::Logger {
+
+
+class MainWindow : public QMainWindow {
   Q_OBJECT
-
-  public:
-    class SCDataView : public QDialog {
-      public:
-        SCDataView(QWidget* parent) : QDialog(parent) {}
-
-        virtual bool exportImages(logger::Logger& l) = 0;
-    };
 
 
   public:
@@ -39,52 +22,20 @@ class MainWindow : public QMainWindow, private logger::Logger {
     ~MainWindow();
 
 
-  signals:
-    void availableLogMsg(const logger::LogMsg&);
-  signals:
-    void completedPerformanceReading(const std::vector<vrfbdriver::PerformanceEntry_CE>&);
-  signals:
-    void completedSCCalc(const vrfbdriver::ShuntRes&);
-    void jobReadySCSim(const vrfbdriver::ShuntSimJob&);
-
-
-  private:
-    void startCalc_CE();
-    void startCalc_SC();
-    void startSim_SC();
-    void log(const logger::LogMsg&) override;
-    void logMsg(const logger::LogMsg&);
-    inline void logMsgAt(int index) {
-      log(watcher.future().resultAt(index));
-    }
-    void disableActions();
-    void enableActions();
-
-    void displayPerformanceView(const std::vector<vrfbdriver::PerformanceEntry_CE>&);
-    void exportCEPerformance(CEResultView*);
-
-    void displayPerformanceView_SC(const vrfbdriver::ShuntRes&);
-    void exportSEPerformance(SCDataView*);
-    void exportSCReport(SCReportPopup*);
-
-    void displayReport_SCSim(const vrfbdriver::ShuntSimJob&);
+  public: // ~~~~ types ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    class LoggerManager;
+    class DriverManager;
 
 
     Ui::MainWindow* ui;
-    CEConfigPopup* popup_ce;
-    SCConfigPopup* popup_se;
-    SCSimConfigPopup* popup_scsim;
-
-    QFutureWatcher<logger::LogMsg> watcher;
-    QThreadPool pool;
+    LoggerManager* logger;
+    DriverManager* driver;
 
 
   private slots:
     void on_action_openOutput_triggered(bool);
     void on_actionCECalculations_triggered(bool);
     void on_actionCEAnalysis_triggered(bool);
-
-    void on_actionSCCalculations_triggered(bool);
 
     void on_actionSCSimulate_triggered(bool);
 };

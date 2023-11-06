@@ -21,7 +21,7 @@ class SCSimConfigPopup : public QDialog {
 
 
   public: // ~~~~ functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    vrfbdriver::ShuntSimJob getJob();
+    vrfbdriver::shuntcur::ShuntSimJob getJob();
 
 
   private: // ~~~~ accessors ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
