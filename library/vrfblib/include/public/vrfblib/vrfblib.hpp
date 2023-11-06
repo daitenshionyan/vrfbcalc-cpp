@@ -467,5 +467,81 @@ class PCCCalc : public ShuntCalc {
 
 
 } // namespace <vrfb::shuntcur::pcc>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/** Electrically Series, Inlet Parallel, Outlet Series */
+namespace esipos {
+
+
+/**
+ * Structure containing the connection parameter for ESIPOS system.
+*/
+struct ConnParam {
+  double inlet_sub_sl;        // Inlet sub shunt length (m)
+  double inlet_sub_sa;        // Inlet sub shunt area (m2)
+  double inlet_sub_ml;        // Inlet sub manifold length (m)
+  double inlet_sub_ma;        // Inlet sub manifold area (m2)
+
+  double inlet_main_sl;       // Inlet main shunt length (m)
+  double inlet_main_sa;       // Inlet mian shunt area (m2)
+  double inlet_main_ml;       // Inlet mian manifold length (m)
+  double inlet_main_ma;       // Inlet main manifold area (m2)
+
+  double outlet_sl;           // Outlet shunt length (m)
+  double outlet_sa;           // Outlet shunt area (m2)
+  double outlet_ml;           // Outlet manifold length (m)
+  double outlet_ma;           // Outlet manifold area (m2)
+};
+
+
+
+
+struct ESIPOSSysParam : public SysParam {
+  public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
+    ESIPOSSysParam(const SysParam& sysParam, const ConnParam& connParam)
+          : SysParam(sysParam), c(connParam) {
+      numStacks *= 2;
+      numLines = 1;
+    }
+
+    ESIPOSSysParam() = delete;
+    ESIPOSSysParam(const ESIPOSSysParam&) = default;
+    ESIPOSSysParam(ESIPOSSysParam&&) = default;
+
+    ESIPOSSysParam& operator=(const ESIPOSSysParam&) = default;
+    ESIPOSSysParam& operator=(ESIPOSSysParam&&) = default;
+
+    ~ESIPOSSysParam() = default;
+
+
+  public: // ~~~~ accessors ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    double inletResist_CSS() const {return resistivity * c.inlet_sub_sl / c.inlet_sub_sa;}
+    double inletResist_CSM() const {return resistivity * c.inlet_sub_ml / c.inlet_sub_ma;}
+    double inletResist_CMS() const {return resistivity * c.inlet_main_sl / c.inlet_main_sa;}
+    double inletResist_CMM() const {return resistivity * c.inlet_main_ml / c.inlet_main_ma;}
+
+    double outletResist_CS() const {return resistivity * c.outlet_sl / c.outlet_sa;}
+    double outletResist_CM() const {return resistivity * c.outlet_ml / c.outlet_ma;}
+
+
+  public: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    ConnParam c;
+};
+
+
+}
 } // namespace <vrfb::shuntcur>
 } // namespace <vrfb>

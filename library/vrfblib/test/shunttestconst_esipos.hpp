@@ -24,6 +24,32 @@ constexpr double kTestConShuntOutlet = 8;
 constexpr double kTestConManiOutlet = 9;
 
 
+const vrfb::shuntcur::StackParam kTestStackParam {
+  kTestCellResist, 1,
+  kTestShuntResist, 1,
+  kTestManiResist, 1
+};
+
+
+const vrfb::shuntcur::esipos::ConnParam kTestConnParam {
+  kTestConSubShuntInletResist, 1,
+  kTestConSubManiInletResist, 1,
+  kTestConMainShuntInletResist, 1,
+  kTestConMainManiInletResist, 1,
+  kTestConShuntOutlet, 1,
+  kTestConManiOutlet, 1
+};
+
+
+const vrfb::shuntcur::esipos::ESIPOSSysParam kTestSysParam{
+  vrfb::shuntcur::SysParam {
+    kTestStackParam, 1, 1000,
+    kNumCells, kNumSCluster, 1
+  },
+  kTestConnParam
+};
+
+
 const Eigen::MatrixXd kExLHS_NoConn {
   /*  CURR , VOLT | LINE | POSITIVE TOP                POSITIVE TOP                POSITIVE TOP                POSITIVE TOP                POSITIVE TOP                POSITIVE TOP              | POSITIVE BOT                POSITIVE BOT                POSITIVE BOT                POSITIVE BOT                POSITIVE BOT                POSITIVE BOT              | NEGATIVE TOP                NEGATIVE TOP                NEGATIVE TOP                NEGATIVE TOP                NEGATIVE TOP                NEGATIVE TOP              | NEGATIVE BOT                NEGATIVE BOT                NEGATIVE BOT                NEGATIVE BOT                NEGATIVE BOT                NEGATIVE BOT                 */
   /*  0    , 1    | 2    | 3    , 4    , 5    , 6    : 7    , 8    , 9    , 10   : 11   , 12   , 13   , 14   : 15   , 16   , 17   , 18   : 19   , 20   , 21   , 22   : 23   , 24   , 25   , 26   | 27   , 28   , 29   , 30   : 31   , 32   , 33   , 34   : 35   , 36   , 37   , 38   : 39   , 40   , 41   , 42   : 43   , 44   , 45   , 46   : 47   , 48   , 49   , 50   | 51   , 52   , 53   , 54   : 55   , 56   , 57   , 58   : 59   , 60   , 61   , 62   : 63   , 64   , 65   , 66   : 67   , 68   , 69   , 70   : 71   , 72   , 73   , 74   | 75   , 76   , 77   , 78   : 79   , 80   , 81   , 82   : 83   , 84   , 85   , 86   : 87   , 88   , 89   , 90   : 91   , 92   , 93   , 94   : 95   , 96   , 97   , 98      */

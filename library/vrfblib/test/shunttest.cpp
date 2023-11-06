@@ -7,6 +7,7 @@
 #include <Eigen/Dense>
 
 #include "shunttestconst_pcc.hpp"
+#include "shunttestconst_esipos.hpp"
 
 #include "vrfblib/vrfblib.hpp"
 #include "shuntcur/shuntcur.hpp"
@@ -162,6 +163,10 @@ void checkShuntPerf(const vrfb::shuntcur::pcc::PCCReport& actual,
 
 
 
+
+
+
+
 /*
 ********************************************************************************
 **    PCC tests
@@ -289,4 +294,24 @@ TEST(vrfbShuntCurrPCC, calculateDPFB) {
       shunttest_pcc::kExSSNTList_DChg, shunttest_pcc::kExSSNBList_DChg,
       shunttest_pcc::kExSMPTList_DChg, shunttest_pcc::kExSMPBList_DChg,
       shunttest_pcc::kExSMNTList_DChg, shunttest_pcc::kExSMNBList_DChg);
+}
+
+
+
+
+
+
+
+
+/*
+********************************************************************************
+**    ESIPOS tests
+********************************************************************************
+*/
+
+
+TEST(vrfbShuntCurrESIPOS, addStackCoeff) {
+  Eigen::MatrixXd actual = Eigen::MatrixXd::Zero(99, 99);
+  vrfb::shuntcur::addStackCoeff(actual, shunttest_esipos::kTestSysParam);
+  checkMatrix(shunttest_esipos::kExLHS_NoConn, actual);
 }
