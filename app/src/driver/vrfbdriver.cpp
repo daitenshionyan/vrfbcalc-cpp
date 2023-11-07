@@ -416,6 +416,9 @@ void simulateShunt(
     case SCArrangement::scaPCCFB:
       simulateShunt_Impl<vrfb::shuntcur::pcc::PCCReport>(j, dt, p);
       break;
+    case SCArrangement::scaESIPOS:
+      simulateShunt_Impl<vrfb::shuntcur::esipos::ESIPOSReport>(j, dt, p);
+      break;
     default:
       throw std::runtime_error("Unknown arrangement");
   }
