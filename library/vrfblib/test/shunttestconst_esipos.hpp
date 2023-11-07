@@ -23,6 +23,31 @@ constexpr double kTestConMainManiInletResist = 7;
 constexpr double kTestConShuntOutlet = 8;
 constexpr double kTestConManiOutlet = 9;
 
+constexpr double kTestChgVolt = 60;
+constexpr double kTestChgCurr = 6.196133218;
+constexpr double kTestChgPowr = kTestChgVolt * kTestChgCurr;
+
+
+
+
+
+const vrfb::shuntcur::ElecInput kTestCVInput {
+  vrfb::shuntcur::ElecInput::Mode::mConstVolt,
+  kTestChgVolt
+};
+
+const vrfb::shuntcur::ElecInput kTestCCInput {
+  vrfb::shuntcur::ElecInput::Mode::mConstCurr,
+  kTestChgCurr
+};
+
+const vrfb::shuntcur::ElecInput kTestCPInput {
+  vrfb::shuntcur::ElecInput::Mode::mConstPowr,
+  kTestChgPowr
+};
+
+
+
 
 const vrfb::shuntcur::StackParam kTestStackParam {
   kTestCellResist, 1,

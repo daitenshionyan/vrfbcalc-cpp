@@ -158,6 +158,35 @@ void checkShuntPerf(const vrfb::shuntcur::pcc::PCCReport& actual,
 }
 
 
+
+
+
+void checkShuntPerf(const vrfb::shuntcur::esipos::ESIPOSReport& actual,
+      double exChgCurr, double exChgVolt) {
+  // bool is_same_size = exCurrList.size() == actual.totCells();
+  // ASSERT_TRUE(is_same_size) << "Wrong size"
+  //     << " - Expected size: " << exCurrList.size()
+  //     << " | Actual size: " << actual.totCells();
+
+  bool is_same = true;
+  std::stringstream miscdiff {};
+  if (std::abs(actual.chargingCurr() - exChgCurr) > threshold) {
+    is_same = false;
+    miscdiff << "Charging current"
+        << " - Expected: " << exChgCurr
+        << " | Actual: " << actual.chargingCurr() << "\n";
+  }
+  if (std::abs(actual.chargingVolt() - exChgVolt) > threshold) {
+    is_same = false;
+    miscdiff << "Charging voltage"
+        << " - Expected: " << exChgVolt
+        << " | Actual: " << actual.chargingVolt() << "\n";
+  }
+  ASSERT_TRUE(is_same)
+      << miscdiff.str();
+}
+
+
 } // ---- namespace <UNNAMED>
 // namespace <GLOBAL>
 
@@ -323,4 +352,14 @@ TEST(vrfbShuntCurrESIPOS, addConnCoeff) {
   vrfb::shuntcur::addStackCoeff(actual, shunttest_esipos::kTestSysParam);
   vrfb::shuntcur::esipos::addConnCoeff(actual, shunttest_esipos::kTestSysParam);
   checkMatrix(shunttest_esipos::kExLHS_WithConn, actual);
+}
+
+
+TEST(vrfbShuntCurrESIPOS, calculateCV) {
+  vrfb::shuntcur::esipos::ESIPOSCalc calc {
+      shunttest_esipos::kTestSysParam};
+  vrfb::shuntcur::ShuntReport actual = calc.calculate(
+      shunttest_esipos::kTestCVInput);
+  checkShuntPerf(actual.data<vrfb::shuntcur::esipos::ESIPOSReport>(),
+      shunttest_esipos::kTestChgCurr, shunttest_esipos::kTestChgVolt);
 }

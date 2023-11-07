@@ -910,7 +910,7 @@ ESIPOSReport* calculate_esipos(const ESIPOSSysParam& s, double mag) {
   Eigen::VectorXd resVec = lhsM.colPivHouseholderQr().solve(rhsV);
 
   double error = ((lhsM*resVec) - rhsV).norm();
-  return new ESIPOSReport_Impl<PS, NS>(resVec, s, error);
+  return new ESIPOSReport_Impl(resVec, s, error);
 }
 
 

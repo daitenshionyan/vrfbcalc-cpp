@@ -557,6 +557,37 @@ class ESIPOSReport : public ShuntReportData {
 };
 
 
+
+
+class ESIPOSCalc : public ShuntCalc {
+  public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
+    ESIPOSCalc(const ESIPOSSysParam& s)
+        : sys{s} {}
+
+    ESIPOSCalc() = delete;
+    ESIPOSCalc(const ESIPOSCalc&) = default;
+    ESIPOSCalc(ESIPOSCalc&&) = default;
+
+    ESIPOSCalc& operator=(const ESIPOSCalc&) = default;
+    ESIPOSCalc& operator=(ESIPOSCalc&&) = default;
+
+    ~ESIPOSCalc() = default;
+
+
+  public: // ~~~~ functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    ShuntReport calculate(const ElecInput& elecInput) const override;
+
+    ESIPOSSysParam& param() override {return sys;}
+    const ESIPOSSysParam& param() const override {return sys;}
+
+    ESIPOSCalc* copy() const override {return new ESIPOSCalc(*this);}
+
+
+  private: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    ESIPOSSysParam sys;
+};
+
+
 }
 } // namespace <vrfb::shuntcur>
 } // namespace <vrfb>
