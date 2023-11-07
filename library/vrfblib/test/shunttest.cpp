@@ -12,6 +12,7 @@
 #include "vrfblib/vrfblib.hpp"
 #include "shuntcur/shuntcur.hpp"
 #include "shuntcur/conn_pcc.hpp"
+#include "shuntcur/conn_esipos.hpp"
 
 
 namespace { // ==== namespace <UNNAMED> ========================================
@@ -314,4 +315,12 @@ TEST(vrfbShuntCurrESIPOS, addStackCoeff) {
   Eigen::MatrixXd actual = Eigen::MatrixXd::Zero(99, 99);
   vrfb::shuntcur::addStackCoeff(actual, shunttest_esipos::kTestSysParam);
   checkMatrix(shunttest_esipos::kExLHS_NoConn, actual);
+}
+
+
+TEST(vrfbShuntCurrESIPOS, addConnCoeff) {
+  Eigen::MatrixXd actual = Eigen::MatrixXd::Zero(119, 119);
+  vrfb::shuntcur::addStackCoeff(actual, shunttest_esipos::kTestSysParam);
+  vrfb::shuntcur::esipos::addConnCoeff(actual, shunttest_esipos::kTestSysParam);
+  checkMatrix(shunttest_esipos::kExLHS_WithConn, actual);
 }

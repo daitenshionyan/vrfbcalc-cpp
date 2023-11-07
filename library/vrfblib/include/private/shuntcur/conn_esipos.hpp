@@ -1,0 +1,469 @@
+#pragma once
+
+#include <Eigen/Dense>
+
+#include "vrfblib/vrfblib.hpp"
+#include "shuntcur/shuntcur.hpp"
+
+
+
+
+
+
+
+
+/*
+================================================================================
+================================================================================
+==
+==    DECLARATION
+==
+================================================================================
+================================================================================
+*/
+
+
+namespace vrfb{
+namespace shuntcur {
+namespace esipos {
+
+
+/**
+ * Returns N that is the required matrix (N x N) or vector (N x 1) size to
+ * calculate shunt current for a PCC electrolyte connection.
+ *
+ * @param s System parameters.
+*/
+inline std::size_t matSize(const SysParam& s) {
+  return s.numLines                                         // from parallel lines
+      + 4 * s.numLines * s.numStacks * (s.numCells -1)      // from stack loops
+      + 4 * s.numLines * (s.numStacks - 1)                  // from connector loops
+      + 2;                                                  // from charging current and voltage
+}
+
+
+/**
+ * Adds the LHS coefficients of loop equations, for connectors, to the given
+ * matrix.
+ *
+ * @param m LHS matrix.
+ * @param s ESIPOS system paramter.
+*/
+void addConnCoeff(Eigen::MatrixXd& m, const ESIPOSSysParam& s);
+
+
+
+
+
+
+
+
+/*
+********************************************************************************
+**    Indexing functions
+********************************************************************************
+*/
+
+
+/**
+ * Returns the index of CONNECTOR POSITIVE TOP within the matrix or vector.
+ *
+ * @param s System parameters.
+ * @param si Stack index within line.
+ * @param li Line index.
+*/
+Eigen::Index indexCPT(const SysParam& s,
+      std::size_t si, std::size_t li) {
+  return s.numLines
+      + 4*s.numLines*s.numStacks*(s.numCells - 1)
+      + li*(s.numStacks - 1)
+      + si - 1
+      + 2;
+}
+
+
+/**
+ * Returns the index of CONNECTOR POSITIVE BOTTOM within the matrix or vector.
+ *
+ * @param s System parameters.
+ * @param si Stack index within line.
+ * @param li Line index.
+*/
+Eigen::Index indexCPB(const SysParam& s,
+      std::size_t si, std::size_t li) {
+  return s.numLines
+      + 4*s.numLines*s.numStacks*(s.numCells - 1)
+      + s.numLines*(s.numStacks - 1)
+      + li*(s.numStacks - 1)
+      + si
+      + 2;
+}
+
+
+/**
+ * Returns the index of CONNECTOR NEGATIVE TOP within the matrix or vector.
+ *
+ * @param s System parameters.
+ * @param si Stack index within line.
+ * @param li Line index.
+*/
+Eigen::Index indexCNT(const SysParam& s,
+      std::size_t si, std::size_t li) {
+  return s.numLines
+      + 4*s.numLines*s.numStacks*(s.numCells - 1)
+      + 2*s.numLines*(s.numStacks - 1)
+      + li*(s.numStacks - 1)
+      + si
+      + 2;
+}
+
+
+/**
+ * Returns the index of CONNECTOR NEGATIVE BOTTOM within the matrix or vector.
+ *
+ * @param s System parameters.
+ * @param si Stack index within line.
+ * @param li Line index.
+*/
+Eigen::Index indexCNB(const SysParam& s,
+      std::size_t si, std::size_t li) {
+  return s.numLines
+      + 4*s.numLines*s.numStacks*(s.numCells - 1)
+      + 3*s.numLines*(s.numStacks - 1)
+      + li*(s.numStacks - 1)
+      + si - 1
+      + 2;
+}
+
+
+}
+}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+================================================================================
+================================================================================
+==
+==    DEFINITIONS
+==
+================================================================================
+================================================================================
+*/
+
+
+namespace vrfb {
+namespace shuntcur {
+namespace esipos {
+
+
+void addConnCoeff(Eigen::MatrixXd& m, const ESIPOSSysParam& s) {
+  for (std::size_t li = 0; li < s.numLines; ++li) {
+    Eigen::Index lci = indexLine(s, li);
+
+    for (std::size_t si = 0; si < s.numStacks; ++si) {
+      Eigen::Index cpti = indexCPT(s, si, li);
+      Eigen::Index cpbi = indexCPB(s, si, li);
+      Eigen::Index cnti = indexCNT(s, si, li);
+      Eigen::Index cnbi = indexCNB(s, si, li);
+
+      if (si > 0) {
+        // :::: [ POSITIVE TOP CONN ] ::::
+        // >>> LINE
+        m(cpti, lci) += s.numCells * s.cellR();
+        m(lci, cpti) += s.numCells * s.cellR();
+        // >>> POSITIVE BOT CONN
+        m(cpti, cpbi-1) += s.cellR();
+        if (si+1 < s.numStacks) {
+          m(cpti, cpbi) += (s.numCells-1) * s.cellR();
+        }
+        // >>> NEGATIVE TOP CONN
+        m(cpti, cnti-1) += 2*s.cellR();
+        if (si+1 < s.numStacks) {
+          m(cpti, cnti) += (s.numCells-2) * s.cellR();
+        }
+        // >>> NEGATIVE BOT CONN
+        m(cpti, cnbi) = (s.numCells-1) * s.cellR();
+        if (si > 1) {
+          m(cpti, cnbi-1) += s.cellR();
+        }
+        // >>> TO SELF
+        m(cpti, cpti) += s.numCells*s.cellR()
+            + 2*s.stackShuntR()
+            + 2*s.outletResist_CS();
+        if (si%2 == 0) {
+          m(cpti, cpti) += s.outletResist_CM();
+        }
+        if (si > 1) {
+          m(cpti, cpti-1) -= s.outletResist_CS();
+        }
+        if (si+1 < s.numStacks) {
+          m(cpti, cpti+1) -= s.outletResist_CS();
+        }
+
+        // :::: [ NEGATIVE BOTTOM CONN ] ::::
+        // >>> LINE
+        m(cnbi, lci) += s.numCells * s.cellR();
+        m(lci, cnbi) += s.numCells * s.cellR();
+        // >>> POSITIVE TOP CONN
+        m(cnbi, cpti) += (s.numCells-1) * s.cellR();
+        if (si+1 < s.numStacks) {
+          m(cnbi, cpti+1) += s.cellR();
+        }
+        // >>> POSITIVE BOT CONN
+        if (si+1 < s.numStacks) {
+          m(cnbi, cpbi) += s.numCells * s.cellR();
+        }
+        // >>> NEGATIVE TOP CONN
+        m(cnbi, cnti-1) += s.cellR();
+        if (si+1 < s.numStacks) {
+          m(cnbi, cnti) += (s.numCells-1) * s.cellR();
+        }
+        // >>> TO SELF
+        m(cnbi, cnbi) += s.numCells*s.cellR()
+            + 2*s.stackShuntR()
+            + 2*s.inletResist_CSS()
+            + s.inletResist_CSM();
+        if (si%2 == 0) {
+          m(cnbi, cnbi) += 2*s.inletResist_CMS() + s.inletResist_CMM();
+          if (si+2 < s.numStacks) {
+            m(cnbi, cnbi+2) += s.inletResist_CMS();
+            m(cnbi+2, cnbi) += s.inletResist_CMS();
+          }
+        }
+        if (si > 1) {
+          m(cnbi, cnbi-1) -= s.inletResist_CSS();
+          if (si%2 == 1) {
+            m(cnbi, cnbi-1) -= s.inletResist_CSM();
+          }
+        }
+        if (si+1 < s.numStacks) {
+          m(cnbi, cnbi+1) -= s.inletResist_CSS();
+          if (si%2 == 0) {
+            m(cnbi, cnbi+1) -= s.inletResist_CSM();
+          }
+        }
+      }
+
+      if (si+1 < s.numStacks) {
+        // :::: [ POSITIVE BOT CONN ] ::::
+        // >>> MAIN LOOP
+        m(cpbi, lci) += s.numCells * s.cellR();
+        m(lci, cpbi) += s.numCells * s.cellR();
+        // >>> POSITIVE TOP CONN
+        m(cpbi, cpti+1) += s.cellR();
+        if (si > 0) {
+          m(cpbi, cpti) += (s.numCells-1) * s.cellR();
+        }
+        // >>> NEGATIVE TOP CONN
+        m(cpbi, cnti) += (s.numCells-1) * s.cellR();
+        if (si > 0) {
+          m(cpbi, cnti-1) += s.cellR();
+        }
+        // >>> NEGATIVE BOT CONN
+        if (si > 0) {
+          m(cpbi, cnbi) += s.numCells * s.cellR();
+        }
+        // >>> TO SELF
+        m(cpbi, cpbi) += s.numCells*s.cellR()
+            + 2*s.stackShuntR()
+            + 2*s.inletResist_CSS()
+            + s.inletResist_CSM();
+        if (si%2 == 1) {
+          m(cpbi, cpbi) += 2*s.inletResist_CMS() + s.inletResist_CMM();
+          if (si+3 < s.numStacks) {
+            m(cpbi, cpbi+2) += s.inletResist_CMS();
+            m(cpbi+2, cpbi) += s.inletResist_CMS();
+          }
+        }
+        if (si > 0) {
+          m(cpbi, cpbi-1) -= s.inletResist_CSS();
+          if (si%2 == 0) {
+            m(cpbi, cpbi-1) -= s.inletResist_CSM();
+          }
+        }
+        if (si+2 < s.numStacks) {
+          m(cpbi, cpbi+1) -= s.inletResist_CSS();
+          if (si%2 == 1) {
+            m(cpbi, cpbi+1) -= s.inletResist_CSM();
+          }
+        }
+
+        // :::: [ NEGATIVE TOP CONN ] ::::
+        // >>> MAIN LOOP
+        m(cnti, lci) += s.numCells * s.cellR();
+        m(lci, cnti) += s.numCells * s.cellR();
+        // >>> POSITIVE TOP CONN
+        m(cnti, cpti+1) += 2*s.cellR();
+        if (si > 0) {
+          m(cnti, cpti) += (s.numCells-2) * s.cellR();
+        }
+        // >>> POSITIVE BOT CONN
+        m(cnti, cpbi) += (s.numCells-1) * s.cellR();
+        if (si+2 < s.numStacks) {
+          m(cnti, cpbi+1) += s.cellR();
+        }
+        // >>> NEGATIVE BOT CONN
+        m(cnti, cnbi+1) += s.cellR();
+        if (si > 0) {
+          m(cnti, cnbi) += (s.numCells-1) * s.cellR();
+        }
+        // >>> TO SELF
+        m(cnti, cnti) += s.numCells*s.cellR()
+            + 2*s.stackShuntR()
+            + 2*s.outletResist_CS();
+        if (si%2 == 1) {
+          m(cnti, cnti) += s.outletResist_CM();
+        }
+        if (si > 0) {
+          m(cnti, cnti-1) -= s.outletResist_CS();
+        }
+        if (si+2 < s.numStacks) {
+          m(cnti, cnti+1) -= s.outletResist_CS();
+        }
+      }
+
+      for (std::size_t ci = 0; ci < s.numCells; ++ci) {
+        Eigen::Index spti = indexSPT(s, ci, si, li);
+        Eigen::Index spbi = indexSPB(s, ci, si, li);
+        Eigen::Index snti = indexSNT(s, ci, si, li);
+        Eigen::Index snbi = indexSNB(s, ci, si, li);
+
+        if (si > 0) {
+          // :::: [ POSITIVE STACK LOOPS ] ::::
+          if (ci+1 < s.numCells) {
+            // >>> POSITIVE TOP CONN
+            m(spti, cpti) += s.cellR();
+            m(cpti, spti) += s.cellR();
+            m(spbi, cpti) += s.cellR();
+            m(cpti, spbi) += s.cellR();
+            if (ci == 0) {
+              m(spti-1, cpti) -= s.stackShuntR();
+              m(cpti, spti-1) -= s.stackShuntR();
+            }
+            if (ci+2 == s.numCells) {
+              m(spti, cpti) += s.stackShuntR();
+              m(cpti, spti) += s.stackShuntR();
+            }
+            // >>> NEGATIVE BOT CONN
+            m(spbi, cnbi) += s.cellR();
+            m(cnbi, spbi) += s.cellR();
+            m(spti, cnbi) += s.cellR();
+            m(cnbi, spti) += s.cellR();
+          }
+
+          // :::: [ NEGATIVE STACK LOOPS ] ::::
+          if (ci > 0) {
+            // >>> POSITIVE TOP CONN
+            m(snti-1, cpti) += s.cellR();
+            m(cpti, snti-1) += s.cellR();
+            m(snbi-1, cpti) += s.cellR();
+            m(cpti, snbi-1) += s.cellR();
+            // >>> NEGATIVE BOT CONN
+            m(snti, cnbi) += s.cellR();
+            m(cnbi, snti) += s.cellR();
+            m(snbi, cnbi) += s.cellR();
+            m(cnbi, snbi) += s.cellR();
+            if (ci == 1) {
+              m(snbi-1, cnbi) -= s.stackShuntR();
+              m(cnbi, snbi-1) -= s.stackShuntR();
+            }
+            if (ci+1 == s.numCells) {
+              m(snbi, cnbi) += s.stackShuntR();
+              m(cnbi, snbi) += s.stackShuntR();
+            }
+          }
+        }
+
+        if (si+1 < s.numStacks) {
+          // :::: [ POSITIVE STACK LOOPS ] ::::
+          if (ci+1 < s.numCells) {
+            // >>> POSITIVE BOT CONN
+            m(spti, cpbi) += s.cellR();
+            m(cpbi, spti) += s.cellR();
+            m(spbi, cpbi) += s.cellR();
+            m(cpbi, spbi) += s.cellR();
+            // >>> NEGATTIVE TOP CONN
+            m(spti+1, cnti) += s.cellR();
+            m(cnti, spti+1) += s.cellR();
+            m(spbi+1, cnti) += s.cellR();
+            m(cnti, spbi+1) += s.cellR();
+            if(ci == 0) {
+              m(spbi, cpbi) += s.stackShuntR();
+              m(cpbi, spbi) += s.stackShuntR();
+            }
+            if (ci+2 == s.numCells) {
+              m(spbi+1, cpbi) -= s.stackShuntR();
+              m(cpbi, spbi+1) -= s.stackShuntR();
+            }
+          }
+
+          // :::: [ NEGATIVE STACK LOOPS ] ::::
+          if (ci > 0) {
+            // >>> POSITIVE BOT CONN
+            m(snti, cpbi) += s.cellR();
+            m(cpbi, snti) += s.cellR();
+            m(snbi, cpbi) += s.cellR();
+            m(cpbi, snbi) += s.cellR();
+            // >>> NEGATIVE TOP CONN
+            m(snti, cnti) += s.cellR();
+            m(cnti, snti) += s.cellR();
+            m(snbi, cnti) += s.cellR();
+            m(cnti, snbi) += s.cellR();
+            if (ci == 1) {
+              m(snti, cnti) += s.stackShuntR();
+              m(cnti, snti) += s.stackShuntR();
+            }
+            if (ci+1 == s.numCells) {
+              m(snti+1, cnti) -= s.stackShuntR();
+              m(cnti, snti+1) -= s.stackShuntR();
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+
+}
+}
+}
