@@ -52,6 +52,15 @@ inline std::size_t matSize(const SysParam& s) {
 void addConnCoeff(Eigen::MatrixXd& m, const ESIPOSSysParam& s);
 
 
+/**
+ * Adds the RHS value of loop equations, for connectors, to the given matrix.
+ *
+ * @param v RHS vector.
+ * @param s ESIPOS system parameter.
+*/
+void addConnValue(Eigen::VectorXd& v, const ESIPOSSysParam& s);
+
+
 
 
 
@@ -458,6 +467,35 @@ void addConnCoeff(Eigen::MatrixXd& m, const ESIPOSSysParam& s) {
             }
           }
         }
+      }
+    }
+  }
+}
+
+
+
+
+
+
+
+
+/*
+********************************************************************************
+**    addConnValue Definitions
+********************************************************************************
+*/
+
+
+void addConnValue(Eigen::VectorXd& v, const ESIPOSSysParam& s) {
+  for (std::size_t li = 0; li < s.numLines; ++li) {
+    for (std::size_t si = 0; si < s.numStacks; ++si) {
+      if (si > 0) {
+        v(indexCPT(s, si, li)) -= s.numCells*s.ocv();
+        v(indexCNB(s, si, li)) -= s.numCells*s.ocv();
+      }
+      if (si+1 < s.numStacks) {
+        v(indexCPB(s, si, li)) -= s.numCells*s.ocv();
+        v(indexCNT(s, si, li)) -= s.numCells*s.ocv();
       }
     }
   }
