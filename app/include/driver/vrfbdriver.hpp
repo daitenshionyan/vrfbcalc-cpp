@@ -64,14 +64,17 @@ namespace shuntcur {
 /** Enum representing a specific system arrangement. */
 enum class SCArrangement {
   /** Parallel Criss Cross Front Back */
-  scaPCCFB=0
+  scaPCCFB=0,
+  /** Electrically Series, Inlet Parallel, Outlet Series */
+  scaESIPOS
 };
 
 
 /** Enum representing the type of the system arrangement. */
 enum class SCArrType {
   /** Parallel Criss Cross */
-  scatPCC=0
+  scatPCC=0,
+  scatESIPOS
 };
 
 

@@ -6,6 +6,7 @@
 
 #include "shuntcur/shuntcur.hpp"
 #include "shuntcur/conn_pcc.hpp"
+#include "shuntcur/conn_esipos.hpp"
 
 
 namespace vrfb {
@@ -127,12 +128,6 @@ ShuntReport calculate_CP(const ShuntCalc& calc, const ElecInput& input) {
 namespace pcc {
 
 
-
-
-
-
-
-
 /*
 ********************************************************************************
 **    PCCReport class
@@ -169,6 +164,58 @@ ShuntReport PCCCalc::calculate(const ElecInput& input) const {
           connType, sys, input.mag);
     case ElecInput::Mode::mConstPowr:
       return calculate_CP<PCCReport>(*this, input);
+    default:
+      throw std::runtime_error("Unknwon input mode");
+  }
+}
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+namespace esipos {
+
+
+ShuntReport ESIPOSCalc::calculate(const ElecInput& input) const {
+  switch (input.mode) {
+    case ElecInput::Mode::mConstVolt:
+      return calculate_esipos<ElecInput::Mode::mConstVolt>(
+          sys, input.mag);
+    case ElecInput::Mode::mConstCurr:
+      return calculate_esipos<ElecInput::Mode::mConstCurr>(
+          sys, input.mag);
+    case ElecInput::Mode::mConstPowr:
+      return calculate_CP<ESIPOSReport>(*this, input);
     default:
       throw std::runtime_error("Unknwon input mode");
   }
