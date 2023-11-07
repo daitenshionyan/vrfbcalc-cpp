@@ -521,10 +521,10 @@ void addConnCoeff(Eigen::MatrixXd& m, const ESIPOSSysParam& s) {
           m(cpti, cpti) += s.outletResist_CM();
         }
         if (si > 1) {
-          m(cpti, cpti-1) -= s.outletResist_CS();
+          m(cpti, cpti-1) -= s.outletResist_CS() + s.stackShuntR();
         }
         if (si+1 < s.numStacks) {
-          m(cpti, cpti+1) -= s.outletResist_CS();
+          m(cpti, cpti+1) -= s.outletResist_CS() + s.stackShuntR();
         }
 
         // :::: [ NEGATIVE BOTTOM CONN ] ::::
@@ -553,18 +553,18 @@ void addConnCoeff(Eigen::MatrixXd& m, const ESIPOSSysParam& s) {
         if (si%2 == 0) {
           m(cnbi, cnbi) += 2*s.inletResist_CMS() + s.inletResist_CMM();
           if (si+2 < s.numStacks) {
-            m(cnbi, cnbi+2) += s.inletResist_CMS();
-            m(cnbi+2, cnbi) += s.inletResist_CMS();
+            m(cnbi, cnbi+2) -= s.inletResist_CMS();
+            m(cnbi+2, cnbi) -= s.inletResist_CMS();
           }
         }
         if (si > 1) {
-          m(cnbi, cnbi-1) -= s.inletResist_CSS();
+          m(cnbi, cnbi-1) -= s.inletResist_CSS() + s.stackShuntR();
           if (si%2 == 1) {
             m(cnbi, cnbi-1) -= s.inletResist_CSM();
           }
         }
         if (si+1 < s.numStacks) {
-          m(cnbi, cnbi+1) -= s.inletResist_CSS();
+          m(cnbi, cnbi+1) -= s.inletResist_CSS() + s.stackShuntR();
           if (si%2 == 0) {
             m(cnbi, cnbi+1) -= s.inletResist_CSM();
           }
@@ -598,18 +598,18 @@ void addConnCoeff(Eigen::MatrixXd& m, const ESIPOSSysParam& s) {
         if (si%2 == 1) {
           m(cpbi, cpbi) += 2*s.inletResist_CMS() + s.inletResist_CMM();
           if (si+3 < s.numStacks) {
-            m(cpbi, cpbi+2) += s.inletResist_CMS();
-            m(cpbi+2, cpbi) += s.inletResist_CMS();
+            m(cpbi, cpbi+2) -= s.inletResist_CMS();
+            m(cpbi+2, cpbi) -= s.inletResist_CMS();
           }
         }
         if (si > 0) {
-          m(cpbi, cpbi-1) -= s.inletResist_CSS();
+          m(cpbi, cpbi-1) -= s.inletResist_CSS() + s.stackShuntR();
           if (si%2 == 0) {
             m(cpbi, cpbi-1) -= s.inletResist_CSM();
           }
         }
         if (si+2 < s.numStacks) {
-          m(cpbi, cpbi+1) -= s.inletResist_CSS();
+          m(cpbi, cpbi+1) -= s.inletResist_CSS() + s.stackShuntR();
           if (si%2 == 1) {
             m(cpbi, cpbi+1) -= s.inletResist_CSM();
           }
@@ -642,10 +642,10 @@ void addConnCoeff(Eigen::MatrixXd& m, const ESIPOSSysParam& s) {
           m(cnti, cnti) += s.outletResist_CM();
         }
         if (si > 0) {
-          m(cnti, cnti-1) -= s.outletResist_CS();
+          m(cnti, cnti-1) -= s.outletResist_CS() + s.stackShuntR();
         }
         if (si+2 < s.numStacks) {
-          m(cnti, cnti+1) -= s.outletResist_CS();
+          m(cnti, cnti+1) -= s.outletResist_CS() + s.stackShuntR();
         }
       }
 
