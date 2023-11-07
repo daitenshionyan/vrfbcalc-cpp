@@ -50,7 +50,7 @@ void checkMatrix(const Eigen::MatrixXd& expected, const Eigen::MatrixXd& actual)
 
 
 
-void checkShuntPerf(const vrfb::shuntcur::pcc::PCCReport& actual,
+void checkShuntPerf(const vrfb::shuntcur::ShuntReportData& actual,
       double exChgCurr, double exChgVolt,
       const std::vector<double>& exCurrList,
       const std::vector<double>& exSSPTList, const std::vector<double>& exSSPBList,
@@ -155,35 +155,6 @@ void checkShuntPerf(const vrfb::shuntcur::pcc::PCCReport& actual,
       << "MPB Difference\n" << mpbdiff.str()
       << "MNT Difference\n" << mntdiff.str()
       << "MNB Difference\n" << mnbdiff.str();
-}
-
-
-
-
-
-void checkShuntPerf(const vrfb::shuntcur::esipos::ESIPOSReport& actual,
-      double exChgCurr, double exChgVolt) {
-  // bool is_same_size = exCurrList.size() == actual.totCells();
-  // ASSERT_TRUE(is_same_size) << "Wrong size"
-  //     << " - Expected size: " << exCurrList.size()
-  //     << " | Actual size: " << actual.totCells();
-
-  bool is_same = true;
-  std::stringstream miscdiff {};
-  if (std::abs(actual.chargingCurr() - exChgCurr) > threshold) {
-    is_same = false;
-    miscdiff << "Charging current"
-        << " - Expected: " << exChgCurr
-        << " | Actual: " << actual.chargingCurr() << "\n";
-  }
-  if (std::abs(actual.chargingVolt() - exChgVolt) > threshold) {
-    is_same = false;
-    miscdiff << "Charging voltage"
-        << " - Expected: " << exChgVolt
-        << " | Actual: " << actual.chargingVolt() << "\n";
-  }
-  ASSERT_TRUE(is_same)
-      << miscdiff.str();
 }
 
 
@@ -361,5 +332,10 @@ TEST(vrfbShuntCurrESIPOS, calculateCV) {
   vrfb::shuntcur::ShuntReport actual = calc.calculate(
       shunttest_esipos::kTestCVInput);
   checkShuntPerf(actual.data<vrfb::shuntcur::esipos::ESIPOSReport>(),
-      shunttest_esipos::kTestChgCurr, shunttest_esipos::kTestChgVolt);
+      shunttest_esipos::kTestChgCurr, shunttest_esipos::kTestChgVolt,
+      shunttest_esipos::kExCurrList_Chg,
+      shunttest_esipos::kExSSPTList_Chg, shunttest_esipos::kExSSPBList_Chg,
+      shunttest_esipos::kExSSNTList_Chg, shunttest_esipos::kExSSNBList_Chg,
+      shunttest_esipos::kExSMPTList_Chg, shunttest_esipos::kExSMPBList_Chg,
+      shunttest_esipos::kExSMNTList_Chg, shunttest_esipos::kExSMNBList_Chg);
 }
