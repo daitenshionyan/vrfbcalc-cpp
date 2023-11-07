@@ -542,6 +542,21 @@ struct ESIPOSSysParam : public SysParam {
 };
 
 
+
+
+class ESIPOSReport : public ShuntReportData {
+  public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
+    ESIPOSReport() = default;
+    ESIPOSReport(const ESIPOSReport&) = default;
+    ESIPOSReport(ESIPOSReport&&) = default;
+
+    ESIPOSReport& operator=(const ESIPOSReport&) = default;
+    ESIPOSReport& operator=(ESIPOSReport&&) = default;
+
+    ~ESIPOSReport() = default;
+};
+
+
 }
 } // namespace <vrfb::shuntcur>
 } // namespace <vrfb>

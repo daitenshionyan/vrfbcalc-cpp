@@ -30,7 +30,7 @@ namespace esipos {
 
 /**
  * Returns N that is the required matrix (N x N) or vector (N x 1) size to
- * calculate shunt current for a PCC electrolyte connection.
+ * calculate shunt current for a ESIPOS electrolyte connection.
  *
  * @param s System parameters.
 */
@@ -59,6 +59,17 @@ void addConnCoeff(Eigen::MatrixXd& m, const ESIPOSSysParam& s);
  * @param s ESIPOS system parameter.
 */
 void addConnValue(Eigen::VectorXd& v, const ESIPOSSysParam& s);
+
+
+/**
+ * Calculates the shunt performance for a ESIPOS system.
+ *
+ * @param <M> Electrical input mode.
+ * @param s ESIPOS system parameters.
+ * @param mag Input magnitude.
+*/
+template<ElecInput::Mode M>
+ESIPOSReport* calculate_esipos(const ESIPOSSysParam& s, double mag);
 
 
 
@@ -142,6 +153,274 @@ Eigen::Index indexCNB(const SysParam& s,
       + li*(s.numStacks - 1)
       + si - 1
       + 2;
+}
+
+
+
+
+
+
+
+
+/*
+********************************************************************************
+**    Current calculation functions for CELL
+********************************************************************************
+*/
+
+
+/**
+ * Returns the POSITIVE CONNECTOR current contribution to the specified cell,
+ * given the calculated current vector.
+ *
+ * @param rv Result vector.
+ * @param s System parameters.
+ * @param ci Cell index within stack.
+ * @param si Stack index within line.
+ * @param li Line index.
+*/
+double getPosConnContri_Cell(const Eigen::VectorXd& rv, const SysParam& s,
+      std::size_t ci, std::size_t si, std::size_t li) {
+  double result = 0;
+  if (si > 0 && ci+1 < s.numCells) {
+    result += rv(indexCPT(s, si, li));
+  } else if (si+1 < s.numStacks && ci+1 == s.numCells) {
+    result += rv(indexCPT(s, si, li) + 1);
+  }
+  if (si+1 < s.numStacks) {
+    result += rv(indexCPB(s, si, li));
+  }
+  return result;
+}
+
+
+/**
+ * Returns the POSITIVE CONNECTOR current contribution to the specified cell,
+ * given the calculated current vector.
+ *
+ * @param rv Result vector.
+ * @param s System parameters.
+ * @param i Cell index from the first cell in the system.
+*/
+double getPosConnContri_Cell(const Eigen::VectorXd& rv, const SysParam& s,
+      std::size_t i) {
+  return getPosConnContri_Cell(rv, s, toci(i, s), tosi(i, s), toli(i, s));
+}
+
+
+
+
+/**
+ * Returns the NEGATIVE CONNECTOR current contribution to the specified cell,
+ * given the calculated current vector.
+ *
+ * @param rv Result vector.
+ * @param s System parameters.
+ * @param ci Cell index within stack.
+ * @param si Stack index within line.
+ * @param li Line index.
+*/
+double getNegConnContri_Cell(const Eigen::VectorXd& rv, const SysParam& s,
+      std::size_t ci, std::size_t si, std::size_t li) {
+  double result = 0;
+  if (si+1 < s.numStacks && ci > 0) {
+    result += rv(indexCNT(s, si, li));
+  } else if (si > 0 && ci == 0) {
+    result += rv(indexCNT(s, si, li) - 1);
+  }
+  if (si > 0) {
+    result += rv(indexCNB(s, si, li));
+  }
+  return result;
+}
+
+
+/**
+ * Returns the NEGATIVE CONNECTOR current contribution to the specified cell,
+ * given the calculated current vector.
+ *
+ * @param rv Result vector.
+ * @param s System parameters.
+ * @param i Cell index from the first cell in the system.
+*/
+double getNegConnContri_Cell(const Eigen::VectorXd& rv, const SysParam& s,
+      std::size_t i) {
+  return getNegConnContri_Cell(rv, s, toci(i, s), tosi(i, s), toli(i, s));
+}
+
+
+
+
+
+
+
+
+/*
+********************************************************************************
+**    Current calculation functions for STACK SHUNT
+********************************************************************************
+*/
+
+
+/**
+ * Returns the CONNECTOR current contribution to STACK SHUNT POSITIVE TOP
+ * current.
+ *
+ * @param rv Result vector.
+ * @param s System parameters.
+ * @param ci Cell index within stack.
+ * @param si Stack index within line.
+ * @param li Line index.
+*/
+double getConnContri_SSPT(const Eigen::VectorXd& rv, const SysParam& s,
+      std::size_t ci, std::size_t si, std::size_t li) {
+  double result = 0;
+  if (ci+1 == s.numCells) {
+    if (si > 0) {
+      result -= rv(indexCPT(s, si, li));
+    }
+    if (si+1 < s.numStacks) {
+      result += rv(indexCPT(s, si, li) + 1);
+    }
+  }
+  return result;
+}
+
+
+/**
+ * Returns the CONNECTOR current contribution to STACK SHUNT POSITIVE TOP
+ * current.
+ *
+ * @param rv Result vector.
+ * @param s System parameters.
+ * @param i Cell index within system.
+*/
+double getConnContri_SSPT(const Eigen::VectorXd& rv, const SysParam& s,
+      std::size_t i) {
+  return getConnContri_SSPT(rv, s, toci(i, s), tosi(i, s), toli(i, s));
+}
+
+
+
+
+/**
+ * Returns the CONNECTOR current contribution to STACK SHUNT POSITIVE BOTTOM
+ * current.
+ *
+ * @param rv Result vector.
+ * @param s System parameters.
+ * @param ci Cell index within stack.
+ * @param si Stack index within line.
+ * @param li Line index.
+*/
+double getConnContri_SSPB(const Eigen::VectorXd& rv, const SysParam& s,
+      std::size_t ci, std::size_t si, std::size_t li) {
+  double result = 0;
+  if (ci == 0) {
+    if (si > 0) {
+      result -= rv(indexCPB(s, si, li) - 1);
+    }
+    if (si+1 < s.numStacks) {
+      result += rv(indexCPB(s, si, li));
+    }
+  }
+  return result;
+}
+
+
+/**
+ * Returns the CONNECTOR current contribution to STACK SHUNT POSITIVE BOTTOM
+ * current.
+ *
+ * @param rv Result vector.
+ * @param s System parameters.
+ * @param i Cell index within system.
+*/
+double getConnContri_SSPB(const Eigen::VectorXd& rv, const SysParam& s,
+      std::size_t i) {
+  return getConnContri_SSPB(rv, s, toci(i, s), tosi(i, s), toli(i, s));
+}
+
+
+
+
+/**
+ * Returns the CONNECTOR current contribution to STACK SHUNT NEGATIVE TOP
+ * current.
+ *
+ * @param rv Result vector.
+ * @param s System parameters.
+ * @param ci Cell index within stack.
+ * @param si Stack index within line.
+ * @param li Line index.
+*/
+double getConnContri_SSNT(const Eigen::VectorXd& rv, const SysParam& s,
+      std::size_t ci, std::size_t si, std::size_t li) {
+  double result = 0;
+  if (ci == 0) {
+    if (si > 0) {
+      result -= rv(indexCNT(s, si, li) - 1);
+    }
+    if (si+1 < s.numStacks) {
+      result += rv(indexCNT(s, si, li));
+    }
+  }
+  return result;
+}
+
+
+/**
+ * Returns the CONNECTOR current contribution to STACK SHUNT NEGATIVE TOP
+ * current.
+ *
+ * @param rv Result vector.
+ * @param s System parameters.
+ * @param i Cell index within system.
+*/
+double getConnContri_SSNT(const Eigen::VectorXd& rv, const SysParam& s,
+      std::size_t i) {
+  return getConnContri_SSNT(rv, s, toci(i, s), tosi(i, s), toli(i, s));
+}
+
+
+
+
+/**
+ * Returns the CONNECTOR current contribution to STACK SHUNT NEGATIVE BOTTOM
+ * current.
+ *
+ * @param rv Result vector.
+ * @param s System parameters.
+ * @param ci Cell index within stack.
+ * @param si Stack index within line.
+ * @param li Line index.
+*/
+double getConnContri_SSNB(const Eigen::VectorXd& rv, const SysParam& s,
+      std::size_t ci, std::size_t si, std::size_t li) {
+  double result = 0;
+  if (ci+1 == s.numCells) {
+    if (si > 0) {
+      result -= rv(indexCNB(s, si, li));
+    }
+    if (si+1 < s.numStacks) {
+      result += rv(indexCNB(s, si, li) + 1);
+    }
+  }
+  return result;
+}
+
+
+/**
+ * Returns the CONNECTOR current contribution to STACK SHUNT NEGATIVE BOTTOM
+ * current.
+ *
+ * @param rv Result vector.
+ * @param s System parameters.
+ * @param i Cell index within system.
+*/
+double getConnContri_SSNB(const Eigen::VectorXd& rv, const SysParam& s,
+      std::size_t i) {
+  return getConnContri_SSNB(rv, s, toci(i, s), tosi(i, s), toli(i, s));
 }
 
 
@@ -499,6 +778,139 @@ void addConnValue(Eigen::VectorXd& v, const ESIPOSSysParam& s) {
       }
     }
   }
+}
+
+
+
+
+
+
+
+
+/*
+********************************************************************************
+**    ESIPOSReport_Impl Definitions
+********************************************************************************
+*/
+
+
+class ESIPOSReport_Impl : public ESIPOSReport {
+  public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
+    ESIPOSReport_Impl(const Eigen::VectorXd& rv, const ESIPOSSysParam& sys, double err)
+        : resVec{rv}, s{sys}, error{err} {}
+
+    ESIPOSReport_Impl() = delete;
+    ESIPOSReport_Impl(const ESIPOSReport_Impl&) = default;
+    ESIPOSReport_Impl(ESIPOSReport_Impl&&) = default;
+
+    ESIPOSReport_Impl& operator=(const ESIPOSReport_Impl&) = default;
+    ESIPOSReport_Impl& operator=(ESIPOSReport_Impl&&) = default;
+
+    ~ESIPOSReport_Impl() = default;
+
+
+  public: // ~~~~ accessors ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    double err() const override {return error;}
+    std::string arrName() const override {return "ESIPOS";}
+    const ESIPOSSysParam& param() const override {return s;}
+
+    double chargingVolt() const {
+      return resVec(kChgVoltIndex);
+    }
+
+    double chargingCurr() const {
+      return resVec(kChgCurrIndex);
+    }
+
+
+    double lineCurr(std::size_t i) const override {
+      return resVec(indexLine(s, toli(i, s)));
+    }
+
+    double cellCurr(std::size_t i) const override {
+      return resVec(indexLine(s, toli(i, s)))
+          + getStackContri_Cell(resVec, s, i)
+          + getPosConnContri_Cell(resVec, s, i)
+          + getNegConnContri_Cell(resVec, s, i);
+    }
+
+
+    double ssptCurr(std::size_t i) const override {
+      return getStackContri_SSPT(resVec, s, i)
+          + getConnContri_SSPT(resVec, s, i);
+    }
+
+    double sspbCurr(std::size_t i) const override {
+      return getStackContri_SSPB(resVec, s, i)
+          + getConnContri_SSPB(resVec, s, i);
+    }
+
+    double ssntCurr(std::size_t i) const override {
+      return getStackContri_SSNT(resVec, s, i)
+          + getConnContri_SSNT(resVec, s, i);
+    }
+
+    double ssnbCurr(std::size_t i) const override {
+      return getStackContri_SSNB(resVec, s, i)
+          + getConnContri_SSNB(resVec, s, i);
+    }
+
+
+    double smptCurr(std::size_t i) const override {
+      return getCurrMPT(resVec, s, i);
+    }
+
+    double smpbCurr(std::size_t i) const override {
+      return getCurrMPB(resVec, s, i);
+    }
+
+    double smntCurr(std::size_t i) const override {
+      return getCurrMNT(resVec, s, i);
+    }
+
+    double smnbCurr(std::size_t i) const override {
+      return getCurrMNB(resVec, s, i);
+    }
+
+
+  public: // ~~~~ functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    ESIPOSReport_Impl* copy() const override {return new ESIPOSReport_Impl(*this);}
+
+
+  private: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Eigen::VectorXd resVec;
+    ESIPOSSysParam s;
+    double error;
+};
+
+
+
+
+
+
+
+
+/*
+********************************************************************************
+**    addVolt Definitions
+********************************************************************************
+*/
+
+
+template<ElecInput::Mode M>
+ESIPOSReport* calculate_esipos(const ESIPOSSysParam& s, double mag) {
+  std::size_t size = matSize(s);
+  Eigen::MatrixXd lhsM = Eigen::MatrixXd::Zero(size, size);
+  addSysCoeff<M>(lhsM, s);
+  addStackCoeff(lhsM, s);
+  addConnCoeff(lhsM, s);
+  Eigen::VectorXd rhsV = Eigen::VectorXd::Zero(size);
+  addStackValue(rhsV, s, mag);
+  addConnValue(rhsV, s);
+  Eigen::VectorXd resVec = lhsM.colPivHouseholderQr().solve(rhsV);
+
+  double error = ((lhsM*resVec) - rhsV).norm();
+  return new ESIPOSReport_Impl<PS, NS>(resVec, s, error);
 }
 
 
