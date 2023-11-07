@@ -77,11 +77,11 @@ void SCSimReportPopup::reportReadyAt(int i) {
   auto step = watcher.future().resultAt(i);
   ui->voltPlot->addPoint<PlotPanel::Axis::axMain>(
       step.time,
-      step.report.data<vrfb::shuntcur::pcc::PCCReport>().chargingVolt());
+      step.report.data<vrfb::shuntcur::ShuntReportData>().chargingVolt());
   ui->voltPlot->addPoint<PlotPanel::Axis::axSub>(
       step.time,
-      step.report.data<vrfb::shuntcur::pcc::PCCReport>().chargingCurr());
-  report.update<vrfb::shuntcur::pcc::PCCReport>(step, kTimeStep);
+      step.report.data<vrfb::shuntcur::ShuntReportData>().chargingCurr());
+  report.update<vrfb::shuntcur::ShuntReportData>(step, kTimeStep);
 }
 
 
