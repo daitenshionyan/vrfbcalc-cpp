@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <functional>
 #include <fstream>
 #include <istream>
 #include <stdexcept>
@@ -319,5 +320,236 @@ void saveData_XLSX(
 }
 
 
+
+
+
+
+
+
+
+
+
+/*
+================================================================================
+================================================================================
+==
+==        SHUNT CURRENT
+==
+================================================================================
+================================================================================
+*/
+
+
+namespace shuntcur {
+
+
+/*
+********************************************************************************
+**        ShuntSimStepIO Definition
+********************************************************************************
+*/
+
+
+namespace {
+
+
+using TitleOutputter = std::function<std::ostream&(std::ostream&, const vrfbdriver::shuntcur::ShuntSimJob&)>;
+using DataOutputter = std::function<std::ostream&(std::ostream&, const vrfbdriver::shuntcur::ShuntSimStep&)>;
+
+
+struct ShuntSimStepOutputConfig {
+  TitleOutputter titleOutputter;
+  DataOutputter dataOutputter;
+};
+
+
+
+
+const std::vector<ShuntSimStepOutputConfig> outputConfigList {
+  { // ---- TIME ---------------------------------------------------------------
+    [](std::ostream& os, const vrfbdriver::shuntcur::ShuntSimJob& j)
+          -> std::ostream& {
+      return os << "Time (s)";
+    },
+    [](std::ostream& os, const vrfbdriver::shuntcur::ShuntSimStep& s)
+          -> std::ostream& {
+      return os << s.time;
+    }
+  },
+  {
+    [](std::ostream& os, const vrfbdriver::shuntcur::ShuntSimJob& j)
+          -> std::ostream& {
+      return os << "Step";
+    },
+    [](std::ostream& os, const vrfbdriver::shuntcur::ShuntSimStep& s)
+          -> std::ostream& {
+      switch (s.step) {
+        case vrfbdriver::shuntcur::ShuntSimStep::Step::sChg:
+          return os << "CHARGING";
+        case vrfbdriver::shuntcur::ShuntSimStep::Step::sDChg:
+          return os << "DISCHARGING";
+        default:
+          return os << "UNKNOWN STEP";
+      }
+    }
+  },
+  {
+    [](std::ostream& os, const vrfbdriver::shuntcur::ShuntSimJob& j)
+          -> std::ostream& {
+      return os << "SOC (%)";
+    },
+    [](std::ostream& os, const vrfbdriver::shuntcur::ShuntSimStep& s)
+          -> std::ostream& {
+      return os << s.soc*100;
+    }
+  },
+  {
+    [](std::ostream& os, const vrfbdriver::shuntcur::ShuntSimJob& j)
+          -> std::ostream& {
+      return os << "Input Current (A)";
+    },
+    [](std::ostream& os, const vrfbdriver::shuntcur::ShuntSimStep& s)
+          -> std::ostream& {
+      return os << s.report.data().chargingCurr();
+    }
+  },
+  {
+    [](std::ostream& os, const vrfbdriver::shuntcur::ShuntSimJob& j)
+          -> std::ostream& {
+      return os << "Input Voltage (V)";
+    },
+    [](std::ostream& os, const vrfbdriver::shuntcur::ShuntSimStep& s)
+          -> std::ostream& {
+      return os << s.report.data().chargingVolt();
+    }
+  },
+  {
+    [](std::ostream& os, const vrfbdriver::shuntcur::ShuntSimJob& j)
+          -> std::ostream& {
+      for (int i = 0; i < j.calc->param().numLines; ++i) {
+        os << comutils::string::format_string("Line %d Current (A)", i);
+        if (i+1 < j.calc->param().numLines) {
+          os << ",";
+        }
+      }
+      return os;
+    },
+    [](std::ostream& os, const vrfbdriver::shuntcur::ShuntSimStep& s)
+          -> std::ostream& {
+      for (int i = 0; i < s.report.data().numLines(); ++i) {
+        os << s.report.data().lineCurr(i);
+        if (i+1 < s.report.data().numLines()) {
+          os << ",";
+        }
+      }
+      return os;
+    }
+  },
+  {
+    [](std::ostream& os, const vrfbdriver::shuntcur::ShuntSimJob& j)
+          -> std::ostream& {
+      for (int li = 0; li < j.calc->param().numLines; ++li) {
+        for (int si = 0; si < j.calc->param().numStacks; ++si) {
+          for (int ci = 0; ci < j.calc->param().numCells; ++ci) {
+            os << comutils::string::format_string(
+                "L%d-S%d-C%d Cell Current (A)",
+                li, si, ci);
+            if (ci+1 < j.calc->param().numCells
+                  || si+1 < j.calc->param().numStacks
+                  || li+1 < j.calc->param().numLines) {
+              os << ",";
+            }
+          }
+        }
+      }
+      return os;
+    },
+    [](std::ostream& os, const vrfbdriver::shuntcur::ShuntSimStep& s)
+          -> std::ostream& {
+      for (int i = 0; i < s.report.data().totCells(); ++i) {
+        os << s.report.data().cellCurr(i);
+        if (i+1 < s.report.data().totCells()) {
+          os << ",";
+        }
+      }
+      return os;
+    }
+  },
+  {
+    [](std::ostream& os, const vrfbdriver::shuntcur::ShuntSimJob& j)
+          -> std::ostream& {
+      for (int li = 0; li < j.calc->param().numLines; ++li) {
+        for (int si = 0; si < j.calc->param().numStacks; ++si) {
+          for (int ci = 0; ci < j.calc->param().numCells; ++ci) {
+            os << comutils::string::format_string(
+                "L%d-S%d-C%d Cell Power (W)",
+                li, si, ci);
+            if (ci+1 < j.calc->param().numCells
+                  || si+1 < j.calc->param().numStacks
+                  || li+1 < j.calc->param().numLines) {
+              os << ",";
+            }
+          }
+        }
+      }
+      return os;
+    },
+    [](std::ostream& os, const vrfbdriver::shuntcur::ShuntSimStep& s)
+          -> std::ostream& {
+      for (int i = 0; i < s.report.data().totCells(); ++i) {
+        os << s.report.data().cellPowr(i);
+        if (i+1 < s.report.data().totCells()) {
+          os << ",";
+        }
+      }
+      return os;
+    }
+  }
+};
+
+
+}
+
+
+
+
+
+
+
+
+ShuntSimStepIO::ShuntSimStepIO(
+      const std::string& pathString, const vrfbdriver::shuntcur::ShuntSimJob& j)
+      : os{comutils::io::openFile_w(std::filesystem::u8path<std::string>(pathString))} {
+  for (int i = 0; i < outputConfigList.size(); ++i) {
+    outputConfigList[i].titleOutputter(os, j);
+    if (i+1 < outputConfigList.size()) {
+      os << ",";
+    }
+  }
+  os << std::endl;
+}
+
+
+void ShuntSimStepIO::append(const vrfbdriver::shuntcur::ShuntSimStep& s) {
+  for (int i = 0; i < outputConfigList.size(); ++i) {
+    outputConfigList[i].dataOutputter(os, s);
+    if (i+1 < outputConfigList.size()) {
+      os << ",";
+    }
+  }
+  os << std::endl;
+}
+
+
+}
 } // END OF NAMESPACE <vrfbdriver::io>
+
+
+
+
+
+
+
+
+
 } // END OF NAMESPACE <vrfbdriver>

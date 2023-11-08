@@ -49,11 +49,13 @@ SCSimReportPopup::SCSimReportPopup(QWidget* parent)
 
 
 SCSimReportPopup::~SCSimReportPopup() {
+  delete stepIO;
   delete ui;
 }
 
 
 void SCSimReportPopup::start(const vrfbdriver::shuntcur::ShuntSimJob& j) {
+  stepIO = new vrfbdriver::io::shuntcur::ShuntSimStepIO("output/" + j.name + ".csv", j);
   watcher.setFuture(QtConcurrent::run<vrfbdriver::shuntcur::ShuntSimStep>(
       &pool,
       [&, j](QPromise<vrfbdriver::shuntcur::ShuntSimStep>& p) {
@@ -82,6 +84,9 @@ void SCSimReportPopup::reportReadyAt(int i) {
       step.time,
       step.report.data().chargingCurr());
   report.update(step, kTimeStep);
+  if (stepIO != nullptr) {
+    stepIO->append(step);
+  }
 }
 
 

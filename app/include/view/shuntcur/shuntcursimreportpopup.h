@@ -4,6 +4,7 @@
 #include <QDialog>
 
 #include "driver/vrfbdriver.hpp"
+#include "driver/vrfbdriver_io.hpp"
 #include "logger.hpp"
 
 
@@ -55,6 +56,7 @@ class SCSimReportPopup : public QDialog {
     Ui::SCSimReportPopup* ui;
 
     vrfbdriver::shuntcur::ShuntSimReport report;
+    vrfbdriver::io::shuntcur::ShuntSimStepIO* stepIO;
 
     QFutureWatcher<vrfbdriver::shuntcur::ShuntSimStep> watcher;
     QThreadPool pool;
