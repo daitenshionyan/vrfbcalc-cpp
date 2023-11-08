@@ -116,14 +116,13 @@ struct ShuntSimReport {
    * @param s Simulation step data to add.
    * @param dt Change in time from the last added step data.
   */
-  template<typename T>
   void update(const ShuntSimStep& s, double dt) {
     switch (s.step) {
       case ShuntSimStep::Step::sChg:
-        inputEnergy += s.report.data<T>().chargingPowr() * dt;
+        inputEnergy += s.report.data().chargingPowr() * dt;
         break;
       case ShuntSimStep::Step::sDChg:
-        outputEnergy -= s.report.data<T>().chargingPowr() * dt;
+        outputEnergy -= s.report.data().chargingPowr() * dt;
         break;
     }
   }

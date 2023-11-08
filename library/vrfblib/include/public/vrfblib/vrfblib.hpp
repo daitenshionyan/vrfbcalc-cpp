@@ -315,7 +315,7 @@ class ShuntReport {
 
 
   public:
-    template<typename T>
+    template<typename T=ShuntReportData>
     const T& data() const {return *dynamic_cast<T*>(data_p);}
 
     const ShuntReportData& sdata() const {return *data_p;}
