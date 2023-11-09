@@ -318,19 +318,18 @@ ShuntSimJob::~ShuntSimJob() {
 namespace {
 
 
-template<typename T, ShuntSimStep::Step STEP>
+template<ShuntSimStep::Step STEP>
 ShuntSimStep iterateShunt_Input(
       vrfb::shuntcur::ShuntCalc* calc,
       const vrfb::shuntcur::ElecInput& input,
       const ShuntSimJob& j, double time, double dt) {
   vrfb::shuntcur::ShuntReport rpt = calc->calculate(input);
-  calc->param().soc += (rpt.data<T>().storedCurr() * dt)
+  calc->param().soc += (rpt.data().storedCurr() * dt)
       / (j.elecVol * j.elecCon * 96485.3321);
   return {rpt, calc->param().soc, time, STEP};
 }
 
 
-template<typename T>
 double simulateShunt_Chg(
       int iter, vrfb::shuntcur::ShuntCalc* calc,
       const ShuntSimJob& j, double startTime, double dt,
@@ -345,7 +344,7 @@ double simulateShunt_Chg(
     }
     time += dt;
     double oldSOC = stepRpt.soc;
-    stepRpt = iterateShunt_Input<T, ShuntSimStep::Step::sChg>(calc, j.chgInput, j, time, dt);
+    stepRpt = iterateShunt_Input<ShuntSimStep::Step::sChg>(calc, j.chgInput, j, time, dt);
     if (stepRpt.soc < oldSOC) {
       throw std::runtime_error("Discharging while charging");
     }
@@ -361,7 +360,6 @@ double simulateShunt_Chg(
 }
 
 
-template<typename T>
 double simulateShunt_DChg(
       int iter, vrfb::shuntcur::ShuntCalc* calc,
       const ShuntSimJob& j, double startTime, double dt,
@@ -376,7 +374,7 @@ double simulateShunt_DChg(
     }
     time += dt;
     double oldSOC = stepRpt.soc;
-    stepRpt = iterateShunt_Input<T, ShuntSimStep::Step::sDChg>(calc, j.dchgInput, j, time, dt);
+    stepRpt = iterateShunt_Input<ShuntSimStep::Step::sDChg>(calc, j.dchgInput, j, time, dt);
     if (stepRpt.soc > oldSOC) {
       throw std::runtime_error("Charging while discharging");
     }
@@ -392,36 +390,19 @@ double simulateShunt_DChg(
 }
 
 
-template<typename T>
-void simulateShunt_Impl(
-      const ShuntSimJob& j, double dt,
-      comutils::concurrent::BasePromise<ShuntSimStep>& p) {
-  p.setProgressRange(0, 200);
-  double time = 0;
-  vrfb::shuntcur::ShuntCalc* calc = j.calc->copy();
-  calc->param().soc = j.lowerLimitSOC;
-  time = simulateShunt_Chg<T>(0, calc, j, time, dt, p);
-  time = simulateShunt_DChg<T>(1, calc, j, time, dt, p);
-  delete calc;
-}
-
-
 } // namespace <vrfbdriver::shuntcur::UNNAMED>
 
 
 void simulateShunt(
       const ShuntSimJob& j, double dt,
       comutils::concurrent::BasePromise<ShuntSimStep>& p) {
-  switch (j.arr) {
-    case SCArrangement::scaPCCFB:
-      simulateShunt_Impl<vrfb::shuntcur::pcc::PCCReport>(j, dt, p);
-      break;
-    case SCArrangement::scaESIPOS:
-      simulateShunt_Impl<vrfb::shuntcur::esipos::ESIPOSReport>(j, dt, p);
-      break;
-    default:
-      throw std::runtime_error("Unknown arrangement");
-  }
+  p.setProgressRange(0, 200);
+  double time = 0;
+  vrfb::shuntcur::ShuntCalc* calc = j.calc->copy();
+  calc->param().soc = j.lowerLimitSOC;
+  time = simulateShunt_Chg(0, calc, j, time, dt, p);
+  time = simulateShunt_DChg(1, calc, j, time, dt, p);
+  delete calc;
 }
 
 
