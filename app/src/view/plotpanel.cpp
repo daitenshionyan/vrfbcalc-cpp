@@ -2,6 +2,7 @@
 #include "./ui_plotpanel.h"
 
 #include <cmath>
+#include <stdexcept>
 
 
 
@@ -341,10 +342,16 @@ class PlotPanel::SignalHandler : public QObject {
 */
 
 
-PlotPanel::PlotPanel(QWidget* parent)
-      : QWidget(parent), ui(new Ui::PlotPanel) {
+PlotPanel::PlotPanel(QWidget* parent, const std::string& plotName)
+      : QWidget(parent), ui(new Ui::PlotPanel),
+        name(plotName) {
   ui->setupUi(this);
   handler = new SignalHandler(ui);
+  if (name.empty()) {
+    ui->plotTitleLabel->hide();
+  } else {
+    ui->plotTitleLabel->setText(QString::fromStdString(plotName));
+  }
 }
 
 
@@ -441,7 +448,7 @@ template<>
 void PlotPanel::addPoint<PlotPanel::Axis::axMain>(double x, double y, int i) {
   auto graph = ui->plot->graph(ilist_1.at(i));
   graph->addData(x, y);
-  graph->rescaleAxes();
+  ui->plot->rescaleAxes();
   ui->plot->replot();
 }
 
@@ -450,6 +457,60 @@ template<>
 void PlotPanel::addPoint<PlotPanel::Axis::axSub>(double x, double y, int i) {
   auto graph = ui->plot->graph(ilist_2.at(i));
   graph->addData(x, y);
-  graph->rescaleAxes();
+  ui->plot->rescaleAxes();
   ui->plot->replot();
+}
+
+
+
+
+template<>
+void PlotPanel::addPoint<PlotPanel::Axis::axMain>(
+      const std::vector<std::pair<double, double>>& points, int i) {
+  auto graph = ui->plot->graph(ilist_1.at(i));
+  for (const auto& p : points) {
+    graph->addData(p.first, p.second);
+  }
+  ui->plot->rescaleAxes();
+  ui->plot->replot();
+}
+
+
+template<>
+void PlotPanel::addPoint<PlotPanel::Axis::axSub>(
+      const std::vector<std::pair<double, double>>& points, int i) {
+  auto graph = ui->plot->graph(ilist_2.at(i));
+  for (const auto& p : points) {
+    graph->addData(p.first, p.second);
+  }
+  ui->plot->rescaleAxes();
+  ui->plot->replot();
+}
+
+
+
+
+
+
+
+
+/*
+********************************************************************************
+**        Functions
+********************************************************************************
+*/
+
+
+bool PlotPanel::savePng(const std::string& dirPath, const std::string& prefix) {
+  if (name.empty() && prefix.empty()) {
+    throw std::runtime_error("Empty name");
+  }
+  std::string fileName = prefix;
+  if (prefix.empty()) {
+    fileName += name;
+  } else if (!name.empty()) {
+    fileName += " - " + name;
+  }
+  return ui->plot->savePng(
+      QString::fromStdString(dirPath + "/" + fileName + ".png"));
 }

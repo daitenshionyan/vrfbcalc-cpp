@@ -7,10 +7,12 @@
 #include <Eigen/Dense>
 
 #include "shunttestconst_pcc.hpp"
+#include "shunttestconst_esipos.hpp"
 
 #include "vrfblib/vrfblib.hpp"
 #include "shuntcur/shuntcur.hpp"
 #include "shuntcur/conn_pcc.hpp"
+#include "shuntcur/conn_esipos.hpp"
 
 
 namespace { // ==== namespace <UNNAMED> ========================================
@@ -48,7 +50,7 @@ void checkMatrix(const Eigen::MatrixXd& expected, const Eigen::MatrixXd& actual)
 
 
 
-void checkShuntPerf(const vrfb::shuntcur::pcc::PCCReport& actual,
+void checkShuntPerf(const vrfb::shuntcur::ShuntReportData& actual,
       double exChgCurr, double exChgVolt,
       const std::vector<double>& exCurrList,
       const std::vector<double>& exSSPTList, const std::vector<double>& exSSPBList,
@@ -158,6 +160,10 @@ void checkShuntPerf(const vrfb::shuntcur::pcc::PCCReport& actual,
 
 } // ---- namespace <UNNAMED>
 // namespace <GLOBAL>
+
+
+
+
 
 
 
@@ -289,4 +295,47 @@ TEST(vrfbShuntCurrPCC, calculateDPFB) {
       shunttest_pcc::kExSSNTList_DChg, shunttest_pcc::kExSSNBList_DChg,
       shunttest_pcc::kExSMPTList_DChg, shunttest_pcc::kExSMPBList_DChg,
       shunttest_pcc::kExSMNTList_DChg, shunttest_pcc::kExSMNBList_DChg);
+}
+
+
+
+
+
+
+
+
+/*
+********************************************************************************
+**    ESIPOS tests
+********************************************************************************
+*/
+
+
+TEST(vrfbShuntCurrESIPOS, addStackCoeff) {
+  Eigen::MatrixXd actual = Eigen::MatrixXd::Zero(99, 99);
+  vrfb::shuntcur::addStackCoeff(actual, shunttest_esipos::kTestSysParam);
+  checkMatrix(shunttest_esipos::kExLHS_NoConn, actual);
+}
+
+
+TEST(vrfbShuntCurrESIPOS, addConnCoeff) {
+  Eigen::MatrixXd actual = Eigen::MatrixXd::Zero(119, 119);
+  vrfb::shuntcur::addStackCoeff(actual, shunttest_esipos::kTestSysParam);
+  vrfb::shuntcur::esipos::addConnCoeff(actual, shunttest_esipos::kTestSysParam);
+  checkMatrix(shunttest_esipos::kExLHS_WithConn, actual);
+}
+
+
+TEST(vrfbShuntCurrESIPOS, calculateCV) {
+  vrfb::shuntcur::esipos::ESIPOSCalc calc {
+      shunttest_esipos::kTestSysParam};
+  vrfb::shuntcur::ShuntReport actual = calc.calculate(
+      shunttest_esipos::kTestCVInput);
+  checkShuntPerf(actual.data<vrfb::shuntcur::esipos::ESIPOSReport>(),
+      shunttest_esipos::kTestChgCurr, shunttest_esipos::kTestChgVolt,
+      shunttest_esipos::kExCurrList_Chg,
+      shunttest_esipos::kExSSPTList_Chg, shunttest_esipos::kExSSPBList_Chg,
+      shunttest_esipos::kExSSNTList_Chg, shunttest_esipos::kExSSNBList_Chg,
+      shunttest_esipos::kExSMPTList_Chg, shunttest_esipos::kExSMPBList_Chg,
+      shunttest_esipos::kExSMNTList_Chg, shunttest_esipos::kExSMNBList_Chg);
 }

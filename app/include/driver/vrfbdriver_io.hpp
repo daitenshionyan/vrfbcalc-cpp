@@ -2,6 +2,7 @@
 
 
 #include <filesystem>
+#include <fstream>
 #include <istream>
 #include <string>
 #include <vector>
@@ -26,5 +27,49 @@ void saveTable_XLSX(const std::filesystem::path&, const comutils::Table&);
 void saveData_XLSX(const std::filesystem::path&, const comutils::Table&, const DataSet_CE&);
 
 
+
+
+
+
+
+
+namespace shuntcur {
+
+
+class ShuntSimStepIO {
+  public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
+    ShuntSimStepIO(const std::string& pathString, const vrfbdriver::shuntcur::ShuntSimJob& j);
+
+    ShuntSimStepIO() = delete;
+    ShuntSimStepIO(const ShuntSimStepIO&) = default;
+    ShuntSimStepIO(ShuntSimStepIO&&) = default;
+
+    ShuntSimStepIO& operator=(const ShuntSimStepIO&) = default;
+    ShuntSimStepIO& operator=(ShuntSimStepIO&&) = default;
+
+    ~ShuntSimStepIO() = default;
+
+
+
+
+  public: // ~~~~ functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    void append(const vrfbdriver::shuntcur::ShuntSimStep&);
+
+
+
+
+  private: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    std::ofstream os;
+};
+
+
 }
+}
+
+
+
+
+
+
+
 }

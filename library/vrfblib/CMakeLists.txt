@@ -21,6 +21,7 @@ add_library(vrfblib SHARED
     include/private/celleff.hpp
     include/private/shuntcur/shuntcur.hpp
     include/private/shuntcur/conn_pcc.hpp
+    include/private/shuntcur/conn_esipos.hpp
 
     src/celleff.cpp
     src/shuntcur.cpp
@@ -47,6 +48,7 @@ enable_testing()
 
 add_executable(shunttest
     test/shunttestconst_pcc.hpp
+    test/shunttestconst_esipos.hpp
     test/shunttest.cpp
 )
 

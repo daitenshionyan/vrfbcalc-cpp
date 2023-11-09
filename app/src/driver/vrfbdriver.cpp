@@ -195,116 +195,26 @@ std::vector<PerformanceEntry_CE> readPerformance_CE(
 }
 
 
+
+
+
+
+
+
+
+
 /*
-********************************************************************************
-**
-**    Shunt current
-**
-********************************************************************************
+================================================================================
+================================================================================
+==
+==        SHUNT CURRENT
+==
+================================================================================
+================================================================================
 */
 
 
-// ==== [ ShuntCalc Definition ] ===============================================
-
-
-ShuntJob::ShuntJob(const std::string& n, const vrfb::shuntcur::ShuntCalc& sc,
-    const vrfb::shuntcur::ElecInput& input,
-    SCArrangement a)
-    : name{n}, calc{sc.copy()}, elecInput{input}, arr{a} {}
-
-
-ShuntJob::ShuntJob(const std::string& n, vrfb::shuntcur::ShuntCalc* scp,
-    const vrfb::shuntcur::ElecInput& input,
-    SCArrangement a)
-    : name{n}, calc{scp}, elecInput{input}, arr{a} {}
-
-
-ShuntJob::ShuntJob(const ShuntJob& o)
-    : name{o.name}, calc{o.calc->copy()}, elecInput{o.elecInput}, arr{o.arr} {}
-
-
-ShuntJob::ShuntJob(ShuntJob&& o)
-    : name{std::move(o.name)}, calc{o.calc}, elecInput{o.elecInput}, arr{o.arr} {
-  o.calc = nullptr;
-}
-
-
-ShuntJob& ShuntJob::operator=(const ShuntJob& o) {
-  name = o.name;
-  delete calc;
-  calc = o.calc->copy();
-  elecInput = o.elecInput;
-  arr = o.arr;
-  return *this;
-}
-
-
-ShuntJob& ShuntJob::operator=(ShuntJob&& o) {
-  name = std::move(o.name);
-  calc = o.calc;
-  o.calc = nullptr;
-  elecInput = o.elecInput;
-  arr = o.arr;
-  return *this;
-}
-
-
-// ==== [ calcShuntPerf Definition ] ===========================================
-
-
-ShuntRes calcShuntPerf(const ShuntJob& j, logger::Logger& l) {
-  auto beg = std::chrono::high_resolution_clock::now();
-  vrfb::shuntcur::ShuntReport report = j.calc->calculate(j.elecInput);
-  std::filesystem::path path = std::filesystem::u8path<std::string>("output/" + j.name + ".xlsx");
-  SCArrType arrType;
-  switch (j.arr) {
-    case SCArrangement::scaPCCFB:
-      arrType = SCArrType::scatPCC;
-      break;
-    default:
-      throw std::runtime_error("Unsupported arrangement");
-  }
-  auto dur = std::chrono::duration_cast<std::chrono::microseconds>(
-            std::chrono::high_resolution_clock::now() - beg);
-  l.info(comutils::string::format_string(
-      "Shunt performance calculation completed in %.3fms",
-      dur.count() / 1000.));
-  return {j.name, arrType, report};
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+namespace shuntcur {
 
 
 /*
@@ -408,19 +318,18 @@ ShuntSimJob::~ShuntSimJob() {
 namespace {
 
 
-template<typename T, ShuntSimStep::Step STEP>
+template<ShuntSimStep::Step STEP>
 ShuntSimStep iterateShunt_Input(
       vrfb::shuntcur::ShuntCalc* calc,
       const vrfb::shuntcur::ElecInput& input,
       const ShuntSimJob& j, double time, double dt) {
   vrfb::shuntcur::ShuntReport rpt = calc->calculate(input);
-  calc->param().soc += (rpt.data<T>().storedCurr() * dt)
+  calc->param().soc += (rpt.data().storedCurr() * dt)
       / (j.elecVol * j.elecCon * 96485.3321);
   return {rpt, calc->param().soc, time, STEP};
 }
 
 
-template<typename T>
 double simulateShunt_Chg(
       int iter, vrfb::shuntcur::ShuntCalc* calc,
       const ShuntSimJob& j, double startTime, double dt,
@@ -435,7 +344,7 @@ double simulateShunt_Chg(
     }
     time += dt;
     double oldSOC = stepRpt.soc;
-    stepRpt = iterateShunt_Input<T, ShuntSimStep::Step::sChg>(calc, j.chgInput, j, time, dt);
+    stepRpt = iterateShunt_Input<ShuntSimStep::Step::sChg>(calc, j.chgInput, j, time, dt);
     if (stepRpt.soc < oldSOC) {
       throw std::runtime_error("Discharging while charging");
     }
@@ -451,7 +360,6 @@ double simulateShunt_Chg(
 }
 
 
-template<typename T>
 double simulateShunt_DChg(
       int iter, vrfb::shuntcur::ShuntCalc* calc,
       const ShuntSimJob& j, double startTime, double dt,
@@ -466,7 +374,7 @@ double simulateShunt_DChg(
     }
     time += dt;
     double oldSOC = stepRpt.soc;
-    stepRpt = iterateShunt_Input<T, ShuntSimStep::Step::sDChg>(calc, j.dchgInput, j, time, dt);
+    stepRpt = iterateShunt_Input<ShuntSimStep::Step::sDChg>(calc, j.dchgInput, j, time, dt);
     if (stepRpt.soc > oldSOC) {
       throw std::runtime_error("Charging while discharging");
     }
@@ -482,34 +390,21 @@ double simulateShunt_DChg(
 }
 
 
-template<typename T>
-void simulateShunt_Impl(
+} // namespace <vrfbdriver::shuntcur::UNNAMED>
+
+
+void simulateShunt(
       const ShuntSimJob& j, double dt,
       comutils::concurrent::BasePromise<ShuntSimStep>& p) {
   p.setProgressRange(0, 200);
   double time = 0;
   vrfb::shuntcur::ShuntCalc* calc = j.calc->copy();
   calc->param().soc = j.lowerLimitSOC;
-  time = simulateShunt_Chg<T>(0, calc, j, time, dt, p);
-  time = simulateShunt_DChg<T>(1, calc, j, time, dt, p);
+  time = simulateShunt_Chg(0, calc, j, time, dt, p);
+  time = simulateShunt_DChg(1, calc, j, time, dt, p);
   delete calc;
 }
 
 
-}
-
-
-void simulateShunt(
-      const ShuntSimJob& j, double dt,
-      comutils::concurrent::BasePromise<ShuntSimStep>& p) {
-  switch (j.arr) {
-    case SCArrangement::scaPCCFB:
-      simulateShunt_Impl<vrfb::shuntcur::pcc::PCCReport>(j, dt, p);
-      break;
-    default:
-      throw std::runtime_error("Unknown arrangement");
-  }
-}
-
-
-} // END OF NAMESPACE <vrfbdriver> ---------------------------------------------
+} // namespace <vrfbdriver::shuntcur>
+} // namespace <vrfbdriver>

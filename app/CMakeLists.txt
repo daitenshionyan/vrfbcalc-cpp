@@ -22,7 +22,7 @@ find_package(Qt6 REQUIRED COMPONENTS
     Charts
 )
 
-set(VRFBCALC-CPP_VERSION "0.3.2")
+set(VRFBCALC-CPP_VERSION "0.3.3")
 configure_file(include/vrfbcalccfg.hpp.in include/vrfbcalccfg.hpp)
 
 add_executable(vrfbcalc-cpp WIN32
@@ -39,20 +39,14 @@ add_executable(vrfbcalc-cpp WIN32
     resource/resource.qrc
 
     include/view/mainwindow.h
+    include/view/mainwindow_impl.h
     src/view/mainwindow.ui
     src/view/mainwindow.cpp
+    src/view/mainwindow_impl.cpp
 
     include/view/plotpanel.h
     src/view/plotpanel.ui
     src/view/plotpanel.cpp
-
-    include/view/graphplotform.h
-    src/view/graphplotform.ui
-    src/view/graphplotform.cpp
-
-    include/view/graphplotformtitled.h
-    src/view/graphplotformtitled.ui
-    src/view/graphplotformtitled.cpp
 
     # :::: Cell Efficiency ::::::::::::::::::::::::::::::::::::::::::::::::::: #
 
@@ -81,14 +75,6 @@ add_executable(vrfbcalc-cpp WIN32
     src/view/celleff/celleffresultview.cpp
 
     # :::: Shunt Current ::::::::::::::::::::::::::::::::::::::::::::::::::::: #
-
-    include/view/shuntcur/shuntcurconfigpopup.h
-    src/view/shuntcur/shuntcurconfigpopup.ui
-    src/view/shuntcur/shuntcurconfigpopup.cpp
-
-    include/view/shuntcur/shuntcurreportpopup.h
-    src/view/shuntcur/shuntcurreportpopup.ui
-    src/view/shuntcur/shuntcurreportpopup.cpp
 
     include/view/shuntcur/shuntcursimconfigpopup.h
     src/view/shuntcur/shuntcursimconfigpopup.ui

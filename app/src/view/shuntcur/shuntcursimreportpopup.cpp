@@ -31,15 +31,15 @@ SCSimReportPopup::SCSimReportPopup(QWidget* parent)
 
   connect(this, &QDialog::finished,
       this, &SCSimReportPopup::deleteSelf);
-  connect(&watcher, &QFutureWatcher<vrfbdriver::ShuntSimStep>::resultReadyAt,
+  connect(&watcher, &QFutureWatcher<vrfbdriver::shuntcur::ShuntSimStep>::resultReadyAt,
       this, &SCSimReportPopup::reportReadyAt);
-  connect(&watcher, &QFutureWatcher<vrfbdriver::ShuntSimStep>::progressValueChanged,
+  connect(&watcher, &QFutureWatcher<vrfbdriver::shuntcur::ShuntSimStep>::progressValueChanged,
       ui->progressBar, &QProgressBar::setValue);
-  connect(&watcher, &QFutureWatcher<vrfbdriver::ShuntSimJob>::progressRangeChanged,
+  connect(&watcher, &QFutureWatcher<vrfbdriver::shuntcur::ShuntSimJob>::progressRangeChanged,
       ui->progressBar, &QProgressBar::setRange);
-  connect(&watcher, &QFutureWatcher<vrfbdriver::ShuntSimStep>::progressTextChanged,
+  connect(&watcher, &QFutureWatcher<vrfbdriver::shuntcur::ShuntSimStep>::progressTextChanged,
       ui->msgLabel, &QLabel::setText);
-  connect(&watcher, &QFutureWatcher<vrfbdriver::ShuntSimStep>::finished,
+  connect(this, &SCSimReportPopup::simulationSuccess,
       this, &SCSimReportPopup::displayReport,
       Qt::ConnectionType::QueuedConnection);
   connect(this, &SCSimReportPopup::simulationFailed,
@@ -49,24 +49,27 @@ SCSimReportPopup::SCSimReportPopup(QWidget* parent)
 
 
 SCSimReportPopup::~SCSimReportPopup() {
+  delete stepIO;
   delete ui;
 }
 
 
-void SCSimReportPopup::start(const vrfbdriver::ShuntSimJob& j) {
-  watcher.setFuture(QtConcurrent::run<vrfbdriver::ShuntSimStep>(
+void SCSimReportPopup::start(const vrfbdriver::shuntcur::ShuntSimJob& j) {
+  stepIO = new vrfbdriver::io::shuntcur::ShuntSimStepIO("output/" + j.name + ".csv", j);
+  watcher.setFuture(QtConcurrent::run<vrfbdriver::shuntcur::ShuntSimStep>(
       &pool,
-      [&, j](QPromise<vrfbdriver::ShuntSimStep>& p) {
-        auto rpter = vrfbutils::BasePromise_Qt<vrfbdriver::ShuntSimStep>{&p};
+      [&, j](QPromise<vrfbdriver::shuntcur::ShuntSimStep>& p) {
+        auto rpter = vrfbutils::BasePromise_Qt<vrfbdriver::shuntcur::ShuntSimStep>{&p};
         try {
-          vrfbdriver::simulateShunt(j, kTimeStep, rpter);
+          vrfbdriver::shuntcur::simulateShunt(j, kTimeStep, rpter);
         } catch (const std::exception& ex) {
           emit simulationFailed(ex.what());
-          throw vrfbutils::StdQException(ex);
+          return;
         } catch (...) {
           emit simulationFailed("Unknown exception occured");
-          throw vrfbutils::StdQException(std::runtime_error("Unknown exception occured"));
+          return;
         }
+        emit simulationSuccess();
       }
   ));
 }
@@ -76,18 +79,18 @@ void SCSimReportPopup::reportReadyAt(int i) {
   auto step = watcher.future().resultAt(i);
   ui->voltPlot->addPoint<PlotPanel::Axis::axMain>(
       step.time,
-      step.report.data<vrfb::shuntcur::pcc::PCCReport>().chargingVolt());
+      step.report.data().chargingVolt());
   ui->voltPlot->addPoint<PlotPanel::Axis::axSub>(
       step.time,
-      step.report.data<vrfb::shuntcur::pcc::PCCReport>().chargingCurr());
-  report.update<vrfb::shuntcur::pcc::PCCReport>(step, kTimeStep);
+      step.report.data().chargingCurr());
+  report.update(step, kTimeStep);
+  if (stepIO != nullptr) {
+    stepIO->append(step);
+  }
 }
 
 
 void SCSimReportPopup::displayReport() {
-  if (watcher.isCanceled()) {
-    return;
-  }
   ui->progressBar->setStyleSheet(
       "QProgressBar { background: #75F281; }"
       "QProgressBar::chunk { background: #75F281; }");
@@ -99,8 +102,8 @@ void SCSimReportPopup::displayReport() {
 
 void SCSimReportPopup::displayFailed(const std::string& msg) {
   ui->progressBar->setStyleSheet(
-      "QProgressBar { background: #2DF041; }"
-      "QProgressBar::chunk { background: #2DF041; }");
+      "QProgressBar { background: #F25771; }"
+      "QProgressBar::chunk { background: #F25771; }");
   ui->msgLabel->setText(QString::fromStdString(comutils::string::format_string(
       "Simulation Failed - %s",
       msg.c_str())));
