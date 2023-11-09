@@ -186,7 +186,7 @@ TEST(vrfbShuntCurrPCC, addConnLoopsFB) {
   Eigen::MatrixXd actual = Eigen::MatrixXd::Zero(173, 173);
   vrfb::shuntcur::addStackCoeff(actual, shunttest_pcc::kTestSysParam);
   vrfb::shuntcur::pcc::addConnCoeff
-      <vrfb::shuntcur::pcc::ConnSide::csFront, vrfb::shuntcur::pcc::ConnSide::csBack>
+      <vrfb::shuntcur::ConnSide::csFront, vrfb::shuntcur::ConnSide::csBack>
       (actual, shunttest_pcc::kTestSysParam);
   checkMatrix(shunttest_pcc::kExLHSMat_WithConn, actual);
 }
