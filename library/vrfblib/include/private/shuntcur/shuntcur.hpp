@@ -1555,5 +1555,111 @@ void addStackValue(Eigen::VectorXd& v, const SysParam& s, double mag) {
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+********************************************************************************
+**    ShuntReportData_Impl Definition
+********************************************************************************
+*/
+
+
+template<typename T, ConnSide PS=ConnSide::csFront, ConnSide NS=ConnSide::csBack>
+class ShuntReportData_Impl : public T {
+  public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
+    ShuntReportData_Impl(const Eigen::VectorXd& rv)
+          : resVec{rv} {}
+
+    ShuntReportData_Impl() = delete;
+    ShuntReportData_Impl(const ShuntReportData_Impl&) = default;
+    ShuntReportData_Impl(ShuntReportData_Impl&&) = default;
+
+    ShuntReportData_Impl& operator=(const ShuntReportData_Impl&) = default;
+    ShuntReportData_Impl& operator=(ShuntReportData_Impl&&) = default;
+
+    ~ShuntReportData_Impl() = default;
+
+
+
+
+  public: // ~~~~ accessors ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    double chargingVolt() const override {
+      return resVec(kChgVoltIndex);
+    }
+
+    double chargingCurr() const override {
+      return resVec(kChgCurrIndex);
+    }
+
+
+    double lineCurr(std::size_t i) const override {
+      return resVec(indexLine(param(), toli(i, param())));
+    }
+
+    double cellCurr(std::size_t i) const override {
+      return resVec(indexLine(param(), toli(i, param())))
+          + getStackContri_Cell(resVec, param(), i)
+          + getPosConnContri_Cell<PS>(resVec, param(), i)
+          + getNegConnContri_Cell<NS>(resVec, param(), i);
+    }
+
+
+    double ssptCurr(std::size_t i) const override {
+      return getStackContri_SSPT(resVec, param(), i)
+          + getConnContri_SSPT<PS>(resVec, param(), i);
+    }
+
+    double sspbCurr(std::size_t i) const override {
+      return getStackContri_SSPB(resVec, param(), i)
+          + getConnContri_SSPB<PS>(resVec, param(), i);
+    }
+
+    double ssntCurr(std::size_t i) const override {
+      return getStackContri_SSNT(resVec, param(), i)
+          + getConnContri_SSNT<NS>(resVec, param(), i);
+    }
+
+    double ssnbCurr(std::size_t i) const override {
+      return getStackContri_SSNB(resVec, param(), i)
+          + getConnContri_SSNB<NS>(resVec, param(), i);
+    }
+
+
+    double smptCurr(std::size_t i) const override {
+      return getCurrMPT(resVec, param(), i);
+    }
+
+    double smpbCurr(std::size_t i) const override {
+      return getCurrMPB(resVec, param(), i);
+    }
+
+    double smntCurr(std::size_t i) const override {
+      return getCurrMNT(resVec, param(), i);
+    }
+
+    double smnbCurr(std::size_t i) const override {
+      return getCurrMNB(resVec, param(), i);
+    }
+
+
+
+
+  private: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Eigen::VectorXd resVec;
+};
+
+
 }
 }

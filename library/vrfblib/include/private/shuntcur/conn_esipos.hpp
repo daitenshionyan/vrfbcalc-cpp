@@ -343,10 +343,11 @@ void addConnValue(Eigen::VectorXd& v, const ESIPOSSysParam& s) {
 */
 
 
-class ESIPOSReport_Impl : public ESIPOSReport {
+class ESIPOSReport_Impl : public ShuntReportData_Impl<ESIPOSReport> {
   public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
     ESIPOSReport_Impl(const Eigen::VectorXd& rv, const ESIPOSSysParam& sys, double err)
-        : resVec{rv}, s{sys}, error{err} {}
+        : ShuntReportData_Impl<ESIPOSReport>{rv},
+          s{sys}, error{err} {}
 
     ESIPOSReport_Impl() = delete;
     ESIPOSReport_Impl(const ESIPOSReport_Impl&) = default;
@@ -363,71 +364,12 @@ class ESIPOSReport_Impl : public ESIPOSReport {
     std::string arrName() const override {return "ESIPOS";}
     const ESIPOSSysParam& param() const override {return s;}
 
-    double chargingVolt() const {
-      return resVec(kChgVoltIndex);
-    }
-
-    double chargingCurr() const {
-      return resVec(kChgCurrIndex);
-    }
-
-
-    double lineCurr(std::size_t i) const override {
-      return resVec(indexLine(s, toli(i, s)));
-    }
-
-    double cellCurr(std::size_t i) const override {
-      return resVec(indexLine(s, toli(i, s)))
-          + getStackContri_Cell(resVec, s, i)
-          + getPosConnContri_Cell(resVec, s, i)
-          + getNegConnContri_Cell(resVec, s, i);
-    }
-
-
-    double ssptCurr(std::size_t i) const override {
-      return getStackContri_SSPT(resVec, s, i)
-          + getConnContri_SSPT(resVec, s, i);
-    }
-
-    double sspbCurr(std::size_t i) const override {
-      return getStackContri_SSPB(resVec, s, i)
-          + getConnContri_SSPB(resVec, s, i);
-    }
-
-    double ssntCurr(std::size_t i) const override {
-      return getStackContri_SSNT(resVec, s, i)
-          + getConnContri_SSNT(resVec, s, i);
-    }
-
-    double ssnbCurr(std::size_t i) const override {
-      return getStackContri_SSNB(resVec, s, i)
-          + getConnContri_SSNB(resVec, s, i);
-    }
-
-
-    double smptCurr(std::size_t i) const override {
-      return getCurrMPT(resVec, s, i);
-    }
-
-    double smpbCurr(std::size_t i) const override {
-      return getCurrMPB(resVec, s, i);
-    }
-
-    double smntCurr(std::size_t i) const override {
-      return getCurrMNT(resVec, s, i);
-    }
-
-    double smnbCurr(std::size_t i) const override {
-      return getCurrMNB(resVec, s, i);
-    }
-
 
   public: // ~~~~ functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     ESIPOSReport_Impl* copy() const override {return new ESIPOSReport_Impl(*this);}
 
 
   private: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    Eigen::VectorXd resVec;
     ESIPOSSysParam s;
     double error;
 };

@@ -368,10 +368,11 @@ void addConnValue(Eigen::VectorXd& v, const PCCSysParam& s) {
 
 
 template<ConnSide PS, ConnSide NS>
-class PCCReport_Impl : public PCCReport {
+class PCCReport_Impl : public ShuntReportData_Impl<PCCReport, PS, NS> {
   public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
     PCCReport_Impl(const Eigen::VectorXd& rv, const PCCSysParam& sys, double err)
-        : resVec{rv}, s{sys}, error{err} {}
+        : ShuntReportData_Impl<PCCReport, PS, NS>{rv},
+          s{sys}, error{err} {}
 
     PCCReport_Impl() = delete;
     PCCReport_Impl(const PCCReport_Impl&) = default;
@@ -388,71 +389,12 @@ class PCCReport_Impl : public PCCReport {
     std::string arrName() const override {return getArrName<PS, NS>();}
     const PCCSysParam& param() const override {return s;}
 
-    double chargingVolt() const {
-      return resVec(kChgVoltIndex);
-    }
-
-    double chargingCurr() const {
-      return resVec(kChgCurrIndex);
-    }
-
-
-    double lineCurr(std::size_t i) const override {
-      return resVec(indexLine(s, toli(i, s)));
-    }
-
-    double cellCurr(std::size_t i) const override {
-      return resVec(indexLine(s, toli(i, s)))
-          + getStackContri_Cell(resVec, s, i)
-          + getPosConnContri_Cell<PS>(resVec, s, i)
-          + getNegConnContri_Cell<NS>(resVec, s, i);
-    }
-
-
-    double ssptCurr(std::size_t i) const override {
-      return getStackContri_SSPT(resVec, s, i)
-          + getConnContri_SSPT<PS>(resVec, s, i);
-    }
-
-    double sspbCurr(std::size_t i) const override {
-      return getStackContri_SSPB(resVec, s, i)
-          + getConnContri_SSPB<PS>(resVec, s, i);
-    }
-
-    double ssntCurr(std::size_t i) const override {
-      return getStackContri_SSNT(resVec, s, i)
-          + getConnContri_SSNT<NS>(resVec, s, i);
-    }
-
-    double ssnbCurr(std::size_t i) const override {
-      return getStackContri_SSNB(resVec, s, i)
-          + getConnContri_SSNB<NS>(resVec, s, i);
-    }
-
-
-    double smptCurr(std::size_t i) const override {
-      return getCurrMPT(resVec, s, i);
-    }
-
-    double smpbCurr(std::size_t i) const override {
-      return getCurrMPB(resVec, s, i);
-    }
-
-    double smntCurr(std::size_t i) const override {
-      return getCurrMNT(resVec, s, i);
-    }
-
-    double smnbCurr(std::size_t i) const override {
-      return getCurrMNB(resVec, s, i);
-    }
-
 
   public: // ~~~~ functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     PCCReport_Impl* copy() const override {return new PCCReport_Impl(*this);}
 
 
   private: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    Eigen::VectorXd resVec;
     PCCSysParam s;
     double error;
 };
