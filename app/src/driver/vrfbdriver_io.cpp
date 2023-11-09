@@ -357,15 +357,23 @@ using TitleOutputter = std::function<std::ostream&(std::ostream&, const vrfbdriv
 using DataOutputter = std::function<std::ostream&(std::ostream&, const vrfbdriver::shuntcur::ShuntSimStep&)>;
 
 
+/**
+ * Structure defining how to write a selected set of shunt simulation data to
+ * output stream.
+*/
 struct ShuntSimStepOutputConfig {
-  TitleOutputter titleOutputter;
-  DataOutputter dataOutputter;
+  TitleOutputter titleOutputter;    // Outputs column header
+  DataOutputter dataOutputter;      // Outputs data
 };
 
 
 
 
-const std::vector<ShuntSimStepOutputConfig> outputConfigList {
+/**
+ * Vector of output configurations defining column order and which data to write
+ * to output stream.
+*/
+const std::vector<ShuntSimStepOutputConfig> kOutputConfigList {
   { // ---- TIME ---------------------------------------------------------------
     [](std::ostream& os, const vrfbdriver::shuntcur::ShuntSimJob& j)
           -> std::ostream& {
@@ -376,7 +384,7 @@ const std::vector<ShuntSimStepOutputConfig> outputConfigList {
       return os << s.time;
     }
   },
-  {
+  { // ---- STEP ---------------------------------------------------------------
     [](std::ostream& os, const vrfbdriver::shuntcur::ShuntSimJob& j)
           -> std::ostream& {
       return os << "Step";
@@ -393,7 +401,7 @@ const std::vector<ShuntSimStepOutputConfig> outputConfigList {
       }
     }
   },
-  {
+  { // ---- SOC ----------------------------------------------------------------
     [](std::ostream& os, const vrfbdriver::shuntcur::ShuntSimJob& j)
           -> std::ostream& {
       return os << "SOC (%)";
@@ -403,7 +411,7 @@ const std::vector<ShuntSimStepOutputConfig> outputConfigList {
       return os << s.soc*100;
     }
   },
-  {
+  { // ---- INPUT CURRENT ------------------------------------------------------
     [](std::ostream& os, const vrfbdriver::shuntcur::ShuntSimJob& j)
           -> std::ostream& {
       return os << "Input Current (A)";
@@ -413,7 +421,7 @@ const std::vector<ShuntSimStepOutputConfig> outputConfigList {
       return os << s.report.data().chargingCurr();
     }
   },
-  {
+  { // ---- INPUT VOLTAGE ------------------------------------------------------
     [](std::ostream& os, const vrfbdriver::shuntcur::ShuntSimJob& j)
           -> std::ostream& {
       return os << "Input Voltage (V)";
@@ -423,7 +431,7 @@ const std::vector<ShuntSimStepOutputConfig> outputConfigList {
       return os << s.report.data().chargingVolt();
     }
   },
-  {
+  { // ---- LINE CURRENT -------------------------------------------------------
     [](std::ostream& os, const vrfbdriver::shuntcur::ShuntSimJob& j)
           -> std::ostream& {
       for (int i = 0; i < j.calc->param().numLines; ++i) {
@@ -445,7 +453,7 @@ const std::vector<ShuntSimStepOutputConfig> outputConfigList {
       return os;
     }
   },
-  {
+  { // ---- CELL CURRENT -------------------------------------------------------
     [](std::ostream& os, const vrfbdriver::shuntcur::ShuntSimJob& j)
           -> std::ostream& {
       for (int li = 0; li < j.calc->param().numLines; ++li) {
@@ -475,7 +483,7 @@ const std::vector<ShuntSimStepOutputConfig> outputConfigList {
       return os;
     }
   },
-  {
+  { // ---- CELL POWER ---------------------------------------------------------
     [](std::ostream& os, const vrfbdriver::shuntcur::ShuntSimJob& j)
           -> std::ostream& {
       for (int li = 0; li < j.calc->param().numLines; ++li) {
@@ -520,9 +528,9 @@ const std::vector<ShuntSimStepOutputConfig> outputConfigList {
 ShuntSimStepIO::ShuntSimStepIO(
       const std::string& pathString, const vrfbdriver::shuntcur::ShuntSimJob& j)
       : os{comutils::io::openFile_w(std::filesystem::u8path<std::string>(pathString))} {
-  for (int i = 0; i < outputConfigList.size(); ++i) {
-    outputConfigList[i].titleOutputter(os, j);
-    if (i+1 < outputConfigList.size()) {
+  for (int i = 0; i < kOutputConfigList.size(); ++i) {
+    kOutputConfigList[i].titleOutputter(os, j);
+    if (i+1 < kOutputConfigList.size()) {
       os << ",";
     }
   }
@@ -531,9 +539,9 @@ ShuntSimStepIO::ShuntSimStepIO(
 
 
 void ShuntSimStepIO::append(const vrfbdriver::shuntcur::ShuntSimStep& s) {
-  for (int i = 0; i < outputConfigList.size(); ++i) {
-    outputConfigList[i].dataOutputter(os, s);
-    if (i+1 < outputConfigList.size()) {
+  for (int i = 0; i < kOutputConfigList.size(); ++i) {
+    kOutputConfigList[i].dataOutputter(os, s);
+    if (i+1 < kOutputConfigList.size()) {
       os << ",";
     }
   }
@@ -541,15 +549,6 @@ void ShuntSimStepIO::append(const vrfbdriver::shuntcur::ShuntSimStep& s) {
 }
 
 
-}
+} // END OF NAMESPACE <vrfbdriver::io::shuntcur>
 } // END OF NAMESPACE <vrfbdriver::io>
-
-
-
-
-
-
-
-
-
 } // END OF NAMESPACE <vrfbdriver>
