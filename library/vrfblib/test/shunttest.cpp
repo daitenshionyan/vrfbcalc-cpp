@@ -182,12 +182,13 @@ TEST(vrfbShuntCurrPCC, addStackCoeff) {
 }
 
 
-TEST(vrfbShuntCurrPCC, addConnLoopsFB) {
+TEST(vrfbShuntCurrPCC, addConnCoeffFB) {
   Eigen::MatrixXd actual = Eigen::MatrixXd::Zero(173, 173);
   vrfb::shuntcur::addStackCoeff(actual, shunttest_pcc::kTestSysParam);
-  vrfb::shuntcur::pcc::addConnCoeff
+  vrfb::shuntcur::pcc::addConnToConnCoeff
       <vrfb::shuntcur::ConnSide::csFront, vrfb::shuntcur::ConnSide::csBack>
       (actual, shunttest_pcc::kTestSysParam);
+  vrfb::shuntcur::addConnToStackCoeff(actual, shunttest_pcc::kTestSysParam);
   checkMatrix(shunttest_pcc::kExLHSMat_WithConn, actual);
 }
 
@@ -321,7 +322,8 @@ TEST(vrfbShuntCurrESIPOS, addStackCoeff) {
 TEST(vrfbShuntCurrESIPOS, addConnCoeff) {
   Eigen::MatrixXd actual = Eigen::MatrixXd::Zero(119, 119);
   vrfb::shuntcur::addStackCoeff(actual, shunttest_esipos::kTestSysParam);
-  vrfb::shuntcur::esipos::addConnCoeff(actual, shunttest_esipos::kTestSysParam);
+  vrfb::shuntcur::esipos::addConnToConnCoeff(actual, shunttest_esipos::kTestSysParam);
+  vrfb::shuntcur::addConnToStackCoeff(actual, shunttest_esipos::kTestSysParam);
   checkMatrix(shunttest_esipos::kExLHS_WithConn, actual);
 }
 

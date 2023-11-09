@@ -44,6 +44,9 @@ void addSysCoeff(Eigen::MatrixXd& m, const SysParam& s);
 void addStackCoeff(Eigen::MatrixXd& m, const SysParam& s);
 
 
+void addConnToStackCoeff(Eigen::MatrixXd& m, const SysParam& s);
+
+
 /**
  * Adds the RHS value of system and loop equations, for lines and stacks, to the
  * given vector.
@@ -1285,6 +1288,13 @@ void addSysCoeff<ElecInput::Mode::mConstCurr>(Eigen::MatrixXd& m, const SysParam
 
 
 
+
+
+
+
+
+
+
 /*
 ********************************************************************************
 **    addStackCoeff Definition
@@ -1368,6 +1378,145 @@ void addStackCoeff(Eigen::MatrixXd& m, const SysParam& s) {
     }
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+********************************************************************************
+**    addConnToStackCoeff Definition
+********************************************************************************
+*/
+
+
+void addConnToStackCoeff(Eigen::MatrixXd& m, const SysParam& s) {
+  for (std::size_t li = 0; li < s.numLines; ++li) {
+    for (std::size_t si = 0; si < s.numStacks; ++si) {
+      Eigen::Index cpti = indexCPT<ConnSide::csFront>(s, si, li);
+      Eigen::Index cpbi = indexCPB<ConnSide::csFront>(s, si, li);
+      Eigen::Index cnti = indexCNT<ConnSide::csBack>(s, si, li);
+      Eigen::Index cnbi = indexCNB<ConnSide::csBack>(s, si, li);
+
+      for (std::size_t ci = 0; ci < s.numCells; ++ci) {
+        Eigen::Index spti = indexSPT(s, ci, si, li);
+        Eigen::Index spbi = indexSPB(s, ci, si, li);
+        Eigen::Index snti = indexSNT(s, ci, si, li);
+        Eigen::Index snbi = indexSNB(s, ci, si, li);
+
+        if (si > 0) {
+          // :::: [ POSITIVE STACK LOOPS ] ::::
+          if (ci+1 < s.numCells) {
+            // >>> POSITIVE TOP CONN
+            m(spti, cpti) += s.cellR();
+            m(cpti, spti) += s.cellR();
+            m(spbi, cpti) += s.cellR();
+            m(cpti, spbi) += s.cellR();
+            if (ci == 0) {
+              m(spti-1, cpti) -= s.stackShuntR();
+              m(cpti, spti-1) -= s.stackShuntR();
+            }
+            if (ci+2 == s.numCells) {
+              m(spti, cpti) += s.stackShuntR();
+              m(cpti, spti) += s.stackShuntR();
+            }
+            // >>> NEGATIVE BOT CONN
+            m(spbi, cnbi) += s.cellR();
+            m(cnbi, spbi) += s.cellR();
+            m(spti, cnbi) += s.cellR();
+            m(cnbi, spti) += s.cellR();
+          }
+
+          // :::: [ NEGATIVE STACK LOOPS ] ::::
+          if (ci > 0) {
+            // >>> POSITIVE TOP CONN
+            m(snti-1, cpti) += s.cellR();
+            m(cpti, snti-1) += s.cellR();
+            m(snbi-1, cpti) += s.cellR();
+            m(cpti, snbi-1) += s.cellR();
+            // >>> NEGATIVE BOT CONN
+            m(snti, cnbi) += s.cellR();
+            m(cnbi, snti) += s.cellR();
+            m(snbi, cnbi) += s.cellR();
+            m(cnbi, snbi) += s.cellR();
+            if (ci == 1) {
+              m(snbi-1, cnbi) -= s.stackShuntR();
+              m(cnbi, snbi-1) -= s.stackShuntR();
+            }
+            if (ci+1 == s.numCells) {
+              m(snbi, cnbi) += s.stackShuntR();
+              m(cnbi, snbi) += s.stackShuntR();
+            }
+          }
+        }
+
+        if (si+1 < s.numStacks) {
+          // :::: [ POSITIVE STACK LOOPS ] ::::
+          if (ci+1 < s.numCells) {
+            // >>> POSITIVE BOT CONN
+            m(spti, cpbi) += s.cellR();
+            m(cpbi, spti) += s.cellR();
+            m(spbi, cpbi) += s.cellR();
+            m(cpbi, spbi) += s.cellR();
+            // >>> NEGATTIVE TOP CONN
+            m(spti+1, cnti) += s.cellR();
+            m(cnti, spti+1) += s.cellR();
+            m(spbi+1, cnti) += s.cellR();
+            m(cnti, spbi+1) += s.cellR();
+            if(ci == 0) {
+              m(spbi, cpbi) += s.stackShuntR();
+              m(cpbi, spbi) += s.stackShuntR();
+            }
+            if (ci+2 == s.numCells) {
+              m(spbi+1, cpbi) -= s.stackShuntR();
+              m(cpbi, spbi+1) -= s.stackShuntR();
+            }
+          }
+
+          // :::: [ NEGATIVE STACK LOOPS ] ::::
+          if (ci > 0) {
+            // >>> POSITIVE BOT CONN
+            m(snti, cpbi) += s.cellR();
+            m(cpbi, snti) += s.cellR();
+            m(snbi, cpbi) += s.cellR();
+            m(cpbi, snbi) += s.cellR();
+            // >>> NEGATIVE TOP CONN
+            m(snti, cnti) += s.cellR();
+            m(cnti, snti) += s.cellR();
+            m(snbi, cnti) += s.cellR();
+            m(cnti, snbi) += s.cellR();
+            if (ci == 1) {
+              m(snti, cnti) += s.stackShuntR();
+              m(cnti, snti) += s.stackShuntR();
+            }
+            if (ci+1 == s.numCells) {
+              m(snti+1, cnti) -= s.stackShuntR();
+              m(cnti, snti+1) -= s.stackShuntR();
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+
+
+
+
+
+
 
 
 
