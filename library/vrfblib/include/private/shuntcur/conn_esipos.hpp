@@ -43,13 +43,13 @@ inline std::size_t matSize(const SysParam& s) {
 
 
 /**
- * Adds the LHS coefficients of loop equations, for connectors, to the given
- * matrix.
+ * Adds the LHS coefficients of loop equations, for connectors to connector, to
+ * the given matrix.
  *
  * @param m LHS matrix.
  * @param s ESIPOS system paramter.
 */
-void addConnCoeff(Eigen::MatrixXd& m, const ESIPOSSysParam& s);
+void addConnToConnCoeff(Eigen::MatrixXd& m, const ESIPOSSysParam& s);
 
 
 /**
@@ -70,358 +70,6 @@ void addConnValue(Eigen::VectorXd& v, const ESIPOSSysParam& s);
 */
 template<ElecInput::Mode M>
 ESIPOSReport* calculate_esipos(const ESIPOSSysParam& s, double mag);
-
-
-
-
-
-
-
-
-/*
-********************************************************************************
-**    Indexing functions
-********************************************************************************
-*/
-
-
-/**
- * Returns the index of CONNECTOR POSITIVE TOP within the matrix or vector.
- *
- * @param s System parameters.
- * @param si Stack index within line.
- * @param li Line index.
-*/
-Eigen::Index indexCPT(const SysParam& s,
-      std::size_t si, std::size_t li) {
-  return s.numLines
-      + 4*s.numLines*s.numStacks*(s.numCells - 1)
-      + li*(s.numStacks - 1)
-      + si - 1
-      + 2;
-}
-
-
-/**
- * Returns the index of CONNECTOR POSITIVE BOTTOM within the matrix or vector.
- *
- * @param s System parameters.
- * @param si Stack index within line.
- * @param li Line index.
-*/
-Eigen::Index indexCPB(const SysParam& s,
-      std::size_t si, std::size_t li) {
-  return s.numLines
-      + 4*s.numLines*s.numStacks*(s.numCells - 1)
-      + s.numLines*(s.numStacks - 1)
-      + li*(s.numStacks - 1)
-      + si
-      + 2;
-}
-
-
-/**
- * Returns the index of CONNECTOR NEGATIVE TOP within the matrix or vector.
- *
- * @param s System parameters.
- * @param si Stack index within line.
- * @param li Line index.
-*/
-Eigen::Index indexCNT(const SysParam& s,
-      std::size_t si, std::size_t li) {
-  return s.numLines
-      + 4*s.numLines*s.numStacks*(s.numCells - 1)
-      + 2*s.numLines*(s.numStacks - 1)
-      + li*(s.numStacks - 1)
-      + si
-      + 2;
-}
-
-
-/**
- * Returns the index of CONNECTOR NEGATIVE BOTTOM within the matrix or vector.
- *
- * @param s System parameters.
- * @param si Stack index within line.
- * @param li Line index.
-*/
-Eigen::Index indexCNB(const SysParam& s,
-      std::size_t si, std::size_t li) {
-  return s.numLines
-      + 4*s.numLines*s.numStacks*(s.numCells - 1)
-      + 3*s.numLines*(s.numStacks - 1)
-      + li*(s.numStacks - 1)
-      + si - 1
-      + 2;
-}
-
-
-
-
-
-
-
-
-/*
-********************************************************************************
-**    Current calculation functions for CELL
-********************************************************************************
-*/
-
-
-/**
- * Returns the POSITIVE CONNECTOR current contribution to the specified cell,
- * given the calculated current vector.
- *
- * @param rv Result vector.
- * @param s System parameters.
- * @param ci Cell index within stack.
- * @param si Stack index within line.
- * @param li Line index.
-*/
-double getPosConnContri_Cell(const Eigen::VectorXd& rv, const SysParam& s,
-      std::size_t ci, std::size_t si, std::size_t li) {
-  double result = 0;
-  if (si > 0 && ci+1 < s.numCells) {
-    result += rv(indexCPT(s, si, li));
-  } else if (si+1 < s.numStacks && ci+1 == s.numCells) {
-    result += rv(indexCPT(s, si, li) + 1);
-  }
-  if (si+1 < s.numStacks) {
-    result += rv(indexCPB(s, si, li));
-  }
-  return result;
-}
-
-
-/**
- * Returns the POSITIVE CONNECTOR current contribution to the specified cell,
- * given the calculated current vector.
- *
- * @param rv Result vector.
- * @param s System parameters.
- * @param i Cell index from the first cell in the system.
-*/
-double getPosConnContri_Cell(const Eigen::VectorXd& rv, const SysParam& s,
-      std::size_t i) {
-  return getPosConnContri_Cell(rv, s, toci(i, s), tosi(i, s), toli(i, s));
-}
-
-
-
-
-/**
- * Returns the NEGATIVE CONNECTOR current contribution to the specified cell,
- * given the calculated current vector.
- *
- * @param rv Result vector.
- * @param s System parameters.
- * @param ci Cell index within stack.
- * @param si Stack index within line.
- * @param li Line index.
-*/
-double getNegConnContri_Cell(const Eigen::VectorXd& rv, const SysParam& s,
-      std::size_t ci, std::size_t si, std::size_t li) {
-  double result = 0;
-  if (si+1 < s.numStacks && ci > 0) {
-    result += rv(indexCNT(s, si, li));
-  } else if (si > 0 && ci == 0) {
-    result += rv(indexCNT(s, si, li) - 1);
-  }
-  if (si > 0) {
-    result += rv(indexCNB(s, si, li));
-  }
-  return result;
-}
-
-
-/**
- * Returns the NEGATIVE CONNECTOR current contribution to the specified cell,
- * given the calculated current vector.
- *
- * @param rv Result vector.
- * @param s System parameters.
- * @param i Cell index from the first cell in the system.
-*/
-double getNegConnContri_Cell(const Eigen::VectorXd& rv, const SysParam& s,
-      std::size_t i) {
-  return getNegConnContri_Cell(rv, s, toci(i, s), tosi(i, s), toli(i, s));
-}
-
-
-
-
-
-
-
-
-/*
-********************************************************************************
-**    Current calculation functions for STACK SHUNT
-********************************************************************************
-*/
-
-
-/**
- * Returns the CONNECTOR current contribution to STACK SHUNT POSITIVE TOP
- * current.
- *
- * @param rv Result vector.
- * @param s System parameters.
- * @param ci Cell index within stack.
- * @param si Stack index within line.
- * @param li Line index.
-*/
-double getConnContri_SSPT(const Eigen::VectorXd& rv, const SysParam& s,
-      std::size_t ci, std::size_t si, std::size_t li) {
-  double result = 0;
-  if (ci+1 == s.numCells) {
-    if (si > 0) {
-      result -= rv(indexCPT(s, si, li));
-    }
-    if (si+1 < s.numStacks) {
-      result += rv(indexCPT(s, si, li) + 1);
-    }
-  }
-  return result;
-}
-
-
-/**
- * Returns the CONNECTOR current contribution to STACK SHUNT POSITIVE TOP
- * current.
- *
- * @param rv Result vector.
- * @param s System parameters.
- * @param i Cell index within system.
-*/
-double getConnContri_SSPT(const Eigen::VectorXd& rv, const SysParam& s,
-      std::size_t i) {
-  return getConnContri_SSPT(rv, s, toci(i, s), tosi(i, s), toli(i, s));
-}
-
-
-
-
-/**
- * Returns the CONNECTOR current contribution to STACK SHUNT POSITIVE BOTTOM
- * current.
- *
- * @param rv Result vector.
- * @param s System parameters.
- * @param ci Cell index within stack.
- * @param si Stack index within line.
- * @param li Line index.
-*/
-double getConnContri_SSPB(const Eigen::VectorXd& rv, const SysParam& s,
-      std::size_t ci, std::size_t si, std::size_t li) {
-  double result = 0;
-  if (ci == 0) {
-    if (si > 0) {
-      result -= rv(indexCPB(s, si, li) - 1);
-    }
-    if (si+1 < s.numStacks) {
-      result += rv(indexCPB(s, si, li));
-    }
-  }
-  return result;
-}
-
-
-/**
- * Returns the CONNECTOR current contribution to STACK SHUNT POSITIVE BOTTOM
- * current.
- *
- * @param rv Result vector.
- * @param s System parameters.
- * @param i Cell index within system.
-*/
-double getConnContri_SSPB(const Eigen::VectorXd& rv, const SysParam& s,
-      std::size_t i) {
-  return getConnContri_SSPB(rv, s, toci(i, s), tosi(i, s), toli(i, s));
-}
-
-
-
-
-/**
- * Returns the CONNECTOR current contribution to STACK SHUNT NEGATIVE TOP
- * current.
- *
- * @param rv Result vector.
- * @param s System parameters.
- * @param ci Cell index within stack.
- * @param si Stack index within line.
- * @param li Line index.
-*/
-double getConnContri_SSNT(const Eigen::VectorXd& rv, const SysParam& s,
-      std::size_t ci, std::size_t si, std::size_t li) {
-  double result = 0;
-  if (ci == 0) {
-    if (si > 0) {
-      result -= rv(indexCNT(s, si, li) - 1);
-    }
-    if (si+1 < s.numStacks) {
-      result += rv(indexCNT(s, si, li));
-    }
-  }
-  return result;
-}
-
-
-/**
- * Returns the CONNECTOR current contribution to STACK SHUNT NEGATIVE TOP
- * current.
- *
- * @param rv Result vector.
- * @param s System parameters.
- * @param i Cell index within system.
-*/
-double getConnContri_SSNT(const Eigen::VectorXd& rv, const SysParam& s,
-      std::size_t i) {
-  return getConnContri_SSNT(rv, s, toci(i, s), tosi(i, s), toli(i, s));
-}
-
-
-
-
-/**
- * Returns the CONNECTOR current contribution to STACK SHUNT NEGATIVE BOTTOM
- * current.
- *
- * @param rv Result vector.
- * @param s System parameters.
- * @param ci Cell index within stack.
- * @param si Stack index within line.
- * @param li Line index.
-*/
-double getConnContri_SSNB(const Eigen::VectorXd& rv, const SysParam& s,
-      std::size_t ci, std::size_t si, std::size_t li) {
-  double result = 0;
-  if (ci+1 == s.numCells) {
-    if (si > 0) {
-      result -= rv(indexCNB(s, si, li));
-    }
-    if (si+1 < s.numStacks) {
-      result += rv(indexCNB(s, si, li) + 1);
-    }
-  }
-  return result;
-}
-
-
-/**
- * Returns the CONNECTOR current contribution to STACK SHUNT NEGATIVE BOTTOM
- * current.
- *
- * @param rv Result vector.
- * @param s System parameters.
- * @param i Cell index within system.
-*/
-double getConnContri_SSNB(const Eigen::VectorXd& rv, const SysParam& s,
-      std::size_t i) {
-  return getConnContri_SSNB(rv, s, toci(i, s), tosi(i, s), toli(i, s));
-}
 
 
 }
@@ -483,7 +131,7 @@ namespace shuntcur {
 namespace esipos {
 
 
-void addConnCoeff(Eigen::MatrixXd& m, const ESIPOSSysParam& s) {
+void addConnToConnCoeff(Eigen::MatrixXd& m, const ESIPOSSysParam& s) {
   for (std::size_t li = 0; li < s.numLines; ++li) {
     Eigen::Index lci = indexLine(s, li);
 
@@ -648,105 +296,6 @@ void addConnCoeff(Eigen::MatrixXd& m, const ESIPOSSysParam& s) {
           m(cnti, cnti+1) -= s.outletResist_CS() + s.stackShuntR();
         }
       }
-
-      for (std::size_t ci = 0; ci < s.numCells; ++ci) {
-        Eigen::Index spti = indexSPT(s, ci, si, li);
-        Eigen::Index spbi = indexSPB(s, ci, si, li);
-        Eigen::Index snti = indexSNT(s, ci, si, li);
-        Eigen::Index snbi = indexSNB(s, ci, si, li);
-
-        if (si > 0) {
-          // :::: [ POSITIVE STACK LOOPS ] ::::
-          if (ci+1 < s.numCells) {
-            // >>> POSITIVE TOP CONN
-            m(spti, cpti) += s.cellR();
-            m(cpti, spti) += s.cellR();
-            m(spbi, cpti) += s.cellR();
-            m(cpti, spbi) += s.cellR();
-            if (ci == 0) {
-              m(spti-1, cpti) -= s.stackShuntR();
-              m(cpti, spti-1) -= s.stackShuntR();
-            }
-            if (ci+2 == s.numCells) {
-              m(spti, cpti) += s.stackShuntR();
-              m(cpti, spti) += s.stackShuntR();
-            }
-            // >>> NEGATIVE BOT CONN
-            m(spbi, cnbi) += s.cellR();
-            m(cnbi, spbi) += s.cellR();
-            m(spti, cnbi) += s.cellR();
-            m(cnbi, spti) += s.cellR();
-          }
-
-          // :::: [ NEGATIVE STACK LOOPS ] ::::
-          if (ci > 0) {
-            // >>> POSITIVE TOP CONN
-            m(snti-1, cpti) += s.cellR();
-            m(cpti, snti-1) += s.cellR();
-            m(snbi-1, cpti) += s.cellR();
-            m(cpti, snbi-1) += s.cellR();
-            // >>> NEGATIVE BOT CONN
-            m(snti, cnbi) += s.cellR();
-            m(cnbi, snti) += s.cellR();
-            m(snbi, cnbi) += s.cellR();
-            m(cnbi, snbi) += s.cellR();
-            if (ci == 1) {
-              m(snbi-1, cnbi) -= s.stackShuntR();
-              m(cnbi, snbi-1) -= s.stackShuntR();
-            }
-            if (ci+1 == s.numCells) {
-              m(snbi, cnbi) += s.stackShuntR();
-              m(cnbi, snbi) += s.stackShuntR();
-            }
-          }
-        }
-
-        if (si+1 < s.numStacks) {
-          // :::: [ POSITIVE STACK LOOPS ] ::::
-          if (ci+1 < s.numCells) {
-            // >>> POSITIVE BOT CONN
-            m(spti, cpbi) += s.cellR();
-            m(cpbi, spti) += s.cellR();
-            m(spbi, cpbi) += s.cellR();
-            m(cpbi, spbi) += s.cellR();
-            // >>> NEGATTIVE TOP CONN
-            m(spti+1, cnti) += s.cellR();
-            m(cnti, spti+1) += s.cellR();
-            m(spbi+1, cnti) += s.cellR();
-            m(cnti, spbi+1) += s.cellR();
-            if(ci == 0) {
-              m(spbi, cpbi) += s.stackShuntR();
-              m(cpbi, spbi) += s.stackShuntR();
-            }
-            if (ci+2 == s.numCells) {
-              m(spbi+1, cpbi) -= s.stackShuntR();
-              m(cpbi, spbi+1) -= s.stackShuntR();
-            }
-          }
-
-          // :::: [ NEGATIVE STACK LOOPS ] ::::
-          if (ci > 0) {
-            // >>> POSITIVE BOT CONN
-            m(snti, cpbi) += s.cellR();
-            m(cpbi, snti) += s.cellR();
-            m(snbi, cpbi) += s.cellR();
-            m(cpbi, snbi) += s.cellR();
-            // >>> NEGATIVE TOP CONN
-            m(snti, cnti) += s.cellR();
-            m(cnti, snti) += s.cellR();
-            m(snbi, cnti) += s.cellR();
-            m(cnti, snbi) += s.cellR();
-            if (ci == 1) {
-              m(snti, cnti) += s.stackShuntR();
-              m(cnti, snti) += s.stackShuntR();
-            }
-            if (ci+1 == s.numCells) {
-              m(snti+1, cnti) -= s.stackShuntR();
-              m(cnti, snti+1) -= s.stackShuntR();
-            }
-          }
-        }
-      }
     }
   }
 }
@@ -794,10 +343,11 @@ void addConnValue(Eigen::VectorXd& v, const ESIPOSSysParam& s) {
 */
 
 
-class ESIPOSReport_Impl : public ESIPOSReport {
+class ESIPOSReport_Impl : public ShuntReportData_Impl<ESIPOSReport> {
   public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
     ESIPOSReport_Impl(const Eigen::VectorXd& rv, const ESIPOSSysParam& sys, double err)
-        : resVec{rv}, s{sys}, error{err} {}
+        : ShuntReportData_Impl<ESIPOSReport>{rv},
+          s{sys}, error{err} {}
 
     ESIPOSReport_Impl() = delete;
     ESIPOSReport_Impl(const ESIPOSReport_Impl&) = default;
@@ -814,71 +364,12 @@ class ESIPOSReport_Impl : public ESIPOSReport {
     std::string arrName() const override {return "ESIPOS";}
     const ESIPOSSysParam& param() const override {return s;}
 
-    double chargingVolt() const {
-      return resVec(kChgVoltIndex);
-    }
-
-    double chargingCurr() const {
-      return resVec(kChgCurrIndex);
-    }
-
-
-    double lineCurr(std::size_t i) const override {
-      return resVec(indexLine(s, toli(i, s)));
-    }
-
-    double cellCurr(std::size_t i) const override {
-      return resVec(indexLine(s, toli(i, s)))
-          + getStackContri_Cell(resVec, s, i)
-          + getPosConnContri_Cell(resVec, s, i)
-          + getNegConnContri_Cell(resVec, s, i);
-    }
-
-
-    double ssptCurr(std::size_t i) const override {
-      return getStackContri_SSPT(resVec, s, i)
-          + getConnContri_SSPT(resVec, s, i);
-    }
-
-    double sspbCurr(std::size_t i) const override {
-      return getStackContri_SSPB(resVec, s, i)
-          + getConnContri_SSPB(resVec, s, i);
-    }
-
-    double ssntCurr(std::size_t i) const override {
-      return getStackContri_SSNT(resVec, s, i)
-          + getConnContri_SSNT(resVec, s, i);
-    }
-
-    double ssnbCurr(std::size_t i) const override {
-      return getStackContri_SSNB(resVec, s, i)
-          + getConnContri_SSNB(resVec, s, i);
-    }
-
-
-    double smptCurr(std::size_t i) const override {
-      return getCurrMPT(resVec, s, i);
-    }
-
-    double smpbCurr(std::size_t i) const override {
-      return getCurrMPB(resVec, s, i);
-    }
-
-    double smntCurr(std::size_t i) const override {
-      return getCurrMNT(resVec, s, i);
-    }
-
-    double smnbCurr(std::size_t i) const override {
-      return getCurrMNB(resVec, s, i);
-    }
-
 
   public: // ~~~~ functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     ESIPOSReport_Impl* copy() const override {return new ESIPOSReport_Impl(*this);}
 
 
   private: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    Eigen::VectorXd resVec;
     ESIPOSSysParam s;
     double error;
 };
@@ -903,7 +394,8 @@ ESIPOSReport* calculate_esipos(const ESIPOSSysParam& s, double mag) {
   Eigen::MatrixXd lhsM = Eigen::MatrixXd::Zero(size, size);
   addSysCoeff<M>(lhsM, s);
   addStackCoeff(lhsM, s);
-  addConnCoeff(lhsM, s);
+  addConnToConnCoeff(lhsM, s);
+  addConnToStackCoeff(lhsM, s);
   Eigen::VectorXd rhsV = Eigen::VectorXd::Zero(size);
   addStackValue(rhsV, s, mag);
   addConnValue(rhsV, s);
