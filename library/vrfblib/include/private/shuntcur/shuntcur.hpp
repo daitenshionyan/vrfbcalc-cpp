@@ -1576,6 +1576,15 @@ void addStackValue(Eigen::VectorXd& v, const SysParam& s, double mag) {
 */
 
 
+/**
+ * Abstract class that implements the stack state accessor function of
+ * `ShuntReportData`.
+ *
+ * @param <T> Parent class. Base class should be `ShuntReportData` and should
+ *    not require any parameters to construct.
+ * @param <PS> Positive electrolyte input side.
+ * @param <NS> Negative electrolyte input side.
+*/
 template<typename T, ConnSide PS=ConnSide::csFront, ConnSide NS=ConnSide::csBack>
 class ShuntReportData_Impl : public T {
   public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1595,6 +1604,25 @@ class ShuntReportData_Impl : public T {
 
 
   public: // ~~~~ accessors ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    std::size_t numLines() const override {
+      return param().numLines;
+    }
+
+    std::size_t numStacks() const override {
+      return param().numStacks;
+    }
+
+    std::size_t numCells() const override {
+      return param().numCells;
+    }
+
+    std::size_t totCells() const override {
+      return numLines()*numStacks()*numCells();
+    }
+
+
+
+
     double chargingVolt() const override {
       return resVec(kChgVoltIndex);
     }
@@ -1602,6 +1630,46 @@ class ShuntReportData_Impl : public T {
     double chargingCurr() const override {
       return resVec(kChgCurrIndex);
     }
+
+    double chargingPowr() const override {
+      return chargingVolt() * chargingCurr();
+    }
+
+    double overVoltPowr() const override {
+      double result = 0;
+      for (std::size_t i = 0; i < totCells(); ++i) {
+        result += (param().maxCD*param().s.cellArea < cellCurr(i))
+            ? (cellCurr(i) - param().maxCD*param().s.cellArea) * param().ocv()
+            : 0;
+      }
+      return result;
+    }
+
+    double storedCurr() const override {
+      double result = 0;
+      for (std::size_t i = 0; i < totCells(); ++i) {
+        result += (param().maxCD*param().s.cellArea < cellCurr(i))
+            ? param().maxCD*param().s.cellArea
+            : cellCurr(i);
+      }
+      return result;
+    }
+
+    double storedPowr() const {
+      double result = 0;
+      for (std::size_t i = 0; i < totCells(); ++i) {
+        result += (param().maxCD*param().s.cellArea < cellCurr(i))
+            ? param().maxCD*param().s.cellArea*param().ocv()
+            : cellCurr(i)*param().ocv();
+      }
+      return result;
+    }
+
+    double powrEff() const {
+      return storedPowr() / chargingPowr();
+    }
+
+
 
 
     double lineCurr(std::size_t i) const override {
@@ -1614,6 +1682,12 @@ class ShuntReportData_Impl : public T {
           + getPosConnContri_Cell<PS>(resVec, param(), i)
           + getNegConnContri_Cell<NS>(resVec, param(), i);
     }
+
+    double cellPowr(std::size_t i) const override {
+      return cellCurr(i)*param().ocv();
+    }
+
+
 
 
     double ssptCurr(std::size_t i) const override {
@@ -1636,6 +1710,24 @@ class ShuntReportData_Impl : public T {
           + getConnContri_SSNB<NS>(resVec, param(), i);
     }
 
+    double ssptPowr(std::size_t i) const override {
+      return ssptCurr(i)*param().stackShuntR();
+    }
+
+    double sspbPowr(std::size_t i) const override {
+      return sspbCurr(i)*param().stackShuntR();
+    }
+
+    double ssntPowr(std::size_t i) const override {
+      return ssntCurr(i)*param().stackShuntR();
+    }
+
+    double ssnbPowr(std::size_t i) const override {
+      return ssnbCurr(i)*param().stackShuntR();
+    }
+
+
+
 
     double smptCurr(std::size_t i) const override {
       return getCurrMPT(resVec, param(), i);
@@ -1651,6 +1743,22 @@ class ShuntReportData_Impl : public T {
 
     double smnbCurr(std::size_t i) const override {
       return getCurrMNB(resVec, param(), i);
+    }
+
+    double smptPowr(std::size_t i) const override {
+      return smptCurr(i)*param().stackManiR();
+    }
+
+    double smpbPowr(std::size_t i) const override {
+      return smpbCurr(i)*param().stackManiR();
+    }
+
+    double smntPowr(std::size_t i) const override {
+      return smntCurr(i)*param().stackManiR();
+    }
+
+    double smnbPowr(std::size_t i) const override {
+      return smnbCurr(i)*param().stackManiR();
     }
 
 
