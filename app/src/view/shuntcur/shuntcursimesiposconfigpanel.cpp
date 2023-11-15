@@ -31,7 +31,7 @@ vrfb::shuntcur::ShuntCalc* SCSimESIPOSConfigPanel::getCalc() const {
               ui->maxChgDenField->value() * 10,
               (std::size_t) ui->numCellField->value(),
               (std::size_t) ui->numStackField->value(),
-              (std::size_t) ui->numLineField->value(),
+              1,                                                  // Num lines
               0.1,                                                // SOC
               ui->tempField->value() + 273.15},
           vrfb::shuntcur::esipos::ConnParam {

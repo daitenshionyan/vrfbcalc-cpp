@@ -396,6 +396,375 @@
     </widget>
    </item>
    <item>
+    <widget class="QGroupBox" name="groupBox_2">
+     <property name="title">
+      <string>Stack</string>
+     </property>
+     <layout class="QFormLayout" name="formLayout_6">
+      <item row="0" column="0">
+       <widget class="QLabel" name="asrLabel">
+        <property name="text">
+         <string>ASR</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QWidget" name="asrBox" native="true">
+        <layout class="QHBoxLayout" name="horizontalLayout_13">
+         <property name="spacing">
+          <number>5</number>
+         </property>
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QDoubleSpinBox" name="asrField">
+           <property name="decimals">
+            <number>9</number>
+           </property>
+           <property name="maximum">
+            <double>9999999999.000000000000000</double>
+           </property>
+           <property name="value">
+            <double>1.300000000000000</double>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="asrUnitLabel">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>53</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Ohm cm2</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="cellAreaLabel">
+        <property name="text">
+         <string>Cell Area</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QWidget" name="cellAreaBox" native="true">
+        <layout class="QHBoxLayout" name="horizontalLayout_14">
+         <property name="spacing">
+          <number>5</number>
+         </property>
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QDoubleSpinBox" name="cellAreaField">
+           <property name="decimals">
+            <number>9</number>
+           </property>
+           <property name="maximum">
+            <double>9999999999.000000000000000</double>
+           </property>
+           <property name="value">
+            <double>1030.000000000000000</double>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="cellAreaUnitLabel">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>53</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>cm2</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="shuntLenLabel">
+        <property name="text">
+         <string>Shunt Len</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QWidget" name="shuntLenBox" native="true">
+        <layout class="QHBoxLayout" name="horizontalLayout_5">
+         <property name="spacing">
+          <number>5</number>
+         </property>
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QDoubleSpinBox" name="shuntLenField">
+           <property name="decimals">
+            <number>9</number>
+           </property>
+           <property name="maximum">
+            <double>9999999.000000000000000</double>
+           </property>
+           <property name="value">
+            <double>130.000000000000000</double>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="shuntLenUnitLabel">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>53</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>cm</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="shuntAreaLabel">
+        <property name="text">
+         <string>Shunt Area</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QWidget" name="shuntAreaBox" native="true">
+        <layout class="QHBoxLayout" name="horizontalLayout_6">
+         <property name="spacing">
+          <number>5</number>
+         </property>
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QDoubleSpinBox" name="shuntAreaField">
+           <property name="decimals">
+            <number>9</number>
+           </property>
+           <property name="maximum">
+            <double>9999999999.000000000000000</double>
+           </property>
+           <property name="value">
+            <double>0.160000000000000</double>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="shuntAreaUnitLabel">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>53</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>cm2</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="maniLenLabel">
+        <property name="text">
+         <string>Mani Len</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <widget class="QWidget" name="maniLenBox" native="true">
+        <layout class="QHBoxLayout" name="horizontalLayout_7">
+         <property name="spacing">
+          <number>5</number>
+         </property>
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QDoubleSpinBox" name="maniLenField">
+           <property name="decimals">
+            <number>9</number>
+           </property>
+           <property name="maximum">
+            <double>9999999999.000000000000000</double>
+           </property>
+           <property name="value">
+            <double>0.500000000000000</double>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="maniLenUnitLabel">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>53</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>cm</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item row="5" column="0">
+       <widget class="QLabel" name="maniAreaLabel">
+        <property name="text">
+         <string>Mani Area</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="1">
+       <widget class="QWidget" name="maniAreaBox" native="true">
+        <layout class="QHBoxLayout" name="horizontalLayout_8">
+         <property name="spacing">
+          <number>5</number>
+         </property>
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QDoubleSpinBox" name="maniAreaField">
+           <property name="decimals">
+            <number>9</number>
+           </property>
+           <property name="maximum">
+            <double>9999999999.000000000000000</double>
+           </property>
+           <property name="value">
+            <double>12.000000000000000</double>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="maniAreaUnitLabel">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>53</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>cm2</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
     <widget class="QGroupBox" name="mainConnectorBox">
      <property name="title">
       <string>Main Connector</string>
@@ -873,375 +1242,6 @@
          </item>
          <item>
           <widget class="QLabel" name="conManiAreaUnitLabel">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>53</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>cm2</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item>
-    <widget class="QGroupBox" name="groupBox_2">
-     <property name="title">
-      <string>Stack</string>
-     </property>
-     <layout class="QFormLayout" name="formLayout_6">
-      <item row="0" column="0">
-       <widget class="QLabel" name="asrLabel">
-        <property name="text">
-         <string>ASR</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QWidget" name="asrBox" native="true">
-        <layout class="QHBoxLayout" name="horizontalLayout_13">
-         <property name="spacing">
-          <number>5</number>
-         </property>
-         <property name="leftMargin">
-          <number>0</number>
-         </property>
-         <property name="topMargin">
-          <number>0</number>
-         </property>
-         <property name="rightMargin">
-          <number>0</number>
-         </property>
-         <property name="bottomMargin">
-          <number>0</number>
-         </property>
-         <item>
-          <widget class="QDoubleSpinBox" name="asrField">
-           <property name="decimals">
-            <number>9</number>
-           </property>
-           <property name="maximum">
-            <double>9999999999.000000000000000</double>
-           </property>
-           <property name="value">
-            <double>1.300000000000000</double>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="asrUnitLabel">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>53</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>Ohm cm2</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="cellAreaLabel">
-        <property name="text">
-         <string>Cell Area</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QWidget" name="cellAreaBox" native="true">
-        <layout class="QHBoxLayout" name="horizontalLayout_14">
-         <property name="spacing">
-          <number>5</number>
-         </property>
-         <property name="leftMargin">
-          <number>0</number>
-         </property>
-         <property name="topMargin">
-          <number>0</number>
-         </property>
-         <property name="rightMargin">
-          <number>0</number>
-         </property>
-         <property name="bottomMargin">
-          <number>0</number>
-         </property>
-         <item>
-          <widget class="QDoubleSpinBox" name="cellAreaField">
-           <property name="decimals">
-            <number>9</number>
-           </property>
-           <property name="maximum">
-            <double>9999999999.000000000000000</double>
-           </property>
-           <property name="value">
-            <double>1030.000000000000000</double>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="cellAreaUnitLabel">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>53</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>cm2</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="shuntLenLabel">
-        <property name="text">
-         <string>Shunt Len</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QWidget" name="shuntLenBox" native="true">
-        <layout class="QHBoxLayout" name="horizontalLayout_5">
-         <property name="spacing">
-          <number>5</number>
-         </property>
-         <property name="leftMargin">
-          <number>0</number>
-         </property>
-         <property name="topMargin">
-          <number>0</number>
-         </property>
-         <property name="rightMargin">
-          <number>0</number>
-         </property>
-         <property name="bottomMargin">
-          <number>0</number>
-         </property>
-         <item>
-          <widget class="QDoubleSpinBox" name="shuntLenField">
-           <property name="decimals">
-            <number>9</number>
-           </property>
-           <property name="maximum">
-            <double>9999999.000000000000000</double>
-           </property>
-           <property name="value">
-            <double>130.000000000000000</double>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="shuntLenUnitLabel">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>53</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>cm</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-      </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="shuntAreaLabel">
-        <property name="text">
-         <string>Shunt Area</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="1">
-       <widget class="QWidget" name="shuntAreaBox" native="true">
-        <layout class="QHBoxLayout" name="horizontalLayout_6">
-         <property name="spacing">
-          <number>5</number>
-         </property>
-         <property name="leftMargin">
-          <number>0</number>
-         </property>
-         <property name="topMargin">
-          <number>0</number>
-         </property>
-         <property name="rightMargin">
-          <number>0</number>
-         </property>
-         <property name="bottomMargin">
-          <number>0</number>
-         </property>
-         <item>
-          <widget class="QDoubleSpinBox" name="shuntAreaField">
-           <property name="decimals">
-            <number>9</number>
-           </property>
-           <property name="maximum">
-            <double>9999999999.000000000000000</double>
-           </property>
-           <property name="value">
-            <double>0.160000000000000</double>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="shuntAreaUnitLabel">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>53</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>cm2</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-      </item>
-      <item row="4" column="0">
-       <widget class="QLabel" name="maniLenLabel">
-        <property name="text">
-         <string>Mani Len</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="1">
-       <widget class="QWidget" name="maniLenBox" native="true">
-        <layout class="QHBoxLayout" name="horizontalLayout_7">
-         <property name="spacing">
-          <number>5</number>
-         </property>
-         <property name="leftMargin">
-          <number>0</number>
-         </property>
-         <property name="topMargin">
-          <number>0</number>
-         </property>
-         <property name="rightMargin">
-          <number>0</number>
-         </property>
-         <property name="bottomMargin">
-          <number>0</number>
-         </property>
-         <item>
-          <widget class="QDoubleSpinBox" name="maniLenField">
-           <property name="decimals">
-            <number>9</number>
-           </property>
-           <property name="maximum">
-            <double>9999999999.000000000000000</double>
-           </property>
-           <property name="value">
-            <double>0.500000000000000</double>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="maniLenUnitLabel">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>53</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>cm</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-      </item>
-      <item row="5" column="0">
-       <widget class="QLabel" name="maniAreaLabel">
-        <property name="text">
-         <string>Mani Area</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="1">
-       <widget class="QWidget" name="maniAreaBox" native="true">
-        <layout class="QHBoxLayout" name="horizontalLayout_8">
-         <property name="spacing">
-          <number>5</number>
-         </property>
-         <property name="leftMargin">
-          <number>0</number>
-         </property>
-         <property name="topMargin">
-          <number>0</number>
-         </property>
-         <property name="rightMargin">
-          <number>0</number>
-         </property>
-         <property name="bottomMargin">
-          <number>0</number>
-         </property>
-         <item>
-          <widget class="QDoubleSpinBox" name="maniAreaField">
-           <property name="decimals">
-            <number>9</number>
-           </property>
-           <property name="maximum">
-            <double>9999999999.000000000000000</double>
-           </property>
-           <property name="value">
-            <double>12.000000000000000</double>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="maniAreaUnitLabel">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
              <horstretch>0</horstretch>
