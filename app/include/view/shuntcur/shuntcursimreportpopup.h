@@ -55,8 +55,10 @@ class SCSimReportPopup : public QDialog {
   private: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     Ui::SCSimReportPopup* ui;
 
+    vrfbdriver::shuntcur::ShuntSimJob* simJob;
     vrfbdriver::shuntcur::ShuntSimReport report;
     vrfbdriver::io::shuntcur::ShuntSimStepIO* stepIO;
+    vrfbdriver::io::shuntcur::ShuntSimReportIO* reportIO;
 
     QFutureWatcher<vrfbdriver::shuntcur::ShuntSimStep> watcher;
     QThreadPool pool;
