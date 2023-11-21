@@ -22,7 +22,7 @@ find_package(Qt6 REQUIRED COMPONENTS
     Charts
 )
 
-set(VRFBCALC-CPP_VERSION "0.3.3")
+set(VRFBCALC-CPP_VERSION "0.3.4")
 configure_file(include/vrfbcalccfg.hpp.in include/vrfbcalccfg.hpp)
 
 add_executable(vrfbcalc-cpp WIN32
