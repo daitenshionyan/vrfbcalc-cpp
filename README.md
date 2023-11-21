@@ -44,27 +44,28 @@ Additional points to note:
 
 ## Shunt Current
 
-Calculates the current and power lost during charging for a VRFB system.
+Simulates a single charging and discharging cycle for a specified system.
 
-1. Navigate `Run` > `SC Calculation` and enter the relavent details.
-2. Output are output into the folder `output/${NAME}.xlsx`. To quickly open output folder, navigate `Files` > `Open output`.
+1. Navigate `Run` > `SC Simulation` and enter the relavent parameters.
+2. Output are outputed into the folder `output/${NAME} - Summary.csv` and `output/${NAME} - Raw Data.csv`. To quickly open output folder, navigate `Files` > `Open output`.
 
-## Dependencies
-
-* GUI framework: [Qt Framework](https://www.qt.io/)
-* JSON library: [nlohmann/json](https://github.com/nlohmann/json)
-* XLSX library: [xlnt](https://github.com/tfussell/xlnt)
-* Graphs: [QCustomPlot v2.1.1](https://www.qcustomplot.com/index.php/introduction)
+--------------------------------------------------------------------------------
 
 ## Building
 
-Install all dependencies and VS.
+1. Install Qt6 ([here](https://www.qt.io/)).
+2. Install 7-zip ([here](https://www.7-zip.org/)). Ensure that the executable in installed into `C:\Program Files\7-Zip\7z.exe`. This should be the default installation path.
+3. Install vcpkg ([here](https://vcpkg.io/en/)). Follow the setup instructions.
+4. Install cmake ([here](https://cmake.org/download/)).
+5. Install visual studio for MSVC.
+6. Run `configure.bat` batch script to configure and install remaining dependencies.
+7. Run cmake to configure and build.
 
-QCustomPlot v2.1.1 source files should be placed in `dependencies/qcustomplot`. The batch script `configure.bat` can be ran to do this.
+Commands for steps 5 to 7 are as follows in powershell (for CMD replace `` ` `` with `^`):
 
-Configure and build by entering the following in powershell (for CMD replace `` ` `` with `^`).
+```diff
+./configure.bat ${VCPKG_EXE_PATH}
 
-```text
 cmake --no-warn-unused-cli `
   -DCMAKE_TOOLCHAIN_FILE:STRING=${TOOLCHAIN_PATH} `
   -DCMAKE_PREFIX_PATH:STRING=${QT_PATH} `
@@ -78,15 +79,20 @@ cmake --no-warn-unused-cli `
 cmake --build build --config Release --target ALL_BUILD --
 ```
 
-Replace `${TOOLCHAIN_PATH}` and `${QT_PATH}` with toolchain and qt path respectively.
+Replace the following placeholders:
 
-## Packaging
+* `${VCPKG_EXE_PATH}` with path to `vcpkg.exe`.
+* `${TOOLCHAIN_PATH}`  with path to `vcpkg.cmake`.
+* `${QT_PATH}` qt6 library path.
 
-Packaging script requires [7-zip](https://www.7-zip.org/) to be installed exactly in `C:\Program Files\7-Zip\7z.exe`. This should be the default install path.
+--------------------------------------------------------------------------------
 
-```text
-./package
-```
+## Dependencies
+
+* GUI framework: [Qt Framework](https://www.qt.io/)
+* JSON library: [nlohmann/json](https://github.com/nlohmann/json)
+* XLSX library: [xlnt](https://github.com/tfussell/xlnt)
+* Graphs: [QCustomPlot v2.1.1](https://www.qcustomplot.com/index.php/introduction)
 
 ## Acknowledgements
 
