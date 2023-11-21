@@ -80,6 +80,14 @@ add_executable(vrfbcalc-cpp WIN32
     src/view/shuntcur/shuntcursimconfigpopup.ui
     src/view/shuntcur/shuntcursimconfigpopup.cpp
 
+    include/view/shuntcur/shuntcursimpccconfigpanel.h
+    src/view/shuntcur/shuntcursimpccconfigpanel.ui
+    src/view/shuntcur/shuntcursimpccconfigpanel.cpp
+
+    include/view/shuntcur/shuntcursimesiposconfigpanel.h
+    src/view/shuntcur/shuntcursimesiposconfigpanel.ui
+    src/view/shuntcur/shuntcursimesiposconfigpanel.cpp
+
     include/view/shuntcur/shuntcursimreportpopup.h
     src/view/shuntcur/shuntcursimreportpopup.ui
     src/view/shuntcur/shuntcursimreportpopup.cpp
