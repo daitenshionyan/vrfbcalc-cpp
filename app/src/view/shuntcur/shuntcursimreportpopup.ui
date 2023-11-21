@@ -43,7 +43,7 @@
            <x>0</x>
            <y>0</y>
            <width>680</width>
-           <height>566</height>
+           <height>596</height>
           </rect>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -65,13 +65,6 @@
           </item>
          </layout>
         </widget>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="exportBtn">
-        <property name="text">
-         <string>Export</string>
-        </property>
        </widget>
       </item>
      </layout>
