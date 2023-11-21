@@ -3,6 +3,69 @@
 
 #include <stdexcept>
 
+#include "view/shuntcur/shuntcursimpccconfigpanel.h"
+#include "view/shuntcur/shuntcursimesiposconfigpanel.h"
+
+
+
+
+namespace {
+
+
+vrfb::shuntcur::ElecInput getChgInput(const Ui::SCSimConfigPopup* ui) {
+  if (ui->chgModeComboBox->currentIndex() < 0) {
+    throw std::runtime_error("Charging input mode not selected");
+  }
+  return vrfb::shuntcur::ElecInput {
+      static_cast<vrfb::shuntcur::ElecInput::Mode>(ui->chgModeComboBox->currentIndex()),
+      ui->chgInputMagField->value()
+  };
+}
+
+
+vrfb::shuntcur::ElecInput getDChgInput(const Ui::SCSimConfigPopup* ui) {
+  if (ui->dchgModeComboBox->currentIndex() < 0) {
+    throw std::runtime_error("Discharging input mode not selected");
+  }
+  return vrfb::shuntcur::ElecInput {
+      static_cast<vrfb::shuntcur::ElecInput::Mode>(ui->dchgModeComboBox->currentIndex()),
+      ui->dchgInputMagField->value()
+  };
+}
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 SCSimConfigPopup::SCSimConfigPopup(QWidget* parent)
       : QDialog(parent), ui(new Ui::SCSimConfigPopup) {
@@ -28,23 +91,20 @@ vrfbdriver::shuntcur::ShuntSimJob SCSimConfigPopup::getJob() {
   if (ui->nameField->text().isEmpty()) {
     throw std::runtime_error("Blank name");
   }
-  if (ui->numStackField->value() <= 0) {
-    throw std::runtime_error("Negative or 0 number of stacks");
-  }
-  if (ui->numCellField->value() <= 0) {
-    throw std::runtime_error("Negative or 0 number of cells");
-  }
   if (ui->arrComboBox->currentIndex() < 0) {
     throw std::runtime_error("Arrange not set");
+  }
+  if (cfgPanel == nullptr) {
+    throw std::runtime_error("Unsupported arrangement");
   }
 
   return vrfbdriver::shuntcur::ShuntSimJob {
     ui->nameField->text().toStdString(),
-    getCalc(),
+    cfgPanel->getCalc(),
     ui->volField->value(),
     ui->concField->value(),
-    getChgInput(),
-    getDChgInput(),
+    getChgInput(ui),
+    getDChgInput(ui),
     new vrfbdriver::shuntcur::EndPointSOC<vrfbdriver::shuntcur::InputEndPoint::LimitType::ltUpper>(
         ui->endSOCField->value() / 100),
     new vrfbdriver::shuntcur::EndPointSOC<vrfbdriver::shuntcur::InputEndPoint::LimitType::ltLower>(
@@ -65,115 +125,33 @@ vrfbdriver::shuntcur::ShuntSimJob SCSimConfigPopup::getJob() {
 
 /*
 ********************************************************************************
-**        Accessors
-********************************************************************************
-*/
-
-
-vrfb::shuntcur::ShuntCalc* SCSimConfigPopup::getCalc() const {
-  vrfbdriver::shuntcur::SCArrangement arr = static_cast<vrfbdriver::shuntcur::SCArrangement>(
-      ui->arrComboBox->currentIndex());
-  switch (arr) {
-    case vrfbdriver::shuntcur::SCArrangement::scaPCCFB:
-      return new vrfb::shuntcur::pcc::PCCCalc(
-          vrfb::shuntcur::pcc::PCCSysParam {
-              vrfb::shuntcur::SysParam {
-                  vrfb::shuntcur::StackParam {
-                      ui->asrField->value() / 10000,
-                      ui->cellAreaField->value() / 10000,
-                      ui->shuntLenField->value() / 100,
-                      ui->shuntAreaField->value() / 10000,
-                      ui->maniLenField->value() / 100,
-                      ui->maniAreaField->value() / 10000},
-                  ui->resistivityField->value(),
-                  ui->maxChgDenField->value() * 10,
-                  (std::size_t) ui->numCellField->value(),
-                  (std::size_t) ui->numStackField->value(),
-                  (std::size_t) ui->numLineField->value(),
-                  0.1,                                                // SOC
-                  ui->tempField->value() + 273.15},
-              vrfb::shuntcur::pcc::ConnParam {
-                  ui->connShuntLenField->value() / 100,
-                  ui->connShuntAreaField->value() / 10000,
-                  ui->connManiLenField->value() / 100,
-                  ui->connManiAreaField->value() / 10000,
-                  ui->mConnShuntLenField->value() / 100,
-                  ui->mConnShuntAreaField->value() / 10000,
-                  ui->mConnManiLenField->value() / 100,
-                  ui->mConnManiAreaField->value() / 10000}},
-          vrfb::shuntcur::pcc::PCCCalc::ConnType::ctFB);
-      break;
-    case vrfbdriver::shuntcur::SCArrangement::scaESIPOS:
-      return new vrfb::shuntcur::esipos::ESIPOSCalc(
-          vrfb::shuntcur::esipos::ESIPOSSysParam {
-              vrfb::shuntcur::SysParam {
-                  vrfb::shuntcur::StackParam {
-                      ui->asrField->value() / 10000,
-                      ui->cellAreaField->value() / 10000,
-                      ui->shuntLenField->value() / 100,
-                      ui->shuntAreaField->value() / 10000,
-                      ui->maniLenField->value() / 100,
-                      ui->maniAreaField->value() / 10000},
-                  ui->resistivityField->value(),
-                  ui->maxChgDenField->value() * 10,
-                  (std::size_t) ui->numCellField->value(),
-                  (std::size_t) ui->numStackField->value(),
-                  (std::size_t) ui->numLineField->value(),
-                  0.1,                                                // SOC
-                  ui->tempField->value() + 273.15},
-              vrfb::shuntcur::esipos::ConnParam {
-                  ui->connShuntLenField->value() / 100,
-                  ui->connShuntAreaField->value() / 10000,
-                  ui->connManiLenField->value() / 100,
-                  ui->connManiAreaField->value() / 10000,
-                  ui->mConnShuntLenField->value() / 100,
-                  ui->mConnShuntAreaField->value() / 10000,
-                  ui->mConnManiLenField->value() / 100,
-                  ui->mConnManiAreaField->value() / 10000,
-                  ui->connShuntLenField->value() / 100,
-                  ui->connShuntAreaField->value() / 10000,
-                  ui->connManiLenField->value() / 100,
-                  ui->connManiAreaField->value() / 10000}});
-    default:
-      throw std::runtime_error("Unsupported arrangement");
-  }
-}
-
-
-vrfb::shuntcur::ElecInput SCSimConfigPopup::getChgInput() const {
-  if (ui->chgModeComboBox->currentIndex() < 0) {
-    throw std::runtime_error("Charging input mode not selected");
-  }
-  return vrfb::shuntcur::ElecInput {
-      static_cast<vrfb::shuntcur::ElecInput::Mode>(ui->chgModeComboBox->currentIndex()),
-      ui->chgInputMagField->value()
-  };
-}
-
-
-vrfb::shuntcur::ElecInput SCSimConfigPopup::getDChgInput() const {
-  if (ui->dchgModeComboBox->currentIndex() < 0) {
-    throw std::runtime_error("Discharging input mode not selected");
-  }
-  return vrfb::shuntcur::ElecInput {
-      static_cast<vrfb::shuntcur::ElecInput::Mode>(ui->dchgModeComboBox->currentIndex()),
-      ui->dchgInputMagField->value()
-  };
-}
-
-
-
-
-
-
-
-
-
-/*
-********************************************************************************
 **        Slots
 ********************************************************************************
 */
+
+
+void SCSimConfigPopup::on_arrComboBox_currentIndexChanged(int index) {
+  if (cfgPanel != nullptr) {
+    ui->sysConfigArea->layout()->removeWidget(cfgPanel);
+    delete cfgPanel;
+    cfgPanel = nullptr;
+  }
+  switch (static_cast<vrfbdriver::shuntcur::SCArrangement>(index)) {
+    case vrfbdriver::shuntcur::SCArrangement::scaPCCFB:
+      cfgPanel = new SCSimPCCConfigPanel(this);
+      ui->sysConfigArea->layout()->addWidget(cfgPanel);
+      break;
+    case vrfbdriver::shuntcur::SCArrangement::scaESIPOS:
+      cfgPanel = new SCSimESIPOSConfigPanel(this);
+      ui->sysConfigArea->layout()->addWidget(cfgPanel);
+      break;
+    default:
+      ui->sysConfigArea->layout()->removeWidget(cfgPanel);
+      delete cfgPanel;
+      cfgPanel = nullptr;
+      break;
+  }
+}
 
 
 void SCSimConfigPopup::on_chgModeComboBox_currentIndexChanged(int index) {

@@ -191,6 +191,11 @@ class InputEndPoint {
     virtual int progress(const ShuntSimStep& s) const = 0;
 
     /**
+     * Returns the string representation of the input mode.
+    */
+    virtual std::string toString() const = 0;
+
+    /**
      * Clones this instance of `InputEndPoint`.
      *
      * @return Pointer to newly created `InputEndPoint` that has the samve value
@@ -231,6 +236,8 @@ class EndPointSOC : public InputEndPoint {
 
     bool isEnd(const ShuntSimStep&) const override;
     int progress(const ShuntSimStep&) const override;
+
+    std::string toString() const override;
     EndPointSOC* clone() const override {return new EndPointSOC(*this);}
 
 
@@ -258,6 +265,13 @@ inline int EndPointSOC<InputEndPoint::LimitType::ltLower>
 }
 
 
+template<>
+inline std::string EndPointSOC<InputEndPoint::LimitType::ltLower>
+      ::toString() const {
+  return "LOWER SOC " + std::to_string(mag);
+}
+
+
 
 
 template<>
@@ -273,6 +287,13 @@ inline int EndPointSOC<InputEndPoint::LimitType::ltUpper>
   return (step.soc > mag)
       ? 100
       : (int) (((step.soc - iniSOC) / (mag - iniSOC)) * 100);
+}
+
+
+template<>
+inline std::string EndPointSOC<InputEndPoint::LimitType::ltUpper>
+      ::toString() const {
+  return "UPPER SOC " + std::to_string(mag);
 }
 
 

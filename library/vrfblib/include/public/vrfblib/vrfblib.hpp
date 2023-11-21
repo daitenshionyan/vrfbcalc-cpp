@@ -232,64 +232,40 @@ class ShuntReportData {
     virtual std::string arrName() const = 0;
     virtual const SysParam& param() const = 0;
 
-    virtual std::size_t numLines() const {return param().numLines;}
-    virtual std::size_t numStacks() const {return param().numStacks;}
-    virtual std::size_t numCells() const {return param().numCells;}
-    virtual std::size_t totCells() const {return numLines()*numStacks()*numCells();}
+    virtual std::size_t numLines() const = 0;
+    virtual std::size_t numStacks() const = 0;
+    virtual std::size_t numCells() const = 0;
+    virtual std::size_t totCells() const = 0;
 
     virtual double chargingVolt() const = 0;
     virtual double chargingCurr() const = 0;
-    virtual double chargingPowr() const {return chargingVolt() * chargingCurr();}
-    virtual double overVoltPowr() const {
-      double result = 0;
-      for (std::size_t i = 0; i < totCells(); ++i) {
-        result += (param().maxCD*param().s.cellArea < cellCurr(i))
-            ? (cellCurr(i) - param().maxCD*param().s.cellArea) * param().ocv()
-            : 0;
-      }
-      return result;
-    }
-    virtual double storedCurr() const {
-      double result = 0;
-      for (std::size_t i = 0; i < totCells(); ++i) {
-        result += (param().maxCD*param().s.cellArea < cellCurr(i))
-            ? param().maxCD*param().s.cellArea
-            : cellCurr(i);
-      }
-      return result;
-    }
-    virtual double storedPowr() const {
-      double result = 0;
-      for (std::size_t i = 0; i < totCells(); ++i) {
-        result += (param().maxCD*param().s.cellArea < cellCurr(i))
-            ? param().maxCD*param().s.cellArea*param().ocv()
-            : cellCurr(i)*param().ocv();
-      }
-      return result;
-    }
-    virtual double powrEff() const {return storedPowr() / chargingPowr();}
+    virtual double chargingPowr() const = 0;
+    virtual double overVoltPowr() const = 0;
+    virtual double storedCurr() const = 0;
+    virtual double storedPowr() const = 0;
+    virtual double powrEff() const = 0;
 
     virtual double lineCurr(std::size_t i) const = 0;
     virtual double cellCurr(std::size_t i) const = 0;
-    virtual double cellPowr(std::size_t i) const {return cellCurr(i)*param().ocv();}
+    virtual double cellPowr(std::size_t i) const = 0;
 
     virtual double ssptCurr(std::size_t i) const = 0;
     virtual double sspbCurr(std::size_t i) const = 0;
     virtual double ssntCurr(std::size_t i) const = 0;
     virtual double ssnbCurr(std::size_t i) const = 0;
-    virtual double ssptPowr(std::size_t i) const {return ssptCurr(i)*param().stackShuntR();}
-    virtual double sspbPowr(std::size_t i) const {return sspbCurr(i)*param().stackShuntR();}
-    virtual double ssntPowr(std::size_t i) const {return ssntCurr(i)*param().stackShuntR();}
-    virtual double ssnbPowr(std::size_t i) const {return ssnbCurr(i)*param().stackShuntR();}
+    virtual double ssptPowr(std::size_t i) const = 0;
+    virtual double sspbPowr(std::size_t i) const = 0;
+    virtual double ssntPowr(std::size_t i) const = 0;
+    virtual double ssnbPowr(std::size_t i) const = 0;
 
     virtual double smptCurr(std::size_t i) const = 0;
     virtual double smpbCurr(std::size_t i) const = 0;
     virtual double smntCurr(std::size_t i) const = 0;
     virtual double smnbCurr(std::size_t i) const = 0;
-    virtual double smptPowr(std::size_t i) const {return smptCurr(i)*param().stackManiR();}
-    virtual double smpbPowr(std::size_t i) const {return smpbCurr(i)*param().stackManiR();}
-    virtual double smntPowr(std::size_t i) const {return smntCurr(i)*param().stackManiR();}
-    virtual double smnbPowr(std::size_t i) const {return smnbCurr(i)*param().stackManiR();}
+    virtual double smptPowr(std::size_t i) const = 0;
+    virtual double smpbPowr(std::size_t i) const = 0;
+    virtual double smntPowr(std::size_t i) const = 0;
+    virtual double smnbPowr(std::size_t i) const = 0;
 
 
   public:

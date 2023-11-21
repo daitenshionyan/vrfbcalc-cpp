@@ -49,19 +49,23 @@ SCSimReportPopup::SCSimReportPopup(QWidget* parent)
 
 
 SCSimReportPopup::~SCSimReportPopup() {
+  delete reportIO;
   delete stepIO;
+  delete simJob;
   delete ui;
 }
 
 
 void SCSimReportPopup::start(const vrfbdriver::shuntcur::ShuntSimJob& j) {
-  stepIO = new vrfbdriver::io::shuntcur::ShuntSimStepIO("output/" + j.name + ".csv", j);
+  simJob = new vrfbdriver::shuntcur::ShuntSimJob(j);
+  stepIO = new vrfbdriver::io::shuntcur::ShuntSimStepIO("output/" + simJob->name + " - Raw Data.csv", *simJob);
+  reportIO = new vrfbdriver::io::shuntcur::ShuntSimReportIO("output/" + simJob->name + " - Summary.csv");
   watcher.setFuture(QtConcurrent::run<vrfbdriver::shuntcur::ShuntSimStep>(
       &pool,
-      [&, j](QPromise<vrfbdriver::shuntcur::ShuntSimStep>& p) {
+      [&](QPromise<vrfbdriver::shuntcur::ShuntSimStep>& p) {
         auto rpter = vrfbutils::BasePromise_Qt<vrfbdriver::shuntcur::ShuntSimStep>{&p};
         try {
-          vrfbdriver::shuntcur::simulateShunt(j, kTimeStep, rpter);
+          vrfbdriver::shuntcur::simulateShunt(*simJob, kTimeStep, rpter);
         } catch (const std::exception& ex) {
           emit simulationFailed(ex.what());
           return;
@@ -97,6 +101,9 @@ void SCSimReportPopup::displayReport() {
   ui->msgLabel->setText(QString::fromStdString(comutils::string::format_string(
       "Completed : EE=%.2f%%",
       report.energyEff() * 100)));
+  if (reportIO != nullptr) {
+    reportIO->append(*simJob, report);
+  }
 }
 
 

@@ -353,8 +353,10 @@ namespace shuntcur {
 namespace {
 
 
-using TitleOutputter = std::function<std::ostream&(std::ostream&, const vrfbdriver::shuntcur::ShuntSimJob&)>;
-using DataOutputter = std::function<std::ostream&(std::ostream&, const vrfbdriver::shuntcur::ShuntSimStep&)>;
+using TitleOutputter_Step = std::function<
+    std::ostream&(std::ostream&, const vrfbdriver::shuntcur::ShuntSimJob&)>;
+using DataOutputter_Step = std::function<
+    std::ostream&(std::ostream&, const vrfbdriver::shuntcur::ShuntSimStep&)>;
 
 
 /**
@@ -362,8 +364,8 @@ using DataOutputter = std::function<std::ostream&(std::ostream&, const vrfbdrive
  * output stream.
 */
 struct ShuntSimStepOutputConfig {
-  TitleOutputter titleOutputter;    // Outputs column header
-  DataOutputter dataOutputter;      // Outputs data
+  TitleOutputter_Step titleOutputter;    // Outputs column header
+  DataOutputter_Step dataOutputter;      // Outputs data
 };
 
 
@@ -373,7 +375,7 @@ struct ShuntSimStepOutputConfig {
  * Vector of output configurations defining column order and which data to write
  * to output stream.
 */
-const std::vector<ShuntSimStepOutputConfig> kOutputConfigList {
+const std::vector<ShuntSimStepOutputConfig> kOutputConfigList_Step {
   { // ---- TIME ---------------------------------------------------------------
     [](std::ostream& os, const vrfbdriver::shuntcur::ShuntSimJob& j)
           -> std::ostream& {
@@ -516,7 +518,7 @@ const std::vector<ShuntSimStepOutputConfig> kOutputConfigList {
 };
 
 
-}
+} // END OF NAMESPACE <vrfbdriver::io::shuntcur::UNNAMED>
 
 
 
@@ -528,9 +530,9 @@ const std::vector<ShuntSimStepOutputConfig> kOutputConfigList {
 ShuntSimStepIO::ShuntSimStepIO(
       const std::string& pathString, const vrfbdriver::shuntcur::ShuntSimJob& j)
       : os{comutils::io::openFile_w(std::filesystem::u8path<std::string>(pathString))} {
-  for (int i = 0; i < kOutputConfigList.size(); ++i) {
-    kOutputConfigList[i].titleOutputter(os, j);
-    if (i+1 < kOutputConfigList.size()) {
+  for (int i = 0; i < kOutputConfigList_Step.size(); ++i) {
+    kOutputConfigList_Step[i].titleOutputter(os, j);
+    if (i+1 < kOutputConfigList_Step.size()) {
       os << ",";
     }
   }
@@ -539,9 +541,371 @@ ShuntSimStepIO::ShuntSimStepIO(
 
 
 void ShuntSimStepIO::append(const vrfbdriver::shuntcur::ShuntSimStep& s) {
-  for (int i = 0; i < kOutputConfigList.size(); ++i) {
-    kOutputConfigList[i].dataOutputter(os, s);
-    if (i+1 < kOutputConfigList.size()) {
+  for (int i = 0; i < kOutputConfigList_Step.size(); ++i) {
+    kOutputConfigList_Step[i].dataOutputter(os, s);
+    if (i+1 < kOutputConfigList_Step.size()) {
+      os << ",";
+    }
+  }
+  os << std::endl;
+}
+
+
+
+
+
+
+
+
+/*
+********************************************************************************
+**        ShuntSimReportIO Definition
+********************************************************************************
+*/
+
+
+namespace {
+
+using TitleOutputter_Report = std::function<std::ostream&(std::ostream&)>;
+using DataOutputter_Report = std::function<
+    std::ostream&(
+        std::ostream&,
+        const vrfbdriver::shuntcur::ShuntSimJob&,
+        const vrfbdriver::shuntcur::ShuntSimReport&)>;
+
+
+struct ShuntSimReportOutputConfig {
+  TitleOutputter_Report titleOutputter;
+  DataOutputter_Report dataOutputter;
+};
+
+
+const std::vector<ShuntSimReportOutputConfig> kOutputConfigList_Report {
+  { // ---- Electrolyte Volume -------------------------------------------------
+    [](std::ostream& os) -> std::ostream& {
+      return os << "Electrolyte Volume (L)";
+    },
+    [](std::ostream& os,
+          const vrfbdriver::shuntcur::ShuntSimJob& j,
+          const vrfbdriver::shuntcur::ShuntSimReport& r)
+          -> std::ostream& {
+      return os << j.elecVol;
+    }
+  },
+  { // ---- Electrolyte Concentration ------------------------------------------
+    [](std::ostream& os) -> std::ostream& {
+      return os << "Electrolyte Concentration (M)";
+    },
+    [](std::ostream& os,
+          const vrfbdriver::shuntcur::ShuntSimJob& j,
+          const vrfbdriver::shuntcur::ShuntSimReport& r)
+          -> std::ostream& {
+      return os << j.elecCon;
+    }
+  },
+  { // ---- Charging Mode ------------------------------------------------------
+    [](std::ostream& os) -> std::ostream& {
+      return os << "Charging Mode";
+    },
+    [](std::ostream& os,
+          const vrfbdriver::shuntcur::ShuntSimJob& j,
+          const vrfbdriver::shuntcur::ShuntSimReport& r)
+          -> std::ostream& {
+      switch (j.chgInput.mode) {
+        case vrfb::shuntcur::ElecInput::Mode::mConstVolt:
+          os << "CCV ";
+          break;
+        case vrfb::shuntcur::ElecInput::Mode::mConstCurr:
+          os << "CCC ";
+          break;
+        case vrfb::shuntcur::ElecInput::Mode::mConstPowr:
+          os << "CCP ";
+          break;
+      }
+      return os << j.chgInput.mag;
+    }
+  },
+  { // ---- Discharging Mode ---------------------------------------------------
+    [](std::ostream& os) -> std::ostream& {
+      return os << "Discharging Mode";
+    },
+    [](std::ostream& os,
+          const vrfbdriver::shuntcur::ShuntSimJob& j,
+          const vrfbdriver::shuntcur::ShuntSimReport& r)
+          -> std::ostream& {
+      switch (j.dchgInput.mode) {
+        case vrfb::shuntcur::ElecInput::Mode::mConstVolt:
+          os << "DCV ";
+          break;
+        case vrfb::shuntcur::ElecInput::Mode::mConstCurr:
+          os << "DCC ";
+          break;
+        case vrfb::shuntcur::ElecInput::Mode::mConstPowr:
+          os << "DCP ";
+          break;
+      }
+      return os << j.dchgInput.mag;
+    }
+  },
+  { // ---- Charging Endpoint --------------------------------------------------
+    [](std::ostream& os) -> std::ostream& {
+      return os << "Charging Endpoint";
+    },
+    [](std::ostream& os,
+          const vrfbdriver::shuntcur::ShuntSimJob& j,
+          const vrfbdriver::shuntcur::ShuntSimReport& r)
+          -> std::ostream& {
+      return os << j.chgEndPoint->toString();
+    }
+  },
+  { // ---- Discharging Endpoint -----------------------------------------------
+    [](std::ostream& os) -> std::ostream& {
+      return os << "Discharging Endpoint";
+    },
+    [](std::ostream& os,
+          const vrfbdriver::shuntcur::ShuntSimJob& j,
+          const vrfbdriver::shuntcur::ShuntSimReport& r)
+          -> std::ostream& {
+      return os << j.dchgEndPoint->toString();
+    }
+  },
+  { // ---- Number of Cells ----------------------------------------------------
+    [](std::ostream& os) -> std::ostream& {
+      return os << "Num Cells";
+    },
+    [](std::ostream& os,
+          const vrfbdriver::shuntcur::ShuntSimJob& j,
+          const vrfbdriver::shuntcur::ShuntSimReport& r)
+          -> std::ostream& {
+      return os << j.calc->param().numCells;
+    }
+  },
+  { // ---- Number of Stacks ---------------------------------------------------
+    [](std::ostream& os) -> std::ostream& {
+      return os << "Num Stacks";
+    },
+    [](std::ostream& os,
+          const vrfbdriver::shuntcur::ShuntSimJob& j,
+          const vrfbdriver::shuntcur::ShuntSimReport& r)
+          -> std::ostream& {
+      return os << j.calc->param().numStacks;
+    }
+  },
+  { // ---- Number of Lines ----------------------------------------------------
+    [](std::ostream& os) -> std::ostream& {
+      return os << "Num Lines";
+    },
+    [](std::ostream& os,
+          const vrfbdriver::shuntcur::ShuntSimJob& j,
+          const vrfbdriver::shuntcur::ShuntSimReport& r)
+          -> std::ostream& {
+      return os << j.calc->param().numLines;
+    }
+  },
+  { // ---- Resistivity --------------------------------------------------------
+    [](std::ostream& os) -> std::ostream& {
+      return os << "Resistivity (Ohm m)";
+    },
+    [](std::ostream& os,
+          const vrfbdriver::shuntcur::ShuntSimJob& j,
+          const vrfbdriver::shuntcur::ShuntSimReport& r)
+          -> std::ostream& {
+      return os << j.calc->param().resistivity;
+    }
+  },
+  { // ---- ASR ----------------------------------------------------------------
+    [](std::ostream& os) -> std::ostream& {
+      return os << "ASR (m2 Ohm)";
+    },
+    [](std::ostream& os,
+          const vrfbdriver::shuntcur::ShuntSimJob& j,
+          const vrfbdriver::shuntcur::ShuntSimReport& r)
+          -> std::ostream& {
+      return os << j.calc->param().s.asr;
+    }
+  },
+  { // ---- Cell Area ----------------------------------------------------------
+    [](std::ostream& os) -> std::ostream& {
+      return os << "Cell Area (m2)";
+    },
+    [](std::ostream& os,
+          const vrfbdriver::shuntcur::ShuntSimJob& j,
+          const vrfbdriver::shuntcur::ShuntSimReport& r)
+          -> std::ostream& {
+      return os << j.calc->param().s.cellArea;
+    }
+  },
+  { // ---- Shunt Length -------------------------------------------------------
+    [](std::ostream& os) -> std::ostream& {
+      return os << "Stack Shunt Length (m)";
+    },
+    [](std::ostream& os,
+          const vrfbdriver::shuntcur::ShuntSimJob& j,
+          const vrfbdriver::shuntcur::ShuntSimReport& r)
+          -> std::ostream& {
+      return os << j.calc->param().s.shuntLen;
+    }
+  },
+  { // ---- Stack Shunt Cross-sectional Area -----------------------------------
+    [](std::ostream& os) -> std::ostream& {
+      return os << "Stack Shunt Cross-sectional Area (m2)";
+    },
+    [](std::ostream& os,
+          const vrfbdriver::shuntcur::ShuntSimJob& j,
+          const vrfbdriver::shuntcur::ShuntSimReport& r)
+          -> std::ostream& {
+      return os << j.calc->param().s.shuntArea;
+    }
+  },
+  { // ---- Stack Manifold Length ----------------------------------------------
+    [](std::ostream& os) -> std::ostream& {
+      return os << "Stack Manifold Length (m)";
+    },
+    [](std::ostream& os,
+          const vrfbdriver::shuntcur::ShuntSimJob& j,
+          const vrfbdriver::shuntcur::ShuntSimReport& r)
+          -> std::ostream& {
+      return os << j.calc->param().s.maniLen;
+    }
+  },
+  { // ---- Stack Manifold Cross-sectional Area --------------------------------
+    [](std::ostream& os) -> std::ostream& {
+      return os << "Stack Manifold Cross-sectional Area (m2)";
+    },
+    [](std::ostream& os,
+          const vrfbdriver::shuntcur::ShuntSimJob& j,
+          const vrfbdriver::shuntcur::ShuntSimReport& r)
+          -> std::ostream& {
+      return os << j.calc->param().s.maniArea;
+    }
+  },
+  { // ---- Connector Parameters -----------------------------------------------
+    [](std::ostream& os) -> std::ostream& {
+      return os
+          << "Connector Inlet Sub Shunt Length (m)" << ","
+          << "Connector Inlet Sub Shunt Cross-sectional Area (m2)" << ","
+          << "Connector Inlet Sub Manifold Length (m)" << ","
+          << "Connector Inlet Sub Manifold Cross-sectional Area (m2)" << ","
+          << "Connector Inlet Main Shunt Length (m)" << ","
+          << "Connector Inlet Main Shunt Cross-sectional Area (m2)" << ","
+          << "Connector Inlet Main Manifold Length (m)" << ","
+          << "Connector Inlet Main Manifold Cross-sectional Area (m2)" << ","
+          << "Connector Outlet Sub Shunt Length (m)" << ","
+          << "Connector Outlet Sub Shunt Cross-sectional Area (m2)" << ","
+          << "Connector Outlet Sub Manifold Length (m)" << ","
+          << "Connector Outlet Sub Manifold Cross-sectional Area (m2)" << ","
+          << "Connector Outlet Main Shunt Length (m)" << ","
+          << "Connector Outlet Main Shunt Cross-sectional Area (m2)" << ","
+          << "Connector Outlet Main Manifold Length (m)" << ","
+          << "Connector Outlet Main Manifold Cross-sectional Area (m2)";
+    },
+    [](std::ostream& os,
+          const vrfbdriver::shuntcur::ShuntSimJob& j,
+          const vrfbdriver::shuntcur::ShuntSimReport& r)
+          -> std::ostream& {
+      switch (j.arr) {
+        case vrfbdriver::shuntcur::SCArrangement::scaPCCFB:
+          return os
+              << dynamic_cast<vrfb::shuntcur::pcc::PCCCalc*>(j.calc)->param().c.sub_sl << ","
+              << dynamic_cast<vrfb::shuntcur::pcc::PCCCalc*>(j.calc)->param().c.sub_sa << ","
+              << dynamic_cast<vrfb::shuntcur::pcc::PCCCalc*>(j.calc)->param().c.sub_ml << ","
+              << dynamic_cast<vrfb::shuntcur::pcc::PCCCalc*>(j.calc)->param().c.sub_ma << ","
+              << dynamic_cast<vrfb::shuntcur::pcc::PCCCalc*>(j.calc)->param().c.main_ma << ","
+              << dynamic_cast<vrfb::shuntcur::pcc::PCCCalc*>(j.calc)->param().c.main_sa << ","
+              << dynamic_cast<vrfb::shuntcur::pcc::PCCCalc*>(j.calc)->param().c.main_ml << ","
+              << dynamic_cast<vrfb::shuntcur::pcc::PCCCalc*>(j.calc)->param().c.main_ma << ","
+              << dynamic_cast<vrfb::shuntcur::pcc::PCCCalc*>(j.calc)->param().c.sub_sl << ","
+              << dynamic_cast<vrfb::shuntcur::pcc::PCCCalc*>(j.calc)->param().c.sub_sa << ","
+              << dynamic_cast<vrfb::shuntcur::pcc::PCCCalc*>(j.calc)->param().c.sub_ml << ","
+              << dynamic_cast<vrfb::shuntcur::pcc::PCCCalc*>(j.calc)->param().c.sub_ma << ","
+              << dynamic_cast<vrfb::shuntcur::pcc::PCCCalc*>(j.calc)->param().c.main_ma << ","
+              << dynamic_cast<vrfb::shuntcur::pcc::PCCCalc*>(j.calc)->param().c.main_sa << ","
+              << dynamic_cast<vrfb::shuntcur::pcc::PCCCalc*>(j.calc)->param().c.main_ml << ","
+              << dynamic_cast<vrfb::shuntcur::pcc::PCCCalc*>(j.calc)->param().c.main_ma;
+        case vrfbdriver::shuntcur::SCArrangement::scaESIPOS:
+          return os
+              << dynamic_cast<vrfb::shuntcur::esipos::ESIPOSCalc*>(j.calc)->param().c.inlet_sub_sl << ","
+              << dynamic_cast<vrfb::shuntcur::esipos::ESIPOSCalc*>(j.calc)->param().c.inlet_sub_sa << ","
+              << dynamic_cast<vrfb::shuntcur::esipos::ESIPOSCalc*>(j.calc)->param().c.inlet_sub_ml << ","
+              << dynamic_cast<vrfb::shuntcur::esipos::ESIPOSCalc*>(j.calc)->param().c.inlet_sub_ma << ","
+              << dynamic_cast<vrfb::shuntcur::esipos::ESIPOSCalc*>(j.calc)->param().c.inlet_main_sl << ","
+              << dynamic_cast<vrfb::shuntcur::esipos::ESIPOSCalc*>(j.calc)->param().c.inlet_main_sa << ","
+              << dynamic_cast<vrfb::shuntcur::esipos::ESIPOSCalc*>(j.calc)->param().c.inlet_main_ml << ","
+              << dynamic_cast<vrfb::shuntcur::esipos::ESIPOSCalc*>(j.calc)->param().c.inlet_main_ma << ","
+              << dynamic_cast<vrfb::shuntcur::esipos::ESIPOSCalc*>(j.calc)->param().c.outlet_sl << ","
+              << dynamic_cast<vrfb::shuntcur::esipos::ESIPOSCalc*>(j.calc)->param().c.outlet_sa << ","
+              << dynamic_cast<vrfb::shuntcur::esipos::ESIPOSCalc*>(j.calc)->param().c.outlet_ml << ","
+              << dynamic_cast<vrfb::shuntcur::esipos::ESIPOSCalc*>(j.calc)->param().c.outlet_ma << ","
+              << "NaN,NaN,NaN,NaN";
+        default:
+          os << "NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN";
+      }
+      return os << j.calc->param().s.maniArea;
+    }
+  },
+  { // ---- Input Energy -------------------------------------------------------
+    [](std::ostream& os) -> std::ostream& {
+      return os << "Input Energy (J)";
+    },
+    [](std::ostream& os,
+          const vrfbdriver::shuntcur::ShuntSimJob& j,
+          const vrfbdriver::shuntcur::ShuntSimReport& r)
+          -> std::ostream& {
+      return os << r.inputEnergy;
+    }
+  },
+  { // ---- Output Energy ------------------------------------------------------
+    [](std::ostream& os) -> std::ostream& {
+      return os << "Output Energy (J)";
+    },
+    [](std::ostream& os,
+          const vrfbdriver::shuntcur::ShuntSimJob& j,
+          const vrfbdriver::shuntcur::ShuntSimReport& r)
+          -> std::ostream& {
+      return os << r.outputEnergy;
+    }
+  },
+  { // ---- Energy Efficiency --------------------------------------------------
+    [](std::ostream& os) -> std::ostream& {
+      return os << "Energy Efficiency (%)";
+    },
+    [](std::ostream& os,
+          const vrfbdriver::shuntcur::ShuntSimJob& j,
+          const vrfbdriver::shuntcur::ShuntSimReport& r)
+          -> std::ostream& {
+      return os << r.energyEff() * 100;
+    }
+  }
+};
+
+
+}
+
+
+
+
+
+
+
+ShuntSimReportIO::ShuntSimReportIO(
+      const std::string& pathString)
+      : os{comutils::io::openFile_w(std::filesystem::u8path<std::string>(pathString))} {
+  for (int i = 0; i < kOutputConfigList_Report.size(); ++i) {
+    kOutputConfigList_Report[i].titleOutputter(os);
+    if (i+1 < kOutputConfigList_Report.size()) {
+      os << ",";
+    }
+  }
+  os << std::endl;
+}
+
+
+void ShuntSimReportIO::append(
+      const vrfbdriver::shuntcur::ShuntSimJob& j,
+      const vrfbdriver::shuntcur::ShuntSimReport& r) {
+  for (int i = 0; i < kOutputConfigList_Report.size(); ++i) {
+    kOutputConfigList_Report[i].dataOutputter(os, j, r);
+    if (i+1 < kOutputConfigList_Report.size()) {
       os << ",";
     }
   }

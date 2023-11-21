@@ -63,6 +63,41 @@ class ShuntSimStepIO {
 };
 
 
+
+
+
+
+
+
+class ShuntSimReportIO {
+  public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
+    ShuntSimReportIO(
+        const std::string& pathString);
+
+    ShuntSimReportIO() = delete;
+    ShuntSimReportIO(const ShuntSimReportIO&) = default;
+    ShuntSimReportIO(ShuntSimReportIO&&) = default;
+
+    ShuntSimReportIO& operator=(const ShuntSimReportIO&) = default;
+    ShuntSimReportIO& operator=(ShuntSimReportIO&&) = default;
+
+    ~ShuntSimReportIO() = default;
+
+
+
+
+  public: // ~~~~ functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    void append(
+        const vrfbdriver::shuntcur::ShuntSimJob& j,
+        const vrfbdriver::shuntcur::ShuntSimReport& rpt);
+
+
+
+  private: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    std::ofstream os;
+};
+
+
 }
 }
 
