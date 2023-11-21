@@ -514,3 +514,10 @@ bool PlotPanel::savePng(const std::string& dirPath, const std::string& prefix) {
   return ui->plot->savePng(
       QString::fromStdString(dirPath + "/" + fileName + ".png"));
 }
+
+
+void PlotPanel::clearData() {
+  for (int i = 0; i < ui->plot->graphCount(); ++i) {
+    ui->plot->graph(i)->data()->clear();
+  }
+}

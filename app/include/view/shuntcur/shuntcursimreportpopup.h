@@ -45,6 +45,8 @@ class SCSimReportPopup : public QDialog {
 
 
   private:
+    void start();
+
     void reportReadyAt(int);
     void displayReport();
     void displayFailed(const std::string& msg);
@@ -62,4 +64,6 @@ class SCSimReportPopup : public QDialog {
 
     QFutureWatcher<vrfbdriver::shuntcur::ShuntSimStep> watcher;
     QThreadPool pool;
+
+    int iter = 0;
 };

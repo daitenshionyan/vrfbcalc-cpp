@@ -87,6 +87,8 @@ class PlotPanel : public QWidget {
     */
     bool savePng(const std::string& dirPath, const std::string& prefix="");
 
+    void clearData();
+
 
   private:
     class SignalHandler;

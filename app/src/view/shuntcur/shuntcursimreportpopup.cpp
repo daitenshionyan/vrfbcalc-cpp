@@ -1,6 +1,7 @@
 #include "view/shuntcur/shuntcursimreportpopup.h"
 #include "./ui_shuntcursimreportpopup.h"
 
+#include <iostream>
 #include <utility>
 
 #include <QtConcurrent/qtconcurrentrun.h>
@@ -58,8 +59,15 @@ SCSimReportPopup::~SCSimReportPopup() {
 
 void SCSimReportPopup::start(const vrfbdriver::shuntcur::ShuntSimJob& j) {
   simJob = new vrfbdriver::shuntcur::ShuntSimJob(j);
-  stepIO = new vrfbdriver::io::shuntcur::ShuntSimStepIO("output/" + simJob->name + " - Raw Data.csv", *simJob);
   reportIO = new vrfbdriver::io::shuntcur::ShuntSimReportIO("output/" + simJob->name + " - Summary.csv");
+  start();
+}
+
+
+void SCSimReportPopup::start() {
+  stepIO = new vrfbdriver::io::shuntcur::ShuntSimStepIO(
+      comutils::string::format_string("output/%s%05d - Raw Data.csv", simJob->name.c_str(), iter),
+      *simJob);
   watcher.setFuture(QtConcurrent::run<vrfbdriver::shuntcur::ShuntSimStep>(
       &pool,
       [&](QPromise<vrfbdriver::shuntcur::ShuntSimStep>& p) {
@@ -95,15 +103,30 @@ void SCSimReportPopup::reportReadyAt(int i) {
 
 
 void SCSimReportPopup::displayReport() {
-  ui->progressBar->setStyleSheet(
-      "QProgressBar { background: #75F281; }"
-      "QProgressBar::chunk { background: #75F281; }");
+  std::cout << "Completed iteration: " << iter << " of 120" << std::endl;
+  iter++;
   ui->msgLabel->setText(QString::fromStdString(comutils::string::format_string(
       "Completed : EE=%.2f%%",
       report.energyEff() * 100)));
   if (reportIO != nullptr) {
     reportIO->append(*simJob, report);
   }
+  delete stepIO;
+  stepIO = nullptr;
+  try {
+    if (dynamic_cast<vrfb::shuntcur::esipos::ESIPOSCalc*>(simJob->calc)->param().c.inlet_sub_sl < 160) {
+      dynamic_cast<vrfb::shuntcur::esipos::ESIPOSCalc*>(simJob->calc)->param().c.inlet_sub_sl += 1;
+      dynamic_cast<vrfb::shuntcur::esipos::ESIPOSCalc*>(simJob->calc)->param().c.outlet_sl += 1;
+      ui->voltPlot->clearData();
+      start();
+      return;
+    }
+  } catch (...) {
+    // ignore
+  }
+  ui->progressBar->setStyleSheet(
+      "QProgressBar { background: #75F281; }"
+      "QProgressBar::chunk { background: #75F281; }");
 }
 
 
