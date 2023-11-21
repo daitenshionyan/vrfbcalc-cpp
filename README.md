@@ -63,7 +63,7 @@ Simulates a single charging and discharging cycle for a specified system.
 
 Commands for steps 5 to 7 are as follows in powershell (for CMD replace `` ` `` with `^`):
 
-```diff
+```text
 ./configure.bat ${VCPKG_EXE_PATH}
 
 cmake --no-warn-unused-cli `
