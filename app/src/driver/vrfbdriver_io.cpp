@@ -779,6 +779,70 @@ const std::vector<ShuntSimReportOutputConfig> kOutputConfigList_Report {
       return os << j.calc->param().s.maniArea;
     }
   },
+  { // ---- Connector Parameters -----------------------------------------------
+    [](std::ostream& os) -> std::ostream& {
+      return os
+          << "Connector Inlet Sub Shunt Length (m)" << ","
+          << "Connector Inlet Sub Shunt Cross-sectional Area (m2)" << ","
+          << "Connector Inlet Sub Manifold Length (m)" << ","
+          << "Connector Inlet Sub Manifold Cross-sectional Area (m2)" << ","
+          << "Connector Inlet Main Shunt Length (m)" << ","
+          << "Connector Inlet Main Shunt Cross-sectional Area (m2)" << ","
+          << "Connector Inlet Main Manifold Length (m)" << ","
+          << "Connector Inlet Main Manifold Cross-sectional Area (m2)" << ","
+          << "Connector Outlet Sub Shunt Length (m)" << ","
+          << "Connector Outlet Sub Shunt Cross-sectional Area (m2)" << ","
+          << "Connector Outlet Sub Manifold Length (m)" << ","
+          << "Connector Outlet Sub Manifold Cross-sectional Area (m2)" << ","
+          << "Connector Outlet Main Shunt Length (m)" << ","
+          << "Connector Outlet Main Shunt Cross-sectional Area (m2)" << ","
+          << "Connector Outlet Main Manifold Length (m)" << ","
+          << "Connector Outlet Main Manifold Cross-sectional Area (m2)";
+    },
+    [](std::ostream& os,
+          const vrfbdriver::shuntcur::ShuntSimJob& j,
+          const vrfbdriver::shuntcur::ShuntSimReport& r)
+          -> std::ostream& {
+      switch (j.arr) {
+        case vrfbdriver::shuntcur::SCArrangement::scaPCCFB:
+          return os
+              << dynamic_cast<vrfb::shuntcur::pcc::PCCCalc*>(j.calc)->param().c.sub_sl << ","
+              << dynamic_cast<vrfb::shuntcur::pcc::PCCCalc*>(j.calc)->param().c.sub_sa << ","
+              << dynamic_cast<vrfb::shuntcur::pcc::PCCCalc*>(j.calc)->param().c.sub_ml << ","
+              << dynamic_cast<vrfb::shuntcur::pcc::PCCCalc*>(j.calc)->param().c.sub_ma << ","
+              << dynamic_cast<vrfb::shuntcur::pcc::PCCCalc*>(j.calc)->param().c.main_ma << ","
+              << dynamic_cast<vrfb::shuntcur::pcc::PCCCalc*>(j.calc)->param().c.main_sa << ","
+              << dynamic_cast<vrfb::shuntcur::pcc::PCCCalc*>(j.calc)->param().c.main_ml << ","
+              << dynamic_cast<vrfb::shuntcur::pcc::PCCCalc*>(j.calc)->param().c.main_ma << ","
+              << dynamic_cast<vrfb::shuntcur::pcc::PCCCalc*>(j.calc)->param().c.sub_sl << ","
+              << dynamic_cast<vrfb::shuntcur::pcc::PCCCalc*>(j.calc)->param().c.sub_sa << ","
+              << dynamic_cast<vrfb::shuntcur::pcc::PCCCalc*>(j.calc)->param().c.sub_ml << ","
+              << dynamic_cast<vrfb::shuntcur::pcc::PCCCalc*>(j.calc)->param().c.sub_ma << ","
+              << dynamic_cast<vrfb::shuntcur::pcc::PCCCalc*>(j.calc)->param().c.main_ma << ","
+              << dynamic_cast<vrfb::shuntcur::pcc::PCCCalc*>(j.calc)->param().c.main_sa << ","
+              << dynamic_cast<vrfb::shuntcur::pcc::PCCCalc*>(j.calc)->param().c.main_ml << ","
+              << dynamic_cast<vrfb::shuntcur::pcc::PCCCalc*>(j.calc)->param().c.main_ma;
+        case vrfbdriver::shuntcur::SCArrangement::scaESIPOS:
+          return os
+              << dynamic_cast<vrfb::shuntcur::esipos::ESIPOSCalc*>(j.calc)->param().c.inlet_sub_sl << ","
+              << dynamic_cast<vrfb::shuntcur::esipos::ESIPOSCalc*>(j.calc)->param().c.inlet_sub_sa << ","
+              << dynamic_cast<vrfb::shuntcur::esipos::ESIPOSCalc*>(j.calc)->param().c.inlet_sub_ml << ","
+              << dynamic_cast<vrfb::shuntcur::esipos::ESIPOSCalc*>(j.calc)->param().c.inlet_sub_ma << ","
+              << dynamic_cast<vrfb::shuntcur::esipos::ESIPOSCalc*>(j.calc)->param().c.inlet_main_sl << ","
+              << dynamic_cast<vrfb::shuntcur::esipos::ESIPOSCalc*>(j.calc)->param().c.inlet_main_sa << ","
+              << dynamic_cast<vrfb::shuntcur::esipos::ESIPOSCalc*>(j.calc)->param().c.inlet_main_ml << ","
+              << dynamic_cast<vrfb::shuntcur::esipos::ESIPOSCalc*>(j.calc)->param().c.inlet_main_ma << ","
+              << dynamic_cast<vrfb::shuntcur::esipos::ESIPOSCalc*>(j.calc)->param().c.outlet_sl << ","
+              << dynamic_cast<vrfb::shuntcur::esipos::ESIPOSCalc*>(j.calc)->param().c.outlet_sa << ","
+              << dynamic_cast<vrfb::shuntcur::esipos::ESIPOSCalc*>(j.calc)->param().c.outlet_ml << ","
+              << dynamic_cast<vrfb::shuntcur::esipos::ESIPOSCalc*>(j.calc)->param().c.outlet_ma << ","
+              << "NaN,NaN,NaN,NaN";
+        default:
+          os << "NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN";
+      }
+      return os << j.calc->param().s.maniArea;
+    }
+  },
   { // ---- Input Energy -------------------------------------------------------
     [](std::ostream& os) -> std::ostream& {
       return os << "Input Energy (J)";
