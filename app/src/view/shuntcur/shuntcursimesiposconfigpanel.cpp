@@ -35,7 +35,7 @@ vrfb::shuntcur::ShuntCalc* SCSimESIPOSConfigPanel::getCalc() const {
               0.1,                                                // SOC
               ui->tempField->value() + 273.15},
           vrfb::shuntcur::esipos::ConnParam {
-              ui->connShuntLenField->value() / 100,
+              ui->connShuntLenInField->value() / 100,
               ui->connShuntAreaField->value() / 10000,
               ui->connManiLenField->value() / 100,
               ui->connManiAreaField->value() / 10000,
@@ -43,7 +43,7 @@ vrfb::shuntcur::ShuntCalc* SCSimESIPOSConfigPanel::getCalc() const {
               ui->mConnShuntAreaField->value() / 10000,
               ui->mConnManiLenField->value() / 100,
               ui->mConnManiAreaField->value() / 10000,
-              ui->connShuntLenField->value() / 100,
+              ui->connShuntLenOutField->value() / 100,
               ui->connShuntAreaField->value() / 10000,
               ui->connManiLenField->value() / 100,
               ui->connManiAreaField->value() / 10000}});
