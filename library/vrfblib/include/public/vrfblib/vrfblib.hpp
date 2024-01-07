@@ -352,7 +352,8 @@ namespace pcc {
  * Structure containing the parameters of the stack connectors in a PCC system.
 */
 struct ConnParam {
-  double sub_sl;      // Sub shunt length (m)
+  double sub_sl_in;      // Sub shunt length (m)
+  double sub_sl_out;
   double sub_sa;      // Sub shunt cross sectional area (m2)
   double sub_ml;      // Sub manifold length (m)
   double sub_ma;      // Sub manifold cross sectional area (m2)
@@ -380,7 +381,8 @@ struct PCCSysParam : public SysParam {
 
 
   public: // ~~~~ accessors ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    inline double connSubShuntR() const {return resistivity * c.sub_sl / c.sub_sa;}
+    inline double connSubShuntR_in() const {return resistivity * c.sub_sl_in / c.sub_sa;}
+    inline double connSubShuntR_out() const {return resistivity * c.sub_sl_out / c.sub_sa;}
     inline double connSubManiR() const {return resistivity * c.sub_ml / c.sub_ma;}
     inline double connMainShuntR() const {return resistivity * c.main_sl / c.main_sa;}
     inline double connMainManiR() const {return resistivity * c.main_ml / c.main_ma;}

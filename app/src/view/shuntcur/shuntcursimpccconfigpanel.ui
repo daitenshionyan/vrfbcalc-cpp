@@ -1023,14 +1023,14 @@
      </property>
      <layout class="QFormLayout" name="formLayout_4">
       <item row="0" column="0">
-       <widget class="QLabel" name="connShuntLenLabel">
+       <widget class="QLabel" name="connShuntLenInLabel">
         <property name="text">
-         <string>Shunt Length</string>
+         <string>Shunt Length (IN)</string>
         </property>
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="QWidget" name="connShuntLenBox" native="true">
+       <widget class="QWidget" name="connShuntLenInBox" native="true">
         <layout class="QHBoxLayout" name="horizontalLayout_9">
          <property name="spacing">
           <number>5</number>
@@ -1048,7 +1048,7 @@
           <number>0</number>
          </property>
          <item>
-          <widget class="QDoubleSpinBox" name="connShuntLenField">
+          <widget class="QDoubleSpinBox" name="connShuntLenInField">
            <property name="decimals">
             <number>9</number>
            </property>
@@ -1061,7 +1061,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QLabel" name="connShuntLenUnitLabel">
+          <widget class="QLabel" name="connShuntLenInUnitLabel">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
              <horstretch>0</horstretch>
@@ -1082,14 +1082,14 @@
         </layout>
        </widget>
       </item>
-      <item row="1" column="0">
+      <item row="2" column="0">
        <widget class="QLabel" name="connShuntAreaLabel">
         <property name="text">
          <string>Shunt Area</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="1">
+      <item row="2" column="1">
        <widget class="QWidget" name="connShuntAreaBox" native="true">
         <layout class="QHBoxLayout" name="horizontalLayout_10">
          <property name="spacing">
@@ -1142,14 +1142,14 @@
         </layout>
        </widget>
       </item>
-      <item row="2" column="0">
+      <item row="3" column="0">
        <widget class="QLabel" name="connManiLenLabel">
         <property name="text">
          <string>Mani Length</string>
         </property>
        </widget>
       </item>
-      <item row="2" column="1">
+      <item row="3" column="1">
        <widget class="QWidget" name="connManiLenBox" native="true">
         <layout class="QHBoxLayout" name="horizontalLayout_11">
          <property name="spacing">
@@ -1202,14 +1202,14 @@
         </layout>
        </widget>
       </item>
-      <item row="3" column="0">
+      <item row="4" column="0">
        <widget class="QLabel" name="connManiAreaLabel">
         <property name="text">
          <string>Mani Area</string>
         </property>
        </widget>
       </item>
-      <item row="3" column="1">
+      <item row="4" column="1">
        <widget class="QWidget" name="connManiAreaBox" native="true">
         <layout class="QHBoxLayout" name="horizontalLayout_12">
          <property name="spacing">
@@ -1256,6 +1256,57 @@
            </property>
            <property name="text">
             <string>cm2</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="connShuntLenOutLabel">
+        <property name="text">
+         <string>Shunt Length (OUT)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QWidget" name="connShuntLenOutBox" native="true">
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QDoubleSpinBox" name="connShuntLenOutField">
+           <property name="decimals">
+            <number>9</number>
+           </property>
+           <property name="maximum">
+            <double>9999999999.000000000000000</double>
+           </property>
+           <property name="value">
+            <double>50.000000000000000</double>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="connShuntLenOutUnitLabel">
+           <property name="maximumSize">
+            <size>
+             <width>53</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>cm</string>
            </property>
           </widget>
          </item>

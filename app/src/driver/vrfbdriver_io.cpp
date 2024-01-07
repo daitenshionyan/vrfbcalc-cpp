@@ -806,7 +806,7 @@ const std::vector<ShuntSimReportOutputConfig> kOutputConfigList_Report {
       switch (j.arr) {
         case vrfbdriver::shuntcur::SCArrangement::scaPCCFB:
           return os
-              << dynamic_cast<vrfb::shuntcur::pcc::PCCCalc*>(j.calc)->param().c.sub_sl << ","
+              << dynamic_cast<vrfb::shuntcur::pcc::PCCCalc*>(j.calc)->param().c.sub_sl_in << ","
               << dynamic_cast<vrfb::shuntcur::pcc::PCCCalc*>(j.calc)->param().c.sub_sa << ","
               << dynamic_cast<vrfb::shuntcur::pcc::PCCCalc*>(j.calc)->param().c.sub_ml << ","
               << dynamic_cast<vrfb::shuntcur::pcc::PCCCalc*>(j.calc)->param().c.sub_ma << ","
@@ -814,7 +814,7 @@ const std::vector<ShuntSimReportOutputConfig> kOutputConfigList_Report {
               << dynamic_cast<vrfb::shuntcur::pcc::PCCCalc*>(j.calc)->param().c.main_sa << ","
               << dynamic_cast<vrfb::shuntcur::pcc::PCCCalc*>(j.calc)->param().c.main_ml << ","
               << dynamic_cast<vrfb::shuntcur::pcc::PCCCalc*>(j.calc)->param().c.main_ma << ","
-              << dynamic_cast<vrfb::shuntcur::pcc::PCCCalc*>(j.calc)->param().c.sub_sl << ","
+              << dynamic_cast<vrfb::shuntcur::pcc::PCCCalc*>(j.calc)->param().c.sub_sl_in << ","
               << dynamic_cast<vrfb::shuntcur::pcc::PCCCalc*>(j.calc)->param().c.sub_sa << ","
               << dynamic_cast<vrfb::shuntcur::pcc::PCCCalc*>(j.calc)->param().c.sub_ml << ","
               << dynamic_cast<vrfb::shuntcur::pcc::PCCCalc*>(j.calc)->param().c.sub_ma << ","

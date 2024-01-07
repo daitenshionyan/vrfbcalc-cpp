@@ -181,7 +181,7 @@ namespace pcc {
 
 template<>
 void addConnToConnCoeff<ConnSide::csFront, ConnSide::csBack>(Eigen::MatrixXd& m, const PCCSysParam&s ) {
-  double stackR = s.numCells*s.cellR() + 2*s.stackShuntR() + 2*s.connSubShuntR();
+  double stackR = s.numCells*s.cellR() + 2*s.stackShuntR() + s.connSubShuntR_in() + s.connSubShuntR_out();
 
   for (std::size_t li = 0; li < s.numLines; ++li) {
     Eigen::Index lci = indexLine(s, li);
@@ -239,7 +239,7 @@ void addConnToConnCoeff<ConnSide::csFront, ConnSide::csBack>(Eigen::MatrixXd& m,
           double otherR = fullConnShuntR;
           if (i == li) {
             connR += stackR;
-            otherR += s.stackShuntR() + s.connSubShuntR();
+            otherR += s.stackShuntR() + s.connSubShuntR_out();
           } else if (i > li) {
             connR -= (i-li) * 2*s.connSubManiR();
             otherR -= (i-li) * s.connSubManiR();
@@ -303,7 +303,7 @@ void addConnToConnCoeff<ConnSide::csFront, ConnSide::csBack>(Eigen::MatrixXd& m,
           double otherR = fullConnShuntR;
           if (i == li) {
             connR += stackR;
-            otherR += s.stackShuntR() + s.connSubShuntR();
+            otherR += s.stackShuntR() + s.connSubShuntR_in();
           } else if (i > li) {
             connR -= (i-li) * 2*s.connSubManiR();
             otherR -= (i-li) * s.connSubManiR();

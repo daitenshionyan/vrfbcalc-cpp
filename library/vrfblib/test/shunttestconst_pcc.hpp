@@ -73,7 +73,7 @@ const vrfb::shuntcur::StackParam kTestStackParam {
 
 
 const vrfb::shuntcur::pcc::ConnParam kTestConnParam {
-  kTestConSubShuntResist, 1,
+  kTestConSubShuntResist, kTestConSubShuntResist, 1,
   kTestConSubManiResist, 1,
   kTestConMainShuntResist, 1,
   kTestConMainManiResist, 1

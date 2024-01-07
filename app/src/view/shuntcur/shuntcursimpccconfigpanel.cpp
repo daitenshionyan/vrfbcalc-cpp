@@ -35,7 +35,8 @@ vrfb::shuntcur::ShuntCalc* SCSimPCCConfigPanel::getCalc() const {
               0.1,                                                // SOC
               ui->tempField->value() + 273.15},
           vrfb::shuntcur::pcc::ConnParam {
-              ui->connShuntLenField->value() / 100,
+              ui->connShuntLenInField->value() / 100,
+              ui->connShuntLenOutField->value() / 100,
               ui->connShuntAreaField->value() / 10000,
               ui->connManiLenField->value() / 100,
               ui->connManiAreaField->value() / 10000,
