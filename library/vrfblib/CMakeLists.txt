@@ -22,6 +22,7 @@ add_library(vrfblib SHARED
     include/private/shuntcur/shuntcur.hpp
     include/private/shuntcur/conn_pcc.hpp
     include/private/shuntcur/conn_esipos.hpp
+    include/private/shuntcur/conn_esipos2.hpp
 
     src/celleff.cpp
     src/shuntcur.cpp
