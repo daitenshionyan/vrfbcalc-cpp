@@ -567,5 +567,135 @@ class ESIPOSCalc : public ShuntCalc {
 
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+namespace esipos2 {
+
+
+/**
+ * Structure containing the connection parameter for ESIPOS2 system.
+*/
+struct ConnParam {
+  double inlet_sub_sl;    // Connector sub inlet shunt length (m)
+  double inlet_sub_sa;    // Connector sub inlet shunt area (m2)
+  double inlet_sub_ml;    // Connector sub inlet manifold length (m)
+  double inlet_sub_ma;    // Connector sub inlet manifold area (m2)
+  double inlet_main_sl;   // Connector main inlet shunt length (m)
+  double inlet_main_sa;   // Connector main inlet shunt area (m2)
+  double inlet_main_ml;   // Connector main inlet manifold length (m)
+  double inlet_main_ma;   // Connector main inlet manifold area (m2)
+
+  double outlet_sub_sl;   // Connector sub outlet shunt length (m)
+  double outlet_sub_sa;   // Connector sub outlet shunt area (m2)
+  double outlet_sub_ml;   // Connector sub outlet manifold length (m)
+  double outlet_sub_ma;   // Connector sub outlet manifold area (m2)
+  double outlet_main_sl;  // Connector main outlet shunt length (m)
+  double outlet_main_sa;  // Connector main outlet shunt area (m2)
+  double outlet_main_ml;  // Connector main outlet manifold length (m)
+  double outlet_main_ma;  // Connector main outlet manifold area (m2)
+};
+
+
+
+
+struct ESIPOS2SysParam : public SysParam {
+  public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
+    ESIPOS2SysParam(const SysParam& sysParam, const ConnParam& connParam)
+          : SysParam(sysParam), c(connParam) {}
+
+    ESIPOS2SysParam() = delete;
+    ESIPOS2SysParam(const ESIPOS2SysParam&) = default;
+    ESIPOS2SysParam(ESIPOS2SysParam&&) = default;
+
+    ESIPOS2SysParam& operator=(const ESIPOS2SysParam&) = default;
+    ESIPOS2SysParam& operator=(ESIPOS2SysParam&&) = default;
+
+    ~ESIPOS2SysParam() = default;
+
+
+  public: // ~~~~ accessors ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    /** Returns connector sub shunt inlet resistance (Ohm). */
+    double inletResist_CSS() const {return resistivity * c.inlet_sub_sl / c.inlet_sub_sa;}
+    /** Returns connector sub manifold inlet resistance (Ohm). */
+    double inletResist_CSM() const {return resistivity * c.inlet_sub_ml / c.inlet_sub_ma;}
+    /** Returns conncector main shunt inlet resistance (Ohm). */
+    double inletResist_CMS() const {return resistivity * c.inlet_main_sl / c.inlet_main_sa;}
+    /** Returns connector main manifold inlet resistance (Ohm). */
+    double inletResist_CMM() const {return resistivity * c.inlet_main_ml / c.inlet_main_ma;}
+
+    /** Returns connector sub shunt outlet resistance (Ohm). */
+    double outletResist_CSS() const {return resistivity * c.outlet_sub_sl / c.outlet_sub_sa;}
+    /** Returns connector sub manifold outlet resistance (Ohm). */
+    double outletResist_CSM() const {return resistivity * c.outlet_sub_ml / c.outlet_sub_ma;}
+    /** Returns connector main shunt outlet resistance (Ohm), */
+    double outletResist_CMS() const {return resistivity * c.outlet_main_sl / c.outlet_main_sa;}
+    /** Returns connector main manifold outlet resistance (Ohm). */
+    double outletResist_CMM() const {return resistivity * c.outlet_main_ml / c.outlet_main_ma;}
+
+
+  public: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    ConnParam c;
+};
+
+
+
+
+class ESIPOS2Report : public ShuntReportData {
+  public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
+    ESIPOS2Report() = default;
+    ESIPOS2Report(const ESIPOS2Report&) = default;
+    ESIPOS2Report(ESIPOS2Report&&) = default;
+
+    ESIPOS2Report& operator=(const ESIPOS2Report&) = default;
+    ESIPOS2Report& operator=(ESIPOS2Report&&) = default;
+
+    ~ESIPOS2Report() = default;
+};
+
+
+
+
+class ESIPOS2Calc : public ShuntCalc {
+  public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
+    ESIPOS2Calc(const ESIPOS2SysParam& s)
+        : sys{s} {}
+
+    ESIPOS2Calc() = delete;
+    ESIPOS2Calc(const ESIPOS2Calc&) = default;
+    ESIPOS2Calc(ESIPOS2Calc&&) = default;
+
+    ESIPOS2Calc& operator=(const ESIPOS2Calc&) = default;
+    ESIPOS2Calc& operator=(ESIPOS2Calc&&) = default;
+
+    ~ESIPOS2Calc() = default;
+
+
+  public: // ~~~~ functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    ShuntReport calculate(const ElecInput& elecInput) const override;
+
+    ESIPOS2SysParam& param() override {return sys;}
+    const ESIPOS2SysParam& param() const override {return sys;}
+
+    ESIPOS2Calc* copy() const override {return new ESIPOS2Calc(*this);}
+
+
+  private: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    ESIPOS2SysParam sys;
+};
+
+
+} // namespace <vrfb::shuntcur::esipos2>
 } // namespace <vrfb::shuntcur>
 } // namespace <vrfb>
