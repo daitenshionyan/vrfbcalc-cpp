@@ -74,3 +74,99 @@ ESIPOS2Report* calculate_esipos2(const ESIPOS2SysParam& s, double mag);
 }
 }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+================================================================================
+================================================================================
+==
+==    DEFINITIONS
+==
+================================================================================
+================================================================================
+*/
+
+
+namespace vrfb {
+namespace shuntcur {
+namespace esipos2 {
+
+
+void addConnToConnCoeff(Eigen::MatrixXd& m, const ESIPOS2SysParam& s) {
+  for (std::size_t li = 0; li < s.numLines; ++li) {
+    Eigen::Index lci = indexLine(s, li);
+
+    for (std::size_t si = 0; si < s.numStacks; ++si) {
+      Eigen::Index cpti = indexCPT(s, si, li);
+      Eigen::Index cpbi = indexCPB(s, si, li);
+      Eigen::Index cnti = indexCNT(s, si, li);
+      Eigen::Index cnbi = indexCNB(s, si, li);
+
+      if (si > 0) {
+        // :::: [ POSITIVE TOP CONN ] ::::
+        // >>> LINE
+        m(cpti, lci) += s.numCells * s.cellR();
+        m(lci, cpti) += s.numCells * s.cellR();
+        // >>> POSITIVE BOT CONN
+        m(cpti, cpbi-1) += s.cellR();
+        if (si+1 < s.numStacks) {
+          m(cpti, cpbi) += (s.numCells-1) * s.cellR();
+        }
+        // >>> NEGATIVE TOP CONN
+        m(cpti, cnti-1) += 2*s.cellR();
+        if (si+1 < s.numStacks) {
+          m(cpti, cnti) += (s.numCells-2) * s.cellR();
+        }
+        // >>> NEGATIVE BOT CONN
+        m(cpti, cnbi) += (s.numCells-1) * s.cellR();
+        if (si > 1) {
+          m(cpti, cnbi-1) += s.cellR();
+        }
+        // >>> TO SELF
+      }
+    }
+  }
+}
+
+
+}
+}
+}

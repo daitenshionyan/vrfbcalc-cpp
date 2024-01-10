@@ -613,7 +613,12 @@ struct ConnParam {
 struct ESIPOS2SysParam : public SysParam {
   public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
     ESIPOS2SysParam(const SysParam& sysParam, const ConnParam& connParam)
-          : SysParam(sysParam), c(connParam) {}
+          : SysParam(sysParam), c(connParam) {
+      numLines_f = numLines;
+      numStacks_f = numStacks;
+      numLines = 1;
+      numStacks = numLines_f * numStacks_f;
+    }
 
     ESIPOS2SysParam() = delete;
     ESIPOS2SysParam(const ESIPOS2SysParam&) = default;
@@ -647,6 +652,8 @@ struct ESIPOS2SysParam : public SysParam {
 
   public: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     ConnParam c;
+    std::size_t numLines_f;   // Number of parallel fluid lines.
+    std::size_t numStacks_f;   // Number of stacks per parallel fluid line.
 };
 
 
