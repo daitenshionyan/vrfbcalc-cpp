@@ -57,7 +57,7 @@ void addConnToConnCoeff(Eigen::MatrixXd& m, const ESIPOS2SysParam& s);
  * @param RHS vector.
  * @param s ESIPOS system parameter.
 */
-void addCOnnValue(Eigen::VectorXd& v, const ESIPOS2SysParam& s);
+void addConnValue(Eigen::VectorXd& v, const ESIPOS2SysParam& s);
 
 
 /**
@@ -131,39 +131,97 @@ namespace esipos2 {
 
 
 void addConnToConnCoeff(Eigen::MatrixXd& m, const ESIPOS2SysParam& s) {
-  for (std::size_t li = 0; li < s.numLines; ++li) {
-    Eigen::Index lci = indexLine(s, li);
+  // TODO
+}
 
-    for (std::size_t si = 0; si < s.numStacks; ++si) {
-      Eigen::Index cpti = indexCPT(s, si, li);
-      Eigen::Index cpbi = indexCPB(s, si, li);
-      Eigen::Index cnti = indexCNT(s, si, li);
-      Eigen::Index cnbi = indexCNB(s, si, li);
 
-      if (si > 0) {
-        // :::: [ POSITIVE TOP CONN ] ::::
-        // >>> LINE
-        m(cpti, lci) += s.numCells * s.cellR();
-        m(lci, cpti) += s.numCells * s.cellR();
-        // >>> POSITIVE BOT CONN
-        m(cpti, cpbi-1) += s.cellR();
-        if (si+1 < s.numStacks) {
-          m(cpti, cpbi) += (s.numCells-1) * s.cellR();
-        }
-        // >>> NEGATIVE TOP CONN
-        m(cpti, cnti-1) += 2*s.cellR();
-        if (si+1 < s.numStacks) {
-          m(cpti, cnti) += (s.numCells-2) * s.cellR();
-        }
-        // >>> NEGATIVE BOT CONN
-        m(cpti, cnbi) += (s.numCells-1) * s.cellR();
-        if (si > 1) {
-          m(cpti, cnbi-1) += s.cellR();
-        }
-        // >>> TO SELF
-      }
-    }
-  }
+
+
+
+
+
+
+/*
+********************************************************************************
+**    addConnValue Definitions
+********************************************************************************
+*/
+
+
+void addConnValue(Eigen::VectorXd& v, const ESIPOS2SysParam& s) {
+  // TODO
+}
+
+
+
+
+
+
+
+
+/*
+********************************************************************************
+**    ESIPOS2Report_Impl Definitions
+********************************************************************************
+*/
+
+
+class ESIPOS2Report_Impl : ShuntReportData_Impl<ESIPOS2Report> {
+  public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
+    ESIPOS2Report_Impl(const Eigen::VectorXd& rv, const ESIPOS2SysParam& sys, double err)
+        : ShuntReportData_Impl<ESIPOS2Report>{rv},
+          s{sys}, error{error} {}
+
+    ESIPOS2Report_Impl() = delete;
+    ESIPOS2Report_Impl(const ESIPOS2Report_Impl&) = default;
+    ESIPOS2Report_Impl(ESIPOS2Report_Impl&&) = default;
+
+    ESIPOS2Report_Impl& operator=(const ESIPOS2Report_Impl&) = default;
+    ESIPOS2Report_Impl& operator=(ESIPOS2Report_Impl&&) = default;
+
+    ~ESIPOS2Report_Impl() = default;
+
+
+  public: // ~~~~ accessors ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    double err() const override {return error;}
+    std::string arrName() const override {return "ESIPOS2";}
+    const ESIPOS2SysParam& param() const override {return s;}
+
+
+  private: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    ESIPOS2SysParam s;
+    double error;
+};
+
+
+
+
+
+
+
+
+/*
+********************************************************************************
+**    calculate_esipos2 Definitions
+********************************************************************************
+*/
+
+
+template<ElecInput::Mode M>
+ESIPOS2Report* calculate_esipos2(const ESIPOS2SysParam& s, double mag) {
+  std::size_t size = matSize(s);
+  Eigen::MatrixXd lhsM = Eigen::MatrixXd::Zero(size, size);
+  addSysCoeff<M>(lhsM, s);
+  addStackCoeff(lhsM, s);
+  addConnToConnCoeff(lhsM, s);
+  addConnToStackCoeff(lhsM, s);
+  Eigen::VectorXd rhsV = Eigen::VectorXd::Zero(size);
+  addStackValue(rhsV, s, mag);
+  addConnValue(rhsV, s);
+  Eigen::VectorXd resVec = lhsM.colPivHouseholderQr().solve(rhsV);
+
+  double error = ((lhsM*resVec) - rhsV).norm();
+  return new ESIPOS2Report_Impl(resVec, s, error);
 }
 
 
