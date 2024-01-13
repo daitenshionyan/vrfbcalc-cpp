@@ -50,6 +50,7 @@ enable_testing()
 add_executable(shunttest
     test/shunttestconst_pcc.hpp
     test/shunttestconst_esipos.hpp
+    test/shunttestconst_esipos2.hpp
     test/shunttest.cpp
 )
 
