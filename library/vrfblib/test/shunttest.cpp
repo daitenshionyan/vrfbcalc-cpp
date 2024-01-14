@@ -8,6 +8,7 @@
 
 #include "shunttestconst_pcc.hpp"
 #include "shunttestconst_esipos.hpp"
+#include "shunttestconst_esipos2.hpp"
 
 #include "vrfblib/vrfblib.hpp"
 #include "shuntcur/shuntcur.hpp"
@@ -340,4 +341,24 @@ TEST(vrfbShuntCurrESIPOS, calculateCV) {
       shunttest_esipos::kExSSNTList_Chg, shunttest_esipos::kExSSNBList_Chg,
       shunttest_esipos::kExSMPTList_Chg, shunttest_esipos::kExSMPBList_Chg,
       shunttest_esipos::kExSMNTList_Chg, shunttest_esipos::kExSMNBList_Chg);
+}
+
+
+
+
+
+
+
+
+/*
+********************************************************************************
+**    ESIPOS2 tests
+********************************************************************************
+*/
+
+
+TEST(vrfbShuntCurrESIPOS2, addStackCoeff) {
+  Eigen::MatrixXd actual = Eigen::MatrixXd::Zero(147, 147);
+  vrfb::shuntcur::addStackCoeff(actual, shunttest_esipos2::kTestSysParam);
+  checkMatrix(shunttest_esipos2::kExLHS_NoConn, actual);
 }
