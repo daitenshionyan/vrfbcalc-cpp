@@ -93,7 +93,7 @@ constexpr Eigen::Index kSumRowIndex = 1;            // Current summation row.
  * @param li Line index.
 */
 inline Eigen::Index indexLine(const SysParam& s,
-    std::size_t li) {
+    std::size_t li=0) {
   return li + 2;
 }
 
@@ -265,7 +265,7 @@ enum class ConnSide {
 */
 template<ConnSide PS=ConnSide::csFront>
 Eigen::Index indexCPT(const SysParam& s,
-      std::size_t si, std::size_t li);
+      std::size_t si, std::size_t li=0);
 
 
 template<>
@@ -294,7 +294,7 @@ inline Eigen::Index indexCPT<ConnSide::csFront>(const SysParam& s,
 */
 template<ConnSide PS=ConnSide::csFront>
 Eigen::Index indexCPB(const SysParam& s,
-      std::size_t si, std::size_t li);
+      std::size_t si, std::size_t li=0);
 
 
 template<>
@@ -324,7 +324,7 @@ inline Eigen::Index indexCPB<ConnSide::csFront>(const SysParam& s,
 */
 template<ConnSide NS=ConnSide::csBack>
 Eigen::Index indexCNT(const SysParam& s,
-      std::size_t si, std::size_t li);
+      std::size_t si, std::size_t li=0);
 
 
 template<>
@@ -354,7 +354,7 @@ inline Eigen::Index indexCNT<ConnSide::csBack>(const SysParam& s,
 */
 template<ConnSide NS=ConnSide::csBack>
 Eigen::Index indexCNB(const SysParam& s,
-      std::size_t si, std::size_t li);
+      std::size_t si, std::size_t li=0);
 
 
 template<>

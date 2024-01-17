@@ -131,7 +131,180 @@ namespace esipos2 {
 
 
 void addConnToConnCoeff(Eigen::MatrixXd& m, const ESIPOS2SysParam& s) {
-  // TODO
+  Eigen::Index lci = indexLine(s);
+
+  for (std::size_t si = 0; si < s.numStacks; ++si) {
+    Eigen::Index cpti = indexCPT(s, si);
+    Eigen::Index cpbi = indexCPB(s, si);
+    Eigen::Index cnti = indexCNT(s, si);
+    Eigen::Index cnbi = indexCNB(s, si);
+
+    if (si > 0) {
+      // :::: [ POSITIVE TOP CONN ] ::::
+      // >>> LINE
+      m(cpti, lci) += s.numCells * s.cellR();
+      m(lci, cpti) += s.numCells * s.cellR();
+      // >>> POSITIVE BOT CONN
+      m(cpti, cpbi-1) += s.cellR();
+      if (si+1 < s.numStacks) {
+        m(cpti, cpbi) += (s.numCells-1) * s.cellR();
+      }
+      // >>> NEGATIVE TOP CONN
+      m(cpti, cnti-1) += 2*s.cellR();
+      if (si+1 < s.numStacks) {
+        m(cpti, cnti) += (s.numCells-2) * s.cellR();
+      }
+      // >>> NEGATIVE BOT CONN
+      m(cpti, cnbi) = (s.numCells-1) * s.cellR();
+      if (si > 1) {
+        m(cpti, cnbi-1) += s.cellR();
+      }
+      // >>> TO SELF
+      m(cpti, cpti) += s.numCells*s.cellR()
+          + 2*s.stackShuntR()
+          + 2*s.outletResist_CSS();
+      if (si > 1) {
+        m(cpti, cpti-1) -= s.outletResist_CSS() + s.stackShuntR();
+      }
+      if (si+1 < s.numStacks) {
+        m(cpti, cpti+1) -= s.outletResist_CSS() + s.stackShuntR();
+      }
+      if (si%s.numStacks_f == 0) {
+        m(cpti, cpti) += 2*s.outletResist_CMS()
+            + s.outletResist_CMM();
+        for (int i = 1; i < s.numStacks_f; ++i) {
+          m(cpti, cpti-i) -= s.outletResist_CSM();
+          m(cpti-i, cpti) -= s.outletResist_CSM();
+          m(cpti, cpti) += s.outletResist_CSM();
+        }
+      } else {
+        m(cpti, cpti) += s.outletResist_CSM();
+      }
+
+      // :::: [ NEGATIVE BOTTOM CONN ] ::::
+      // >>> LINE
+      m(cnbi, lci) += s.numCells * s.cellR();
+      m(lci, cnbi) += s.numCells * s.cellR();
+      // >>> POSITIVE TOP CONN
+      m(cnbi, cpti) += (s.numCells-1) * s.cellR();
+      if (si+1 < s.numStacks) {
+        m(cnbi, cpti+1) += s.cellR();
+      }
+      // >>> POSITIVE BOT CONN
+      if (si+1 < s.numStacks) {
+        m(cnbi, cpbi) += s.numCells * s.cellR();
+      }
+      // >>> NEGATIVE TOP CONN
+      m(cnbi, cnti-1) += s.cellR();
+      if (si+1 < s.numStacks) {
+        m(cnbi, cnti) += (s.numCells-1) * s.cellR();
+      }
+      // >>> TO SELF
+      m(cnbi, cnbi) += s.numCells*s.cellR()
+          + 2*s.stackShuntR()
+          + 2*s.inletResist_CSS();
+      if (si > 1) {
+        m(cnbi, cnbi-1) -= s.inletResist_CSS() + s.stackShuntR();
+      }
+      if (si+1 < s.numStacks) {
+        m(cnbi, cnbi+1) -= s.inletResist_CSS() + s.stackShuntR();
+      }
+      if (si%s.numStacks_f == 0) {
+        m(cnbi, cnbi) += 2*s.inletResist_CMS()
+            + s.inletResist_CMM();
+        for (int i = 1; i < s.numStacks_f; ++i) {
+          m(cnbi, cnbi-i) -= s.inletResist_CSM();
+          m(cnbi-i, cnbi) -= s.inletResist_CSM();
+          m(cnbi, cnbi) += s.inletResist_CSM();
+        }
+      } else {
+        m(cnbi, cnbi) += s.inletResist_CSM();
+      }
+    }
+
+    if (si+1 < s.numStacks) {
+      // :::: [ POSITIVE BOT CONN ] ::::
+      // >>> MAIN LOOP
+      m(cpbi, lci) += s.numCells * s.cellR();
+      m(lci, cpbi) += s.numCells * s.cellR();
+      // >>> POSITIVE TOP CONN
+      m(cpbi, cpti+1) += s.cellR();
+      if (si > 0) {
+        m(cpbi, cpti) += (s.numCells-1) * s.cellR();
+      }
+      // >>> NEGATIVE TOP CONN
+      m(cpbi, cnti) += (s.numCells-1) * s.cellR();
+      if (si > 0) {
+        m(cpbi, cnti-1) += s.cellR();
+      }
+      // >>> NEGATIVE BOT CONN
+      if (si > 0) {
+        m(cpbi, cnbi) += s.numCells * s.cellR();
+      }
+      // >>> TO SELF
+      m(cpbi, cpbi) += s.numCells*s.cellR()
+          + 2*s.stackShuntR()
+          + 2*s.inletResist_CSS();
+      if (si > 0) {
+        m(cpbi, cpbi-1) -= s.inletResist_CSS() + s.stackShuntR();
+      }
+      if (si+2 < s.numStacks) {
+        m(cpbi, cpbi+1) -= s.inletResist_CSS() + s.stackShuntR();
+      }
+      if ((si+1)%s.numStacks_f == 0) {
+        m(cpbi, cpbi) += 2*s.inletResist_CMS()
+            + s.inletResist_CMM();
+        for (int i = 1; i < s.numStacks_f; ++i) {
+          m(cpbi, cpbi-i) -= s.inletResist_CSM();
+          m(cpbi-i, cpbi) -= s.inletResist_CSM();
+          m(cpbi, cpbi) += s.inletResist_CSM();
+        }
+      } else {
+        m(cpbi, cpbi) += s.inletResist_CSM();
+      }
+
+      // :::: [ NEGATIVE TOP CONN ] ::::
+      // >>> MAIN LOOP
+      m(cnti, lci) += s.numCells * s.cellR();
+      m(lci, cnti) += s.numCells * s.cellR();
+      // >>> POSITIVE TOP CONN
+      m(cnti, cpti+1) += 2*s.cellR();
+      if (si > 0) {
+        m(cnti, cpti) += (s.numCells-2) * s.cellR();
+      }
+      // >>> POSITIVE BOT CONN
+      m(cnti, cpbi) += (s.numCells-1) * s.cellR();
+      if (si+2 < s.numStacks) {
+        m(cnti, cpbi+1) += s.cellR();
+      }
+      // >>> NEGATIVE BOT CONN
+      m(cnti, cnbi+1) += s.cellR();
+      if (si > 0) {
+        m(cnti, cnbi) += (s.numCells-1) * s.cellR();
+      }
+      // >>> TO SELF
+      m(cnti, cnti) += s.numCells*s.cellR()
+          + 2*s.stackShuntR()
+          + 2*s.outletResist_CSS();
+      if (si > 0) {
+        m(cnti, cnti-1) -= s.outletResist_CSS() + s.stackShuntR();
+      }
+      if (si+2 < s.numStacks) {
+        m(cnti, cnti+1) -= s.outletResist_CSS() + s.stackShuntR();
+      }
+      if ((si+1)%s.numStacks_f == 0) {
+        m(cnti, cnti) += 2*s.outletResist_CMS()
+            + s.outletResist_CMM();
+        for (int i = 1; i < s.numStacks_f; ++i) {
+          m(cnti, cnti-i) -= s.outletResist_CSM();
+          m(cnti-i, cnti) -= s.outletResist_CSM();
+          m(cnti, cnti) += s.outletResist_CSM();
+        }
+      } else {
+        m(cnti, cnti) += s.outletResist_CSM();
+      }
+    }
+  }
 }
 
 
