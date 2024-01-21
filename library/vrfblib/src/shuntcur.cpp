@@ -7,6 +7,7 @@
 #include "shuntcur/shuntcur.hpp"
 #include "shuntcur/conn_pcc.hpp"
 #include "shuntcur/conn_esipos.hpp"
+#include "shuntcur/conn_esipos2.hpp"
 
 
 namespace vrfb {
@@ -218,6 +219,57 @@ ShuntReport ESIPOSCalc::calculate(const ElecInput& input) const {
       return calculate_CP<ESIPOSReport>(*this, input);
     default:
       throw std::runtime_error("Unknwon input mode");
+  }
+}
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+namespace esipos2 {
+
+
+ShuntReport ESIPOS2Calc::calculate(const ElecInput& input) const {
+  switch (input.mode) {
+    case ElecInput::Mode::mConstVolt:
+      return calculate_esipos2<ElecInput::Mode::mConstVolt>(
+          sys, input.mag);
+    case ElecInput::Mode::mConstCurr:
+      return calculate_esipos2<ElecInput::Mode::mConstCurr>(
+          sys, input.mag);
+    case ElecInput::Mode::mConstPowr:
+      return calculate_CP<ESIPOS2Report>(*this, input);
+    default:
+      throw std::runtime_error("Unknown input mode");
   }
 }
 

@@ -372,3 +372,18 @@ TEST(vrfbShuntCurrESIPOS2, addConnCoeff) {
   vrfb::shuntcur::addConnToStackCoeff(actual, shunttest_esipos2::kTestSysParam);
   checkMatrix(shunttest_esipos2::kExLHS_WithConn, actual);
 }
+
+
+TEST(vrfbShuntCurrESIPOS2, calculateCV) {
+  vrfb::shuntcur::esipos2::ESIPOS2Calc calc {
+      shunttest_esipos2::kTestSysParam};
+  vrfb::shuntcur::ShuntReport actual = calc.calculate(
+      shunttest_esipos2::kTestCVInput);
+  checkShuntPerf(actual.data<vrfb::shuntcur::esipos2::ESIPOS2Report>(),
+      shunttest_esipos2::kTestChgCurr, shunttest_esipos2::kTestChgVolt,
+      shunttest_esipos2::kExCurrList_Chg,
+      shunttest_esipos2::kExSSPTList_Chg, shunttest_esipos2::kExSSPBList_Chg,
+      shunttest_esipos2::kExSSNTList_Chg, shunttest_esipos2::kExSSNBList_Chg,
+      shunttest_esipos2::kExSMPTList_Chg, shunttest_esipos2::kExSMPBList_Chg,
+      shunttest_esipos2::kExSMNTList_Chg, shunttest_esipos2::kExSMNBList_Chg);
+}

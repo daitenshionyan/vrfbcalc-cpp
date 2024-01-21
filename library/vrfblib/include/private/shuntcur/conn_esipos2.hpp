@@ -177,6 +177,10 @@ void addConnToConnCoeff(Eigen::MatrixXd& m, const ESIPOS2SysParam& s) {
           m(cpti-i, cpti) -= s.outletResist_CSM();
           m(cpti, cpti) += s.outletResist_CSM();
         }
+        if (si/s.numStacks_f > 1) {
+          m(cpti, cpti-s.numStacks_f) -= s.outletResist_CMS();
+          m(cpti-s.numStacks_f, cpti) -= s.outletResist_CMS();
+        }
       } else {
         m(cpti, cpti) += s.outletResist_CSM();
       }
@@ -216,6 +220,10 @@ void addConnToConnCoeff(Eigen::MatrixXd& m, const ESIPOS2SysParam& s) {
           m(cnbi, cnbi-i) -= s.inletResist_CSM();
           m(cnbi-i, cnbi) -= s.inletResist_CSM();
           m(cnbi, cnbi) += s.inletResist_CSM();
+        }
+        if (si/s.numStacks_f > 1) {
+          m(cnbi, cnbi-s.numStacks_f) -= s.inletResist_CMS();
+          m(cnbi-s.numStacks_f, cnbi) -= s.inletResist_CMS();
         }
       } else {
         m(cnbi, cnbi) += s.inletResist_CSM();
@@ -259,6 +267,10 @@ void addConnToConnCoeff(Eigen::MatrixXd& m, const ESIPOS2SysParam& s) {
           m(cpbi-i, cpbi) -= s.inletResist_CSM();
           m(cpbi, cpbi) += s.inletResist_CSM();
         }
+        if ((si+1)/s.numStacks_f > 1) {
+          m(cpbi, cpbi-s.numStacks_f) -= s.inletResist_CMS();
+          m(cpbi-s.numStacks_f, cpbi) -= s.inletResist_CMS();
+        }
       } else {
         m(cpbi, cpbi) += s.inletResist_CSM();
       }
@@ -300,6 +312,10 @@ void addConnToConnCoeff(Eigen::MatrixXd& m, const ESIPOS2SysParam& s) {
           m(cnti-i, cnti) -= s.outletResist_CSM();
           m(cnti, cnti) += s.outletResist_CSM();
         }
+        if ((si+1)/s.numStacks_f > 1) {
+          m(cnti, cnti-s.numStacks_f) -= s.outletResist_CMS();
+          m(cnti-s.numStacks_f, cnti) -= s.outletResist_CMS();
+        }
       } else {
         m(cnti, cnti) += s.outletResist_CSM();
       }
@@ -322,7 +338,18 @@ void addConnToConnCoeff(Eigen::MatrixXd& m, const ESIPOS2SysParam& s) {
 
 
 void addConnValue(Eigen::VectorXd& v, const ESIPOS2SysParam& s) {
-  // TODO
+  for (std::size_t li = 0; li < s.numLines; ++li) {
+    for (std::size_t si = 0; si < s.numStacks; ++si) {
+      if (si > 0) {
+        v(indexCPT(s, si, li)) -= s.numCells*s.ocv();
+        v(indexCNB(s, si, li)) -= s.numCells*s.ocv();
+      }
+      if (si+1 < s.numStacks) {
+        v(indexCPB(s, si, li)) -= s.numCells*s.ocv();
+        v(indexCNT(s, si, li)) -= s.numCells*s.ocv();
+      }
+    }
+  }
 }
 
 
@@ -339,7 +366,7 @@ void addConnValue(Eigen::VectorXd& v, const ESIPOS2SysParam& s) {
 */
 
 
-class ESIPOS2Report_Impl : ShuntReportData_Impl<ESIPOS2Report> {
+class ESIPOS2Report_Impl : public ShuntReportData_Impl<ESIPOS2Report> {
   public: // ~~~~ constructor / assignment / destructor ~~~~~~~~~~~~~~~~~~~~~~~~
     ESIPOS2Report_Impl(const Eigen::VectorXd& rv, const ESIPOS2SysParam& sys, double err)
         : ShuntReportData_Impl<ESIPOS2Report>{rv},
@@ -359,6 +386,10 @@ class ESIPOS2Report_Impl : ShuntReportData_Impl<ESIPOS2Report> {
     double err() const override {return error;}
     std::string arrName() const override {return "ESIPOS2";}
     const ESIPOS2SysParam& param() const override {return s;}
+
+
+  public: // ~~~~ functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    ESIPOS2Report_Impl* copy() const override {return new ESIPOS2Report_Impl(*this);}
 
 
   private: // ~~~~ fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
