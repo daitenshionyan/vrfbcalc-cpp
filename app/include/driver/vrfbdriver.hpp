@@ -66,7 +66,8 @@ enum class SCArrangement {
   /** Parallel Criss Cross Front Back */
   scaPCCFB=0,
   /** Electrically Series, Inlet Parallel, Outlet Series */
-  scaESIPOS
+  scaESIPOS,
+  scaESIPOS2
 };
 
 
@@ -74,7 +75,8 @@ enum class SCArrangement {
 enum class SCArrType {
   /** Parallel Criss Cross */
   scatPCC=0,
-  scatESIPOS
+  scatESIPOS,
+  scatESIPOS2
 };
 
 

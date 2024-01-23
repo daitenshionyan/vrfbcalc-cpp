@@ -5,6 +5,7 @@
 
 #include "view/shuntcur/shuntcursimpccconfigpanel.h"
 #include "view/shuntcur/shuntcursimesiposconfigpanel.h"
+#include "view/shuntcur/shuntcursimesipos2configpanel.h"
 
 
 
@@ -72,6 +73,7 @@ SCSimConfigPopup::SCSimConfigPopup(QWidget* parent)
   ui->setupUi(this);
   ui->arrComboBox->insertItem(1, "PCC FB");
   ui->arrComboBox->insertItem(2, "ESIPOS");
+  ui->arrComboBox->insertItem(3, "ESIPOS2");
   // add values to elec input mode combo box
   ui->chgModeComboBox->insertItem(1, "Const Volt");
   ui->chgModeComboBox->insertItem(2, "Const Curr");
@@ -143,6 +145,10 @@ void SCSimConfigPopup::on_arrComboBox_currentIndexChanged(int index) {
       break;
     case vrfbdriver::shuntcur::SCArrangement::scaESIPOS:
       cfgPanel = new SCSimESIPOSConfigPanel(this);
+      ui->sysConfigArea->layout()->addWidget(cfgPanel);
+      break;
+    case vrfbdriver::shuntcur::SCArrangement::scaESIPOS2:
+      cfgPanel = new SCSimESIPOS2ConfigPanel(this);
       ui->sysConfigArea->layout()->addWidget(cfgPanel);
       break;
     default:

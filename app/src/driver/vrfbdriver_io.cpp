@@ -837,6 +837,24 @@ const std::vector<ShuntSimReportOutputConfig> kOutputConfigList_Report {
               << dynamic_cast<vrfb::shuntcur::esipos::ESIPOSCalc*>(j.calc)->param().c.outlet_ml << ","
               << dynamic_cast<vrfb::shuntcur::esipos::ESIPOSCalc*>(j.calc)->param().c.outlet_ma << ","
               << "NaN,NaN,NaN,NaN";
+        case vrfbdriver::shuntcur::SCArrangement::scaESIPOS2:
+          return os
+              << dynamic_cast<vrfb::shuntcur::esipos2::ESIPOS2Calc*>(j.calc)->param().c.inlet_sub_sl << ","
+              << dynamic_cast<vrfb::shuntcur::esipos2::ESIPOS2Calc*>(j.calc)->param().c.inlet_sub_sa << ","
+              << dynamic_cast<vrfb::shuntcur::esipos2::ESIPOS2Calc*>(j.calc)->param().c.inlet_sub_ml << ","
+              << dynamic_cast<vrfb::shuntcur::esipos2::ESIPOS2Calc*>(j.calc)->param().c.inlet_sub_ma << ","
+              << dynamic_cast<vrfb::shuntcur::esipos2::ESIPOS2Calc*>(j.calc)->param().c.inlet_main_sl << ","
+              << dynamic_cast<vrfb::shuntcur::esipos2::ESIPOS2Calc*>(j.calc)->param().c.inlet_main_sa << ","
+              << dynamic_cast<vrfb::shuntcur::esipos2::ESIPOS2Calc*>(j.calc)->param().c.inlet_main_ml << ","
+              << dynamic_cast<vrfb::shuntcur::esipos2::ESIPOS2Calc*>(j.calc)->param().c.inlet_main_ma << ","
+              << dynamic_cast<vrfb::shuntcur::esipos2::ESIPOS2Calc*>(j.calc)->param().c.outlet_sub_sl << ","
+              << dynamic_cast<vrfb::shuntcur::esipos2::ESIPOS2Calc*>(j.calc)->param().c.outlet_sub_sa << ","
+              << dynamic_cast<vrfb::shuntcur::esipos2::ESIPOS2Calc*>(j.calc)->param().c.outlet_sub_ml << ","
+              << dynamic_cast<vrfb::shuntcur::esipos2::ESIPOS2Calc*>(j.calc)->param().c.outlet_sub_ma << ","
+              << dynamic_cast<vrfb::shuntcur::esipos2::ESIPOS2Calc*>(j.calc)->param().c.outlet_main_sl << ","
+              << dynamic_cast<vrfb::shuntcur::esipos2::ESIPOS2Calc*>(j.calc)->param().c.outlet_main_sa << ","
+              << dynamic_cast<vrfb::shuntcur::esipos2::ESIPOS2Calc*>(j.calc)->param().c.outlet_main_ml << ","
+              << dynamic_cast<vrfb::shuntcur::esipos2::ESIPOS2Calc*>(j.calc)->param().c.outlet_main_ma << ",";
         default:
           os << "NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN";
       }
